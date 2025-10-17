@@ -40,3 +40,20 @@ firestore-debug.log
 
 # Railway
 .railway/
+
+# Sanity Studio build
+/studio/dist
+/studio/.sanity
+/studio/sanity.json
+/studio/node_modules
+/studio/.env.local
+/studio/.env.development.local
+/studio/.env.production.local
+/studio/.env.test.local
+/studio/.firebase
+/studio/firebase-debug.log
+/studio/firestore-debug.log
+/studio/npm-debug.log*
+/studio/yarn-debug.log*
+/studio/yarn-error.log*
+/studio/.next
