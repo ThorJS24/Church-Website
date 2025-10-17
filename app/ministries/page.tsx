@@ -158,7 +158,7 @@ export default function MinistriesPage() {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredMinistries.map((ministry, index) => {
                 const categoryKey = Array.isArray(ministry.category) ? ministry.category[0] : ministry.category;
-                const Icon = iconMap[categoryKey] || iconMap.default;
+                const Icon = iconMap[categoryKey as keyof typeof iconMap] || iconMap.default;
                 return (
                   <motion.div 
                     key={ministry._id}
