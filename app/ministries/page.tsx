@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Users, Baby, Music, BookOpen, Heart, Clock, MapPin } from 'lucide-react';
 import { sanityFetch } from '@/lib/sanity-fetch';
@@ -38,6 +39,7 @@ export default function MinistriesPage() {
   const [ministries, setMinistries] = useState<Ministry[]>([]);
   const [activeCategory, setActiveCategory] = useState('all');
   const [loading, setLoading] = useState(true);
+  const ministriesGridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchData();
@@ -72,6 +74,12 @@ export default function MinistriesPage() {
     }
   };
 
+  const handleFindMinistryClick = () => {
+    if (ministriesGridRef.current) {
+      ministriesGridRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   const filteredMinistries = activeCategory === 'all' 
     ? ministries 
     : ministries.filter(ministry => 
@@ -91,17 +99,17 @@ export default function MinistriesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading ministries...</p>
+          <p className="text-gray-600 dark:text-gray-300">Loading ministries...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-blue-600 to-purple-700 text-white py-20">
         <div className="container mx-auto px-4 text-center">
@@ -125,7 +133,7 @@ export default function MinistriesPage() {
       </section>
 
       {/* Category Tabs */}
-      <section className="py-8 bg-white">
+      <section className="py-8 bg-white dark:bg-gray-800" ref={ministriesGridRef}>
         <div className="container mx-auto px-4">
           <div className="flex flex-wrap justify-center gap-4">
             {categories.map((category) => (
@@ -162,17 +170,17 @@ export default function MinistriesPage() {
                 return (
                   <motion.div 
                     key={ministry._id}
-                    className="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow"
+                    className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: index * 0.1 }}
                   >
                     <Icon className="w-16 h-16 text-blue-600 mx-auto mb-4" />
-                    <h3 className="text-2xl font-bold mb-2 text-center">{ministry.title}</h3>
+                    <h3 className="text-2xl font-bold mb-2 text-center text-gray-900 dark:text-white">{ministry.title}</h3>
                     {ministry.ageGroup && (
                       <p className="text-blue-600 font-semibold text-center mb-4">{ministry.ageGroup}</p>
                     )}
-                    <p className="text-gray-600 mb-6 text-center">{ministry.description}</p>
+                    <p className="text-gray-600 dark:text-gray-300 mb-6 text-center">{ministry.description}</p>
                     
                     <div className="space-y-2 mb-6">
                       {ministry.meetingTime && (
@@ -190,12 +198,12 @@ export default function MinistriesPage() {
                     </div>
 
                     <div className="flex gap-3">
-                      <button className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
-                        Join Ministry
-                      </button>
-                      <button className="flex-1 border-2 border-blue-600 text-blue-600 py-2 px-4 rounded-lg hover:bg-blue-600 hover:text-white transition-colors">
-                        Learn More
-                      </button>
+                      <Link href="/ministries/volunteer" passHref legacyBehavior>
+                        <a className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-center">Join Ministry</a>
+                      </Link>
+                      <Link href={`/ministries/contact?ministry=${ministry._id}`} passHref legacyBehavior>
+                        <a className="flex-1 border-2 border-blue-600 text-blue-600 py-2 px-4 rounded-lg hover:bg-blue-600 hover:text-white transition-colors text-center">Learn More</a>
+                      </Link>
                     </div>
                   </motion.div>
                 );
@@ -206,11 +214,11 @@ export default function MinistriesPage() {
       </section>
 
       {/* Ministry Opportunities */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-white dark:bg-gray-800">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">Get Involved</h2>
-            <p className="text-gray-600">There are many ways to serve and grow in our church community</p>
+            <h2 className="text-4xl font-bold mb-4 text-gray-900 dark:text-white">Get Involved</h2>
+            <p className="text-gray-600 dark:text-gray-300">There are many ways to serve and grow in our church community</p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
@@ -223,7 +231,7 @@ export default function MinistriesPage() {
               <Users className="w-16 h-16 text-blue-600 mx-auto mb-4" />
               <h3 className="text-2xl font-bold mb-4">Serve Others</h3>
               <p className="text-gray-600 mb-6">Use your gifts and talents to serve our church and community through various ministry opportunities.</p>
-              <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+              <button onClick={handleFindMinistryClick} className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                 Find Your Ministry
               </button>
             </motion.div>
@@ -237,9 +245,9 @@ export default function MinistriesPage() {
               <BookOpen className="w-16 h-16 text-blue-600 mx-auto mb-4" />
               <h3 className="text-2xl font-bold mb-4">Grow in Faith</h3>
               <p className="text-gray-600 mb-6">Join small groups, Bible studies, and discipleship programs to deepen your relationship with God.</p>
-              <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+              <a href="https://chat.whatsapp.com/1234567890" target="_blank" rel="noopener noreferrer" className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                 Join a Group
-              </button>
+              </a>
             </motion.div>
 
             <motion.div 
@@ -251,9 +259,9 @@ export default function MinistriesPage() {
               <Heart className="w-16 h-16 text-blue-600 mx-auto mb-4" />
               <h3 className="text-2xl font-bold mb-4">Build Community</h3>
               <p className="text-gray-600 mb-6">Connect with others through fellowship events, ministry teams, and community service projects.</p>
-              <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-600 hover:text-white transition-colors">
+              <a href="https://chat.whatsapp.com/1234567890" target="_blank" rel="noopener noreferrer" className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                 Get Connected
-              </button>
+              </a>
             </motion.div>
           </div>
         </div>
@@ -270,12 +278,12 @@ export default function MinistriesPage() {
             <h2 className="text-4xl font-bold mb-4">Ready to Get Involved?</h2>
             <p className="text-xl mb-8">Take the next step and join a ministry that matches your passion and calling.</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
-                Contact Ministry Leader
-              </button>
-              <button className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors">
-                Volunteer Application
-              </button>
+              <Link href="/ministries/contact" passHref legacyBehavior>
+                <a className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">Contact Ministry Leader</a>
+              </Link>
+              <Link href="/ministries/volunteer" passHref legacyBehavior>
+                <a className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors">Volunteer Application</a>
+              </Link>
             </div>
           </motion.div>
         </div>

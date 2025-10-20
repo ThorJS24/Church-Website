@@ -1,9 +1,38 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Target, Eye, Heart, CheckCircle, Users } from 'lucide-react';
+import { Target, Eye, Heart, CheckCircle, Play, Video } from 'lucide-react';
 import { sanityFetch } from '@/lib/sanity-fetch';
+import Image from 'next/image';
+import { urlFor } from '@/lib/sanity';
+
+interface StaffMember {
+  _id: string;
+  name: string;
+  position: string;
+  bio: string;
+  image: any;
+}
+
+interface Pastor {
+  _id: string;
+  name: string;
+  title: string;
+  bio: string;
+  image: any;
+  email?: string;
+  phone?: string;
+  yearsOfService?: number;
+  education?: string[];
+  specialties?: string[];
+}
+
+interface Sermon {
+  _id: string;
+  title: string;
+  videoUrl: string;
+}
 
 interface AboutPage {
   title: string;
@@ -30,11 +59,48 @@ interface AboutPage {
     title: string;
     description: string;
   }>;
+  pastorSectionTitle: string;
 }
+
+const YouTubePlayer = ({ videoId, onClose }: { videoId: string, onClose: () => void }) => {
+  const playerRef = useRef<any>(null);
+
+  useEffect(() => {
+    const tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+
+    window.onYouTubeIframeAPIReady = () => {
+      playerRef.current = new window.YT.Player('player', {
+        height: '390',
+        width: '640',
+        videoId: videoId,
+        playerVars: {
+          autoplay: 1,
+        },
+      });
+    };
+
+    return () => {
+      window.onYouTubeIframeAPIReady = null;
+    };
+  }, [videoId]);
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50" onClick={onClose}>
+      <div className="relative" onClick={(e) => e.stopPropagation()}>
+        <div id="player"></div>
+      </div>
+    </div>
+  );
+};
 
 export default function AboutPage() {
   const [aboutPage, setAboutPage] = useState<AboutPage | null>(null);
+  const [pastors, setPastors] = useState<Pastor[]>([]);
   const [loading, setLoading] = useState(true);
+  const [playingVideo, setPlayingVideo] = useState<string | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -43,28 +109,35 @@ export default function AboutPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const aboutPageData = await sanityFetch(`*[_type == "aboutPage"][0] {
-        title,
-        subtitle,
-        mission,
-        vision,
-        values,
-        valuesSectionTitle,
-        storySectionTitle,
-        timeline,
-        stats,
-        beliefsSectionTitle,
-        beliefs
-      }`);
+      const [aboutPageData, pastorsData] = await Promise.all([
+        sanityFetch(`*[_type == "aboutPage"][0]`),
+        sanityFetch(`*[_type == "pastor"] | order(yearsOfService desc) {
+          _id,
+          name,
+          title,
+          bio,
+          image,
+          email,
+          phone,
+          yearsOfService,
+          education,
+          specialties
+        }`)
+      ]);
       
-      if (aboutPageData) {
-        setAboutPage(aboutPageData);
-      }
+      if (aboutPageData) setAboutPage(aboutPageData);
+      if (pastorsData) setPastors(pastorsData);
     } catch (error) {
       console.error('Error fetching about page:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const getYouTubeVideoId = (url: string) => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
   };
 
   if (loading) {
@@ -83,14 +156,16 @@ export default function AboutPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-600 mb-4">About page content not found</h2>
-          <p className="text-gray-500">Please add content in Sanity CMS</p>
+          <p className="text-gray-500">Please add content in Sanity CMS, including assigning a pastor to the about page.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {playingVideo && <YouTubePlayer videoId={playingVideo} onClose={() => setPlayingVideo(null)} />}
+
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-blue-600 to-purple-700 text-white py-20">
         <div className="container mx-auto px-4 text-center">
@@ -141,9 +216,98 @@ export default function AboutPage() {
         </div>
       </section>
 
+      {/* Pastor Section */}
+      {aboutPage.pastor && (
+        <section className="py-16 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl font-bold mb-4">{aboutPage.pastorSectionTitle || 'Meet Our Pastor'}</h2>
+            </div>
+            <div className="flex flex-col md:flex-row items-center gap-8">
+              <motion.div
+                className="md:w-1/3 text-center"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6 }}
+              >
+                <Image
+                  src={urlFor(aboutPage.pastor.image).width(400).height(400).url()}
+                  alt={aboutPage.pastor.name}
+                  width={400}
+                  height={400}
+                  className="rounded-full mx-auto shadow-lg"
+                />
+              </motion.div>
+              <motion.div
+                className="md:w-2/3"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+              >
+                <h3 className="text-3xl font-bold mb-2">{aboutPage.pastor.name}</h3>
+                <p className="text-xl text-gray-600 mb-4">{aboutPage.pastor.position}</p>
+                <p className="text-gray-600">{aboutPage.pastor.bio}</p>
+                {aboutPage.pastor.latestSermon && (
+                  <div className="mt-6 bg-gray-100 p-4 rounded-lg">
+                    <h4 className="font-bold mb-2">Watch the Latest Sermon:</h4>
+                    <div className="flex items-center justify-between">
+                      <p>“{aboutPage.pastor.latestSermon.title}”</p>
+                      <button 
+                        onClick={() => setPlayingVideo(getYouTubeVideoId(aboutPage.pastor.latestSermon.videoUrl))}
+                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                        <Play className="w-4 h-4 mr-2" />
+                        Watch
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Pastors Section */}
+      {pastors.length > 0 && (
+        <section className="py-16 bg-gray-100 dark:bg-gray-700">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl font-bold mb-4 text-gray-900 dark:text-white">Our Pastoral Team</h2>
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {pastors.map((pastor, index) => (
+                <motion.div
+                  key={pastor._id}
+                  className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg text-center"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                >
+                  {pastor.image && (
+                    <Image
+                      src={urlFor(pastor.image).width(200).height(200).url()}
+                      alt={pastor.name}
+                      width={200}
+                      height={200}
+                      className="rounded-full mx-auto mb-4"
+                    />
+                  )}
+                  <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">{pastor.name}</h3>
+                  <p className="text-blue-600 font-semibold mb-3">{pastor.title}</p>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">{pastor.bio}</p>
+                  {pastor.yearsOfService && (
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{pastor.yearsOfService} years of service</p>
+                  )}
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Values Section */}
       {aboutPage.values && aboutPage.values.length > 0 && (
-        <section className="py-16 bg-white">
+        <section className="py-16 bg-gray-100">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <h2 className="text-4xl font-bold mb-4">{aboutPage.valuesSectionTitle}</h2>
@@ -169,7 +333,7 @@ export default function AboutPage() {
 
       {/* Timeline Section */}
       {aboutPage.timeline && aboutPage.timeline.length > 0 && (
-        <section className="py-16 bg-gray-100">
+        <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <h2 className="text-4xl font-bold mb-4">{aboutPage.storySectionTitle}</h2>

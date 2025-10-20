@@ -115,10 +115,10 @@ export default function Navbar() {
                   >
                     <Link
                       href={item.href}
-                      className={`flex items-center px-3 py-2 text-sm font-medium transition-colors ${
+                      className={`flex items-center px-3 py-2 text-sm font-medium transition-all duration-300 rounded-lg hover:bg-white/10 hover:backdrop-blur-sm hover:shadow-lg ${
                         pathname === item.href
-                          ? 'text-blue-600'
-                          : 'text-gray-700 hover:text-blue-600'
+                          ? 'text-blue-600 bg-white/20 backdrop-blur-sm shadow-md'
+                          : 'text-gray-700 dark:text-gray-300 hover:text-blue-600'
                       }`}
                     >
                       {item.name}
@@ -150,9 +150,9 @@ export default function Navbar() {
                 ) : (
                   <Link
                     href={item.href}
-                    className={`px-3 py-2 text-sm font-medium transition-colors ${
+                    className={`px-3 py-2 text-sm font-medium transition-all duration-300 rounded-lg hover:bg-white/10 hover:backdrop-blur-sm hover:shadow-lg ${
                       pathname === item.href
-                        ? 'text-blue-600'
+                        ? 'text-blue-600 bg-white/20 backdrop-blur-sm shadow-md'
                         : 'text-gray-700 dark:text-gray-300 hover:text-blue-600'
                     }`}
                   >
@@ -177,9 +177,9 @@ export default function Navbar() {
               <div className="relative">
                 <button
                   onClick={() => toggleDropdown('user')}
-                  className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
+                  className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 transition-colors"
                 >
-                  <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                  <div className="w-8 h-8 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center">
                     <User className="w-4 h-4" />
                   </div>
                   <span>{user?.name || 'User'}</span>
@@ -193,18 +193,18 @@ export default function Navbar() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.2 }}
-                      className="absolute top-full right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2"
+                      className="absolute top-full right-0 mt-1 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2"
                     >
-                      <Link href="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+                      <Link href="/profile" className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                         My Profile
                       </Link>
-                      <Link href="/dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+                      <Link href="/dashboard" className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                         Dashboard
                       </Link>
                       <hr className="my-2" />
                       <button
                         onClick={handleLogout}
-                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors flex items-center"
+                        className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center"
                       >
                         <LogOut className="w-4 h-4 mr-2" />
                         Logout
@@ -217,7 +217,7 @@ export default function Navbar() {
               <div className="flex items-center space-x-3">
                 <button
                   onClick={() => setShowLoginModal(true)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 transition-colors"
                 >
                   Login
                 </button>
@@ -251,7 +251,7 @@ export default function Navbar() {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="lg:hidden bg-white border-t border-gray-200"
+            className="lg:hidden bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700"
           >
             <div className="px-4 py-6 space-y-4">
               {navigation.map((item) => (
@@ -307,19 +307,19 @@ export default function Navbar() {
               ))}
               
               {/* Mobile Auth Buttons */}
-              <div className="pt-4 border-t border-gray-200">
+              <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
                 {isLoggedIn ? (
                   <div className="space-y-2">
                     <Link
                       href="/profile"
-                      className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 transition-colors"
+                      className="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 transition-colors"
                       onClick={() => setIsOpen(false)}
                     >
                       My Profile
                     </Link>
                     <Link
                       href="/dashboard"
-                      className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 transition-colors"
+                      className="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 transition-colors"
                       onClick={() => setIsOpen(false)}
                     >
                       Dashboard
@@ -329,7 +329,7 @@ export default function Navbar() {
                         handleLogout();
                         setIsOpen(false);
                       }}
-                      className="block w-full text-left px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 transition-colors"
+                      className="block w-full text-left px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 transition-colors"
                     >
                       Logout
                     </button>
@@ -341,7 +341,7 @@ export default function Navbar() {
                         setShowLoginModal(true);
                         setIsOpen(false);
                       }}
-                      className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 transition-colors w-full text-left"
+                      className="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 transition-colors w-full text-left"
                     >
                       Login
                     </button>

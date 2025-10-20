@@ -42,3 +42,32 @@ export function truncateText(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text;
   return text.slice(0, maxLength).trim() + '...';
 }
+
+export function extractYouTubeId(url: string): string | null {
+  if (!url) return null;
+  
+  // If it's already an embed URL, extract the ID
+  if (url.includes('youtube.com/embed/')) {
+    const match = url.match(/youtube\.com\/embed\/([\w-]+)/);
+    return match ? match[1] : null;
+  }
+  
+  // Handle various YouTube URL formats
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/,
+    /youtube\.com\/v\/([\w-]+)/,
+    /^([\w-]{11})$/ // Direct video ID
+  ];
+  
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) return match[1];
+  }
+  
+  return null;
+}
+
+export function getYouTubeEmbedUrl(url: string): string | null {
+  const videoId = extractYouTubeId(url);
+  return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+}

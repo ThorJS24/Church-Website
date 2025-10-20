@@ -51,17 +51,24 @@ export default defineType({
       name: 'keyPoints',
       title: 'Key Points',
       type: 'array',
-      of: [{type: 'string'}],
+      of: [{
+        type: 'object',
+        fields: [
+          defineField({name: 'timestamp', title: 'Timestamp', type: 'string', placeholder: 'e.g., 01:23'}),
+          defineField({name: 'description', title: 'Description', type: 'string'}),
+        ],
+      }],
     }),
+
     defineField({
-      name: 'audioUrl',
-      title: 'Audio URL',
+      name: 'youtubeUrl',
+      title: 'YouTube URL',
       type: 'url',
-    }),
-    defineField({
-      name: 'videoUrl',
-      title: 'Video URL',
-      type: 'url',
+      description: 'Paste any YouTube URL format: watch URL, share URL, or embed URL',
+      placeholder: 'https://youtu.be/VIDEO_ID or https://www.youtube.com/watch?v=VIDEO_ID',
+      validation: Rule => Rule.uri({
+        scheme: ['http', 'https']
+      })
     }),
     defineField({
       name: 'transcript',

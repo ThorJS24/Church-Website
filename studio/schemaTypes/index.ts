@@ -4,6 +4,7 @@ import homePage from './homePage'
 import aboutPage from './aboutPage'
 import staffMember from './staffMember'
 import speaker from './speaker'
+import pastor from './pastor'
 import series from './series'
 import sermon from './sermon'
 import service from './service'
@@ -23,6 +24,7 @@ export const schemaTypes = [
   // People
   staffMember,
   speaker,
+  pastor,
   
   // Content
   sermon,

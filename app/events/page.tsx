@@ -60,25 +60,25 @@ export default function EventsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading events...</p>
+          <p className="text-gray-600 dark:text-gray-300">Loading events...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Upcoming Events</h1>
-          <p className="text-xl text-gray-600">Join us for worship, fellowship, and community events</p>
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Upcoming Events</h1>
+          <p className="text-xl text-gray-600 dark:text-gray-300">Join us for worship, fellowship, and community events</p>
         </motion.div>
 
         <div className="mb-8 flex justify-center">
@@ -89,7 +89,7 @@ export default function EventsPage() {
               placeholder="Search events..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             />
           </div>
         </div>
@@ -97,8 +97,8 @@ export default function EventsPage() {
         {filteredEvents.length === 0 ? (
           <div className="text-center py-12">
             <Calendar className="mx-auto w-16 h-16 text-gray-300 mb-4" />
-            <h3 className="text-xl font-semibold text-gray-600 mb-2">No events found</h3>
-            <p className="text-gray-500">Check back soon for new events and activities!</p>
+            <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">No events found</h3>
+            <p className="text-gray-500 dark:text-gray-400">Check back soon for new events and activities!</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -108,7 +108,7 @@ export default function EventsPage() {
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+                className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
               >
                 {event.image?.asset?.url && (
                   <div className="h-48 bg-gray-200">
@@ -127,9 +127,9 @@ export default function EventsPage() {
                     </div>
                   </div>
                   
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">{event.title}</h3>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{event.title}</h3>
                   
-                  <div className="space-y-2 text-sm text-gray-500 mb-4">
+                  <div className="space-y-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
                     <div className="flex items-center">
                       <Clock className="mr-2 w-4 h-4" />
                       {new Date(event.date).toLocaleTimeString('en-US', { 

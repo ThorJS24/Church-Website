@@ -36,6 +36,11 @@ export default defineType({
         hotspot: true,
       },
     }),
+    defineField({
+      name: 'bio',
+      title: 'Biography',
+      type: 'text',
+    }),
   ],
   preview: {
     select: {

@@ -52,8 +52,9 @@ export default defineType({
     defineField({
       name: 'color',
       title: 'Theme Color',
-      type: 'color',
-      description: 'Primary color for this series'
+      type: 'string',
+      description: 'Primary color for this series (hex code)',
+      placeholder: '#3B82F6'
     }),
     defineField({
       name: 'tags',
