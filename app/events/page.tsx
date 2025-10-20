@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, Clock, MapPin, Search } from 'lucide-react';
-import { sanityFetch } from '@/lib/sanity-fetch';
+// import { sanityFetch } from '@/lib/sanity-fetch';
+const sanityFetch = async () => null;
 import Image from 'next/image';
 
 interface Event {

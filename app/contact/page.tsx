@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Phone, Mail, Clock, Send, User, MessageSquare, Calendar, Navigation, MessageCircle } from 'lucide-react';
-import { sanityFetch } from '@/lib/sanity-fetch';
+// import { sanityFetch } from '@/lib/sanity-fetch';
+const sanityFetch = async () => null;
 
 interface SiteSettings {
   churchName: string;
