@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, Clock, MapPin, Search } from 'lucide-react';
 import { sanityFetch } from '@/lib/sanity-fetch';
+import Image from 'next/image';
 
 interface Event {
   _id: string;
@@ -111,11 +112,12 @@ export default function EventsPage() {
                 className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
               >
                 {event.image?.asset?.url && (
-                  <div className="h-48 bg-gray-200">
-                    <img 
+                  <div className="relative h-48 bg-gray-200">
+                    <Image 
                       src={event.image.asset.url} 
                       alt={event.title}
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
                     />
                   </div>
                 )}

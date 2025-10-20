@@ -20,7 +20,7 @@ export default function VolunteerPage() {
   const [submitted, setSubmitted] = useState(false);
 
   const volunteerAreas = [
-    'Children\'s Ministry',
+    'Children&#39;s Ministry',
     'Youth Ministry',
     'Worship Team',
     'Hospitality',

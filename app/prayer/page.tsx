@@ -281,7 +281,7 @@ export default function PrayerPage() {
           >
             <h2 className="text-4xl font-bold mb-6">The Power of Prayer</h2>
             <blockquote className="text-xl italic text-gray-700 mb-4 max-w-3xl mx-auto">
-              "Therefore I tell you, whatever you ask for in prayer, believe that you have received it, and it will be yours."
+              &quot;Therefore I tell you, whatever you ask for in prayer, believe that you have received it, and it will be yours.&quot;
             </blockquote>
             <cite className="text-blue-600 font-semibold">Mark 11:24</cite>
             <p className="text-gray-600 mt-6 max-w-2xl mx-auto">

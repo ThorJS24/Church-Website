@@ -1,13 +1,10 @@
-export const sanityFetch = async (query: string) => {
+import { client } from './sanity';
+
+export async function sanityFetch(query: string, params?: any) {
   try {
-    const response = await fetch(`/api/sanity-proxy?query=${encodeURIComponent(query)}`);
-    if (!response.ok) {
-      console.error(`Sanity fetch failed with status ${response.status}`);
-      return null;
-    }
-    return await response.json();
+    return await client.fetch(query, params);
   } catch (error) {
     console.error('Sanity fetch error:', error);
     return null;
   }
-};
+}

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Sun, Moon, BookOpen, Clock, MapPin, Calendar, Video, Coffee, Baby, Users, Bell } from 'lucide-react';
+import { Sun, Moon, BookOpen, Clock, MapPin, Calendar, Video, Coffee, Baby, Users, Bell, Heart } from 'lucide-react';
 import { sanityFetch } from '@/lib/sanity-fetch';
 
 interface Service {
@@ -211,7 +211,7 @@ export default function ServicesPage() {
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <h2 className="text-4xl font-bold mb-4 text-gray-900 dark:text-white">{servicesPage.whatToExpectSectionTitle}</h2>
-              <p className="text-gray-600 dark:text-gray-300">Your first visit made easy - here's what you can expect when you join us</p>
+              <p className="text-gray-600 dark:text-gray-300">Your first visit made easy - here&apos;s what you can expect when you join us</p>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {servicesPage.whatToExpect.map((item, index) => {

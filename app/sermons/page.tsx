@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Play, Download, Calendar, User, Clock, Search, Filter, BookOpen, Video, Headphones } from 'lucide-react';
 import { sanityFetch } from '@/lib/sanity-fetch';
 import { extractYouTubeId, getYouTubeEmbedUrl } from '@/lib/utils';
+import Image from 'next/image';
 
 interface Sermon {
   _id: string;
@@ -139,7 +140,7 @@ export default function SermonsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            Be encouraged and challenged by God's Word through our sermon library
+            Be encouraged and challenged by God&apos;s Word through our sermon library
           </motion.p>
         </div>
       </section>
@@ -163,10 +164,11 @@ export default function SermonsPage() {
                   <div className="relative h-64 md:h-full overflow-hidden">
                     {featuredSermon.image?.asset?.url ? (
                       <div className="relative w-full h-full">
-                        <img 
+                        <Image 
                           src={featuredSermon.image.asset.url} 
                           alt={featuredSermon.title}
-                          className="w-full h-full object-cover"
+                          fill
+                          className="object-cover"
                         />
                         <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
                           {featuredSermon.youtubeUrl && extractYouTubeId(featuredSermon.youtubeUrl) && (
@@ -341,7 +343,7 @@ export default function SermonsPage() {
                         <div className="flex items-start gap-4">
                           <div className="w-20 h-20 flex-shrink-0">
                             {sermon.image?.asset?.url ? (
-                              <img src={sermon.image.asset.url} alt={sermon.title} className="w-full h-full object-cover rounded" />
+                              <Image src={sermon.image.asset.url} alt={sermon.title} fill className="object-cover rounded" />
                             ) : (
                               <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 rounded flex items-center justify-center">
                                 <Play className="w-6 h-6 text-white" />
@@ -381,10 +383,11 @@ export default function SermonsPage() {
                   <div className="relative h-48 overflow-hidden">
                     {sermon.image?.asset?.url ? (
                       <div className="relative w-full h-full">
-                        <img 
+                        <Image 
                           src={sermon.image.asset.url} 
                           alt={sermon.title}
-                          className="w-full h-full object-cover"
+                          fill
+                          className="object-cover"
                         />
                         <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
                           {sermon.youtubeUrl && extractYouTubeId(sermon.youtubeUrl) && (

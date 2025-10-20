@@ -155,7 +155,7 @@ export default function ContactPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            We'd love to hear from you. Get in touch with our church family.
+            We&apos;d love to hear from you. Get in touch with our church family.
           </motion.p>
         </div>
       </section>
@@ -190,7 +190,7 @@ export default function ContactPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                         Email Address *
                       </label>
                       <input
@@ -207,7 +207,7 @@ export default function ContactPage() {
 
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                         Phone Number
                       </label>
                       <input
@@ -220,7 +220,7 @@ export default function ContactPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                         Department
                       </label>
                       <select
@@ -239,7 +239,7 @@ export default function ContactPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                       Subject *
                     </label>
                     <input
@@ -254,7 +254,7 @@ export default function ContactPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                       Message *
                     </label>
                     <textarea
@@ -295,8 +295,8 @@ export default function ContactPage() {
                 <div>
                   <h2 className="text-3xl font-bold mb-6">Get in Touch</h2>
                   <p className="text-gray-600 mb-8">
-                    Whether you're looking for information about our services, want to get involved, 
-                    or need prayer, we're here for you. Don't hesitate to reach out!
+                    Whether you&apos;re looking for information about our services, want to get involved, 
+                    or need prayer, we&apos;re here for you. Don&apos;t hesitate to reach out!
                   </p>
                 </div>
 

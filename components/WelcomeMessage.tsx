@@ -15,10 +15,10 @@ const WelcomeMessage = ({ user }: WelcomeMessageProps) => {
   const [isVisible, setIsVisible] = useState(true);
 
   const blessings = [
-    "May God's peace be with you today and always.",
+    "May God&apos;s peace be with you today and always.",
     "Blessed are you in the name of the Lord.",
     "May the Lord bless you and keep you safe.",
-    "God's grace and mercy be upon you.",
+    "God&apos;s grace and mercy be upon you.",
     "May you find strength and comfort in His love."
   ];
 
@@ -51,11 +51,11 @@ const WelcomeMessage = ({ user }: WelcomeMessageProps) => {
           </h3>
           
           <p className="text-gray-600 dark:text-gray-300 mb-4 italic">
-            "{randomBlessing}"
+            &quot;{randomBlessing}&quot;
           </p>
           
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            We're blessed to have you in our church family.
+            We&apos;re blessed to have you in our church family.
           </p>
         </div>
       </motion.div>

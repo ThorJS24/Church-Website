@@ -60,6 +60,16 @@ interface AboutPage {
     description: string;
   }>;
   pastorSectionTitle: string;
+  pastor?: {
+    name: string;
+    position: string;
+    bio: string;
+    image: any;
+    latestSermon?: {
+      title: string;
+      videoUrl: string;
+    };
+  };
 }
 
 const YouTubePlayer = ({ videoId, onClose }: { videoId: string, onClose: () => void }) => {
@@ -71,8 +81,8 @@ const YouTubePlayer = ({ videoId, onClose }: { videoId: string, onClose: () => v
     const firstScriptTag = document.getElementsByTagName('script')[0];
     firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
 
-    window.onYouTubeIframeAPIReady = () => {
-      playerRef.current = new window.YT.Player('player', {
+    (window as any).onYouTubeIframeAPIReady = () => {
+      playerRef.current = new (window as any).YT.Player('player', {
         height: '390',
         width: '640',
         videoId: videoId,
@@ -83,7 +93,7 @@ const YouTubePlayer = ({ videoId, onClose }: { videoId: string, onClose: () => v
     };
 
     return () => {
-      window.onYouTubeIframeAPIReady = null;
+      (window as any).onYouTubeIframeAPIReady = null;
     };
   }, [videoId]);
 
@@ -253,7 +263,7 @@ export default function AboutPage() {
                     <div className="flex items-center justify-between">
                       <p>“{aboutPage.pastor.latestSermon.title}”</p>
                       <button 
-                        onClick={() => setPlayingVideo(getYouTubeVideoId(aboutPage.pastor.latestSermon.videoUrl))}
+                        onClick={() => setPlayingVideo(getYouTubeVideoId(aboutPage.pastor?.latestSermon?.videoUrl || ''))}
                         className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center">
                         <Play className="w-4 h-4 mr-2" />
                         Watch

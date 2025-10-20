@@ -75,8 +75,8 @@ export default function GalleryPage() {
     }
   };
 
-  const allCategories = useMemo(() => [...new Set(galleryImages.flatMap(img => img.category))], [galleryImages]);
-  const allTags = useMemo(() => [...new Set(galleryImages.flatMap(img => img.tags || []))], [galleryImages]);
+  const allCategories = useMemo(() => Array.from(new Set(galleryImages.flatMap(img => img.category))), [galleryImages]);
+  const allTags = useMemo(() => Array.from(new Set(galleryImages.flatMap(img => img.tags || []))), [galleryImages]);
 
   const filteredAndSortedImages = useMemo(() => {
     let items = galleryImages.filter(item => {

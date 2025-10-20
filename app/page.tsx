@@ -41,8 +41,8 @@ export default function Home() {
     tamil: "வருத்தப்பட்டுப் பாரஞ்சுமக்கிறவர்களே! நீங்கள் எல்லாரும் என்னிடத்தில் வாருங்கள்; நான் உங்களுக்கு இளைப்பாறுதல் தருவேன்.",
     tamilReference: "மத்தேயு 11:28"
   });
-  const [announcements, setAnnouncements] = useState([]);
-  const [siteSettings, setSiteSettings] = useState(null);
+  const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [siteSettings, setSiteSettings] = useState<any>(null);
 
   useEffect(() => {
     setCurrentVerse(getRandomVerse());
@@ -93,7 +93,7 @@ export default function Home() {
             
             <div className="bg-white bg-opacity-10 backdrop-blur-sm p-6 rounded-2xl mb-8">
               <p className="text-lg sm:text-xl italic mb-4 text-yellow-300 leading-relaxed">
-                "{currentVerse.english}"
+                &quot;{currentVerse.english}&quot;
               </p>
               <p className="text-base opacity-90">
                 {currentVerse.reference}

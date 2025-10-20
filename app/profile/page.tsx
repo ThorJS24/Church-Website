@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { User, Mail, Phone, MapPin, Calendar, Edit, Save, X } from 'lucide-react';
+import Image from 'next/image';
 
 export default function ProfilePage() {
   const [user, setUser] = useState<any>(null);
@@ -68,7 +69,7 @@ export default function ProfilePage() {
               <div className="flex items-center">
                 <div className="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center overflow-hidden">
                   {user?.photoURL ? (
-                    <img src={user.photoURL} alt="Profile" className="w-full h-full object-cover" />
+                    <Image src={user.photoURL} alt="Profile" fill className="object-cover" />
                   ) : (
                     <User className="w-10 h-10 text-white" />
                   )}

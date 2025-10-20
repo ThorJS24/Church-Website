@@ -104,7 +104,7 @@ export default function GivePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            Your generosity helps us serve our community and spread God's love
+            Your generosity helps us serve our community and spread God&apos;s love
           </motion.p>
         </div>
       </section>
@@ -234,7 +234,7 @@ export default function GivePage() {
                 )}
 
                 <p className="text-center text-gray-600 text-sm mt-4">
-                  By clicking "Give", you agree to our terms and conditions. All donations are secure and encrypted.
+                  By clicking &quot;Give&quot;, you agree to our terms and conditions. All donations are secure and encrypted.
                 </p>
               </motion.div>
             </div>
@@ -297,12 +297,12 @@ export default function GivePage() {
                 <div className="p-6">
                   <Globe className="w-12 h-12 text-blue-600 mx-auto mb-4" />
                   <h3 className="text-xl font-bold mb-3">Make a Difference</h3>
-                  <p className="text-gray-600">Together, we can transform lives and communities through God's love and grace.</p>
+                  <p className="text-gray-600">Together, we can transform lives and communities through God&apos;s love and grace.</p>
                 </div>
               </div>
 
               <blockquote className="text-xl italic text-gray-700 mb-4">
-                "Each of you should give what you have decided in your heart to give, not reluctantly or under compulsion, for God loves a cheerful giver."
+                &quot;Each of you should give what you have decided in your heart to give, not reluctantly or under compulsion, for God loves a cheerful giver.&quot;
               </blockquote>
               <cite className="text-blue-600 font-semibold">2 Corinthians 9:7</cite>
             </motion.div>
@@ -373,7 +373,7 @@ export default function GivePage() {
             transition={{ duration: 0.6 }}
           >
             <h2 className="text-4xl font-bold mb-4">Questions About Giving?</h2>
-            <p className="text-xl mb-8">We're here to help you with your generosity journey</p>
+            <p className="text-xl mb-8">We&apos;re here to help you with your generosity journey</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
                 Contact Finance Team
