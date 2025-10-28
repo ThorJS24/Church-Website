@@ -18,6 +18,7 @@ import Link from 'next/link';
 import { fetchSanityData, batchFetchSanityData } from '@/lib/sanity-optimized';
 import DynamicLiveStream from '@/components/DynamicLiveStream';
 import BibleVerse from '@/components/BibleVerse';
+import { useAuth } from '@/contexts/AuthContext';
 
 const quickActions = [
   {
@@ -72,10 +73,10 @@ interface Announcement {
 }
 
 export default function Home() {
-
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
   const [showLiveStream, setShowLiveStream] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
 
@@ -162,12 +163,21 @@ export default function Home() {
                 Join Us Sunday 9:30 AM
               </DivineButton>
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                <DivineButton 
-                  onClick={() => window.location.href = '/login'}
-                  variant="secondary"
-                >
-                  Login
-                </DivineButton>
+                {!user ? (
+                  <DivineButton 
+                    onClick={() => window.location.href = '/login'}
+                    variant="secondary"
+                  >
+                    Login
+                  </DivineButton>
+                ) : (
+                  <DivineButton 
+                    onClick={() => window.location.href = '/dashboard'}
+                    variant="secondary"
+                  >
+                    My Dashboard
+                  </DivineButton>
+                )}
                 <DivineButton 
                   onClick={() => setShowLiveStream(true)}
                   className="bg-gradient-to-r from-red-500 via-pink-500 to-red-600 text-white hover:from-red-600 hover:via-pink-600 hover:to-red-700 flex items-center justify-center"

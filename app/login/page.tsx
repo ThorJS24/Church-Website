@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { User, Lock, Eye, EyeOff, Mail } from 'lucide-react'
+import { useAuth } from '@/contexts/AuthContext'
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -15,6 +16,14 @@ export default function LoginPage() {
     password: ''
   })
   const router = useRouter()
+  const { user, login } = useAuth()
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      router.push('/dashboard')
+    }
+  }, [user, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -22,25 +31,23 @@ export default function LoginPage() {
     setError('')
     
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      })
+      const success = await login(formData.email, formData.password)
       
-      const data = await response.json()
-      
-      if (data.success) {
-        localStorage.setItem('user', JSON.stringify(data.user))
+      if (success) {
         router.push('/dashboard')
       } else {
-        setError(data.message || 'Login failed')
+        setError('Invalid email or password')
       }
     } catch (error) {
       setError('An error occurred. Please try again.')
     } finally {
       setLoading(false)
     }
+  }
+
+  // Don't render if user is already logged in
+  if (user) {
+    return null
   }
 
   return (

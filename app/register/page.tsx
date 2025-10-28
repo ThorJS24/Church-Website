@@ -1,121 +1,60 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { User, Eye, EyeOff, Mail, Phone, MapPin } from 'lucide-react'
-import CountryCodeSelect from '@/components/CountryCodeSelect'
-import { validateEmail, validatePhone, validatePassword } from '@/lib/validation'
+import { User, Eye, EyeOff, Mail } from 'lucide-react'
+import { useAuth } from '@/contexts/AuthContext'
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    name: '',
     email: '',
-    phone: '',
-    countryCode: '+91',
     password: '',
-    confirmPassword: '',
-    address: '',
-    dateOfBirth: '',
-    interests: [] as string[]
+    confirmPassword: ''
   })
-  const [duplicateCheck, setDuplicateCheck] = useState({ email: false, phone: false })
   const router = useRouter()
+  const { user, register } = useAuth()
 
-  const interests = [
-    'Worship Team', 'Youth Ministry', 'Children Ministry', 'Outreach',
-    'Prayer Team', 'Hospitality', 'Technical Team', 'Bible Study'
-  ]
-
-  const handleInterestChange = (interest: string) => {
-    setFormData(prev => ({
-      ...prev,
-      interests: prev.interests.includes(interest)
-        ? prev.interests.filter(i => i !== interest)
-        : [...prev.interests, interest]
-    }))
-  }
-
-  const checkDuplicates = async () => {
-    try {
-      const response = await fetch('/api/auth/check-duplicate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          email: formData.email, 
-          phone: formData.countryCode + formData.phone 
-        })
-      })
-      const data = await response.json()
-      return data
-    } catch (error) {
-      return { exists: false }
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      router.push('/dashboard')
     }
-  }
+  }, [user, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
-    setSuccess('')
-    
-    // Validation
-    if (!validateEmail(formData.email)) {
-      setError('Please enter a valid email address')
-      setLoading(false)
-      return
-    }
-    
-    if (formData.phone && !validatePhone(formData.phone)) {
-      setError('Please enter a valid phone number')
-      setLoading(false)
-      return
-    }
-    
-    const passwordValidation = validatePassword(formData.password)
-    if (!passwordValidation.isValid) {
-      setError(passwordValidation.errors[0])
-      setLoading(false)
-      return
-    }
     
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match')
       setLoading(false)
       return
     }
-    
-    // Check duplicates
-    const duplicateResult = await checkDuplicates()
-    if (duplicateResult.exists) {
-      setError(duplicateResult.message)
+
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters')
       setLoading(false)
       return
     }
     
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+      const success = await register({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password
       })
       
-      const data = await response.json()
-      
-      if (data.success) {
-        setSuccess('Registration successful! Redirecting to login...')
-        setTimeout(() => {
-          router.push('/login')
-        }, 2000)
+      if (success) {
+        router.push('/dashboard')
       } else {
-        setError(data.message || 'Registration failed')
+        setError('Registration failed. Please try again.')
       }
     } catch (error) {
       setError('An error occurred. Please try again.')
@@ -124,12 +63,17 @@ export default function RegisterPage() {
     }
   }
 
+  // Don't render if user is already logged in
+  if (user) {
+    return null
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-2xl"
+        className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-md"
       >
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -149,28 +93,15 @@ export default function RegisterPage() {
           </div>
         )}
 
-        {success && (
-          <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
-            {success}
-          </div>
-        )}
-
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="relative">
+            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
-              placeholder="First Name"
-              value={formData.firstName}
-              onChange={(e) => setFormData({...formData, firstName: e.target.value})}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              required
-            />
-            <input
-              type="text"
-              placeholder="Last Name"
-              value={formData.lastName}
-              onChange={(e) => setFormData({...formData, lastName: e.target.value})}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              placeholder="Full Name"
+              value={formData.name}
+              onChange={(e) => setFormData({...formData, name: e.target.value})}
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               required
             />
           </div>
@@ -188,100 +119,32 @@ export default function RegisterPage() {
           </div>
 
           <div className="relative">
-            <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 z-10" />
-            <div className="flex">
-              <CountryCodeSelect 
-                value={formData.countryCode}
-                onChange={(code) => setFormData({...formData, countryCode: code})}
-              />
-              <input
-                type="tel"
-                placeholder="Phone Number"
-                value={formData.phone}
-                onChange={(e) => setFormData({...formData, phone: e.target.value.replace(/\D/g, '')})}
-                className="flex-1 pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-r-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              />
-            </div>
+            <input
+              type={showPassword ? 'text' : 'password'}
+              placeholder="Password"
+              value={formData.password}
+              onChange={(e) => setFormData({...formData, password: e.target.value})}
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-12 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+            >
+              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            </button>
           </div>
 
           <div className="relative">
-            <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
-              type="text"
-              placeholder="Address"
-              value={formData.address}
-              onChange={(e) => setFormData({...formData, address: e.target.value})}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Date of Birth
-            </label>
-            <input
-              type="date"
-              value={formData.dateOfBirth}
-              onChange={(e) => setFormData({...formData, dateOfBirth: e.target.value})}
+              type={showPassword ? 'text' : 'password'}
+              placeholder="Confirm Password"
+              value={formData.confirmPassword}
+              onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
               className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              required
             />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                placeholder="Password"
-                value={formData.password}
-                onChange={(e) => setFormData({...formData, password: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-12 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-              >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </button>
-            </div>
-
-            <div className="relative">
-              <input
-                type={showConfirmPassword ? 'text' : 'password'}
-                placeholder="Confirm Password"
-                value={formData.confirmPassword}
-                onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-12 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-              >
-                {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-              Areas of Interest (Optional)
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              {interests.map((interest) => (
-                <label key={interest} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={formData.interests.includes(interest)}
-                    onChange={() => handleInterestChange(interest)}
-                    className="mr-2 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">{interest}</span>
-                </label>
-              ))}
-            </div>
           </div>
 
           <button
