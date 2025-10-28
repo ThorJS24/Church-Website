@@ -1,4 +1,5 @@
 const { createClient } = require('@sanity/client');
+require('dotenv').config({ path: '.env.local' });
 
 const client = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
@@ -49,23 +50,6 @@ const sampleData = [
     category: 'study'
   },
   
-  // Sermons
-  {
-    _type: 'sermon',
-    title: 'The Good Shepherd',
-    description: 'A message about Jesus as our Good Shepherd from John 10:11-18',
-    scripture: 'John 10:11-18',
-    date: new Date().toISOString(),
-    speaker: {
-      _type: 'reference',
-      _ref: 'speaker-pastor-john'
-    },
-    series: {
-      _type: 'reference', 
-      _ref: 'series-gospel-of-john'
-    }
-  },
-  
   // Speakers
   {
     _id: 'speaker-pastor-john',
@@ -84,6 +68,45 @@ const sampleData = [
     description: 'A verse-by-verse study through the Gospel of John',
     startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
     isActive: true
+  },
+  
+  // Sermons
+  {
+    _type: 'sermon',
+    title: 'The Good Shepherd',
+    description: 'A message about Jesus as our Good Shepherd from John 10:11-18',
+    scripture: 'John 10:11-18',
+    date: new Date().toISOString(),
+    speaker: {
+      _type: 'reference',
+      _ref: 'speaker-pastor-john'
+    },
+    series: {
+      _type: 'reference', 
+      _ref: 'series-gospel-of-john'
+    }
+  },
+  {
+    _type: 'sermon',
+    title: 'Walking in Faith',
+    description: 'Understanding what it means to walk by faith and not by sight',
+    scripture: '2 Corinthians 5:7',
+    date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+    speaker: {
+      _type: 'reference',
+      _ref: 'speaker-pastor-john'
+    }
+  },
+  {
+    _type: 'sermon',
+    title: 'The Power of Prayer',
+    description: 'Discovering the transformative power of prayer in our daily lives',
+    scripture: 'Matthew 6:9-13',
+    date: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
+    speaker: {
+      _type: 'reference',
+      _ref: 'speaker-pastor-john'
+    }
   },
   
   // Ministries
@@ -106,6 +129,30 @@ const sampleData = [
     location: 'Children\'s Wing',
     ageGroup: '3-12 years',
     isActive: true
+  },
+  
+  // Services Page
+  {
+    _type: 'servicesPage',
+    title: 'Our Services',
+    description: 'Join us for worship, fellowship, and spiritual growth',
+    services: [
+      {
+        name: 'Sunday Morning Worship',
+        time: '10:30 AM',
+        description: 'Traditional worship service with hymns, prayer, and biblical preaching'
+      },
+      {
+        name: 'Sunday School',
+        time: '9:30 AM', 
+        description: 'Bible study for all ages with age-appropriate classes'
+      },
+      {
+        name: 'Wednesday Bible Study',
+        time: '7:00 PM',
+        description: 'Midweek Bible study and prayer meeting'
+      }
+    ]
   },
   
   // Site Settings
@@ -136,6 +183,8 @@ const sampleData = [
 async function seedData() {
   try {
     console.log('Starting to seed Sanity data...');
+    console.log('Project ID:', process.env.NEXT_PUBLIC_SANITY_PROJECT_ID);
+    console.log('Dataset:', process.env.NEXT_PUBLIC_SANITY_DATASET);
     
     for (const doc of sampleData) {
       const result = await client.create(doc);
