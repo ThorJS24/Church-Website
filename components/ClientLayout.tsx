@@ -2,7 +2,6 @@
 
 import { useEffect } from 'react';
 import NotificationSystem, { useNotifications } from './NotificationSystem';
-import Navbar from './Navbar';
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const { notifications, addNotification, removeNotification } = useNotifications();
@@ -14,16 +13,12 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
   return (
     <>
-      <Navbar />
+      <NotificationSystem 
+        notifications={notifications}
+        onRemove={removeNotification}
+      />
       
-      <div className="pt-16">
-        <NotificationSystem 
-          notifications={notifications}
-          onRemove={removeNotification}
-        />
-        
-        {children}
-      </div>
+      {children}
     </>
   );
 }

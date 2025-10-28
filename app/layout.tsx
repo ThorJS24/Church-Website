@@ -137,7 +137,8 @@ export default function RootLayout({
             <AuthProvider>
               <ClientLayout>
               <div className="min-h-screen flex flex-col">
-                <main className="flex-grow">
+                <Navbar />
+                <main className="flex-grow pt-16">
                   {children}
                 </main>
                 <Footer />

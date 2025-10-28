@@ -68,7 +68,7 @@ export default function PrivacyDialog({ isOpen, onClose }: PrivacyDialogProps) {
       icon: FileText,
       title: 'Privacy Policy',
       description: 'Learn how we handle your data',
-      action: () => setActiveTab('policy'),
+      action: () => window.open('/privacy', '_blank'),
       buttonText: 'View'
     },
     {

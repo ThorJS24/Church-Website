@@ -74,7 +74,11 @@ export async function getRandomVerse(): Promise<BibleVerse | null> {
   }
 }
 
-export async function searchVerses(query: string): Promise<BibleVerse[]> {
+export async function searchVerses(query: string): Promise<any[]> {
+  if (!BIBLE_API_KEY) {
+    return mockVerseSearch(query);
+  }
+
   try {
     const response = await fetch(
       `https://api.scripture.api.bible/v1/bibles/${BIBLE_ID}/search?query=${encodeURIComponent(query)}&limit=10`,
@@ -93,6 +97,36 @@ export async function searchVerses(query: string): Promise<BibleVerse[]> {
     return data.data.passages || [];
   } catch (error) {
     console.error('Error searching verses:', error);
-    return [];
+    return mockVerseSearch(query);
   }
 }
+
+const mockVerseSearch = (query: string): any[] => {
+  const mockVerses = [
+    {
+      reference: 'John 3:16',
+      content: 'For God so loved the world that He gave His only begotten Son, that whoever believes in Him should not perish but have everlasting life.'
+    },
+    {
+      reference: 'Psalm 23:1', 
+      content: 'The Lord is my shepherd; I shall not want.'
+    },
+    {
+      reference: 'Proverbs 3:5-6',
+      content: 'Trust in the Lord with all your heart, And lean not on your own understanding; In all your ways acknowledge Him, And He shall direct your paths.'
+    },
+    {
+      reference: 'Romans 8:28',
+      content: 'And we know that all things work together for good to those who love God, to those who are the called according to His purpose.'
+    },
+    {
+      reference: 'Philippians 4:13',
+      content: 'I can do all things through Christ who strengthens me.'
+    }
+  ];
+  
+  return mockVerses.filter(verse => 
+    verse.reference.toLowerCase().includes(query.toLowerCase()) ||
+    verse.content.toLowerCase().includes(query.toLowerCase())
+  );
+};
