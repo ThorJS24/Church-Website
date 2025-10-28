@@ -1,0 +1,184 @@
+#!/usr/bin/env node
+
+/**
+ * Salem Primitive Baptist Church Website Setup Script
+ * Helps users set up the project quickly with guided configuration
+ */
+
+const fs = require('fs');
+const path = require('path');
+const readline = require('readline');
+
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+
+const colors = {
+  reset: '\x1b[0m',
+  bright: '\x1b[1m',
+  red: '\x1b[31m',
+  green: '\x1b[32m',
+  yellow: '\x1b[33m',
+  blue: '\x1b[34m',
+  magenta: '\x1b[35m',
+  cyan: '\x1b[36m'
+};
+
+function colorize(text, color) {
+  return `${colors[color]}${text}${colors.reset}`;
+}
+
+function log(message, color = 'reset') {
+  console.log(colorize(message, color));
+}
+
+function question(prompt) {
+  return new Promise((resolve) => {
+    rl.question(colorize(prompt, 'cyan'), resolve);
+  });
+}
+
+async function main() {
+  log('\n🏛️  Salem Primitive Baptist Church Website Setup', 'bright');
+  log('=' .repeat(50), 'blue');
+  
+  log('\nThis script will help you set up your church website.', 'green');
+  log('You can skip optional services by pressing Enter.\n');
+
+  // Check if .env.local already exists
+  const envPath = path.join(__dirname, '.env.local');
+  if (fs.existsSync(envPath)) {
+    const overwrite = await question('⚠️  .env.local already exists. Overwrite? (y/N): ');
+    if (overwrite.toLowerCase() !== 'y') {
+      log('Setup cancelled. Your existing .env.local is preserved.', 'yellow');
+      rl.close();
+      return;
+    }
+  }
+
+  const config = {};
+
+  // Required Configuration
+  log('\n📋 REQUIRED CONFIGURATION', 'bright');
+  log('-'.repeat(30), 'blue');
+
+  // Sanity CMS
+  log('\n🎨 Sanity CMS Setup (Required for content management)');
+  log('Visit: https://sanity.io → Create project → Get credentials');
+  config.NEXT_PUBLIC_SANITY_PROJECT_ID = await question('Sanity Project ID: ');
+  config.NEXT_PUBLIC_SANITY_DATASET = await question('Sanity Dataset (default: production): ') || 'production';
+  config.SANITY_API_TOKEN = await question('Sanity API Token: ');
+  config.SANITY_STUDIO_TOKEN = await question('Sanity Studio Token: ');
+
+  // Bible API
+  log('\n📖 Bible API Setup (Required for daily verses)');
+  log('Visit: https://bible-api.com → Sign up → Get free API key');
+  const bibleKey = await question('Bible API Key: ');
+  config.BIBLE_API_KEY = bibleKey;
+  config.NEXT_PUBLIC_BIBLE_API_KEY = bibleKey;
+
+  // Security
+  log('\n🔒 Security Configuration');
+  config.JWT_SECRET_KEY = await question('JWT Secret Key (min 32 chars): ') || 
+    'church_jwt_secret_2024_salem_primitive_baptist_secure_key_12345';
+  config.ENCRYPTION_KEY = await question('Encryption Key (32 chars): ') || 
+    'a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6';
+  config.WEBHOOK_SECRET = await question('Webhook Secret: ') || 
+    'your_random_webhook_secret_123';
+
+  // Admin Credentials
+  log('\n👤 Admin Account Setup');
+  config.ADMIN_EMAIL = await question('Admin Email: ') || 'admin@salemprimitivebaptist.org';
+  config.ADMIN_NAME = await question('Admin Name: ') || 'Church Administrator';
+  config.ADMIN_PASSWORD = await question('Admin Password: ') || 'SecureAdmin2024!';
+
+  // Optional Services
+  log('\n🌟 OPTIONAL SERVICES', 'bright');
+  log('-'.repeat(30), 'blue');
+  log('Press Enter to skip any service you don\'t want to configure now.\n');
+
+  // Firebase
+  const setupFirebase = await question('🔥 Setup Firebase? (y/N): ');
+  if (setupFirebase.toLowerCase() === 'y') {
+    log('Visit: https://console.firebase.google.com → Create project → Get config');
+    config.NEXT_PUBLIC_FIREBASE_API_KEY = await question('Firebase API Key: ');
+    config.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN = await question('Firebase Auth Domain: ');
+    config.NEXT_PUBLIC_FIREBASE_PROJECT_ID = await question('Firebase Project ID: ');
+    config.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET = await question('Firebase Storage Bucket: ');
+    config.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID = await question('Firebase Sender ID: ');
+    config.NEXT_PUBLIC_FIREBASE_APP_ID = await question('Firebase App ID: ');
+  }
+
+  // Email
+  const setupEmail = await question('📧 Setup Email (Gmail SMTP)? (y/N): ');
+  if (setupEmail.toLowerCase() === 'y') {
+    log('Enable 2FA on Gmail → Generate App Password');
+    const emailUser = await question('Gmail Address: ');
+    const emailPass = await question('Gmail App Password: ');
+    config.CONTACT_EMAIL_USER = emailUser;
+    config.CONTACT_EMAIL_PASS = emailPass;
+    config.SECURITY_EMAIL_USER = emailUser;
+    config.SECURITY_EMAIL_PASS = emailPass;
+  }
+
+  // Analytics
+  const setupAnalytics = await question('📊 Setup Google Analytics? (y/N): ');
+  if (setupAnalytics.toLowerCase() === 'y') {
+    config.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID = await question('Google Analytics ID (G-XXXXXXXXXX): ');
+  }
+
+  // Generate .env.local
+  log('\n⚙️  Generating .env.local file...', 'yellow');
+  
+  let envContent = '# Salem Primitive Baptist Church Website\n';
+  envContent += '# Generated by setup script\n';
+  envContent += `# Created: ${new Date().toISOString()}\n\n`;
+
+  // Add all configuration
+  Object.entries(config).forEach(([key, value]) => {
+    if (value) {
+      envContent += `${key}=${value}\n`;
+    }
+  });
+
+  // Add default values for unset variables
+  const defaults = {
+    DATA_RETENTION_DAYS: '2555',
+    GDPR_CONTACT_EMAIL: config.ADMIN_EMAIL || 'privacy@salemprimitivebaptist.org',
+    CHILD_PROTECTION_ENABLED: 'true',
+    BACKGROUND_CHECK_REQUIRED: 'true',
+    TWO_FACTOR_SECRET: 'SALEM_2FA_SECRET_KEY_FOR_CHURCH_MEMBERS_2024'
+  };
+
+  envContent += '\n# Default Configuration\n';
+  Object.entries(defaults).forEach(([key, value]) => {
+    envContent += `${key}=${value}\n`;
+  });
+
+  // Write .env.local
+  fs.writeFileSync(envPath, envContent);
+  
+  log('\n✅ Setup Complete!', 'green');
+  log('=' .repeat(50), 'blue');
+  
+  log('\n📋 Next Steps:', 'bright');
+  log('1. Review and update .env.local with your actual credentials');
+  log('2. Run: npm install');
+  log('3. Run: npm run dev');
+  log('4. Visit: http://localhost:3000');
+  
+  log('\n📚 Documentation:', 'bright');
+  log('• README.md - Complete setup guide');
+  log('• .env.example - All available environment variables');
+  
+  log('\n🆘 Need Help?', 'bright');
+  log('• Email: admin@salemprimitivebaptist.org');
+  log('• Check README.md for troubleshooting');
+  
+  log('\n🙏 God bless your ministry!', 'magenta');
+  
+  rl.close();
+}
+
+main().catch(console.error);

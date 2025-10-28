@@ -8,10 +8,12 @@
     "build:analyze": "ANALYZE=true next build",
     "start": "next start",
     "lint": "next lint",
-    "seed": "node scripts/seed-db.js",
+    "setup": "node setup.js",
     "type-check": "tsc --noEmit",
     "deploy": "vercel --prod",
-    "optimize": "next build && next export"
+    "optimize": "next build && next export",
+    "clean": "rm -rf .next out node_modules/.cache",
+    "fresh-install": "rm -rf node_modules package-lock.json && npm install"
   },
   "dependencies": {
     "@sanity/client": "^7.12.0",
