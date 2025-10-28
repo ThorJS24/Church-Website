@@ -1,0 +1,80 @@
+# Dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# Testing
+/coverage
+
+# Next.js
+/.next/
+/out/
+
+# Production
+/build
+
+# Misc
+.DS_Store
+*.pem
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local env files
+.env*.local
+.env
+
+# Vercel
+.vercel
+
+# Sensitive deployment files
+VERCEL_ENV_VARS.txt
+VERCEL_LOGIN_FIX.md
+FINAL_DEPLOYMENT_SETUP.md
+DEPLOYMENT.md
+*.env.backup
+*.credentials
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Sanity
+/studio/dist
+/studio/.sanity
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+.vercel

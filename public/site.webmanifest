@@ -1,0 +1,16 @@
+{
+  "name": "Salem Primitive Baptist Church",
+  "short_name": "SPBC",
+  "description": "Salem Primitive Baptist Church - A place where faith, hope, and love come together",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    }
+  ]
+}
