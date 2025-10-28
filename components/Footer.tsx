@@ -23,17 +23,37 @@ const Footer = () => {
 
   useEffect(() => {
     const fetchSettings = async () => {
-      const data = await sanityFetch(`*[_type == "siteSettings"][0] {
-        churchName,
-        address,
-        phoneNumber,
-        email,
-        facebookUrl,
-        instagramUrl,
-        youtubeChannelUrl,
-        whatsappGroupUrl
-      }`);
-      if (data) setSettings(data);
+      try {
+        const data = await sanityFetch(`*[_type == "siteSettings"][0] {
+          title,
+          description,
+          address,
+          phone,
+          email,
+          "socialMedia": socialMedia {
+            facebook,
+            youtube
+          }
+        }`);
+        if (data) {
+          setSettings({
+            churchName: data.title || 'Salem Primitive Baptist Church',
+            address: data.address || '123 Church Street\nYour City, State 12345',
+            phoneNumber: data.phone || '(555) 123-4567',
+            email: data.email || 'info@salemprimitivebaptist.org',
+            facebookUrl: data.socialMedia?.facebook,
+            youtubeChannelUrl: data.socialMedia?.youtube
+          });
+        }
+      } catch (error) {
+        console.log('Using fallback settings');
+        setSettings({
+          churchName: 'Salem Primitive Baptist Church',
+          address: '123 Church Street\nYour City, State 12345',
+          phoneNumber: '(555) 123-4567',
+          email: 'info@salemprimitivebaptist.org'
+        });
+      }
     };
     fetchSettings();
   }, []);
@@ -131,7 +151,7 @@ const Footer = () => {
               >
                 Privacy Policy
               </button>
-              <Link href="/contact" className="hover:text-white transition-colors">
+              <Link href="/terms" className="hover:text-white transition-colors">
                 Terms of Service
               </Link>
             </div>
