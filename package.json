@@ -9,8 +9,11 @@
     "start": "next start",
     "lint": "next lint",
     "setup": "node setup.js",
+    "auto-setup": "./auto-setup.bat",
+    "one-click": "./one-click-setup.bat",
     "type-check": "tsc --noEmit",
     "deploy": "vercel --prod",
+    "auto-deploy": "./auto-deploy.bat",
     "optimize": "next build && next export",
     "clean": "rm -rf .next out node_modules/.cache",
     "fresh-install": "rm -rf node_modules package-lock.json && npm install"
