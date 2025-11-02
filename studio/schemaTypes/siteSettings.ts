@@ -83,5 +83,34 @@ export default defineType({
       type: 'url',
       description: 'WhatsApp group invitation link'
     }),
+    defineField({
+      name: 'officeHours',
+      title: 'Office Hours',
+      type: 'array',
+      of: [{ type: 'string' }],
+      description: 'List of office hours (e.g., "Monday - Friday: 9:00 AM - 5:00 PM")',
+      initialValue: ['Monday - Friday: 9:00 AM - 5:00 PM', 'Saturday: 10:00 AM - 2:00 PM', 'Sunday: After Service']
+    }),
+    defineField({
+      name: 'prayerStats',
+      title: 'Prayer Statistics',
+      type: 'object',
+      fields: [
+        defineField({ name: 'totalRequests', title: 'Total Prayer Requests', type: 'number', initialValue: 150 }),
+        defineField({ name: 'totalPeople', title: 'Total People Praying', type: 'number', initialValue: 500 }),
+        defineField({ name: 'totalPrayers', title: 'Total Prayers Offered', type: 'number', initialValue: 1000 })
+      ]
+    }),
+    defineField({
+      name: 'givingImpact',
+      title: 'Giving Impact Amounts',
+      type: 'object',
+      fields: [
+        defineField({ name: 'communityOutreach', title: 'Community Outreach Amount', type: 'string', initialValue: '₹2,50,000' }),
+        defineField({ name: 'globalMissions', title: 'Global Missions Amount', type: 'string', initialValue: '₹5,00,000' }),
+        defineField({ name: 'educationMinistry', title: 'Education Ministry Amount', type: 'string', initialValue: '₹3,00,000' }),
+        defineField({ name: 'youthPrograms', title: 'Youth Programs Amount', type: 'string', initialValue: '₹1,50,000' })
+      ]
+    }),
   ],
 })

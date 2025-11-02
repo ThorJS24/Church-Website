@@ -33,6 +33,7 @@ const departments = [
 export default function ContactPage() {
   const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
   const [staff, setStaff] = useState<StaffMember[]>([]);
+  const [officeHours, setOfficeHours] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -51,13 +52,14 @@ export default function ContactPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [siteSettingsData, staffData] = await Promise.all([
+      const [siteSettingsData, staffData, officeHoursData] = await Promise.all([
         sanityFetch(`*[_type == "siteSettings"][0] {
           churchName,
           address,
           phoneNumber,
           email,
-          whatsappGroupUrl
+          whatsappGroupUrl,
+          officeHours
         }`),
         sanityFetch(`*[_type == "staffMember"] {
           _id,
@@ -65,11 +67,13 @@ export default function ContactPage() {
           position,
           email,
           phone
-        }`)
+        }`),
+        sanityFetch(`*[_type == "siteSettings"][0].officeHours`)
       ]);
 
       if (siteSettingsData) setSiteSettings(siteSettingsData);
       if (staffData) setStaff(staffData);
+      if (officeHoursData) setOfficeHours(officeHoursData);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -145,7 +149,7 @@ export default function ContactPage() {
     {
       icon: Clock,
       title: 'Office Hours',
-      details: ['Monday - Friday: 9:00 AM - 5:00 PM', 'Saturday: 10:00 AM - 2:00 PM', 'Sunday: After Service']
+      details: officeHours.length > 0 ? officeHours : ['Contact us for availability']
     }
   ];
 

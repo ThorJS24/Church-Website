@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Heart, CreditCard, Smartphone, Building, Users, Globe, BookOpen, Shield } from 'lucide-react';
 import DivineButton from '@/components/DivineButton';
+import { sanityFetch } from '@/lib/sanity-fetch';
 
 const givingOptions = [
   {
@@ -71,6 +72,54 @@ export default function GivePage() {
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [isRecurring, setIsRecurring] = useState(false);
   const [donationStatus, setDonationStatus] = useState<'idle' | 'success'>('idle');
+  const [impactData, setImpactData] = useState(impactAreas);
+
+  useEffect(() => {
+    fetchImpactData();
+  }, []);
+
+  const fetchImpactData = async () => {
+    try {
+      const data = await sanityFetch(`*[_type == "siteSettings"][0] {
+        givingImpact {
+          communityOutreach,
+          globalMissions,
+          educationMinistry,
+          youthPrograms
+        }
+      }`);
+      if (data?.givingImpact) {
+        setImpactData([
+          {
+            icon: Users,
+            title: 'Community Outreach',
+            description: 'Supporting families in need through food drives, counseling, and assistance programs.',
+            amount: data.givingImpact.communityOutreach || '∞'
+          },
+          {
+            icon: Globe,
+            title: 'Global Missions',
+            description: 'Spreading the Gospel worldwide through missionary support and evangelism.',
+            amount: data.givingImpact.globalMissions || '∞'
+          },
+          {
+            icon: BookOpen,
+            title: 'Education Ministry',
+            description: 'Providing quality Christian education and scholarship programs.',
+            amount: data.givingImpact.educationMinistry || '∞'
+          },
+          {
+            icon: Heart,
+            title: 'Youth Programs',
+            description: 'Investing in the next generation through camps, mentorship, and activities.',
+            amount: data.givingImpact.youthPrograms || '∞'
+          }
+        ]);
+      }
+    } catch (error) {
+      console.error('Error fetching impact data:', error);
+    }
+  };
   
   const handleDonate = async () => {
     if (!amount || parseFloat(amount) <= 0) {
@@ -272,7 +321,7 @@ export default function GivePage() {
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {impactAreas.map((area, index) => (
+            {impactData.map((area, index) => (
               <motion.div 
                 key={area.title}
                 className="text-center p-6 bg-gray-50 dark:bg-gray-700 rounded-lg"
@@ -284,7 +333,7 @@ export default function GivePage() {
                 <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">{area.title}</h3>
                 <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">{area.description}</p>
                 <div className="text-2xl font-bold text-blue-600">{area.amount}</div>
-                <div className="text-sm text-gray-500 dark:text-gray-400">raised this year</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">{typeof area.amount === 'string' && area.amount !== '∞' ? 'raised this year' : 'God\'s provision'}</div>
               </motion.div>
             ))}
           </div>

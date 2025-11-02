@@ -17,7 +17,8 @@
     "optimize": "next build && next export",
     "clean": "rm -rf .next out node_modules/.cache",
     "fresh-install": "rm -rf node_modules package-lock.json && npm install",
-    "seed-sanity": "node scripts/seed-sanity.js"
+    "seed-sanity": "node scripts/seed-sanity.js",
+    "seed-full": "node scripts/full-sanity-seed.js"
   },
   "dependencies": {
     "@sanity/client": "^7.12.0",

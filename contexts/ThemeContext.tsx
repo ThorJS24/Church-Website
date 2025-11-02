@@ -21,8 +21,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     if (savedTheme) {
       setTheme(savedTheme)
       document.documentElement.classList.toggle('dark', savedTheme === 'dark')
+    } else {
+      // Ensure light theme is default
+      setTheme('light')
+      document.documentElement.classList.remove('dark')
     }
-    // Default to light theme - no system preference check
   }, [])
 
   useEffect(() => {

@@ -1,5 +1,11 @@
-const BIBLE_API_KEY = process.env.NEXT_PUBLIC_BIBLE_API_KEY || process.env.BIBLE_API_KEY;
+const BIBLE_API_KEY = process.env.BIBLE_API_KEY || process.env.NEXT_PUBLIC_BIBLE_API_KEY;
 const BIBLE_ID = '61fd76eafa1577b2-01'; // New King James Version
+const BIBLE_API_BASE_URL = 'https://api.scripture.api.bible/v1';
+
+// Validate API key on module load
+if (BIBLE_API_KEY && BIBLE_API_KEY.length < 10) {
+  console.warn('Bible API key appears to be invalid');
+}
 
 export interface BibleVerse {
   id: string;
@@ -11,130 +17,86 @@ export interface BibleVerse {
   copyright: string;
 }
 
-export async function getRandomVerse(): Promise<BibleVerse | null> {
-  // Return random blessing verse if no API key
-  if (!BIBLE_API_KEY) {
-    const blessingVerses = [
-      {
-        id: 'num-6-24',
-        orgId: 'fallback',
-        bookId: 'NUM',
-        chapterIds: ['6'],
-        reference: 'Numbers 6:24-26',
-        content: 'The Lord bless you and keep you; The Lord make His face shine upon you, And be gracious to you; The Lord lift up His countenance upon you, And give you peace.',
-        copyright: 'NKJV'
-      },
-      {
-        id: 'jer-29-11',
-        orgId: 'fallback',
-        bookId: 'JER',
-        chapterIds: ['29'],
-        reference: 'Jeremiah 29:11',
-        content: 'For I know the thoughts that I think toward you, says the Lord, thoughts of peace and not of evil, to give you a future and a hope.',
-        copyright: 'NKJV'
-      },
-      {
-        id: 'rom-15-13',
-        orgId: 'fallback',
-        bookId: 'ROM',
-        chapterIds: ['15'],
-        reference: 'Romans 15:13',
-        content: 'Now may the God of hope fill you with all joy and peace in believing, that you may abound in hope by the power of the Holy Spirit.',
-        copyright: 'NKJV'
-      },
-      {
-        id: 'eph-3-20',
-        orgId: 'fallback',
-        bookId: 'EPH',
-        chapterIds: ['3'],
-        reference: 'Ephesians 3:20-21',
-        content: 'Now to Him who is able to do exceedingly abundantly above all that we ask or think, according to the power that works in us, to Him be glory in the church by Christ Jesus to all generations, forever and ever. Amen.',
-        copyright: 'NKJV'
-      },
-      {
-        id: 'isa-40-31',
-        orgId: 'fallback',
-        bookId: 'ISA',
-        chapterIds: ['40'],
-        reference: 'Isaiah 40:31',
-        content: 'But those who wait on the Lord Shall renew their strength; They shall mount up with wings like eagles, They shall run and not be weary, They shall walk and not faint.',
-        copyright: 'NKJV'
-      }
-    ];
-    
-    const randomIndex = Math.floor(Math.random() * blessingVerses.length);
-    return blessingVerses[randomIndex];
+import { getRandomFallbackVerse } from './bible-fallback';
+
+const verseTranslations = {
+  'jer-29-11': {
+    NKJV: 'For I know the thoughts that I think toward you, says the Lord, thoughts of peace and not of evil, to give you a future and a hope.',
+    NIV: 'For I know the plans I have for you, declares the Lord, plans to prosper you and not to harm you, to give you hope and a future.',
+    ESV: 'For I know the plans I have for you, declares the Lord, plans for welfare and not for evil, to give you a future and a hope.',
+    KJV: 'For I know the thoughts that I think toward you, saith the Lord, thoughts of peace, and not of evil, to give you an expected end.',
+    NLT: 'For I know the plans I have for you, says the Lord. They are plans for good and not for disaster, to give you a future and a hope.',
+    CJB: 'For I know what plans I have in mind for you, says Adonai, plans for shalom and not calamity, to give you a future and a hope.',
+    TAMIL: 'ஏனென்றால் நான் உங்களைக்குறித்து நினைக்கிற நினைவுகளை அறிவேன்; அவைகள் தீமைக்கல்ல, சமாதானத்திற்கும், உங்களுக்கு நம்பிக்கையையும் எதிர்காலத்தையும் கொடுக்கும் நினைவுகளே என்று கர்த்தர் அருளிச்செய்கிறார்.'
+  },
+  'jhn-3-16': {
+    NKJV: 'For God so loved the world that He gave His only begotten Son, that whoever believes in Him should not perish but have everlasting life.',
+    NIV: 'For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.',
+    ESV: 'For God so loved the world, that he gave his only Son, that whoever believes in him should not perish but have eternal life.',
+    KJV: 'For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.',
+    NLT: 'For this is how God loved the world: He gave his one and only Son, so that everyone who believes in him will not perish but have eternal life.',
+    CJB: 'For God so loved the world that he gave his only and unique Son, so that everyone who trusts in him may have eternal life, instead of being utterly destroyed.',
+    TAMIL: 'தேவன் உலகத்தின்மேல் அன்புகூர்ந்து, தம்முடைய ஒரே புத்திரனைக் கொடுத்தார்; அவர்மேல் விசுவாசமுள்ளவன் எவனும் நாசமாகாமல் நித்தியஜீவனை அடையும்படிக்கே.'
+  },
+  'psa-23-1': {
+    NKJV: 'The Lord is my shepherd; I shall not want.',
+    NIV: 'The Lord is my shepherd, I lack nothing.',
+    ESV: 'The Lord is my shepherd; I shall not want.',
+    KJV: 'The Lord is my shepherd; I shall not want.',
+    NLT: 'The Lord is my shepherd; I have all that I need.',
+    CJB: 'Adonai is my shepherd; I lack nothing.',
+    TAMIL: 'கர்த்தர் என் மேய்ப்பன்; எனக்குக் குறைவில்லை.'
   }
+};
 
-  try {
-    // Popular blessing verses (excluding Proverbs 3:5)
-    const blessingVerses = [
-      'NUM.6.24-NUM.6.26', // Numbers 6:24-26 (Priestly Blessing)
-      'JER.29.11', // Jeremiah 29:11
-      'ROM.15.13', // Romans 15:13
-      'EPH.3.20-EPH.3.21', // Ephesians 3:20-21
-      'PHP.4.19', // Philippians 4:19
-      'PSA.23.1', // Psalm 23:1
-      'PSA.121.1-PSA.121.2', // Psalm 121:1-2
-      'ISA.40.31', // Isaiah 40:31
-      'JHN.3.16', // John 3:16
-      'ROM.8.28' // Romans 8:28
-    ];
-
-    const randomIndex = Math.floor(Math.random() * blessingVerses.length);
-    const verseId = blessingVerses[randomIndex];
-
-    const response = await fetch(
-      `https://api.scripture.api.bible/v1/bibles/${BIBLE_ID}/passages/${verseId}?content-type=text&include-notes=false&include-titles=true&include-chapter-numbers=false&include-verse-numbers=true&include-verse-spans=false`,
-      {
-        headers: {
-          'api-key': BIBLE_API_KEY!
-        }
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch verse');
-    }
-
-    const data = await response.json();
-    return data.data;
-  } catch (error) {
-    console.error('Error fetching Bible verse:', error);
-    // Return random blessing verse on error
-    const blessingVerses = [
-      {
-        id: 'num-6-24',
-        orgId: 'fallback',
-        bookId: 'NUM',
-        chapterIds: ['6'],
-        reference: 'Numbers 6:24-26',
-        content: 'The Lord bless you and keep you; The Lord make His face shine upon you, And be gracious to you; The Lord lift up His countenance upon you, And give you peace.',
-        copyright: 'NKJV'
-      },
-      {
-        id: 'jer-29-11',
-        orgId: 'fallback',
-        bookId: 'JER',
-        chapterIds: ['29'],
-        reference: 'Jeremiah 29:11',
-        content: 'For I know the thoughts that I think toward you, says the Lord, thoughts of peace and not of evil, to give you a future and a hope.',
-        copyright: 'NKJV'
-      },
-      {
-        id: 'rom-15-13',
-        orgId: 'fallback',
-        bookId: 'ROM',
-        chapterIds: ['15'],
-        reference: 'Romans 15:13',
-        content: 'Now may the God of hope fill you with all joy and peace in believing, that you may abound in hope by the power of the Holy Spirit.',
-        copyright: 'NKJV'
-      }
-    ];
-    
-    const randomIndex = Math.floor(Math.random() * blessingVerses.length);
-    return blessingVerses[randomIndex];
+const baseVerses = [
+  {
+    id: 'jer-29-11',
+    orgId: 'fallback',
+    bookId: 'JER',
+    chapterIds: ['29'],
+    reference: 'Jeremiah 29:11'
+  },
+  {
+    id: 'jhn-3-16',
+    orgId: 'fallback',
+    bookId: 'JHN',
+    chapterIds: ['3'],
+    reference: 'John 3:16'
+  },
+  {
+    id: 'psa-23-1',
+    orgId: 'fallback',
+    bookId: 'PSA',
+    chapterIds: ['23'],
+    reference: 'Psalm 23:1'
   }
+];
+
+export async function getRandomVerse(version: string = 'NKJV'): Promise<BibleVerse | null> {
+  const randomIndex = Math.floor(Math.random() * baseVerses.length);
+  const baseVerse = baseVerses[randomIndex];
+  const translations = verseTranslations[baseVerse.id as keyof typeof verseTranslations];
+  
+  return {
+    ...baseVerse,
+    content: translations[version as keyof typeof translations] || translations.NKJV,
+    copyright: version
+  };
+}
+
+export function getVerseInVersion(verseId: string, version: string): BibleVerse | null {
+  const baseVerse = baseVerses.find(v => v.id === verseId);
+  if (!baseVerse) return null;
+  
+  const translations = verseTranslations[verseId as keyof typeof verseTranslations];
+  if (!translations) return null;
+  
+  return {
+    ...baseVerse,
+    content: translations[version as keyof typeof translations] || translations.NKJV,
+    copyright: version
+  };
 }
 
 export async function searchVerses(query: string): Promise<any[]> {

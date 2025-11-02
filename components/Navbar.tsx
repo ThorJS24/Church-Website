@@ -98,13 +98,14 @@ export default function Navbar() {
             <div className="relative">
               <button
                 onClick={() => toggleDropdown('user')}
-                className="flex items-center space-x-2 px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 transition-colors bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600"
+                className="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 transition-colors bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 min-w-0 max-w-[120px] sm:max-w-none"
               >
-                <div className="w-6 h-6 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center">
+                <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center flex-shrink-0">
                   <User className="w-3 h-3" />
                 </div>
-                <span>{user.name}</span>
-                <ChevronDown className="w-3 h-3" />
+                <span className="truncate hidden sm:block">{user.name}</span>
+                <span className="truncate sm:hidden">{user.name.split(' ')[0]}</span>
+                <ChevronDown className="w-3 h-3 flex-shrink-0" />
               </button>
               
               <AnimatePresence>
@@ -138,13 +139,13 @@ export default function Navbar() {
             <>
               <button
                 onClick={() => setShowLoginModal(true)}
-                className="px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 transition-all duration-300 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 btn-touch"
+                className="px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 transition-all duration-300 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 btn-touch whitespace-nowrap"
               >
                 Login
               </button>
               <Link
                 href="/register"
-                className="px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 btn-touch"
+                className="px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 btn-touch whitespace-nowrap text-center min-w-[60px] sm:min-w-[80px]"
               >
                 Register
               </Link>
@@ -263,7 +264,7 @@ export default function Navbar() {
           </div>
 
           {/* Mobile menu button */}
-          <div className="lg:hidden flex items-center">
+          <div className="lg:hidden flex items-center ml-2">
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="p-2 rounded-md text-gray-700 dark:text-gray-300 hover:text-blue-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors btn-touch"
@@ -285,6 +286,28 @@ export default function Navbar() {
             className="lg:hidden bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mobile-menu"
           >
             <div className="px-4 py-6 space-y-4">
+              {/* Mobile Auth Buttons */}
+              {!user && (
+                <div className="flex flex-col space-y-2 pb-4 border-b border-gray-200 dark:border-gray-700">
+                  <button
+                    onClick={() => {
+                      setShowLoginModal(true);
+                      setIsOpen(false);
+                    }}
+                    className="w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 transition-colors rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 text-center"
+                  >
+                    Login
+                  </button>
+                  <Link
+                    href="/register"
+                    className="w-full px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-center"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Register
+                  </Link>
+                </div>
+              )}
+              
               {navigation.map((item) => (
                 <div key={item.name}>
                   {item.dropdown ? (

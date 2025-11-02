@@ -1,80 +1,74 @@
-import { createClient } from '@sanity/client';
-import { cache } from './performance';
+import { sanityFetch } from './sanity-fetch';
 
-// Server-side client for API routes
-const serverClient = createClient({
-  projectId: 'jon2drzn',
-  dataset: 'production',
-  useCdn: false,
-  apiVersion: '2024-01-01',
-  token: process.env.SANITY_API_TOKEN,
-  stega: {
-    enabled: false,
-  },
-});
-
-// Client-side fetch using API proxy
-async function fetchFromProxy(query: string, params: any = {}) {
-  const queryString = new URLSearchParams({
-    query,
-    ...(Object.keys(params).length > 0 && { params: JSON.stringify(params) })
-  }).toString();
-  
-  const response = await fetch(`/api/sanity-proxy?${queryString}`);
-  
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-  
-  return response.json();
+export async function fetchSanityData(query: string, params?: any) {
+  return await sanityFetch(query, params);
 }
 
-// Optimized fetch with caching
-export async function fetchSanityData(query: string, params: any = {}, ttl: number = 300000) {
-  const cacheKey = `sanity:${query}:${JSON.stringify(params)}`;
-  
-  // Check cache first
-  const cached = cache.get(cacheKey);
-  if (cached) {
-    return cached;
-  }
-
+export async function batchFetchSanityData(queries: Array<{ key: string; query: string; params?: any }>) {
   try {
-    // Use proxy for client-side requests, direct client for server-side
-    const data = typeof window !== 'undefined' 
-      ? await fetchFromProxy(query, params)
-      : await serverClient.fetch(query, params);
+    const results = await Promise.allSettled(
+      queries.map(({ query, params }) => sanityFetch(query, params))
+    );
     
-    cache.set(cacheKey, data, ttl);
+    const data: Record<string, any> = {};
+    queries.forEach(({ key }, index) => {
+      const result = results[index];
+      data[key] = result.status === 'fulfilled' ? result.value : null;
+    });
+    
     return data;
   } catch (error) {
-    console.error('Sanity fetch error:', error);
-    throw error;
+    console.error('Batch fetch error:', error);
+    // Return fallback data structure
+    const fallbackData: Record<string, any> = {};
+    queries.forEach(({ key }) => {
+      fallbackData[key] = null;
+    });
+    return fallbackData;
   }
 }
 
-// Batch fetch multiple queries
-export async function batchFetchSanityData(queries: Array<{ query: string; params?: any; key: string }>) {
-  const promises = queries.map(async ({ query, params, key }) => {
-    try {
-      const data = await fetchSanityData(query, params);
-      return { key, data, error: null };
-    } catch (error) {
-      return { key, data: null, error };
-    }
-  });
-
-  const results = await Promise.allSettled(promises);
-  return results.reduce((acc, result, index) => {
-    const { key } = queries[index];
-    if (result.status === 'fulfilled') {
-      acc[key] = result.value.data;
-    } else {
-      acc[key] = null;
-      console.error(`Failed to fetch ${key}:`, result.reason);
-    }
-    return acc;
-  }, {} as Record<string, any>);
+// Helper function to get site settings with fallback
+export async function getSiteSettings() {
+  const query = `*[_type == "siteSettings"][0] {
+    churchName,
+    tagline,
+    statistics,
+    address,
+    phoneNumber,
+    email,
+    youtubeChannelUrl,
+    facebookUrl,
+    instagramUrl,
+    googleMapsUrl,
+    whatsappGroupUrl
+  }`;
+  
+  const settings = await sanityFetch(query);
+  
+  // Return fallback if no settings found
+  if (!settings) {
+    return {
+      churchName: 'Salem Primitive Baptist Church',
+      tagline: 'A place where faith meets community, and hope comes alive',
+      address: '223/838, Near north post office, Kannangurichi main road, Chinnathirupathi, Salem TN, PIN- 636008',
+      phoneNumber: '+91 94871 62485',
+      email: 'contact@salemprimitivebaptist.org',
+      statistics: {
+        members: '500+',
+        yearsServing: '25+',
+        weeklyServices: '3',
+        ministries: '15+'
+      }
+    };
+  }
+  
+  return settings;
 }
 
-export { serverClient as client };
+// Helper function to get announcements with fallback
+export async function getAnnouncements(limit = 3) {
+  const query = `*[_type == "announcement"] | order(_createdAt desc)[0...${limit}]`;
+  const announcements = await sanityFetch(query);
+  return announcements || [];
+}

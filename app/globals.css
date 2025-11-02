@@ -144,3 +144,113 @@ img {
   contain: layout style;
   content-visibility: auto;
 }
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Responsive Button Fixes */
+.btn-touch {
+  min-height: 44px;
+  min-width: 44px;
+  touch-action: manipulation;
+}
+
+.btn-primary, .btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  min-height: 48px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  color: white;
+  border: none;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+}
+
+.btn-outline {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.btn-outline:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Mobile Responsive Adjustments */
+@media (max-width: 640px) {
+  .btn-primary, .btn-outline {
+    padding: 10px 20px;
+    font-size: 14px;
+    min-height: 44px;
+  }
+  
+  .mobile-menu {
+    max-height: calc(100vh - 64px);
+    overflow-y: auto;
+  }
+}
+
+/* Dynamic button sizing */
+.dynamic-btn {
+  padding: 8px 16px;
+  font-size: clamp(12px, 2.5vw, 14px);
+  min-width: fit-content;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 480px) {
+  .dynamic-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;500;600&family=Noto+Sans+Tamil:wght@400;500;600&display=swap');
+
+.font-hebrew {
+  font-family: 'Noto Sans Hebrew', 'SBL Hebrew', 'Times New Roman', serif;
+  direction: rtl;
+  text-align: right;
+}
+
+.font-tamil {
+  font-family: 'Noto Sans Tamil', sans-serif;
+}
+
+/* Calendar responsive fixes */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .calendar-grid {
+    grid-template-columns: repeat(7, minmax(80px, 1fr));
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .calendar-grid {
+    grid-template-columns: repeat(7, minmax(60px, 1fr));
+    gap: 4px;
+  }
+}

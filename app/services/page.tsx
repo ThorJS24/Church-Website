@@ -336,7 +336,9 @@ export default function ServicesPage() {
             >
               <Video className="w-16 h-16 text-blue-600 mx-auto mb-4" />
               <p className="text-xl font-bold mb-2 text-gray-900 dark:text-white">Live Stream Available</p>
-              <small className="text-gray-600 dark:text-gray-300">Sundays at 10:00 AM</small>
+              <small className="text-gray-600 dark:text-gray-300">
+                {services.length > 0 ? `Next service: ${services[0]?.time}` : 'Check schedule for times'}
+              </small>
             </motion.div>
           </div>
         </div>

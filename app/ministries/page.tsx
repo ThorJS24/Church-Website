@@ -245,9 +245,9 @@ export default function MinistriesPage() {
               <BookOpen className="w-16 h-16 text-blue-600 mx-auto mb-4" />
               <h3 className="text-2xl font-bold mb-4">Grow in Faith</h3>
               <p className="text-gray-600 mb-6">Join small groups, Bible studies, and discipleship programs to deepen your relationship with God.</p>
-              <a href="https://chat.whatsapp.com/1234567890" target="_blank" rel="noopener noreferrer" className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+              <Link href="/contact" className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors inline-block">
                 Join a Group
-              </a>
+              </Link>
             </motion.div>
 
             <motion.div 
@@ -259,9 +259,9 @@ export default function MinistriesPage() {
               <Heart className="w-16 h-16 text-blue-600 mx-auto mb-4" />
               <h3 className="text-2xl font-bold mb-4">Build Community</h3>
               <p className="text-gray-600 mb-6">Connect with others through fellowship events, ministry teams, and community service projects.</p>
-              <a href="https://chat.whatsapp.com/1234567890" target="_blank" rel="noopener noreferrer" className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+              <Link href="/contact" className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors inline-block">
                 Get Connected
-              </a>
+              </Link>
             </motion.div>
           </div>
         </div>

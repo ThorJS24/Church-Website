@@ -107,9 +107,12 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{
           __html: `
             (function() {
-              const theme = localStorage.getItem('theme') || 'light';
+              const theme = localStorage.getItem('theme');
               if (theme === 'dark') {
                 document.documentElement.classList.add('dark');
+              } else {
+                document.documentElement.classList.remove('dark');
+                if (!theme) localStorage.setItem('theme', 'light');
               }
             })()
           `

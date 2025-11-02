@@ -7,10 +7,11 @@ import { sanityFetch } from '@/lib/sanity-fetch'
 import PrivacyDialog from './PrivacyDialog'
 
 interface SiteSettings {
-  churchName: string;
-  address: string;
-  phoneNumber: string;
-  email: string;
+  churchName?: string;
+  tagline?: string;
+  address?: string;
+  phoneNumber?: string;
+  email?: string;
   facebookUrl?: string;
   instagramUrl?: string;
   youtubeChannelUrl?: string;
@@ -25,34 +26,19 @@ const Footer = () => {
     const fetchSettings = async () => {
       try {
         const data = await sanityFetch(`*[_type == "siteSettings"][0] {
-          title,
-          description,
+          churchName,
+          tagline,
           address,
-          phone,
+          phoneNumber,
           email,
-          "socialMedia": socialMedia {
-            facebook,
-            youtube
-          }
+          facebookUrl,
+          instagramUrl,
+          youtubeChannelUrl,
+          whatsappGroupUrl
         }`);
-        if (data) {
-          setSettings({
-            churchName: data.title || 'Salem Primitive Baptist Church',
-            address: data.address || '123 Church Street\nYour City, State 12345',
-            phoneNumber: data.phone || '(555) 123-4567',
-            email: data.email || 'info@salemprimitivebaptist.org',
-            facebookUrl: data.socialMedia?.facebook,
-            youtubeChannelUrl: data.socialMedia?.youtube
-          });
-        }
+        setSettings(data || {});
       } catch (error) {
-        console.log('Using fallback settings');
-        setSettings({
-          churchName: 'Salem Primitive Baptist Church',
-          address: '123 Church Street\nYour City, State 12345',
-          phoneNumber: '(555) 123-4567',
-          email: 'info@salemprimitivebaptist.org'
-        });
+        console.error('Footer settings fetch error:', error);
       }
     };
     fetchSettings();
@@ -67,11 +53,11 @@ const Footer = () => {
                 <Church className="text-white w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-xl font-bold">{settings?.churchName || 'Salem Primitive Baptist Church'}</h3>
+                <h3 className="text-xl font-bold">{settings?.churchName}</h3>
               </div>
             </div>
             <p className="text-gray-400 mb-4">
-              A place where faith meets community, and hope comes alive.
+              {settings?.tagline || 'A place where faith meets community, and hope comes alive.'}
             </p>
             <div className="flex space-x-4">
               {settings?.facebookUrl && (
@@ -143,7 +129,7 @@ const Footer = () => {
 
         <div className="border-t border-gray-800 mt-8 pt-8">
           <div className="flex flex-col sm:flex-row justify-between items-center text-gray-400 text-sm">
-            <p>&copy; 2024 {settings?.churchName || 'Salem Primitive Baptist Church'}. All rights reserved.</p>
+            <p>&copy; 2024 {settings?.churchName}. All rights reserved.</p>
             <div className="flex space-x-4 mt-2 sm:mt-0">
               <button 
                 onClick={() => setShowPrivacyDialog(true)}

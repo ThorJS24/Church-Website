@@ -13,6 +13,7 @@ const categories = ['all', 'healing', 'guidance', 'thanksgiving', 'family', 'wor
 export default function PrayerPage() {
   const [activeFilter, setActiveFilter] = useState('all');
   const [showModal, setShowModal] = useState(false);
+  const [prayerStats, setPrayerStats] = useState({ requests: 0, people: 0, prayers: 0 });
   const [formData, setFormData] = useState({
     title: '',
     category: 'general',
@@ -22,6 +23,31 @@ export default function PrayerPage() {
     authorName: ''
   });
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success'>('idle');
+
+  useEffect(() => {
+    fetchPrayerStats();
+  }, []);
+
+  const fetchPrayerStats = async () => {
+    try {
+      const stats = await sanityFetch(`*[_type == "siteSettings"][0] {
+        prayerStats {
+          totalRequests,
+          totalPeople,
+          totalPrayers
+        }
+      }`);
+      if (stats?.prayerStats) {
+        setPrayerStats({
+          requests: stats.prayerStats.totalRequests || 0,
+          people: stats.prayerStats.totalPeople || 0,
+          prayers: stats.prayerStats.totalPrayers || 0
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching prayer stats:', error);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -154,7 +180,7 @@ export default function PrayerPage() {
                   <Heart className="w-12 h-12 mx-auto mb-4 text-yellow-300" />
                 </motion.div>
                 <SacredText className="text-4xl font-bold mb-2 text-white">
-                  <div>150+</div>
+                  <div>{prayerStats.requests > 0 ? `${prayerStats.requests}+` : '∞'}</div>
                 </SacredText>
                 <div className="text-yellow-200">Prayer Requests</div>
               </motion.div>
@@ -172,7 +198,7 @@ export default function PrayerPage() {
                   <Users className="w-12 h-12 mx-auto mb-4 text-yellow-300" />
                 </motion.div>
                 <SacredText className="text-4xl font-bold mb-2 text-white">
-                  <div>500+</div>
+                  <div>{prayerStats.people > 0 ? `${prayerStats.people}+` : '∞'}</div>
                 </SacredText>
                 <div className="text-yellow-200">People Praying</div>
               </motion.div>
@@ -190,7 +216,7 @@ export default function PrayerPage() {
                   <Heart className="w-12 h-12 mx-auto mb-4 text-yellow-300" />
                 </motion.div>
                 <SacredText className="text-4xl font-bold mb-2 text-white">
-                  <div>1000+</div>
+                  <div>{prayerStats.prayers > 0 ? `${prayerStats.prayers}+` : '∞'}</div>
                 </SacredText>
                 <div className="text-yellow-200">Prayers Offered</div>
               </motion.div>

@@ -54,8 +54,9 @@ interface Event {
 
 export default function EventsPage() {
   const [events, setEvents] = useState<Event[]>([]);
+  const [services, setServices] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedFilters, setSelectedFilters] = useState<string[]>(['all']);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -66,41 +67,78 @@ export default function EventsPage() {
   const fetchEvents = async () => {
     setLoading(true);
     try {
-      const eventsData = await sanityFetch(`*[_type == "event" && isPublic == true] | order(featured desc, startDate asc) {
-        _id,
-        title,
-        subtitle,
-        description,
-        shortDescription,
-        startDate,
-        endDate,
-        location,
-        address,
-        category,
-        image {
-          asset-> {
-            url
-          }
-        },
-        organizer-> {
-          name
-        },
-        contactEmail,
-        contactPhone,
-        registrationRequired,
-        registrationUrl,
-        maxAttendees,
-        cost,
-        tags,
-        featured,
-        recurring,
-        recurrencePattern,
-        isPublic
-      }`);
+      console.log('Fetching events from Sanity...');
+      const [eventsData, servicesData] = await Promise.all([
+        sanityFetch(`*[_type == "event"] {
+          _id,
+          title,
+          subtitle,
+          description,
+          shortDescription,
+          startDate,
+          endDate,
+          location,
+          address,
+          category,
+          image {
+            asset-> {
+              url
+            }
+          },
+          organizer-> {
+            name
+          },
+          contactEmail,
+          contactPhone,
+          registrationRequired,
+          registrationUrl,
+          maxAttendees,
+          cost,
+          tags,
+          featured,
+          recurring,
+          recurrencePattern,
+          isPublic
+        }`),
+        sanityFetch(`*[_type == "service"] {
+          _id,
+          title,
+          time,
+          location,
+          description
+        }`)
+      ]);
       
-      if (eventsData) {
-        setEvents(eventsData);
+      console.log('Events from Sanity:', eventsData);
+      let allEvents = eventsData || [];
+      if (servicesData) {
+        setServices(servicesData);
+        // Convert services to recurring events
+        const serviceEvents = [];
+        servicesData.forEach(service => {
+          const serviceDates = getServiceDates(service.time);
+          serviceDates.forEach((date, index) => {
+            serviceEvents.push({
+              _id: `service-${service._id}-${index}`,
+              title: service.title,
+              description: service.description,
+              shortDescription: service.description,
+              startDate: date,
+              location: service.location,
+              category: 'regular-service',
+              recurring: true,
+              featured: false,
+              isPublic: true,
+              cost: 0,
+              registrationRequired: false
+            });
+          });
+        });
+        allEvents = [...allEvents, ...serviceEvents];
       }
+      
+      console.log('Final events array:', allEvents);
+      setEvents(allEvents);
     } catch (error) {
       console.error('Error fetching events:', error);
     } finally {
@@ -108,17 +146,82 @@ export default function EventsPage() {
     }
   };
 
+  const getServiceDates = (time: string, count = 8) => {
+    const dates = [];
+    const now = new Date();
+    
+    if (!time || !time.includes(':')) {
+      console.error('Invalid time format:', time);
+      return [];
+    }
+    
+    const [hours, minutes] = time.split(':').map(Number);
+    
+    if (isNaN(hours) || isNaN(minutes)) {
+      console.error('Invalid time values:', time);
+      return [];
+    }
+    
+    // Find next Sunday
+    let nextSunday = new Date(now);
+    nextSunday.setDate(now.getDate() + (7 - now.getDay()) % 7);
+    if (nextSunday.getDay() === 0 && nextSunday < now) {
+      nextSunday.setDate(nextSunday.getDate() + 7);
+    }
+    
+    // Generate multiple Sunday dates
+    for (let i = 0; i < count; i++) {
+      const serviceDate = new Date(nextSunday);
+      serviceDate.setDate(nextSunday.getDate() + (i * 7));
+      serviceDate.setHours(hours, minutes, 0, 0);
+      
+      if (!isNaN(serviceDate.getTime())) {
+        dates.push(serviceDate.toISOString());
+      }
+    }
+    
+    return dates;
+  };
+
   const filteredEvents = events.filter(event => {
     const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       event.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (event.shortDescription && event.shortDescription.toLowerCase().includes(searchTerm.toLowerCase()));
     
-    const matchesCategory = selectedCategory === 'all' || event.category === selectedCategory;
+    const matchesFilters = selectedFilters.includes('all') || 
+      selectedFilters.some(filter => event.category === filter);
     
-    return matchesSearch && matchesCategory;
+    return matchesSearch && matchesFilters;
   });
 
-  const categories = ['all', ...Array.from(new Set(events.map(event => event.category)))];
+  const categories = [
+    { id: 'all', label: 'All Events', color: 'bg-gray-500' },
+    { id: 'regular-service', label: 'Regular Services', color: 'bg-blue-500' },
+    { id: 'special', label: 'Special Events', color: 'bg-purple-500' },
+    { id: 'ministry', label: 'Ministry Events', color: 'bg-green-500' },
+    { id: 'community', label: 'Community', color: 'bg-orange-500' },
+    { id: 'youth', label: 'Youth Events', color: 'bg-pink-500' },
+    { id: 'worship', label: 'Worship Events', color: 'bg-indigo-500' }
+  ];
+
+  const getCategoryColor = (category: string) => {
+    const cat = categories.find(c => c.id === category);
+    return cat?.color || 'bg-gray-500';
+  };
+
+  const handleFilterChange = (categoryId: string) => {
+    if (categoryId === 'all') {
+      setSelectedFilters(['all']);
+    } else {
+      const newFilters = selectedFilters.includes('all') 
+        ? [categoryId]
+        : selectedFilters.includes(categoryId)
+          ? selectedFilters.filter(f => f !== categoryId)
+          : [...selectedFilters.filter(f => f !== 'all'), categoryId];
+      
+      setSelectedFilters(newFilters.length === 0 ? ['all'] : newFilters);
+    }
+  };
 
   if (loading) {
     return (
@@ -145,6 +248,7 @@ export default function EventsPage() {
 
         {/* Interactive Calendar */}
         <div className="mb-12">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 text-center">Event Calendar</h2>
           <InteractiveCalendar />
         </div>
 
@@ -160,17 +264,31 @@ export default function EventsPage() {
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
             </div>
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            >
+          </div>
+          
+          {/* Filter Checkboxes */}
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Filter by Category:</h3>
+            <div className="flex flex-wrap gap-3">
               {categories.map(category => (
-                <option key={category} value={category}>
-                  {category === 'all' ? 'All Categories' : category.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-                </option>
+                <label key={category.id} className="flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={selectedFilters.includes(category.id)}
+                    onChange={() => handleFilterChange(category.id)}
+                    className="sr-only"
+                  />
+                  <div className={`flex items-center px-3 py-2 rounded-full text-sm font-medium transition-all ${
+                    selectedFilters.includes(category.id)
+                      ? `${category.color} text-white shadow-md`
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  }`}>
+                    <div className={`w-3 h-3 rounded-full mr-2 ${category.color}`}></div>
+                    {category.label}
+                  </div>
+                </label>
               ))}
-            </select>
+            </div>
           </div>
         </div>
 
@@ -206,8 +324,8 @@ export default function EventsPage() {
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
-                      <div className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium">
-                        {new Date(event.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      <div className={`${getCategoryColor(event.category)} text-white px-3 py-1 rounded-full text-sm font-medium`}>
+                        {event.category === 'regular-service' ? 'Weekly' : new Date(event.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                       </div>
                       {event.featured && (
                         <Star className="w-4 h-4 text-yellow-500 fill-current" />
@@ -251,8 +369,8 @@ export default function EventsPage() {
                     {event.category && (
                       <div className="flex items-center">
                         <Tag className="mr-2 w-4 h-4" />
-                        <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs">
-                          {event.category.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                        <span className={`px-2 py-1 ${getCategoryColor(event.category)} text-white rounded text-xs`}>
+                          {categories.find(c => c.id === event.category)?.label || event.category}
                         </span>
                       </div>
                     )}
