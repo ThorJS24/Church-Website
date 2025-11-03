@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     const results: any = {};
     const searchQuery = `*[_type in ["sermon", "event", "announcement", "galleryImage"] && (title match "${query}*" || description match "${query}*")] | order(_createdAt desc)[0...${limit}]`;
     
-    const searchResults = await fetchSanityData(searchQuery, {}, 60000); // 1 minute cache
+    const searchResults = await fetchSanityData(searchQuery, {}); // cached
     
     // Group results by type
     results.sermons = searchResults.filter((item: any) => item._type === 'sermon');
