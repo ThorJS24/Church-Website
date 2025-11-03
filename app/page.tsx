@@ -360,6 +360,100 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Prayer Statistics Section */}
+      <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-br from-indigo-600 via-purple-600 to-blue-700 text-white">
+        <div className="container-responsive">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold mb-4">Prayer Community</h2>
+            <p className="text-indigo-100">Join our growing prayer community</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300"
+            >
+              <Heart className="w-12 h-12 mx-auto mb-4 text-yellow-300" />
+              <div className="text-3xl font-bold mb-2">30</div>
+              <div className="text-indigo-100">Total Prayer Requests</div>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300"
+            >
+              <Users className="w-12 h-12 mx-auto mb-4 text-yellow-300" />
+              <div className="text-3xl font-bold mb-2">10</div>
+              <div className="text-indigo-100">Total People Praying</div>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300"
+            >
+              <Heart className="w-12 h-12 mx-auto mb-4 text-yellow-300" />
+              <div className="text-3xl font-bold mb-2">100</div>
+              <div className="text-indigo-100">Total Prayers Offered</div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Giving Impact Section */}
+      <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-br from-orange-500 via-amber-500 to-yellow-600 text-white">
+        <div className="container-responsive">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold mb-4">Giving Impact</h2>
+            <p className="text-orange-100">See how your generosity makes a difference</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300"
+            >
+              <Heart className="w-12 h-12 mx-auto mb-4 text-white" />
+              <div className="text-2xl font-bold mb-2">₹20,75,000</div>
+              <div className="text-orange-100">Community Outreach</div>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300"
+            >
+              <Users className="w-12 h-12 mx-auto mb-4 text-white" />
+              <div className="text-2xl font-bold mb-2">₹12,45,000</div>
+              <div className="text-orange-100">Global Missions</div>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300"
+            >
+              <Church className="w-12 h-12 mx-auto mb-4 text-white" />
+              <div className="text-2xl font-bold mb-2">₹9,96,000</div>
+              <div className="text-orange-100">Education Ministry</div>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300"
+            >
+              <Users className="w-12 h-12 mx-auto mb-4 text-white" />
+              <div className="text-2xl font-bold mb-2">₹6,64,000</div>
+              <div className="text-orange-100">Youth Programs</div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
       {/* Location Section */}
       <section className="py-8 sm:py-12 lg:py-16 bg-white dark:bg-gray-800 mb-8 sm:mb-12 lg:mb-16">
         <div className="container-responsive">

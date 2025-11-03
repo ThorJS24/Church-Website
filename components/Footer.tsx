@@ -16,6 +16,7 @@ interface SiteSettings {
   instagramUrl?: string;
   youtubeChannelUrl?: string;
   whatsappGroupUrl?: string;
+
 }
 
 const Footer = () => {
@@ -34,7 +35,8 @@ const Footer = () => {
           facebookUrl,
           instagramUrl,
           youtubeChannelUrl,
-          whatsappGroupUrl
+          whatsappGroupUrl,
+
         }`);
         setSettings(data || {});
       } catch (error) {
@@ -123,6 +125,8 @@ const Footer = () => {
               {settings?.email && (
                 <p>{settings.email}</p>
               )}
+              
+
             </div>
           </div>
         </div>

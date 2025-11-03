@@ -215,6 +215,8 @@ export default function UnifiedContactForm() {
                   <input
                     type="text"
                     required
+                    minLength={2}
+                    maxLength={100}
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -253,6 +255,8 @@ export default function UnifiedContactForm() {
                   />
                   <input
                     type="tel"
+                    minLength={10}
+                    maxLength={15}
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, '') })}
                     className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-r-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -267,6 +271,7 @@ export default function UnifiedContactForm() {
                 </label>
                 <textarea
                   rows={2}
+                  maxLength={500}
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none"
@@ -1050,6 +1055,8 @@ export default function UnifiedContactForm() {
                 <textarea
                   required
                   rows={6}
+                  minLength={10}
+                  maxLength={2000}
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none"
@@ -1196,6 +1203,28 @@ export default function UnifiedContactForm() {
           </form>
         )}
       </motion.div>
+      
+      {/* Working Hours Display */}
+      <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 border border-blue-200 dark:border-blue-800">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 text-center">📞 Office Hours</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
+            <div className="font-medium text-gray-900 dark:text-white">Monday - Friday</div>
+            <div className="text-blue-600 dark:text-blue-400 font-semibold">9:00 AM - 5:00 PM</div>
+          </div>
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
+            <div className="font-medium text-gray-900 dark:text-white">Saturday</div>
+            <div className="text-blue-600 dark:text-blue-400 font-semibold">6:00 PM - 8:00 PM</div>
+          </div>
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
+            <div className="font-medium text-gray-900 dark:text-white">Sunday</div>
+            <div className="text-gray-500 dark:text-gray-400">Closed</div>
+          </div>
+        </div>
+        <p className="text-sm text-gray-600 dark:text-gray-400 text-center mt-4">
+          For urgent matters outside office hours, please mark your message as "Emergency" and we'll respond immediately.
+        </p>
+      </div>
     </div>
   );
 }

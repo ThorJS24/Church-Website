@@ -41,7 +41,7 @@ const navigation = [
   { name: 'Community', href: '/community' },
   { name: 'Gallery', href: '/gallery' },
   { name: 'Give', href: '/give' },
-  { name: 'Contact', href: '/contact/forms' }
+  { name: 'Contact', href: '/contact' }
 ];
 
 export default function Navbar() {
