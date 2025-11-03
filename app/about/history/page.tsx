@@ -66,7 +66,7 @@ export default function HistoryPage() {
     }
   }, [isAutoPlay, filteredEvents.length]);
 
-  const categories = ['all', ...new Set(timelineEvents.map(event => event.category))];
+  const categories = ['all', ...Array.from(new Set(timelineEvents.map(event => event.category)))];
   
   const stats = {
     totalEvents: timelineEvents.length,
