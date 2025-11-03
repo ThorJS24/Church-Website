@@ -114,7 +114,7 @@ export default function EventsPage() {
       if (servicesData) {
         setServices(servicesData);
         // Convert services to recurring events
-        const serviceEvents = [];
+        const serviceEvents: Event[] = [];
         servicesData.forEach(service => {
           const serviceDates = getServiceDates(service.time);
           serviceDates.forEach((date, index) => {
