@@ -156,9 +156,9 @@ export default function BibleVerse() {
               const newVersion = e.target.value;
               setBibleVersion(newVersion);
               if (currentVerseId) {
-                const sameVerseNewVersion = getVerseInVersion(currentVerseId, newVersion);
-                if (sameVerseNewVersion) {
-                  setVerse(sameVerseNewVersion);
+                const newVerse = getVerseInVersion(currentVerseId, newVersion);
+                if (newVerse) {
+                  setVerse(newVerse);
                 }
               }
             }}
@@ -240,7 +240,7 @@ export default function BibleVerse() {
               <span>{copied ? 'Copied!' : 'Copy'}</span>
             </motion.button>
             
-            {navigator.share && (
+            {typeof window !== 'undefined' && typeof navigator?.share === 'function' && (
               <motion.button
                 onClick={shareVerse}
                 whileHover={{ scale: 1.05 }}

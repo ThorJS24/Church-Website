@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Heart, Users, X } from 'lucide-react';
 import PrayerEffects from '@/components/PrayerEffects';
@@ -30,6 +30,7 @@ export default function PrayerPage() {
 
   const fetchPrayerStats = async () => {
     try {
+      const { sanityFetch } = await import('@/lib/sanity-fetch');
       const stats = await sanityFetch(`*[_type == "siteSettings"][0] {
         prayerStats {
           totalRequests,

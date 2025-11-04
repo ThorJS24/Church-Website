@@ -61,10 +61,10 @@ export default function InteractiveCalendar() {
         }`)
       ]);
       
-      let allEvents = (eventsData || []).filter(event => event.startDate);
+      let allEvents = (eventsData || []).filter((event: any) => event.startDate);
       
       if (servicesData) {
-        const serviceEvents = [];
+        const serviceEvents: CalendarEvent[] = [];
         const currentMonth = currentDate.getMonth();
         const currentYear = currentDate.getFullYear();
         
@@ -77,7 +77,7 @@ export default function InteractiveCalendar() {
           for (let day = 1; day <= new Date(targetYear, adjustedMonth + 1, 0).getDate(); day++) {
             const date = new Date(targetYear, adjustedMonth, day);
             if (date.getDay() === 0) {
-              servicesData.forEach(service => {
+              servicesData.forEach((service: any) => {
                 if (!service.time || !service.time.includes(':')) return;
                 
                 const [hours, minutes] = service.time.split(':').map(Number);
@@ -103,7 +103,7 @@ export default function InteractiveCalendar() {
         allEvents = [...allEvents, ...serviceEvents];
       }
       
-      console.log('Calendar events with dates:', allEvents.slice(0, 3).map(e => ({ title: e.title, startDate: e.startDate })));
+      console.log('Calendar events with dates:', allEvents.slice(0, 3).map((e: any) => ({ title: e.title, startDate: e.startDate })));
       setEvents(allEvents);
     } catch (error) {
       console.error('Error fetching calendar events:', error);
@@ -234,7 +234,7 @@ export default function InteractiveCalendar() {
 
       {/* Calendar Grid */}
       <div className="p-6 bg-gradient-to-br from-blue-50 to-indigo-100 overflow-x-auto">
-        <div className="calendar-grid">
+        <div className="grid grid-cols-7 gap-2">
           {getDaysInMonth(currentDate).map((day, index) => {
             const dayEvents = day ? getEventsForDay(day) : [];
             const hasEvents = dayEvents.length > 0;
@@ -280,7 +280,7 @@ export default function InteractiveCalendar() {
                           }`}
                           title={`${new Date(event.startDate).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })} - ${event.title}`}
                           whileHover={{ scale: 1.02 }}
-                          onClick={(e) => {
+                          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                             e.stopPropagation();
                             setSelectedEvent(event);
                           }}
