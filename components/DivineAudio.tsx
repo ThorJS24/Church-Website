@@ -62,7 +62,7 @@ export default function DivineAudio({ showControls = true }: DivineAudioProps) {
           setIsPlaying(true);
         } else {
           console.log('No audioUrl found in response');
-          alert('Please upload an ambient audio file in Sanity CMS and mark it as active');
+          alert('Please add an ambient audio track (ambientAudio/current in Firestore) and mark it active');
         }
       } catch (error) {
         console.error('API Error:', error);
@@ -81,7 +81,9 @@ export default function DivineAudio({ showControls = true }: DivineAudioProps) {
   if (!showControls) return null;
 
   return (
-    <motion.div 
+    <motion.div
+      role="region"
+      aria-label="Ambient audio controls"
       className="fixed bottom-4 right-4 z-50 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full p-3 border border-yellow-200/50 dark:border-yellow-700/50 shadow-lg"
       initial={{ opacity: 0, scale: 0 }}
       animate={{ opacity: 1, scale: 1 }}

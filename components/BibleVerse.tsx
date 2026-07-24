@@ -142,9 +142,9 @@ export default function BibleVerse() {
             </motion.div>
           </div>
           <div>
-            <h3 className="text-xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+            <h2 className="text-xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
               ✨ Today's Divine Message
-            </h3>
+            </h2>
             <p className="text-sm text-amber-600/70 dark:text-amber-400/70">Blessed words for your soul</p>
           </div>
         </motion.div>
@@ -152,6 +152,7 @@ export default function BibleVerse() {
         <div className="flex items-center space-x-2">
           <select
             value={bibleVersion}
+            aria-label="Bible translation version"
             onChange={(e) => {
               const newVersion = e.target.value;
               setBibleVersion(newVersion);
@@ -175,6 +176,7 @@ export default function BibleVerse() {
             onClick={handleLike}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
+            aria-label={liked ? 'Unlike this verse' : 'Like this verse'}
             className={`p-2 rounded-full transition-all duration-300 ${liked ? 'bg-red-100 text-red-500' : 'bg-white/50 text-gray-600 hover:bg-white/80'}`}
           >
             <Heart className={`w-5 h-5 ${liked ? 'fill-current' : ''}`} />

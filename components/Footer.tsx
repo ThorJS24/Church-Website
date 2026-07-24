@@ -3,47 +3,17 @@
 import Link from 'next/link'
 import { Facebook, Instagram, Youtube, Twitter, Church, MessageCircle } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { sanityFetch } from '@/lib/sanity-fetch'
+import { getSiteSettings, SiteSettings } from '@/lib/content'
 import PrivacyDialog from './PrivacyDialog'
-
-interface SiteSettings {
-  churchName?: string;
-  tagline?: string;
-  address?: string;
-  phoneNumber?: string;
-  email?: string;
-  facebookUrl?: string;
-  instagramUrl?: string;
-  youtubeChannelUrl?: string;
-  whatsappGroupUrl?: string;
-
-}
 
 const Footer = () => {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [showPrivacyDialog, setShowPrivacyDialog] = useState(false);
 
   useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const data = await sanityFetch(`*[_type == "siteSettings"][0] {
-          churchName,
-          tagline,
-          address,
-          phoneNumber,
-          email,
-          facebookUrl,
-          instagramUrl,
-          youtubeChannelUrl,
-          whatsappGroupUrl,
-
-        }`);
-        setSettings(data || {});
-      } catch (error) {
-        console.error('Footer settings fetch error:', error);
-      }
-    };
-    fetchSettings();
+    getSiteSettings()
+      .then(data => setSettings(data || {}))
+      .catch(error => console.error('Footer settings fetch error:', error));
   }, []);
   return (
     <footer className="bg-gray-900 dark:bg-gray-950 text-white transition-colors">
@@ -55,11 +25,11 @@ const Footer = () => {
                 <Church className="text-white w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-xl font-bold">{settings?.churchName}</h3>
+                <h2 className="text-xl font-bold">{settings?.churchName || 'Salem Primitive Baptist Church'}</h2>
               </div>
             </div>
             <p className="text-gray-400 mb-4">
-              {settings?.tagline || 'A place where faith meets community, and hope comes alive.'}
+              {settings?.tagline || 'A place where faith meets community, and hope comes alive. Join us every Sunday at 9:30 AM.'}
             </p>
             <div className="flex space-x-4">
               {settings?.facebookUrl && (
@@ -94,9 +64,9 @@ const Footer = () => {
           </div>
 
           <div>
-            <h4 className="text-lg font-semibold mb-4 text-yellow-400">Quick Links</h4>
+            <h3 className="text-lg font-semibold mb-4 text-yellow-400">Quick Links</h3>
             <ul className="space-y-2">
-              <li><Link href="/about" className="text-gray-400 dark:text-gray-300 hover:text-white transition-colors">About Us</Link></li>
+              <li><Link href="/about/beliefs" className="text-gray-400 dark:text-gray-300 hover:text-white transition-colors">About Us</Link></li>
               <li><Link href="/services" className="text-gray-400 hover:text-white transition-colors">Services</Link></li>
               <li><Link href="/ministries" className="text-gray-400 hover:text-white transition-colors">Ministries</Link></li>
               <li><Link href="/events" className="text-gray-400 hover:text-white transition-colors">Events</Link></li>
@@ -104,7 +74,7 @@ const Footer = () => {
           </div>
 
           <div>
-            <h4 className="text-lg font-semibold mb-4 text-yellow-400">Resources</h4>
+            <h3 className="text-lg font-semibold mb-4 text-yellow-400">Resources</h3>
             <ul className="space-y-2">
               <li><Link href="/sermons" className="text-gray-400 hover:text-white transition-colors">Sermons</Link></li>
               <li><Link href="/prayer" className="text-gray-400 hover:text-white transition-colors">Prayer</Link></li>
@@ -114,26 +84,24 @@ const Footer = () => {
           </div>
 
           <div>
-            <h4 className="text-lg font-semibold mb-4 text-yellow-400">Contact Info</h4>
+            <h3 className="text-lg font-semibold mb-4 text-yellow-400">Contact Info</h3>
             <div className="space-y-1 text-gray-400 text-sm">
-              {settings?.address && (
-                <p className="whitespace-pre-line">{settings.address}</p>
-              )}
-              {settings?.phoneNumber && (
-                <p className="pt-2">{settings.phoneNumber}</p>
-              )}
-              {settings?.email && (
-                <p>{settings.email}</p>
-              )}
-              
-
+              <p className="whitespace-pre-line">
+                {settings?.address || '223/838, Near north post office,\nKannangurichi main road, Chinnathirupathi,\nSalem TN, PIN- 636008'}
+              </p>
+              <p className="pt-2">
+                {settings?.phoneNumber || '+91 94871 62485'}
+              </p>
+              <p>
+                {settings?.email || 'contact@salempbc.in'}
+              </p>
             </div>
           </div>
         </div>
 
         <div className="border-t border-gray-800 mt-8 pt-8">
           <div className="flex flex-col sm:flex-row justify-between items-center text-gray-400 text-sm">
-            <p>&copy; 2024 {settings?.churchName}. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} {settings?.churchName || 'Salem Primitive Baptist Church'}. All rights reserved.</p>
             <div className="flex space-x-4 mt-2 sm:mt-0">
               <button 
                 onClick={() => setShowPrivacyDialog(true)}

@@ -57,6 +57,8 @@ export default function PWAInstallPrompt() {
     <AnimatePresence>
       {showPrompt && (
         <motion.div
+          role="region"
+          aria-label="Install app prompt"
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 100, opacity: 0 }}

@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Mail, Lock, Eye, EyeOff, User, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -12,6 +13,8 @@ interface LoginModalProps {
 }
 
 export default function EnhancedLoginModal({ isOpen, onClose, onLogin }: LoginModalProps) {
+  const modalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(isOpen, onClose, modalRef);
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -61,6 +64,11 @@ export default function EnhancedLoginModal({ isOpen, onClose, onLogin }: LoginMo
     <AnimatePresence>
       <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
         <motion.div
+          ref={modalRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="login-modal-title"
+          tabIndex={-1}
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -68,7 +76,7 @@ export default function EnhancedLoginModal({ isOpen, onClose, onLogin }: LoginMo
         >
           <div className="p-8">
             <div className="flex justify-between items-center mb-8">
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+              <h2 id="login-modal-title" className="text-3xl font-bold text-gray-900 dark:text-white">
                 {isLogin ? 'Welcome Back' : 'Join Our Community'}
               </h2>
               <button

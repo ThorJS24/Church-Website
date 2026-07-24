@@ -95,8 +95,10 @@ export default function RegisterPage() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="relative">
+            <label htmlFor="name" className="sr-only">Full Name</label>
             <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
+              id="name"
               type="text"
               placeholder="Full Name"
               value={formData.name}
@@ -107,8 +109,10 @@ export default function RegisterPage() {
           </div>
 
           <div className="relative">
+            <label htmlFor="email" className="sr-only">Email Address</label>
             <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
+              id="email"
               type="email"
               placeholder="Email Address"
               value={formData.email}
@@ -119,7 +123,9 @@ export default function RegisterPage() {
           </div>
 
           <div className="relative">
+            <label htmlFor="password" className="sr-only">Password</label>
             <input
+              id="password"
               type={showPassword ? 'text' : 'password'}
               placeholder="Password"
               value={formData.password}
@@ -130,6 +136,7 @@ export default function RegisterPage() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
               className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
             >
               {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -137,7 +144,9 @@ export default function RegisterPage() {
           </div>
 
           <div className="relative">
+            <label htmlFor="confirmPassword" className="sr-only">Confirm Password</label>
             <input
+              id="confirmPassword"
               type={showPassword ? 'text' : 'password'}
               placeholder="Confirm Password"
               value={formData.confirmPassword}

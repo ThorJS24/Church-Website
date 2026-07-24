@@ -1,32 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, Mail, Phone, Calendar, Award, Heart, BookOpen, X } from 'lucide-react';
-import { sanityFetch } from '@/lib/sanity-fetch';
+import { getPastors, Pastor } from '@/lib/content';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 import Image from 'next/image';
-
-interface Pastor {
-  _id: string;
-  name: string;
-  title: string;
-  bio: any;
-  image?: {
-    asset: {
-      url: string;
-    };
-  };
-  email?: string;
-  phone?: string;
-  yearsOfService?: number;
-  ordainedDate?: string;
-  specialties?: string[];
-}
 
 export default function PastorsPage() {
   const [pastors, setPastors] = useState<Pastor[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPastor, setSelectedPastor] = useState<Pastor | null>(null);
+  const pastorModalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(!!selectedPastor, () => setSelectedPastor(null), pastorModalRef);
 
   useEffect(() => {
     fetchPastors();
@@ -35,23 +21,8 @@ export default function PastorsPage() {
   const fetchPastors = async () => {
     setLoading(true);
     try {
-      const pastorsData = await sanityFetch(`*[_type == "pastor"] {
-        _id,
-        name,
-        title,
-        bio,
-        image {
-          asset-> {
-            url
-          }
-        },
-        email,
-        phone,
-        yearsOfService,
-        ordainedDate,
-        specialties
-      }`);
-      
+      const pastorsData = await getPastors();
+
       if (pastorsData) {
         // Sort by hierarchy based on title
         const hierarchyOrder = {
@@ -159,9 +130,9 @@ export default function PastorsPage() {
             className="text-center py-20 bg-white dark:bg-gray-800 rounded-2xl shadow-xl"
           >
             <User className="mx-auto w-20 h-20 text-gray-300 mb-6" />
-            <h3 className="text-2xl font-semibold text-gray-600 dark:text-gray-300 mb-4">
+            <h2 className="text-2xl font-semibold text-gray-600 dark:text-gray-300 mb-4">
               No pastoral information available
-            </h3>
+            </h2>
             <p className="text-gray-500 dark:text-gray-400 text-lg">
               Please check back soon for updates about our pastoral team.
             </p>
@@ -170,7 +141,7 @@ export default function PastorsPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {pastors.map((pastor, index) => (
               <motion.div
-                key={pastor._id}
+                key={pastor.id}
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1, duration: 0.6 }}
@@ -178,11 +149,14 @@ export default function PastorsPage() {
               >
                 <div className="p-6">
                   <div className="flex items-center mb-4">
-                    {pastor.image?.asset?.url ? (
-                      <img
-                        src={pastor.image.asset.url}
+                    {pastor.imageUrl ? (
+                      <Image
+                        src={pastor.imageUrl}
                         alt={pastor.name}
+                        width={64}
+                        height={64}
                         className="w-16 h-16 rounded-full object-cover mr-4"
+                        sizes="64px"
                       />
                     ) : (
                       <div className="w-16 h-16 bg-gray-200 dark:bg-gray-600 rounded-full flex items-center justify-center mr-4">
@@ -232,6 +206,11 @@ export default function PastorsPage() {
             onClick={() => setSelectedPastor(null)}
           >
             <motion.div
+              ref={pastorModalRef}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="pastor-modal-title"
+              tabIndex={-1}
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
@@ -239,7 +218,7 @@ export default function PastorsPage() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{selectedPastor.name}</h2>
+                <h2 id="pastor-modal-title" className="text-2xl font-bold text-gray-900 dark:text-white">{selectedPastor.name}</h2>
                 <button onClick={() => setSelectedPastor(null)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full">
                   <X className="w-6 h-6" />
                 </button>
@@ -247,8 +226,16 @@ export default function PastorsPage() {
               
               <div className="p-6">
                 <div className="mb-8">
-                  {selectedPastor.image?.asset?.url ? (
-                    <img src={selectedPastor.image.asset.url} alt={selectedPastor.name} className="w-full aspect-video object-cover rounded-lg" />
+                  {selectedPastor.imageUrl ? (
+                    <Image
+                      src={selectedPastor.imageUrl}
+                      alt={selectedPastor.name} 
+                      width={800}
+                      height={450}
+                      className="w-full aspect-video object-cover rounded-lg" 
+                      priority
+                      sizes="(max-width: 768px) 100vw, 800px"
+                    />
                   ) : (
                     <div className="w-full aspect-video bg-gray-200 dark:bg-gray-600 rounded-lg flex items-center justify-center">
                       <User className="w-20 h-20 text-gray-400" />

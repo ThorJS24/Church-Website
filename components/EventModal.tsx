@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Calendar, Clock, MapPin, User, Phone, Mail, Tag, DollarSign } from 'lucide-react';
 import Image from 'next/image';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 
 interface EventModalProps {
   event: any;
@@ -12,6 +13,9 @@ interface EventModalProps {
 }
 
 export default function EventModal({ event, isOpen, onClose }: EventModalProps) {
+  const modalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(isOpen && !!event, onClose, modalRef);
+
   if (!event) return null;
 
   const formatDate = (dateString: string) => {
@@ -58,13 +62,18 @@ export default function EventModal({ event, isOpen, onClose }: EventModalProps) 
             />
 
             <motion.div
+              ref={modalRef}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="event-modal-title"
+              tabIndex={-1}
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               className="inline-block w-full max-w-4xl p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-gray-800 shadow-2xl rounded-2xl relative z-50"
             >
               <div className="flex justify-between items-start mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                <h2 id="event-modal-title" className="text-2xl font-bold text-gray-900 dark:text-white">
                   {event.title}
                 </h2>
                 <button
@@ -77,10 +86,10 @@ export default function EventModal({ event, isOpen, onClose }: EventModalProps) 
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="space-y-6">
-                  {event.image?.asset?.url && (
+                  {event.imageUrl && (
                     <div className="relative h-64 rounded-lg overflow-hidden">
                       <Image
-                        src={event.image.asset.url}
+                        src={event.imageUrl}
                         alt={event.title}
                         fill
                         className="object-cover"
@@ -149,16 +158,16 @@ export default function EventModal({ event, isOpen, onClose }: EventModalProps) 
                     </div>
                   </div>
 
-                  {(event.organizer || event.contactEmail || event.contactPhone) && (
+                  {(event.organizerName || event.contactEmail || event.contactPhone) && (
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
                         Contact Information
                       </h3>
                       <div className="space-y-2">
-                        {event.organizer?.name && (
+                        {event.organizerName && (
                           <div className="flex items-center text-gray-600 dark:text-gray-300">
                             <User className="w-4 h-4 mr-2" />
-                            <span>{event.organizer.name}</span>
+                            <span>{event.organizerName}</span>
                           </div>
                         )}
                         {event.contactEmail && (

@@ -1,18 +1,19 @@
 'use client';
 
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { Sun, Moon, BookOpen, Clock, MapPin, Calendar, Video, Coffee, Baby, Users, Bell, Heart, Radio } from 'lucide-react';
-import { sanityFetch } from '@/lib/sanity-fetch';
+import { getPageContent, getServiceTimes, getSiteSettings, getLivestream } from '@/lib/content';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 
 const DynamicLiveStream = lazy(() => import('@/components/DynamicLiveStream'));
 
 interface Service {
-  _id: string;
+  id: string;
   title: string;
   time: string;
   location: string;
-  description: string;
+  description?: string;
 }
 
 interface ServicesPage {
@@ -62,6 +63,8 @@ export default function ServicesPage() {
   const [loading, setLoading] = useState(true);
   const [showLiveStream, setShowLiveStream] = useState(false);
   const [hasLiveStream, setHasLiveStream] = useState(false);
+  const liveStreamModalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(showLiveStream, () => setShowLiveStream(false), liveStreamModalRef);
 
   useEffect(() => {
     fetchData();
@@ -71,36 +74,14 @@ export default function ServicesPage() {
     setLoading(true);
     try {
       const [servicesPageData, servicesData, settingsData, livestreamData] = await Promise.all([
-        sanityFetch(`*[_type == "servicesPage"][0] {
-          title,
-          subtitle,
-          whatToExpectSectionTitle,
-          whatToExpect,
-          specialEventsSectionTitle,
-          specialEvents,
-          onlineServicesTitle,
-          onlineServicesDescription,
-          planYourVisitTitle,
-          planYourVisitDescription,
-          planYourVisit
-        }`),
-        sanityFetch(`*[_type == "service"] {
-          _id,
-          title,
-          time,
-          location,
-          description
-        }`),
-        sanityFetch(`*[_type == "siteSettings"][0] {
-          youtubeChannelUrl,
-          googleMapsUrl,
-          zoomMeetingUrl
-        }`),
-        sanityFetch(`*[_type == "livestream"] | order(_createdAt desc)[0] { isLive }`)
+        getPageContent<ServicesPage>('services'),
+        getServiceTimes(),
+        getSiteSettings(),
+        getLivestream()
       ]);
 
       if (servicesPageData) setServicesPage(servicesPageData);
-      if (servicesData) setServices(servicesData);
+      setServices(servicesData);
       if (settingsData) setSiteSettings(settingsData);
       if (livestreamData) setHasLiveStream(livestreamData.isLive);
     } catch (error) {
@@ -126,7 +107,7 @@ export default function ServicesPage() {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-600 dark:text-gray-300 mb-4">Services page content not found</h2>
-          <p className="text-gray-500 dark:text-gray-400">Please add content in Sanity CMS</p>
+          <p className="text-gray-500 dark:text-gray-400">Please add content through the admin panel</p>
         </div>
       </div>
     );
@@ -186,14 +167,14 @@ export default function ServicesPage() {
                 const Icon = iconMap[service.title] || BookOpen;
                 return (
                   <motion.div 
-                    key={service._id}
+                    key={service.id}
                     className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg text-center hover:shadow-xl transition-shadow"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: index * 0.1 }}
                   >
                     <Icon className="w-16 h-16 text-blue-600 mx-auto mb-4" />
-                    <h3 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">{service.title}</h3>
+                    <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">{service.title}</h2>
                     <div className="flex items-center justify-center mb-2 text-gray-600 dark:text-gray-300">
                       <Clock className="w-4 h-4 mr-2" />
                       <span>{service.time}</span>
@@ -216,7 +197,7 @@ export default function ServicesPage() {
                         
                         const startDate = serviceDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
                         const endDate = new Date(serviceDate.getTime() + 3600000).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-                        const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(service.title)}&dates=${startDate}/${endDate}&details=${encodeURIComponent(service.description)}&location=${encodeURIComponent(service.location)}&recur=RRULE:FREQ=WEEKLY`;
+                        const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(service.title)}&dates=${startDate}/${endDate}&details=${encodeURIComponent(service.description || '')}&location=${encodeURIComponent(service.location)}&recur=RRULE:FREQ=WEEKLY`;
                         window.open(calendarUrl, '_blank');
                       }}
                       className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
@@ -252,7 +233,7 @@ export default function ServicesPage() {
                     transition={{ duration: 0.6, delay: index * 0.1 }}
                   >
                     <Icon className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-                    <h4 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">{item.title}</h4>
+                    <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">{item.title}</h3>
                     <p className="text-gray-600 dark:text-gray-300">{item.description}</p>
                   </motion.div>
                 );
@@ -282,7 +263,7 @@ export default function ServicesPage() {
                   <div className="absolute top-4 right-4 bg-blue-600 text-white px-3 py-1 rounded-full text-sm">
                     {event.date}
                   </div>
-                  <h4 className="text-xl font-bold mb-3 text-gray-900 dark:text-white">{event.title}</h4>
+                  <h3 className="text-xl font-bold mb-3 text-gray-900 dark:text-white">{event.title}</h3>
                   <p className="text-gray-600 dark:text-gray-300">{event.description}</p>
                 </motion.div>
               ))}
@@ -408,9 +389,16 @@ export default function ServicesPage() {
       {/* Live Stream Modal */}
       {showLiveStream && (
         <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4">
-          <div className="max-w-6xl w-full max-h-[95vh] overflow-hidden">
+          <div
+            ref={liveStreamModalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="livestream-modal-title"
+            tabIndex={-1}
+            className="max-w-6xl w-full max-h-[95vh] overflow-hidden"
+          >
             <div className="mb-4 flex justify-between items-center">
-              <h2 className="text-white text-2xl font-bold">Live Stream</h2>
+              <h2 id="livestream-modal-title" className="text-white text-2xl font-bold">Live Stream</h2>
               <button 
                 onClick={() => setShowLiveStream(false)}
                 className="bg-white text-black px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors"

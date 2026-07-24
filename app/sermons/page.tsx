@@ -1,41 +1,18 @@
 'use client';
 
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { Play, Download, Calendar, User, Clock, Search, Filter, BookOpen, Video, Headphones, Radio } from 'lucide-react';
-import { sanityFetch } from '@/lib/sanity-fetch';
+import { getSermons, getSeriesList, getSpeakersList, getLivestream, Sermon } from '@/lib/content';
 import { extractYouTubeId, getYouTubeEmbedUrl } from '@/lib/utils';
 import Image from 'next/image';
 import DivineEffects from '@/components/DivineEffects';
 import SacredText from '@/components/SacredText';
 import DivineButton from '@/components/DivineButton';
 import HeavenlyCard from '@/components/HeavenlyCard';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 
 const DynamicLiveStream = lazy(() => import('@/components/DynamicLiveStream'));
-
-interface Sermon {
-  _id: string;
-  title: string;
-  subtitle?: string;
-  speaker: {
-    name: string;
-  };
-  series: {
-    title: string;
-  };
-  date: string;
-  youtubeUrl?: string;
-  transcript?: any;
-  image?: {
-    asset: {
-      url: string;
-    };
-  };
-  duration?: number;
-  scripture?: string;
-  description?: string;
-  featured?: boolean;
-}
 
 export default function SermonsPage() {
   const [sermons, setSermons] = useState<Sermon[]>([]);
@@ -50,7 +27,11 @@ export default function SermonsPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'timeline'>('grid');
   const [showLiveStream, setShowLiveStream] = useState(false);
   const [hasLiveStream, setHasLiveStream] = useState(false);
-  
+  const liveStreamModalRef = useRef<HTMLDivElement>(null);
+  const videoModalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(showLiveStream, () => setShowLiveStream(false), liveStreamModalRef);
+  useFocusTrap(!!selectedVideo, () => setSelectedVideo(null), videoModalRef);
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -59,35 +40,16 @@ export default function SermonsPage() {
     setLoading(true);
     try {
       const [sermonsData, seriesData, speakersData, livestreamData] = await Promise.all([
-        sanityFetch(`*[_type == "sermon"] | order(date desc)[0...20] {
-          _id,
-          title,
-          subtitle,
-          speaker->{ name },
-          series->{ title },
-          date,
-          youtubeUrl,
-          image{
-            asset->{
-              url
-            }
-          },
-          duration,
-          scripture,
-          description,
-          featured
-        }`),
-        sanityFetch(`*[_type == "series"] { _id, title }`),
-        sanityFetch(`*[_type == "speaker"] { _id, name }`),
-        sanityFetch(`*[_type == "livestream"] | order(_createdAt desc)[0] { isLive }`)
+        getSermons(20),
+        getSeriesList(),
+        getSpeakersList(),
+        getLivestream()
       ]);
-      
-      if (sermonsData) {
-        setSermons(sermonsData);
-        setFeaturedSermon(sermonsData[0] || null);
-      }
-      if (seriesData) setSeries(seriesData);
-      if (speakersData) setSpeakers(speakersData);
+
+      setSermons(sermonsData);
+      setFeaturedSermon(sermonsData[0] || null);
+      setSeries(seriesData);
+      setSpeakers(speakersData);
       if (livestreamData) setHasLiveStream(livestreamData.isLive);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -98,8 +60,8 @@ export default function SermonsPage() {
 
   const filteredSermons = sermons.filter(sermon => {
     const matchesSearch = sermon.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesSeries = selectedSeries === 'All Series' || sermon.series?.title === selectedSeries;
-    const matchesSpeaker = selectedSpeaker === 'All Speakers' || sermon.speaker?.name === selectedSpeaker;
+    const matchesSeries = selectedSeries === 'All Series' || sermon.seriesTitle === selectedSeries;
+    const matchesSpeaker = selectedSpeaker === 'All Speakers' || sermon.speakerName === selectedSpeaker;
     
     return matchesSearch && matchesSeries && matchesSpeaker;
   });
@@ -193,10 +155,10 @@ export default function SermonsPage() {
               <div className="md:flex">
                 <div className="md:w-1/2">
                   <div className="relative h-64 md:h-full overflow-hidden">
-                    {featuredSermon.image?.asset?.url ? (
+                    {featuredSermon.imageUrl ? (
                       <div className="relative w-full h-full">
                         <Image 
-                          src={featuredSermon.image.asset.url} 
+                          src={featuredSermon.imageUrl!}
                           alt={featuredSermon.title}
                           fill
                           sizes="(max-width: 768px) 100vw, 50vw"
@@ -236,7 +198,7 @@ export default function SermonsPage() {
                 </div>
                 <div className="md:w-1/2 p-8">
                   <div className="flex items-center justify-between mb-2">
-                    <div className="text-sm text-blue-600 font-semibold">{featuredSermon.series?.title}</div>
+                    <div className="text-sm text-blue-600 font-semibold">{featuredSermon.seriesTitle}</div>
                     <div className="bg-yellow-500 text-black text-xs px-2 py-1 rounded font-semibold">
                       Latest
                     </div>
@@ -260,7 +222,7 @@ export default function SermonsPage() {
                   <div className="flex items-center text-gray-600 dark:text-gray-300 mb-4 space-x-4">
                     <div className="flex items-center">
                       <User className="w-4 h-4 mr-2" />
-                      <span>{featuredSermon.speaker?.name}</span>
+                      <span>{featuredSermon.speakerName}</span>
                     </div>
                     <div className="flex items-center">
                       <Calendar className="w-4 h-4 mr-2" />
@@ -300,33 +262,36 @@ export default function SermonsPage() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
+                aria-label="Search sermons"
                 placeholder="Search sermons..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
             </div>
-            
+
             <div className="flex gap-4">
               <select
+                aria-label="Filter by series"
                 value={selectedSeries}
                 onChange={(e) => setSelectedSeries(e.target.value)}
                 className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
                 <option value="All Series">All Series</option>
                 {series.map(s => (
-                  <option key={s._id} value={s.title}>{s.title}</option>
+                  <option key={s.id} value={s.title}>{s.title}</option>
                 ))}
               </select>
               
               <select
+                aria-label="Filter by speaker"
                 value={selectedSpeaker}
                 onChange={(e) => setSelectedSpeaker(e.target.value)}
                 className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
                 <option value="All Speakers">All Speakers</option>
                 {speakers.map(s => (
-                  <option key={s._id} value={s.name}>{s.name}</option>
+                  <option key={s.id} value={s.name}>{s.name}</option>
                 ))}
               </select>
               
@@ -359,7 +324,7 @@ export default function SermonsPage() {
           {filteredSermons.length === 0 ? (
             <div className="text-center py-12">
               <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">No sermons found</h3>
+              <h2 className="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">No sermons found</h2>
               <p className="text-gray-500 dark:text-gray-400">Check back soon for new sermons!</p>
             </div>
           ) : viewMode === 'timeline' ? (
@@ -371,11 +336,11 @@ export default function SermonsPage() {
                   <h3 className="text-2xl font-bold mb-4 text-blue-600 dark:text-blue-400">{group.monthName}</h3>
                   <div className="space-y-4">
                     {group.sermons.map((sermon: Sermon) => (
-                      <div key={sermon._id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 hover:shadow-lg transition-shadow">
+                      <div key={sermon.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 hover:shadow-lg transition-shadow">
                         <div className="flex items-start gap-4">
                           <div className="w-20 h-20 flex-shrink-0">
-                            {sermon.image?.asset?.url ? (
-                              <Image src={sermon.image.asset.url} alt={sermon.title} fill sizes="80px" className="object-cover rounded" />
+                            {sermon.imageUrl ? (
+                              <Image src={sermon.imageUrl} alt={sermon.title} fill sizes="80px" className="object-cover rounded" />
                             ) : (
                               <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 rounded flex items-center justify-center">
                                 <Play className="w-6 h-6 text-white" />
@@ -384,7 +349,7 @@ export default function SermonsPage() {
                           </div>
                           <div className="flex-1">
                             <h4 className="font-bold text-lg mb-1 text-gray-900 dark:text-white">{sermon.title}</h4>
-                            <p className="text-gray-600 dark:text-gray-300 text-sm mb-2">{sermon.speaker?.name} • {new Date(sermon.date).toLocaleDateString()}</p>
+                            <p className="text-gray-600 dark:text-gray-300 text-sm mb-2">{sermon.speakerName} • {new Date(sermon.date).toLocaleDateString()}</p>
                             {sermon.scripture && <p className="text-purple-600 text-sm">📖 {sermon.scripture}</p>}
                           </div>
                           {sermon.youtubeUrl && extractYouTubeId(sermon.youtubeUrl) && (
@@ -406,17 +371,17 @@ export default function SermonsPage() {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredSermons.map((sermon, index) => (
                 <motion.div 
-                  key={sermon._id}
+                  key={sermon.id}
                   className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                 >
                   <div className="relative h-48 overflow-hidden">
-                    {sermon.image?.asset?.url || sermon.youtubeUrl ? (
+                    {sermon.imageUrl || sermon.youtubeUrl ? (
                       <div className="relative w-full h-full">
-                        <Image 
-                          src={sermon.image?.asset?.url || `https://img.youtube.com/vi/${extractYouTubeId(sermon.youtubeUrl || '')}/maxresdefault.jpg`} 
+                        <Image
+                          src={sermon.imageUrl || `https://img.youtube.com/vi/${extractYouTubeId(sermon.youtubeUrl || '')}/maxresdefault.jpg`}
                           alt={sermon.title}
                           fill
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -468,7 +433,7 @@ export default function SermonsPage() {
                   
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-2">
-                      <div className="text-sm text-blue-600 font-semibold">{sermon.series?.title}</div>
+                      <div className="text-sm text-blue-600 font-semibold">{sermon.seriesTitle}</div>
                       {sermon.duration && (
                         <div className="flex items-center text-gray-500 text-xs">
                           <Clock className="w-3 h-3 mr-1" />
@@ -495,7 +460,7 @@ export default function SermonsPage() {
                     <div className="flex items-center text-gray-600 dark:text-gray-300 text-sm mb-4 space-x-3">
                       <div className="flex items-center">
                         <User className="w-3 h-3 mr-1" />
-                        <span>{sermon.speaker?.name}</span>
+                        <span>{sermon.speakerName}</span>
                       </div>
                       <div className="flex items-center">
                         <Calendar className="w-3 h-3 mr-1" />
@@ -525,9 +490,16 @@ export default function SermonsPage() {
       {/* Live Stream Modal */}
       {showLiveStream && (
         <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4">
-          <div className="max-w-6xl w-full max-h-[95vh] overflow-hidden">
+          <div
+            ref={liveStreamModalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="sermons-livestream-title"
+            tabIndex={-1}
+            className="max-w-6xl w-full max-h-[95vh] overflow-hidden"
+          >
             <div className="mb-4 flex justify-between items-center">
-              <h2 className="text-white text-2xl font-bold">Live Stream</h2>
+              <h2 id="sermons-livestream-title" className="text-white text-2xl font-bold">Live Stream</h2>
               <button 
                 onClick={() => setShowLiveStream(false)}
                 className="bg-white text-black px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors"
@@ -545,7 +517,14 @@ export default function SermonsPage() {
       {/* Video Modal */}
       {selectedVideo && (
         <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4">
-          <div className="max-w-4xl w-full">
+          <div
+            ref={videoModalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Sermon video"
+            tabIndex={-1}
+            className="max-w-4xl w-full"
+          >
             <div className="relative bg-black rounded-lg overflow-hidden" style={{paddingBottom: '56.25%'}}>
               <iframe
                 className="absolute inset-0 w-full h-full"

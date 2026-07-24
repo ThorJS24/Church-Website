@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, Clock, MapPin, ExternalLink, ChevronLeft, ChevronRight, Tag } from 'lucide-react';
-import { sanityFetch } from '@/lib/sanity-fetch';
+import { getEvents, getServiceTimes } from '@/lib/content';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 
 interface CalendarEvent {
-  _id: string;
+  id: string;
   title: string;
   subtitle?: string;
   startDate: string;
@@ -16,7 +17,7 @@ interface CalendarEvent {
   featured?: boolean;
   cost?: number;
   shortDescription?: string;
-  organizer?: { name: string };
+  organizerName?: string;
   registrationUrl?: string;
 }
 
@@ -25,6 +26,8 @@ export default function InteractiveCalendar() {
   const [loading, setLoading] = useState(true);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const calendarModalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(!!selectedEvent, () => setSelectedEvent(null), calendarModalRef);
 
 
 
@@ -39,56 +42,38 @@ export default function InteractiveCalendar() {
       const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
       
       const [eventsData, servicesData] = await Promise.all([
-        sanityFetch(`*[_type == "event"] {
-          _id,
-          title,
-          subtitle,
-          startDate,
-          endDate,
-          location,
-          category,
-          featured,
-          cost,
-          shortDescription,
-          organizer->{ name },
-          registrationUrl
-        } | order(_createdAt desc)`),
-        sanityFetch(`*[_type == "service"] {
-          _id,
-          title,
-          time,
-          location
-        }`)
+        getEvents(),
+        getServiceTimes()
       ]);
-      
-      let allEvents = (eventsData || []).filter((event: any) => event.startDate);
-      
+
+      let allEvents: CalendarEvent[] = (eventsData || []).filter((event) => event.startDate);
+
       if (servicesData) {
         const serviceEvents: CalendarEvent[] = [];
         const currentMonth = currentDate.getMonth();
         const currentYear = currentDate.getFullYear();
-        
+
         // Get all Sundays in current month + next 2 months for recurring services
         for (let monthOffset = 0; monthOffset < 3; monthOffset++) {
           const targetMonth = currentMonth + monthOffset;
           const targetYear = targetMonth > 11 ? currentYear + 1 : currentYear;
           const adjustedMonth = targetMonth > 11 ? targetMonth - 12 : targetMonth;
-          
+
           for (let day = 1; day <= new Date(targetYear, adjustedMonth + 1, 0).getDate(); day++) {
             const date = new Date(targetYear, adjustedMonth, day);
             if (date.getDay() === 0) {
-              servicesData.forEach((service: any) => {
+              servicesData.forEach((service) => {
                 if (!service.time || !service.time.includes(':')) return;
-                
+
                 const [hours, minutes] = service.time.split(':').map(Number);
                 if (isNaN(hours) || isNaN(minutes)) return;
-                
+
                 const serviceDate = new Date(date);
                 serviceDate.setHours(hours, minutes, 0, 0);
-                
+
                 if (!isNaN(serviceDate.getTime())) {
                   serviceEvents.push({
-                    _id: `service-${service._id}-${date.toISOString().split('T')[0]}`,
+                    id: `service-${service.id}-${date.toISOString().split('T')[0]}`,
                     title: service.title,
                     startDate: serviceDate.toISOString(),
                     location: service.location,
@@ -102,8 +87,7 @@ export default function InteractiveCalendar() {
         }
         allEvents = [...allEvents, ...serviceEvents];
       }
-      
-      console.log('Calendar events with dates:', allEvents.slice(0, 3).map((e: any) => ({ title: e.title, startDate: e.startDate })));
+
       setEvents(allEvents);
     } catch (error) {
       console.error('Error fetching calendar events:', error);
@@ -187,6 +171,7 @@ export default function InteractiveCalendar() {
         <div className="flex items-center justify-between mb-6">
           <motion.button
             onClick={() => navigateMonth('prev')}
+            aria-label="Previous month"
             className="p-3 hover:bg-white/20 rounded-full transition-all duration-300 backdrop-blur-sm"
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
@@ -204,6 +189,7 @@ export default function InteractiveCalendar() {
             </motion.h2>
             <input
               type="month"
+              aria-label="Jump to month"
               value={`${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`}
               onChange={(e) => {
                 const [year, month] = e.target.value.split('-');
@@ -214,6 +200,7 @@ export default function InteractiveCalendar() {
           </div>
           <motion.button
             onClick={() => navigateMonth('next')}
+            aria-label="Next month"
             className="p-3 hover:bg-white/20 rounded-full transition-all duration-300 backdrop-blur-sm"
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
@@ -268,7 +255,7 @@ export default function InteractiveCalendar() {
                     <div className="flex-1 flex flex-col gap-1">
                       {dayEvents.map((event) => (
                         <motion.button
-                          key={event._id}
+                          key={event.id}
                           className={`text-xs px-2 py-1 rounded text-white shadow-sm w-full text-left ${
                             event.category === 'regular-service' ? 'bg-blue-500' :
                             event.category === 'special' ? 'bg-purple-500' :
@@ -311,6 +298,11 @@ export default function InteractiveCalendar() {
           onClick={() => setSelectedEvent(null)}
         >
           <motion.div
+            ref={calendarModalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Event details"
+            tabIndex={-1}
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             className="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto"
@@ -339,7 +331,7 @@ export default function InteractiveCalendar() {
                 <div className="space-y-4">
                   {(selectedEvent as any).allEvents.map((event: CalendarEvent) => (
                     <motion.div
-                      key={event._id}
+                      key={event.id}
                       className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
                       whileHover={{ scale: 1.02 }}
                       onClick={() => setSelectedEvent(event)}
@@ -461,10 +453,10 @@ export default function InteractiveCalendar() {
                   </div>
                 )}
                 
-                {selectedEvent.organizer?.name && (
+                {selectedEvent.organizerName && (
                   <div className="mb-6">
                     <h4 className="font-semibold text-gray-900 mb-2">Organized By</h4>
-                    <p className="text-gray-700">{selectedEvent.organizer.name}</p>
+                    <p className="text-gray-700">{selectedEvent.organizerName}</p>
                   </div>
                 )}
                 

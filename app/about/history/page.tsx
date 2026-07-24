@@ -3,22 +3,8 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, Calendar, MapPin, Users, Building, Award, Heart, Filter, Search, ChevronDown, Play, Pause } from 'lucide-react';
-import { sanityFetch } from '@/lib/sanity-fetch';
+import { getHistoryTimeline, TimelineEvent } from '@/lib/content';
 import Image from 'next/image';
-
-interface TimelineEvent {
-  _id: string;
-  year: number;
-  title: string;
-  description: string;
-  image?: {
-    asset: {
-      url: string;
-    };
-  };
-  category: string;
-  featured: boolean;
-}
 
 export default function HistoryPage() {
   const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
@@ -79,15 +65,9 @@ export default function HistoryPage() {
   const fetchTimelineEvents = async () => {
     setLoading(true);
     try {
-      const events = await sanityFetch(`*[_type == "historyTimeline"] {
-        _id, year, title, description, category, featured,
-        image { asset-> { url } }
-      } | order(year asc)`);
-      
-      if (events) {
-        setTimelineEvents(events);
-        setFilteredEvents(events);
-      }
+      const events = await getHistoryTimeline();
+      setTimelineEvents(events);
+      setFilteredEvents(events);
     } catch (error) {
       console.error('Error fetching timeline events:', error);
     } finally {
@@ -186,16 +166,18 @@ export default function HistoryPage() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
-                placeholder="Search events..."
+                aria-label="Search timeline events"
+                placeholder="Search timeline events..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
               />
             </div>
-            
+
             {/* Category Filter */}
             <div className="relative">
               <select
+                aria-label="Filter by category"
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="appearance-none bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 pr-8 focus:ring-2 focus:ring-amber-500 focus:border-transparent dark:text-white capitalize"
@@ -239,7 +221,7 @@ export default function HistoryPage() {
               No timeline events available
             </h2>
             <p className="text-gray-500 dark:text-gray-400">
-              Add timeline events in Sanity CMS to display church history.
+              Add timeline events through the admin panel to display church history.
             </p>
           </motion.div>
         ) : (
@@ -256,7 +238,7 @@ export default function HistoryPage() {
                 
                 return (
                   <motion.div
-                    key={event._id}
+                    key={event.id}
                     id={`event-${index}`}
                     initial={{ opacity: 0, x: -50 }}
                     animate={{ 
@@ -308,11 +290,11 @@ export default function HistoryPage() {
                           </div>
                           
                           {/* Image */}
-                          {event.image?.asset?.url && (
+                          {event.imageUrl && (
                             <div className="lg:w-1/3">
                               <div className="aspect-video rounded-lg overflow-hidden group-hover:scale-105 transition-transform duration-300">
                                 <Image
-                                  src={event.image.asset.url}
+                                  src={event.imageUrl}
                                   alt={event.title}
                                   width={300}
                                   height={200}

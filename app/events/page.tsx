@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, Clock, MapPin, Search, Tag, DollarSign, Star } from 'lucide-react';
-import { sanityFetch } from '@/lib/sanity-fetch';
+import { getEvents as getEventsData, getServiceTimes, EventItem as Event } from '@/lib/content';
 import Image from 'next/image';
 import EventModal from '@/components/EventModal';
 import InteractiveCalendar from '@/components/InteractiveCalendar';
@@ -18,39 +18,6 @@ const getYouTubeThumbnail = (url: string): string => {
   const videoId = extractYouTubeId(url);
   return videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : '/images/default-video.jpg';
 };
-
-interface Event {
-  _id: string;
-  title: string;
-  subtitle?: string;
-  description: any;
-  shortDescription?: string;
-  startDate: string;
-  endDate?: string;
-  location: string;
-  address?: string;
-  category: string;
-  image?: {
-    asset: {
-      url: string;
-    };
-  };
-  organizer?: {
-    name: string;
-  };
-  contactEmail?: string;
-  contactPhone?: string;
-  registrationRequired: boolean;
-  registrationUrl?: string;
-  maxAttendees?: number;
-  cost: number;
-  tags?: string[];
-  featured: boolean;
-  recurring: boolean;
-  recurrencePattern?: string;
-  isPublic: boolean;
-  youtubeUrl?: string;
-}
 
 export default function EventsPage() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -67,59 +34,21 @@ export default function EventsPage() {
   const fetchEvents = async () => {
     setLoading(true);
     try {
-      console.log('Fetching events from Sanity...');
       const [eventsData, servicesData] = await Promise.all([
-        sanityFetch(`*[_type == "event"] {
-          _id,
-          title,
-          subtitle,
-          description,
-          shortDescription,
-          startDate,
-          endDate,
-          location,
-          address,
-          category,
-          image {
-            asset-> {
-              url
-            }
-          },
-          organizer-> {
-            name
-          },
-          contactEmail,
-          contactPhone,
-          registrationRequired,
-          registrationUrl,
-          maxAttendees,
-          cost,
-          tags,
-          featured,
-          recurring,
-          recurrencePattern,
-          isPublic
-        }`),
-        sanityFetch(`*[_type == "service"] {
-          _id,
-          title,
-          time,
-          location,
-          description
-        }`)
+        getEventsData(),
+        getServiceTimes()
       ]);
-      
-      console.log('Events from Sanity:', eventsData);
-      let allEvents = eventsData || [];
+
+      let allEvents: Event[] = eventsData || [];
       if (servicesData) {
         setServices(servicesData);
         // Convert services to recurring events
         const serviceEvents: Event[] = [];
-        servicesData.forEach((service: any) => {
+        servicesData.forEach((service) => {
           const serviceDates = getServiceDates(service.time);
           serviceDates.forEach((date, index) => {
             serviceEvents.push({
-              _id: `service-${service._id}-${index}`,
+              id: `service-${service.id}-${index}`,
               title: service.title,
               description: service.description,
               shortDescription: service.description,
@@ -136,8 +65,7 @@ export default function EventsPage() {
         });
         allEvents = [...allEvents, ...serviceEvents];
       }
-      
-      console.log('Final events array:', allEvents);
+
       setEvents(allEvents);
     } catch (error) {
       console.error('Error fetching events:', error);
@@ -258,6 +186,7 @@ export default function EventsPage() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
+                aria-label="Search events"
                 placeholder="Search events..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -302,7 +231,7 @@ export default function EventsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredEvents.map((event, index) => (
               <motion.div
-                key={event._id}
+                key={event.id}
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
@@ -310,7 +239,7 @@ export default function EventsPage() {
               >
                 <div className="relative h-48 bg-gray-200">
                   <Image 
-                    src={event.image?.asset?.url || getYouTubeThumbnail(event.youtubeUrl || '') || '/images/default-event.jpg'} 
+                    src={event.imageUrl || getYouTubeThumbnail(event.youtubeUrl || '') || '/images/default-event.jpg'} 
                     alt={event.title}
                     fill
                     className="object-cover"

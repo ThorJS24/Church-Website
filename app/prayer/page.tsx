@@ -1,18 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Heart, Users, X } from 'lucide-react';
 import PrayerEffects from '@/components/PrayerEffects';
 import SacredText from '@/components/SacredText';
 import DivineButton from '@/components/DivineButton';
 import HeavenlyCard from '@/components/HeavenlyCard';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 
 const categories = ['all', 'healing', 'guidance', 'thanksgiving', 'family', 'work'];
 
 export default function PrayerPage() {
   const [activeFilter, setActiveFilter] = useState('all');
   const [showModal, setShowModal] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(showModal, () => setShowModal(false), modalRef);
   const [prayerStats, setPrayerStats] = useState({ requests: 0, people: 0, prayers: 0 });
   const [formData, setFormData] = useState({
     title: '',
@@ -30,14 +33,8 @@ export default function PrayerPage() {
 
   const fetchPrayerStats = async () => {
     try {
-      const { sanityFetch } = await import('@/lib/sanity-fetch');
-      const stats = await sanityFetch(`*[_type == "siteSettings"][0] {
-        prayerStats {
-          totalRequests,
-          totalPeople,
-          totalPrayers
-        }
-      }`);
+      const { getSiteSettings } = await import('@/lib/content');
+      const stats = await getSiteSettings();
       if (stats?.prayerStats) {
         setPrayerStats({
           requests: stats.prayerStats.totalRequests || 0,
@@ -156,7 +153,7 @@ export default function PrayerPage() {
               <Heart className="w-16 h-16 text-purple-400 dark:text-purple-300 mx-auto mb-4" />
             </motion.div>
             <SacredText className="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">
-              <h3>Prayer requests will appear here</h3>
+              <h2>Prayer requests will appear here</h2>
             </SacredText>
             <p className="text-gray-500 dark:text-gray-400">Submit a prayer request to get started</p>
           </HeavenlyCard>
@@ -230,7 +227,8 @@ export default function PrayerPage() {
       {showModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <PrayerEffects isActive={true} intensity="medium" />
-          <HeavenlyCard glowIntensity="high" className="max-w-md w-full max-h-[90vh] overflow-y-auto">
+          <div ref={modalRef} role="dialog" aria-modal="true" aria-labelledby="prayer-modal-title" tabIndex={-1} className="max-w-md w-full max-h-[90vh]">
+          <HeavenlyCard glowIntensity="high" className="w-full max-h-[90vh] overflow-y-auto">
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -239,7 +237,7 @@ export default function PrayerPage() {
             >
               <div className="flex justify-between items-center mb-6">
                 <SacredText className="text-2xl font-bold text-gray-900 dark:text-white">
-                  <h3>Submit Prayer Request</h3>
+                  <h3 id="prayer-modal-title">Submit Prayer Request</h3>
                 </SacredText>
                 <motion.button
                   onClick={() => setShowModal(false)}
@@ -354,6 +352,7 @@ export default function PrayerPage() {
               </form>
             </motion.div>
           </HeavenlyCard>
+          </div>
         </div>
       )}
 

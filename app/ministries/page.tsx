@@ -4,17 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Users, Baby, Music, BookOpen, Heart, Clock, MapPin } from 'lucide-react';
-import { sanityFetch } from '@/lib/sanity-fetch';
-
-interface Ministry {
-  _id: string;
-  title: string;
-  description: string;
-  category: string | string[];
-  ageGroup: string;
-  meetingTime: string;
-  location: string;
-}
+import { getPageContent, getMinistries, Ministry } from '@/lib/content';
 
 interface MinistriesPage {
   title: string;
@@ -49,24 +39,12 @@ export default function MinistriesPage() {
     setLoading(true);
     try {
       const [ministriesPageData, ministriesData] = await Promise.all([
-        sanityFetch(`*[_type == "ministriesPage"][0] {
-          title,
-          subtitle,
-          categories
-        }`),
-        sanityFetch(`*[_type == "ministry"] {
-          _id,
-          title,
-          description,
-          category,
-          ageGroup,
-          meetingTime,
-          location
-        }`)
+        getPageContent<MinistriesPage>('ministries'),
+        getMinistries()
       ]);
 
       if (ministriesPageData) setMinistriesPage(ministriesPageData);
-      if (ministriesData) setMinistries(ministriesData);
+      setMinistries(ministriesData);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -131,7 +109,6 @@ export default function MinistriesPage() {
           </motion.p>
         </div>
       </section>
-
       {/* Category Tabs */}
       <section className="py-8 bg-white dark:bg-gray-800" ref={ministriesGridRef}>
         <div className="container mx-auto px-4">
@@ -152,14 +129,13 @@ export default function MinistriesPage() {
           </div>
         </div>
       </section>
-
       {/* Ministries Grid */}
       <section className="py-16">
         <div className="container mx-auto px-4">
           {filteredMinistries.length === 0 ? (
             <div className="text-center py-12">
               <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-600 mb-2">No ministries found</h3>
+              <h2 className="text-xl font-semibold text-gray-600 mb-2">No ministries found</h2>
               <p className="text-gray-500">Check back soon for new ministry opportunities!</p>
             </div>
           ) : (
@@ -169,7 +145,7 @@ export default function MinistriesPage() {
                 const Icon = iconMap[categoryKey as keyof typeof iconMap] || iconMap.default;
                 return (
                   <motion.div 
-                    key={ministry._id}
+                    key={ministry.id}
                     className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -181,7 +157,6 @@ export default function MinistriesPage() {
                       <p className="text-blue-600 font-semibold text-center mb-4">{ministry.ageGroup}</p>
                     )}
                     <p className="text-gray-600 dark:text-gray-300 mb-6 text-center">{ministry.description}</p>
-                    
                     <div className="space-y-2 mb-6">
                       {ministry.meetingTime && (
                         <div className="flex items-center justify-center text-gray-600">
@@ -196,13 +171,16 @@ export default function MinistriesPage() {
                         </div>
                       )}
                     </div>
-
                     <div className="flex gap-3">
-                      <Link href="/ministries/volunteer" passHref legacyBehavior>
-                        <a className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-center">Join Ministry</a>
+                      <Link
+                        href="/ministries/volunteer"
+                        className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-center">
+                        Join Ministry
                       </Link>
-                      <Link href={`/ministries/contact?ministry=${ministry._id}`} passHref legacyBehavior>
-                        <a className="flex-1 border-2 border-blue-600 text-blue-600 py-2 px-4 rounded-lg hover:bg-blue-600 hover:text-white transition-colors text-center">Learn More</a>
+                      <Link
+                        href={`/ministries/contact?ministry=${ministry.id}`}
+                        className="flex-1 border-2 border-blue-600 text-blue-600 py-2 px-4 rounded-lg hover:bg-blue-600 hover:text-white transition-colors text-center">
+                        Learn More
                       </Link>
                     </div>
                   </motion.div>
@@ -212,7 +190,6 @@ export default function MinistriesPage() {
           )}
         </div>
       </section>
-
       {/* Ministry Opportunities */}
       <section className="py-16 bg-white dark:bg-gray-800">
         <div className="container mx-auto px-4">
@@ -266,7 +243,6 @@ export default function MinistriesPage() {
           </div>
         </div>
       </section>
-
       {/* CTA Section */}
       <section className="py-16 bg-gradient-to-r from-purple-600 to-blue-600 text-white text-center">
         <div className="container mx-auto px-4">
@@ -278,11 +254,15 @@ export default function MinistriesPage() {
             <h2 className="text-4xl font-bold mb-4">Ready to Get Involved?</h2>
             <p className="text-xl mb-8">Take the next step and join a ministry that matches your passion and calling.</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/ministries/contact" passHref legacyBehavior>
-                <a className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">Contact Ministry Leader</a>
+              <Link
+                href="/ministries/contact"
+                className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+                Contact Ministry Leader
               </Link>
-              <Link href="/ministries/volunteer" passHref legacyBehavior>
-                <a className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors">Volunteer Application</a>
+              <Link
+                href="/ministries/volunteer"
+                className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors">
+                Volunteer Application
               </Link>
             </div>
           </motion.div>
