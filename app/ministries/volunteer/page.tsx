@@ -2,32 +2,81 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { sanityFetch } from '@/lib/sanity-fetch';
+import { getMinistries } from '@/lib/content';
 
 interface Ministry {
-  _id: string;
+  id: string;
   title: string;
 }
 
 export default function VolunteerApplicationPage() {
   const [ministries, setMinistries] = useState<Ministry[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingMinistries, setLoadingMinistries] = useState(true);
+
+  const [formData, setFormData] = useState({
+    ministry: '',
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    message: ''
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
   useEffect(() => {
     fetchMinistries();
   }, []);
 
   const fetchMinistries = async () => {
-    setLoading(true);
+    setLoadingMinistries(true);
     try {
-      const ministriesData = await sanityFetch(`*[_type == "ministry"]{_id, title}`);
-      if (ministriesData) {
-        setMinistries(ministriesData);
+      const ministriesData = await getMinistries();
+      const list = ministriesData.map(m => ({ id: m.id, title: m.title }));
+      setMinistries(list);
+      if (list.length > 0) {
+        setFormData(prev => ({ ...prev, ministry: prev.ministry || list[0].id }));
       }
     } catch (error) {
       console.error('Error fetching ministries:', error);
     } finally {
-      setLoading(false);
+      setLoadingMinistries(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setSubmitStatus('idle');
+
+    try {
+      const ministryTitle = ministries.find(m => m.id === formData.ministry)?.title || formData.ministry;
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
+          message: formData.message,
+          department: 'ministry-volunteer',
+          ministry: ministryTitle,
+        }),
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        setSubmitStatus('success');
+        setFormData(prev => ({ ...prev, firstName: '', lastName: '', email: '', phone: '', message: '' }));
+      } else {
+        setSubmitStatus('error');
+      }
+    } catch (error) {
+      console.error('Error submitting volunteer application:', error);
+      setSubmitStatus('error');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -49,61 +98,125 @@ export default function VolunteerApplicationPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <form>
-            <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
-              <div className="sm:col-span-2">
-                <label htmlFor="ministry" className="block text-sm font-medium text-gray-700">Select Ministry</label>
-                <select
-                  id="ministry"
-                  name="ministry"
-                  className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <option>Loading ministries...</option>
-                  ) : (
-                    ministries.map(ministry => (
-                      <option key={ministry._id} value={ministry._id}>{ministry.title}</option>
-                    ))
-                  )}
-                </select>
-              </div>
-
-              <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">First Name</label>
-                <input type="text" name="firstName" id="firstName" className="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" />
-              </div>
-
-              <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">Last Name</label>
-                <input type="text" name="lastName" id="lastName" className="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" />
-              </div>
-
-              <div className="sm:col-span-2">
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
-                <input type="email" name="email" id="email" className="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" />
-              </div>
-
-              <div className="sm:col-span-2">
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700">Phone</label>
-                <input type="text" name="phone" id="phone" className="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" />
-              </div>
-
-              <div className="sm:col-span-2">
-                <label htmlFor="message" className="block text-sm font-medium text-gray-700">Why do you want to volunteer?</label>
-                <textarea id="message" name="message" rows={4} className="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"></textarea>
-              </div>
-            </div>
-
-            <div className="mt-8">
+          {submitStatus === 'success' ? (
+            <div className="text-center py-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Application Submitted!</h2>
+              <p className="text-gray-600 mb-6">Thank you for applying — we&apos;ll be in touch soon.</p>
               <button
-                type="submit"
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                onClick={() => setSubmitStatus('idle')}
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
               >
-                Submit Application
+                Submit Another Application
               </button>
             </div>
-          </form>
+          ) : (
+            <form onSubmit={handleSubmit}>
+              <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <label htmlFor="ministry" className="block text-sm font-medium text-gray-700">Select Ministry</label>
+                  <select
+                    id="ministry"
+                    name="ministry"
+                    value={formData.ministry}
+                    onChange={(e) => setFormData({ ...formData, ministry: e.target.value })}
+                    className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                    disabled={loadingMinistries}
+                    required
+                  >
+                    {loadingMinistries ? (
+                      <option>Loading ministries...</option>
+                    ) : ministries.length === 0 ? (
+                      <option value="">No ministries available</option>
+                    ) : (
+                      ministries.map(ministry => (
+                        <option key={ministry.id} value={ministry.id}>{ministry.title}</option>
+                      ))
+                    )}
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">First Name</label>
+                  <input
+                    type="text"
+                    name="firstName"
+                    id="firstName"
+                    required
+                    value={formData.firstName}
+                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                    className="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">Last Name</label>
+                  <input
+                    type="text"
+                    name="lastName"
+                    id="lastName"
+                    required
+                    value={formData.lastName}
+                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                    className="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
+                  <input
+                    type="email"
+                    name="email"
+                    id="email"
+                    required
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700">Phone</label>
+                  <input
+                    type="text"
+                    name="phone"
+                    id="phone"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    className="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label htmlFor="message" className="block text-sm font-medium text-gray-700">Why do you want to volunteer?</label>
+                  <textarea
+                    id="message"
+                    name="message"
+                    rows={4}
+                    required
+                    value={formData.message}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    className="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                  ></textarea>
+                </div>
+              </div>
+
+              {submitStatus === 'error' && (
+                <div className="mt-6 p-3 bg-red-50 border border-red-200 rounded-md">
+                  <p className="text-red-700 text-sm">Something went wrong submitting your application. Please try again.</p>
+                </div>
+              )}
+
+              <div className="mt-8">
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {submitting ? 'Submitting...' : 'Submit Application'}
+                </button>
+              </div>
+            </form>
+          )}
         </motion.div>
       </div>
     </div>

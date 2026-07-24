@@ -18,6 +18,8 @@ export default function VolunteerPage() {
     emergencyPhone: ''
   });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
   const volunteerAreas = [
     'Children&#39;s Ministry',
@@ -59,10 +61,42 @@ export default function VolunteerPage() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Volunteer application:', formData);
-    setSubmitted(true);
+    setSubmitting(true);
+    setError('');
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          message: formData.motivation,
+          department: 'volunteer',
+          age: formData.age,
+          interests: formData.interests,
+          availability: formData.availability,
+          experience: formData.experience,
+          emergencyContact: formData.emergencyContact,
+          emergencyPhone: formData.emergencyPhone,
+        }),
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        setSubmitted(true);
+      } else {
+        setError('Something went wrong submitting your application. Please try again.');
+      }
+    } catch (err) {
+      console.error('Error submitting volunteer application:', err);
+      setError('Something went wrong submitting your application. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (submitted) {
@@ -121,8 +155,9 @@ export default function VolunteerPage() {
             
             <div className="grid md:grid-cols-2 gap-6 mb-8">
               <div>
-                <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-white">Full Name *</label>
+                <label htmlFor="volunteer-name" className="block text-sm font-medium mb-2 text-gray-900 dark:text-white">Full Name *</label>
                 <input
+                  id="volunteer-name"
                   type="text"
                   required
                   value={formData.name}
@@ -131,8 +166,9 @@ export default function VolunteerPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-white">Email *</label>
+                <label htmlFor="volunteer-email" className="block text-sm font-medium mb-2 text-gray-900 dark:text-white">Email *</label>
                 <input
+                  id="volunteer-email"
                   type="email"
                   required
                   value={formData.email}
@@ -171,12 +207,19 @@ export default function VolunteerPage() {
               />
             </div>
 
+            {error && (
+              <div className="mb-6 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-red-700 dark:text-red-300 text-sm">{error}</p>
+              </div>
+            )}
+
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center font-semibold"
+              disabled={submitting}
+              className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Send className="w-5 h-5 mr-2" />
-              Submit Application
+              {submitting ? 'Submitting...' : 'Submit Application'}
             </button>
           </motion.form>
         </div>

@@ -3,23 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Phone, Mail, Clock, Send, User, MessageSquare, Calendar, Navigation, MessageCircle, ChevronRight, ChevronLeft, Heart, Users, Building, Video, Globe } from 'lucide-react';
-import { sanityFetch } from '@/lib/sanity-fetch';
-
-interface SiteSettings {
-  churchName: string;
-  address: string;
-  phoneNumber: string;
-  email: string;
-  whatsappGroupUrl?: string;
-}
-
-interface StaffMember {
-  _id: string;
-  name: string;
-  position: string;
-  email: string;
-  phone: string;
-}
+import { getSiteSettings, getStaffMembers, SiteSettings, StaffMember } from '@/lib/content';
 
 const categories = [
   { id: 'spiritual', name: 'Spiritual & Community Life', icon: Heart, color: 'blue' },
@@ -147,28 +131,16 @@ export default function ContactPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [siteSettingsData, staffData, officeHoursData] = await Promise.all([
-        sanityFetch(`*[_type == "siteSettings"][0] {
-          churchName,
-          address,
-          phoneNumber,
-          email,
-          whatsappGroupUrl,
-          officeHours
-        }`),
-        sanityFetch(`*[_type == "staffMember"] {
-          _id,
-          name,
-          position,
-          email,
-          phone
-        }`),
-        sanityFetch(`*[_type == "siteSettings"][0].officeHours`)
+      const [siteSettingsData, staffData] = await Promise.all([
+        getSiteSettings(),
+        getStaffMembers()
       ]);
 
-      if (siteSettingsData) setSiteSettings(siteSettingsData);
-      if (staffData) setStaff(staffData);
-      if (officeHoursData) setOfficeHours(officeHoursData);
+      if (siteSettingsData) {
+        setSiteSettings(siteSettingsData);
+        if (siteSettingsData.officeHours) setOfficeHours(siteSettingsData.officeHours);
+      }
+      setStaff(staffData);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -317,10 +289,10 @@ export default function ContactPage() {
                     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          <label htmlFor="contact-firstName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             First Name *
                           </label>
-                          <input
+                          <input id="contact-firstName"
                             type="text"
                             value={formData.firstName}
                             onChange={(e) => setFormData({...formData, firstName: e.target.value})}
@@ -328,10 +300,10 @@ export default function ContactPage() {
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          <label htmlFor="contact-lastName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Last Name *
                           </label>
-                          <input
+                          <input id="contact-lastName"
                             type="text"
                             value={formData.lastName}
                             onChange={(e) => setFormData({...formData, lastName: e.target.value})}
@@ -341,10 +313,10 @@ export default function ContactPage() {
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          <label htmlFor="contact-email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Email *
                           </label>
-                          <input
+                          <input id="contact-email"
                             type="email"
                             value={formData.email}
                             onChange={(e) => setFormData({...formData, email: e.target.value})}
@@ -352,10 +324,10 @@ export default function ContactPage() {
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          <label htmlFor="contact-phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Phone Number
                           </label>
-                          <input
+                          <input id="contact-phone"
                             type="tel"
                             value={formData.phone}
                             onChange={(e) => setFormData({...formData, phone: e.target.value})}
@@ -364,10 +336,10 @@ export default function ContactPage() {
                         </div>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <label htmlFor="contact-address" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           Address
                         </label>
-                        <input
+                        <input id="contact-address"
                           type="text"
                           value={formData.address}
                           onChange={(e) => setFormData({...formData, address: e.target.value})}
@@ -377,10 +349,10 @@ export default function ContactPage() {
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          <label htmlFor="contact-city" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             City
                           </label>
-                          <input
+                          <input id="contact-city"
                             type="text"
                             value={formData.city}
                             onChange={(e) => setFormData({...formData, city: e.target.value})}
@@ -388,10 +360,10 @@ export default function ContactPage() {
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          <label htmlFor="contact-state" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             State
                           </label>
-                          <input
+                          <input id="contact-state"
                             type="text"
                             value={formData.state}
                             onChange={(e) => setFormData({...formData, state: e.target.value})}
@@ -399,10 +371,10 @@ export default function ContactPage() {
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          <label htmlFor="contact-zipCode" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             ZIP Code
                           </label>
-                          <input
+                          <input id="contact-zipCode"
                             type="text"
                             value={formData.zipCode}
                             onChange={(e) => setFormData({...formData, zipCode: e.target.value})}
@@ -412,10 +384,10 @@ export default function ContactPage() {
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          <label htmlFor="contact-dateOfBirth" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Date of Birth
                           </label>
-                          <input
+                          <input id="contact-dateOfBirth"
                             type="date"
                             value={formData.dateOfBirth}
                             onChange={(e) => setFormData({...formData, dateOfBirth: e.target.value})}
@@ -423,10 +395,10 @@ export default function ContactPage() {
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          <label htmlFor="contact-gender" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Gender
                           </label>
-                          <select
+                          <select id="contact-gender"
                             value={formData.gender}
                             onChange={(e) => setFormData({...formData, gender: e.target.value})}
                             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
@@ -438,10 +410,10 @@ export default function ContactPage() {
                           </select>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          <label htmlFor="contact-maritalStatus" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Marital Status
                           </label>
-                          <select
+                          <select id="contact-maritalStatus"
                             value={formData.maritalStatus}
                             onChange={(e) => setFormData({...formData, maritalStatus: e.target.value})}
                             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
@@ -456,10 +428,10 @@ export default function ContactPage() {
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          <label htmlFor="contact-occupation" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Occupation
                           </label>
-                          <input
+                          <input id="contact-occupation"
                             type="text"
                             value={formData.occupation}
                             onChange={(e) => setFormData({...formData, occupation: e.target.value})}
@@ -467,10 +439,10 @@ export default function ContactPage() {
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          <label htmlFor="contact-preferredContact" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Preferred Contact Method
                           </label>
-                          <select
+                          <select id="contact-preferredContact"
                             value={formData.preferredContact}
                             onChange={(e) => setFormData({...formData, preferredContact: e.target.value})}
                             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
@@ -518,10 +490,10 @@ export default function ContactPage() {
 
                       {formData.category && (
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                          <label htmlFor="contact-formType" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                             Specific Request *
                           </label>
-                          <select
+                          <select id="contact-formType"
                             value={formData.formType}
                             onChange={(e) => setFormData({...formData, formType: e.target.value})}
                             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
@@ -543,10 +515,10 @@ export default function ContactPage() {
                       {formData.formType === 'baptism' && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label htmlFor="contact-baptismType" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                               Baptism Type
                             </label>
-                            <select value={formData.baptismType} onChange={(e) => setFormData({...formData, baptismType: e.target.value})} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
+                            <select id="contact-baptismType" value={formData.baptismType} onChange={(e) => setFormData({...formData, baptismType: e.target.value})} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
                               <option value="">Select type</option>
                               <option value="adult">Adult Baptism</option>
                               <option value="infant">Infant Baptism</option>
@@ -554,10 +526,10 @@ export default function ContactPage() {
                             </select>
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label htmlFor="contact-membershipStatus" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                               Membership Status
                             </label>
-                            <select value={formData.membershipStatus} onChange={(e) => setFormData({...formData, membershipStatus: e.target.value})} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
+                            <select id="contact-membershipStatus" value={formData.membershipStatus} onChange={(e) => setFormData({...formData, membershipStatus: e.target.value})} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
                               <option value="">Select status</option>
                               <option value="new">New to Christianity</option>
                               <option value="transfer">Transferring from another church</option>
@@ -591,10 +563,10 @@ export default function ContactPage() {
                       {formData.formType === 'donations' && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label htmlFor="contact-donationType" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                               Donation Type
                             </label>
-                            <select value={formData.donationType} onChange={(e) => setFormData({...formData, donationType: e.target.value})} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
+                            <select id="contact-donationType" value={formData.donationType} onChange={(e) => setFormData({...formData, donationType: e.target.value})} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
                               <option value="">Select type</option>
                               <option value="tithe">Tithe</option>
                               <option value="offering">General Offering</option>
@@ -603,10 +575,10 @@ export default function ContactPage() {
                             </select>
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label htmlFor="contact-donationAmount" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                               Amount (Optional)
                             </label>
-                            <input type="number" value={formData.donationAmount} onChange={(e) => setFormData({...formData, donationAmount: e.target.value})} placeholder="₹0.00" className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" />
+                            <input id="contact-donationAmount" type="number" value={formData.donationAmount} onChange={(e) => setFormData({...formData, donationAmount: e.target.value})} placeholder="₹0.00" className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" />
                           </div>
                         </div>
                       )}
@@ -614,10 +586,10 @@ export default function ContactPage() {
                       {formData.formType === 'facility' && (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label htmlFor="contact-facilityType" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                               Facility Type
                             </label>
-                            <select value={formData.facilityType} onChange={(e) => setFormData({...formData, facilityType: e.target.value})} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
+                            <select id="contact-facilityType" value={formData.facilityType} onChange={(e) => setFormData({...formData, facilityType: e.target.value})} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
                               <option value="">Select facility</option>
                               <option value="sanctuary">Main Sanctuary</option>
                               <option value="hall">Fellowship Hall</option>
@@ -625,25 +597,25 @@ export default function ContactPage() {
                             </select>
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label htmlFor="contact-eventDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                               Event Date
                             </label>
-                            <input type="date" value={formData.eventDate} onChange={(e) => setFormData({...formData, eventDate: e.target.value})} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" />
+                            <input id="contact-eventDate" type="date" value={formData.eventDate} onChange={(e) => setFormData({...formData, eventDate: e.target.value})} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" />
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label htmlFor="contact-guestCount" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                               Guest Count
                             </label>
-                            <input type="number" value={formData.guestCount} onChange={(e) => setFormData({...formData, guestCount: e.target.value})} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" />
+                            <input id="contact-guestCount" type="number" value={formData.guestCount} onChange={(e) => setFormData({...formData, guestCount: e.target.value})} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" />
                           </div>
                         </div>
                       )}
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <label htmlFor="contact-subject" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           Subject
                         </label>
-                        <input
+                        <input id="contact-subject"
                           type="text"
                           value={formData.subject}
                           onChange={(e) => setFormData({...formData, subject: e.target.value})}
@@ -652,10 +624,10 @@ export default function ContactPage() {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <label htmlFor="contact-message" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           Message *
                         </label>
-                        <textarea
+                        <textarea id="contact-message"
                           value={formData.message}
                           onChange={(e) => setFormData({...formData, message: e.target.value})}
                           rows={4}
@@ -665,10 +637,10 @@ export default function ContactPage() {
 
                       {(formData.formType === 'prayer' || formData.formType === 'counseling') && (
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          <label htmlFor="contact-urgency" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Urgency Level
                           </label>
-                          <select value={formData.urgency} onChange={(e) => setFormData({...formData, urgency: e.target.value})} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
+                          <select id="contact-urgency" value={formData.urgency} onChange={(e) => setFormData({...formData, urgency: e.target.value})} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
                             <option value="normal">Normal</option>
                             <option value="urgent">Urgent</option>
                             <option value="emergency">Emergency</option>
@@ -715,6 +687,13 @@ export default function ContactPage() {
                   {submitStatus === 'success' && (
                     <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
                       <p className="text-green-800 text-sm">Thank you for your message! We&apos;ll get back to you soon.</p>
+                    </div>
+                  )}
+                  {submitStatus === 'error' && (
+                    <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                      <p className="text-red-700 dark:text-red-300 text-sm">
+                        Something went wrong sending your message. Please try again, or reach us directly using the contact details on this page.
+                      </p>
                     </div>
                   )}
                 </form>
@@ -814,7 +793,7 @@ export default function ContactPage() {
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
               {staff.map((member, index) => (
                 <motion.div 
-                  key={member._id}
+                  key={member.id}
                   className="text-center bg-gray-50 p-6 rounded-lg"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -865,6 +844,7 @@ export default function ContactPage() {
             transition={{ duration: 0.6 }}
           >
             <iframe
+              title="Church location map"
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d289.6717292106369!2d78.16560039927737!3d11.678130577350974!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3babf16da41b56e5%3A0x30049390bc14cac1!2sSALEM%20PRIMITIVE%20BAPTIST%20CHURCH!5e1!3m2!1sen!2sin!4v1760932034062!5m2!1sen!2sin"
               width="100%"
               height="100%"
