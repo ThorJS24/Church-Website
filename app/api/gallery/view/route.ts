@@ -1,35 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@sanity/client';
+import { getAdminDb } from '@/lib/firebase-admin';
+import { FieldValue } from 'firebase-admin/firestore';
+import { checkRateLimit, clientIpFrom } from '@/lib/rateLimit';
 
-const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
-const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET;
-const token = process.env.SANITY_API_TOKEN;
-
-let client: any = null;
-if (projectId && dataset && token) {
-  client = createClient({
-    projectId,
-    dataset,
-    token,
-    useCdn: false,
-    apiVersion: '2023-05-03'
-  });
-}
+// 60/hour: this fires implicitly as someone browses a photo gallery (once
+// per photo opened), not on a deliberate abuse-prone action — the ceiling
+// is set high enough that normal browsing never trips it, while still
+// bounding a scripted hammering of the endpoint.
+const RATE_LIMIT_MAX = 60;
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
 
 export async function POST(request: NextRequest) {
-  if (!client) {
-    return NextResponse.json({ success: false, message: 'CMS not configured' }, { status: 500 });
-  }
-  
   try {
-    const { imageId } = await request.json();
-    
-    const result = await client
-      .patch(imageId)
-      .inc({ views: 1 })
-      .commit();
+    const ip = clientIpFrom(request);
+    const rateLimit = await checkRateLimit(`gallery-view_${ip}`, RATE_LIMIT_MAX, RATE_LIMIT_WINDOW_MS);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { success: false, error: 'Too many requests. Please try again later.' },
+        { status: 429, headers: { 'Retry-After': String(Math.ceil((rateLimit.retryAfterMs || 0) / 1000)) } }
+      );
+    }
 
-    return NextResponse.json({ success: true, views: result.views });
+    const { imageId } = await request.json();
+    if (!imageId) {
+      return NextResponse.json({ success: false, error: 'imageId is required' }, { status: 400 });
+    }
+
+    const ref = getAdminDb().collection('galleryImages').doc(imageId);
+    await ref.update({ views: FieldValue.increment(1) });
+    const snap = await ref.get();
+
+    return NextResponse.json({ success: true, views: snap.data()?.views });
   } catch (error) {
     return NextResponse.json({ success: false }, { status: 500 });
   }

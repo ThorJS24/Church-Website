@@ -1,65 +1,44 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@sanity/client';
+import { getAdminDb } from '@/lib/firebase-admin';
+import { requireAdmin, withAudit } from '@/lib/api-auth';
 
-const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
-const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET;
-const token = process.env.SANITY_API_TOKEN;
+const LIVESTREAM_DOC = 'current';
 
-let client: any = null;
-if (projectId && dataset && token) {
-  client = createClient({
-    projectId,
-    dataset,
-    token,
-    useCdn: false,
-    apiVersion: '2023-05-03'
-  });
+export async function GET() {
+  try {
+    const snap = await getAdminDb().collection('livestream').doc(LIVESTREAM_DOC).get();
+    return NextResponse.json({ success: true, data: snap.exists ? snap.data() : null });
+  } catch (error) {
+    return NextResponse.json({ success: false }, { status: 500 });
+  }
 }
 
 export async function PATCH(request: NextRequest) {
-  if (!client) {
-    return NextResponse.json({ success: false, message: 'CMS not configured' }, { status: 500 });
-  }
-  
+  const authResult = await requireAdmin(request);
+  if (!authResult.ok) return authResult.response;
+
   try {
-    const { streamId, viewerCount, isLive } = await request.json();
-    
-    const updates: any = {};
+    const { viewerCount, isLive } = await request.json();
+
+    const updates: Record<string, unknown> = {};
     if (viewerCount !== undefined) updates.viewerCount = viewerCount;
     if (isLive !== undefined) updates.isLive = isLive;
-    
-    const result = await client
-      .patch(streamId)
-      .set(updates)
-      .commit();
 
-    return NextResponse.json({ success: true, data: result });
+    const ref = getAdminDb().collection('livestream').doc(LIVESTREAM_DOC);
+    const before = (await ref.get()).data();
+
+    await withAudit(
+      authResult.user,
+      request,
+      { action: 'livestream.update', targetType: 'livestream', targetId: LIVESTREAM_DOC },
+      async () => {
+        await ref.set(updates, { merge: true });
+        return { before, after: updates, result: null };
+      }
+    );
+
+    return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json({ success: false, error: 'Update failed' }, { status: 500 });
-  }
-}
-
-export async function GET() {
-  if (!client) {
-    return NextResponse.json({ success: false, message: 'CMS not configured' }, { status: 500 });
-  }
-  
-  try {
-    const stream = await client.fetch(`*[_type == "livestream"] | order(_createdAt desc)[0] {
-      _id,
-      title,
-      isLive,
-      viewerCount,
-      streamType,
-      streamUrl,
-      streamKey,
-      chatEnabled,
-      autoRefresh,
-      refreshInterval
-    }`);
-    
-    return NextResponse.json({ success: true, data: stream });
-  } catch (error) {
-    return NextResponse.json({ success: false }, { status: 500 });
   }
 }

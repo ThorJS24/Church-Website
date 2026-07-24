@@ -1,35 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@sanity/client';
+import { getAdminDb } from '@/lib/firebase-admin';
+import { FieldValue } from 'firebase-admin/firestore';
+import { checkRateLimit, clientIpFrom } from '@/lib/rateLimit';
 
-const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
-const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET;
-const token = process.env.SANITY_API_TOKEN;
-
-let client: any = null;
-if (projectId && dataset && token) {
-  client = createClient({
-    projectId,
-    dataset,
-    token,
-    useCdn: false,
-    apiVersion: '2023-05-03'
-  });
-}
+// 30/hour: a real visitor might like several photos while browsing a
+// gallery; the risk here is scripted like-inflation, not a form-abuse
+// cost, so the ceiling is generous relative to the write itself being
+// cheap (an atomic increment, no moderation queue involvement).
+const RATE_LIMIT_MAX = 30;
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
 
 export async function POST(request: NextRequest) {
-  if (!client) {
-    return NextResponse.json({ success: false, message: 'CMS not configured' }, { status: 500 });
-  }
-  
   try {
-    const { imageId } = await request.json();
-    
-    const result = await client
-      .patch(imageId)
-      .inc({ likes: 1 })
-      .commit();
+    const ip = clientIpFrom(request);
+    const rateLimit = await checkRateLimit(`gallery-like_${ip}`, RATE_LIMIT_MAX, RATE_LIMIT_WINDOW_MS);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { success: false, error: 'Too many requests. Please try again later.' },
+        { status: 429, headers: { 'Retry-After': String(Math.ceil((rateLimit.retryAfterMs || 0) / 1000)) } }
+      );
+    }
 
-    return NextResponse.json({ success: true, likes: result.likes });
+    const { imageId } = await request.json();
+    if (!imageId) {
+      return NextResponse.json({ success: false, error: 'imageId is required' }, { status: 400 });
+    }
+
+    const ref = getAdminDb().collection('galleryImages').doc(imageId);
+    await ref.update({ likes: FieldValue.increment(1) });
+    const snap = await ref.get();
+
+    return NextResponse.json({ success: true, likes: snap.data()?.likes });
   } catch (error) {
     return NextResponse.json({ success: false }, { status: 500 });
   }

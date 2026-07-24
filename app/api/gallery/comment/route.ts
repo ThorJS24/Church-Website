@@ -1,56 +1,60 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@sanity/client';
+import { getAdminDb } from '@/lib/firebase-admin';
+import { FieldValue } from 'firebase-admin/firestore';
+import { checkRateLimit, clientIpFrom } from '@/lib/rateLimit';
 
-const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
-const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET;
-const token = process.env.SANITY_API_TOKEN;
-
-let client: any = null;
-if (projectId && dataset && token) {
-  client = createClient({
-    projectId,
-    dataset,
-    token,
-    useCdn: false,
-    apiVersion: '2023-05-03'
-  });
-}
+// 10/hour: higher than a full form submission (prayer/contact) since
+// commenting on several photos while browsing is normal behavior, but
+// still moderated afterward so shouldn't be wide open either.
+const RATE_LIMIT_MAX = 10;
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
 
 export async function POST(request: NextRequest) {
-  if (!client) {
-    return NextResponse.json({ success: false, message: 'CMS not configured' }, { status: 500 });
-  }
-  
   try {
+    const ip = clientIpFrom(request);
+    const rateLimit = await checkRateLimit(`gallery-comment_${ip}`, RATE_LIMIT_MAX, RATE_LIMIT_WINDOW_MS);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { success: false, error: 'Too many comments submitted. Please try again later.' },
+        { status: 429, headers: { 'Retry-After': String(Math.ceil((rateLimit.retryAfterMs || 0) / 1000)) } }
+      );
+    }
+
     const { imageId, comment, author } = await request.json();
-    
-    const commentDoc = await client.create({
-      _type: 'comment',
+    if (!imageId || !comment) {
+      return NextResponse.json({ success: false, error: 'imageId and comment are required' }, { status: 400 });
+    }
+
+    const docRef = await getAdminDb().collection('comments').add({
+      imageId,
       text: comment,
       author: author || 'Anonymous',
-      createdAt: new Date().toISOString(),
-      image: { _type: 'reference', _ref: imageId }
+      createdAt: FieldValue.serverTimestamp(),
+      moderationStatus: 'pending',
     });
 
-    return NextResponse.json({ success: true, comment: commentDoc });
+    return NextResponse.json({ success: true, id: docRef.id, moderationStatus: 'pending' });
   } catch (error) {
     return NextResponse.json({ success: false }, { status: 500 });
   }
 }
 
 export async function GET(request: NextRequest) {
-  if (!client) {
-    return NextResponse.json({ success: false, message: 'CMS not configured' }, { status: 500 });
-  }
-  
   try {
     const { searchParams } = new URL(request.url);
     const imageId = searchParams.get('imageId');
-    
-    const comments = await client.fetch(
-      `*[_type == "comment" && image._ref == $imageId] | order(createdAt desc)`,
-      { imageId }
-    );
+    if (!imageId) {
+      return NextResponse.json({ success: false, error: 'imageId is required' }, { status: 400 });
+    }
+
+    const snap = await getAdminDb()
+      .collection('comments')
+      .where('imageId', '==', imageId)
+      .where('moderationStatus', '==', 'approved')
+      .orderBy('createdAt', 'desc')
+      .get();
+
+    const comments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
     return NextResponse.json({ success: true, comments });
   } catch (error) {

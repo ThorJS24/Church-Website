@@ -7,30 +7,7 @@ const API_DOCS = {
   baseUrl: process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000',
   endpoints: {
     authentication: {
-      '/api/auth/login': {
-        method: 'POST',
-        description: 'User login',
-        parameters: {
-          email: 'string (required)',
-          password: 'string (required)'
-        },
-        response: {
-          success: 'boolean',
-          token: 'string',
-          user: 'object'
-        }
-      },
-      '/api/auth/register': {
-        method: 'POST',
-        description: 'User registration',
-        parameters: {
-          firstName: 'string (required)',
-          lastName: 'string (required)',
-          email: 'string (required)',
-          password: 'string (required)',
-          phone: 'string (optional)'
-        }
-      }
+      note: 'Authentication is handled client-side via the Firebase Auth SDK (see contexts/AuthContext.tsx). There is no server login/register endpoint — API routes verify the Firebase ID token sent as `Authorization: Bearer <idToken>`.'
     },
     services: {
       '/api/services/request': {
@@ -62,17 +39,6 @@ const API_DOCS = {
       }
     },
     notifications: {
-      '/api/notifications/email': {
-        method: 'POST',
-        description: 'Send email notification',
-        parameters: {
-          to: 'string (required)',
-          subject: 'string (required)',
-          html: 'string (required)',
-          type: 'string (optional)',
-          userId: 'string (optional)'
-        }
-      },
       '/api/notifications/sms': {
         method: 'POST',
         description: 'Send SMS notification',
@@ -128,9 +94,9 @@ const API_DOCS = {
     500: 'Internal Server Error - Server error'
   },
   authentication: {
-    type: 'Bearer Token',
-    description: 'Include JWT token in Authorization header: Bearer <token>',
-    tokenExpiry: '24 hours'
+    type: 'Firebase ID Token',
+    description: 'Sign in via the Firebase Auth SDK client-side, then include the ID token in the Authorization header: Bearer <idToken>',
+    tokenExpiry: '1 hour (auto-refreshed by the Firebase client SDK)'
   },
   rateLimit: {
     general: '100 requests per minute',

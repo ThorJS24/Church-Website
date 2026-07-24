@@ -1,9 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, getDocs, query, where, orderBy } from 'firebase/firestore';
+import { checkRateLimit, clientIpFrom } from '@/lib/rateLimit';
+
+// 5/hour: matches the gallery-submission threshold — a public form feeding
+// the moderation queue, where legitimate use is "a handful of requests",
+// not a flow anyone submits often.
+const RATE_LIMIT_MAX = 5;
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = clientIpFrom(request);
+    const rateLimit = await checkRateLimit(`prayer-submit_${ip}`, RATE_LIMIT_MAX, RATE_LIMIT_WINDOW_MS);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { success: false, message: 'Too many prayer requests submitted. Please try again later.' },
+        { status: 429, headers: { 'Retry-After': String(Math.ceil((rateLimit.retryAfterMs || 0) / 1000)) } }
+      );
+    }
+
     const body = await request.json();
     const { title, description, category, isPrivate, isAnonymous, authorName } = body;
 
@@ -22,6 +38,7 @@ export async function POST(request: NextRequest) {
       isAnonymous: isAnonymous || false,
       authorName: isAnonymous ? 'Anonymous' : (authorName || 'Anonymous'),
       status: 'active',
+      moderationStatus: 'pending',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -50,6 +67,7 @@ export async function GET() {
       prayerRequestsRef,
       where('isPrivate', '==', false),
       where('status', '==', 'active'),
+      where('moderationStatus', '==', 'approved'),
       orderBy('createdAt', 'desc')
     );
 
