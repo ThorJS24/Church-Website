@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Heart, Globe, Users, MessageCircle, Calendar, MapPin, Phone, Mail } from 'lucide-react';
-import { sanityFetch } from '@/lib/sanity-fetch';
+import { getPageContent } from '@/lib/content';
 import DivineEffects from '@/components/DivineEffects';
 import SacredText from '@/components/SacredText';
 import HeavenlyCard from '@/components/HeavenlyCard';
@@ -48,7 +48,7 @@ export default function CommunityPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const data = await sanityFetch(`*[_type == "communityPage"][0]`);
+      const data = await getPageContent<CommunityData>('community');
       if (data) setCommunityData(data);
     } catch (error) {
       console.error('Error fetching community data:', error);

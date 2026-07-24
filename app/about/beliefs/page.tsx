@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Book, Heart, Cross, Target, Eye, CheckCircle } from 'lucide-react';
-import { sanityFetch } from '@/lib/sanity-fetch';
+import { getPageContent } from '@/lib/content';
 import DivineEffects from '@/components/DivineEffects';
 import SacredText from '@/components/SacredText';
 import HeavenlyCard from '@/components/HeavenlyCard';
@@ -51,7 +51,7 @@ export default function BeliefsPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const aboutData = await sanityFetch(`*[_type == "aboutPage"][0]`);
+      const aboutData = await getPageContent<AboutPage>('about');
       if (aboutData) setAboutPage(aboutData);
     } catch (error) {
       console.error('Error fetching data:', error);

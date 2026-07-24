@@ -5,82 +5,64 @@ import { motion } from 'framer-motion';
 import { User, Mail, Phone, MapPin, Calendar, Edit, Save, X, LogOut } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function ProfilePage() {
-  const [user, setUser] = useState<any>(null);
+  const { user, isLoading, updateUser, logout } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
-    email: '',
     phone: '',
     address: '',
     dateOfBirth: '',
-    interests: []
+    interests: [] as string[]
   });
   const router = useRouter();
 
   useEffect(() => {
-    fetchProfile();
-  }, []);
-
-  const fetchProfile = () => {
-    const userData = localStorage.getItem('user');
-    if (!userData) {
+    if (!isLoading && !user) {
       router.push('/login');
-      return;
     }
-    const parsed = JSON.parse(userData);
-    setUser(parsed);
-    setFormData({
-      firstName: parsed.firstName || '',
-      lastName: parsed.lastName || '',
-      email: parsed.email || '',
-      phone: parsed.phone || '',
-      address: parsed.address || '',
-      dateOfBirth: parsed.dateOfBirth ? parsed.dateOfBirth.split('T')[0] : '',
-      interests: parsed.interests || []
-    });
-  };
+  }, [isLoading, user, router]);
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        phone: user.phone || '',
+        address: user.address || '',
+        dateOfBirth: user.dateOfBirth ? user.dateOfBirth.split('T')[0] : '',
+        interests: user.interests || []
+      });
+    }
+  }, [user]);
 
   const handleSave = async () => {
-    setLoading(true);
+    setSaving(true);
     try {
-      const response = await fetch('/api/auth/profile', {
-        method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(formData)
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        const updatedUser = { ...user, ...formData, name: `${formData.firstName} ${formData.lastName}` };
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-        setUser(updatedUser);
+      const success = await updateUser(formData);
+      if (success) {
         setIsEditing(false);
         alert('Profile updated successfully!');
       } else {
-        alert(data.message || 'Failed to update profile');
+        alert('Failed to update profile');
       }
     } catch (error) {
       alert('An error occurred while updating profile');
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
-    window.location.href = '/login';
+  const handleLogout = async () => {
+    await logout();
+    router.push('/login');
   };
 
-  if (!user) {
+  if (isLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -100,7 +82,7 @@ export default function ProfilePage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <div className="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center overflow-hidden">
-                  {user?.photoURL ? (
+                  {user.photoURL ? (
                     <Image src={user.photoURL} alt="Profile" width={80} height={80} className="object-cover rounded-full" />
                   ) : (
                     <User className="w-10 h-10 text-white" />
@@ -110,8 +92,8 @@ export default function ProfilePage() {
                   <h1 className="text-2xl font-bold text-white">
                     {formData.firstName} {formData.lastName}
                   </h1>
-                  <p className="text-blue-100">{formData.email}</p>
-                  <p className="text-blue-200 text-sm">Member since {new Date(user.memberSince || user.createdAt).toLocaleDateString()}</p>
+                  <p className="text-blue-100">{user.email}</p>
+                  <p className="text-blue-200 text-sm">Member since {new Date(user.joinDate || user.createdAt).toLocaleDateString()}</p>
                 </div>
               </div>
               <div className="flex space-x-2">
@@ -168,7 +150,7 @@ export default function ProfilePage() {
 
                   <div className="flex items-center">
                     <Mail className="w-5 h-5 text-gray-400 mr-3" />
-                    <span className="text-gray-700 dark:text-gray-300">{formData.email}</span>
+                    <span className="text-gray-700 dark:text-gray-300">{user.email}</span>
                   </div>
 
                   <div className="flex items-center">
@@ -234,7 +216,7 @@ export default function ProfilePage() {
                     <p className="text-gray-500 dark:text-gray-400">No interests selected</p>
                   )}
                 </div>
-                
+
                 <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
                   Membership Info
                 </h3>
@@ -242,24 +224,18 @@ export default function ProfilePage() {
                   <div className="flex justify-between">
                     <span className="text-gray-600 dark:text-gray-400">Member Since:</span>
                     <span className="text-gray-900 dark:text-white">
-                      {new Date(user.memberSince || user.createdAt).toLocaleDateString()}
+                      {new Date(user.joinDate || user.createdAt).toLocaleDateString()}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600 dark:text-gray-400">Status:</span>
-                    <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm">
-                      {user.status || 'Active Member'}
+                    <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm capitalize">
+                      {user.membershipStatus || 'Member'}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600 dark:text-gray-400">Role:</span>
                     <span className="text-gray-900 dark:text-white capitalize">{user.role || 'Member'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Last Login:</span>
-                    <span className="text-gray-900 dark:text-white">
-                      {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'First time'}
-                    </span>
                   </div>
                 </div>
               </div>
@@ -269,11 +245,11 @@ export default function ProfilePage() {
               <div className="mt-6 flex justify-end">
                 <button
                   onClick={handleSave}
-                  disabled={loading}
+                  disabled={saving}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center disabled:opacity-50"
                 >
                   <Save className="w-4 h-4 mr-2" />
-                  {loading ? 'Saving...' : 'Save Changes'}
+                  {saving ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
             )}
