@@ -2,9 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import { Shield, Download, Trash2, Eye, Settings } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { getIdToken } from '@/lib/firebase';
 
 export default function GDPRCompliance() {
+  const { user } = useAuth();
+  const router = useRouter();
   const [showBanner, setShowBanner] = useState(false);
   const [preferences, setPreferences] = useState({
     necessary: true,
@@ -12,6 +17,7 @@ export default function GDPRCompliance() {
     marketing: false,
     functional: false
   });
+  const [requestStatus, setRequestStatus] = useState<{ type: 'download' | 'delete' | null; state: 'idle' | 'working' | 'success' | 'error' }>({ type: null, state: 'idle' });
 
   useEffect(() => {
     const consent = localStorage.getItem('gdpr-consent');
@@ -40,26 +46,40 @@ export default function GDPRCompliance() {
   };
 
   const handleDataRequest = async (type: 'download' | 'delete') => {
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+
+    setRequestStatus({ type, state: 'working' });
     try {
-      const response = await fetch(`/api/gdpr/${type}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      
-      if (response.ok) {
-        if (type === 'download') {
-          const blob = await response.blob();
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = 'my-church-data.json';
-          a.click();
-        } else {
-          alert('Data deletion request submitted. You will receive confirmation via email.');
+      const token = await getIdToken();
+      const response = await fetch(
+        type === 'download' ? '/api/privacy/download-data' : '/api/privacy/delete-account',
+        {
+          method: type === 'download' ? 'POST' : 'DELETE',
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
         }
+      );
+
+      if (!response.ok) {
+        setRequestStatus({ type, state: 'error' });
+        return;
       }
+
+      if (type === 'download') {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'my-church-data.json';
+        a.click();
+        window.URL.revokeObjectURL(url);
+      }
+      setRequestStatus({ type, state: 'success' });
     } catch (error) {
       console.error('GDPR request error:', error);
+      setRequestStatus({ type, state: 'error' });
     }
   };
 
@@ -69,6 +89,8 @@ export default function GDPRCompliance() {
       <AnimatePresence>
         {showBanner && (
           <motion.div
+            role="region"
+            aria-label="Cookie preferences"
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
@@ -147,7 +169,7 @@ export default function GDPRCompliance() {
       </AnimatePresence>
 
       {/* GDPR Management Panel */}
-      <div className="bg-white rounded-lg shadow p-6">
+      <div role="region" aria-label="Data privacy and rights" className="bg-white rounded-lg shadow p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
           <Shield className="w-5 h-5 mr-2" />
           Data Privacy & Rights
@@ -162,41 +184,56 @@ export default function GDPRCompliance() {
                 <p className="text-xs text-gray-500">Learn how we handle your data</p>
               </div>
             </div>
-            <button className="text-blue-600 text-sm hover:underline">
+            <button onClick={() => router.push('/privacy')} className="text-blue-600 text-sm hover:underline">
               View
             </button>
           </div>
 
-          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-            <div className="flex items-center">
-              <Download className="w-4 h-4 text-gray-600 mr-3" />
-              <div>
-                <p className="font-medium text-sm">Download My Data</p>
-                <p className="text-xs text-gray-500">Get a copy of your personal data</p>
+          <div className="p-3 bg-gray-50 rounded-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <Download className="w-4 h-4 text-gray-600 mr-3" />
+                <div>
+                  <p className="font-medium text-sm">Download My Data</p>
+                  <p className="text-xs text-gray-500">Get a copy of your personal data</p>
+                </div>
               </div>
+              <button
+                onClick={() => handleDataRequest('download')}
+                disabled={requestStatus.type === 'download' && requestStatus.state === 'working'}
+                className="text-blue-600 text-sm hover:underline disabled:opacity-50"
+              >
+                {requestStatus.type === 'download' && requestStatus.state === 'working' ? 'Preparing...' : 'Download'}
+              </button>
             </div>
-            <button
-              onClick={() => handleDataRequest('download')}
-              className="text-blue-600 text-sm hover:underline"
-            >
-              Download
-            </button>
+            {requestStatus.type === 'download' && requestStatus.state === 'error' && (
+              <p className="text-xs text-red-600 mt-2">Couldn&apos;t download your data. Please try again.</p>
+            )}
           </div>
 
-          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-            <div className="flex items-center">
-              <Trash2 className="w-4 h-4 text-red-600 mr-3" />
-              <div>
-                <p className="font-medium text-sm">Delete My Account</p>
-                <p className="text-xs text-gray-500">Permanently remove your data</p>
+          <div className="p-3 bg-gray-50 rounded-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <Trash2 className="w-4 h-4 text-red-600 mr-3" />
+                <div>
+                  <p className="font-medium text-sm">Delete My Account</p>
+                  <p className="text-xs text-gray-500">Permanently remove your data</p>
+                </div>
               </div>
+              <button
+                onClick={() => handleDataRequest('delete')}
+                disabled={requestStatus.type === 'delete' && (requestStatus.state === 'working' || requestStatus.state === 'success')}
+                className="text-red-600 text-sm hover:underline disabled:opacity-50"
+              >
+                {requestStatus.type === 'delete' && requestStatus.state === 'working' ? 'Submitting...' : 'Request'}
+              </button>
             </div>
-            <button
-              onClick={() => handleDataRequest('delete')}
-              className="text-red-600 text-sm hover:underline"
-            >
-              Request
-            </button>
+            {requestStatus.type === 'delete' && requestStatus.state === 'success' && (
+              <p className="text-xs text-green-600 mt-2">Request received — our staff will follow up by email.</p>
+            )}
+            {requestStatus.type === 'delete' && requestStatus.state === 'error' && (
+              <p className="text-xs text-red-600 mt-2">Couldn&apos;t submit your request. Please try again.</p>
+            )}
           </div>
 
           <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">

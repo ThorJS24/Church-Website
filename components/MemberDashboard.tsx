@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  User, Calendar, Heart, DollarSign, Book, Users, 
-  Bell, Settings, Shield, QrCode, Download 
+import {
+  User, Calendar, Heart, DollarSign, Book, Users,
+  Bell, Settings, Download
 } from 'lucide-react';
-import { useAuth } from '@/lib/auth';
-import { hasPermission, Permission } from '@/lib/permissions';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
+import { getIdToken } from '@/lib/firebase';
 
 interface DashboardStats {
   attendanceCount: number;
@@ -18,6 +19,7 @@ interface DashboardStats {
 
 export default function MemberDashboard() {
   const { user } = useAuth();
+  const router = useRouter();
   const [stats, setStats] = useState<DashboardStats>({
     attendanceCount: 0,
     prayerRequests: 0,
@@ -25,6 +27,8 @@ export default function MemberDashboard() {
     upcomingEvents: 0
   });
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [downloadingData, setDownloadingData] = useState(false);
+  const [downloadError, setDownloadError] = useState('');
 
   useEffect(() => {
     if (user) {
@@ -34,7 +38,10 @@ export default function MemberDashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      const response = await fetch('/api/member/dashboard');
+      const token = await getIdToken();
+      const response = await fetch('/api/member/dashboard', {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
       const data = await response.json();
       if (data.success) {
         setStats(data.stats);
@@ -42,6 +49,32 @@ export default function MemberDashboard() {
       }
     } catch (error) {
       console.error('Dashboard data fetch error:', error);
+    }
+  };
+
+  const handleDownloadData = async () => {
+    setDownloadingData(true);
+    setDownloadError('');
+    try {
+      const token = await getIdToken();
+      const response = await fetch('/api/privacy/download-data', {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!response.ok) throw new Error('Download failed');
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'my-church-data.json';
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Data download error:', error);
+      setDownloadError('Could not download your data. Please try again.');
+    } finally {
+      setDownloadingData(false);
     }
   };
 
@@ -213,31 +246,23 @@ export default function MemberDashboard() {
               </div>
 
               <div className="space-y-3">
-                <button className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                  <div className="flex items-center">
-                    <Shield className="w-5 h-5 text-gray-600 mr-3" />
-                    <span className="text-sm font-medium">Two-Factor Auth</span>
-                  </div>
-                  <span className="text-xs text-gray-500">Setup</span>
-                </button>
-
-                <button className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                  <div className="flex items-center">
-                    <QrCode className="w-5 h-5 text-gray-600 mr-3" />
-                    <span className="text-sm font-medium">Member QR Code</span>
-                  </div>
-                  <span className="text-xs text-gray-500">View</span>
-                </button>
-
-                <button className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                <button
+                  onClick={handleDownloadData}
+                  disabled={downloadingData}
+                  className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50"
+                >
                   <div className="flex items-center">
                     <Download className="w-5 h-5 text-gray-600 mr-3" />
                     <span className="text-sm font-medium">Download Data</span>
                   </div>
-                  <span className="text-xs text-gray-500">GDPR</span>
+                  <span className="text-xs text-gray-500">{downloadingData ? 'Preparing...' : 'GDPR'}</span>
                 </button>
+                {downloadError && <p className="text-xs text-red-600">{downloadError}</p>}
 
-                <button className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                <button
+                  onClick={() => router.push('/settings')}
+                  className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                >
                   <div className="flex items-center">
                     <Bell className="w-5 h-5 text-gray-600 mr-3" />
                     <span className="text-sm font-medium">Notifications</span>
