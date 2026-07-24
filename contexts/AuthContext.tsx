@@ -1,22 +1,39 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { onAuthStateChanged, updateProfile as updateFirebaseProfile } from 'firebase/auth';
+import {
+  auth,
+  signInUser,
+  createUser,
+  logOut,
+  createUserProfile,
+  getUserProfile,
+  updateUserProfile as updateFirestoreProfile,
+  changeUserPassword,
+} from '@/lib/firebase';
+import { User } from '@/models/User';
+import { UserRole, Permission, hasPermission as checkPermission, roleAtLeast } from '@/lib/permissions';
 
-interface User {
-  id: string;
+interface RegisterInput {
   name: string;
   email: string;
-  role: 'admin' | 'member' | 'visitor';
-  avatar?: string;
+  password: string;
 }
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
-  logout: () => void;
-  register: (userData: Partial<User> & { password: string }) => Promise<boolean>;
-  updateUser: (userData: Partial<User>) => void;
+  logout: () => Promise<void>;
+  register: (userData: RegisterInput) => Promise<boolean>;
+  updateUser: (updates: Partial<User>) => Promise<boolean>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+  hasPermission: (permission: Permission) => boolean;
+  isSuperAdmin: () => boolean;
+  isAdmin: () => boolean;
+  isModerator: () => boolean;
+  canAccessAdminPanel: () => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -26,102 +43,89 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (!firebaseUser) {
+        setUser(null);
         setIsLoading(false);
         return;
       }
 
-      const response = await fetch('/api/auth/verify', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      if (response.ok) {
-        const userData = await response.json();
-        setUser(userData.user);
-      } else {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+      try {
+        const profile = await getUserProfile(firebaseUser.uid);
+        setUser(profile);
+      } catch (error) {
+        console.error('Failed to load user profile:', error);
+        setUser(null);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error('Auth check failed:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setUser(data.user);
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        return true;
-      }
-      return false;
+      await signInUser(email, password);
+      return true;
     } catch (error) {
       console.error('Login failed:', error);
       return false;
     }
   };
 
-  const register = async (userData: Partial<User> & { password: string }): Promise<boolean> => {
+  const register = async ({ name, email, password }: RegisterInput): Promise<boolean> => {
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData)
-      });
+      const credential = await createUser(email, password);
+      const [firstName, ...rest] = name.trim().split(' ');
+      const lastName = rest.join(' ');
 
-      if (response.ok) {
-        const data = await response.json();
-        setUser(data.user);
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        return true;
-      }
-      return false;
+      await updateFirebaseProfile(credential.user, { displayName: name });
+      const profile = await createUserProfile(credential.user, {
+        firstName,
+        lastName,
+        role: 'member',
+      });
+      setUser(profile);
+      return true;
     } catch (error) {
       console.error('Registration failed:', error);
       return false;
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await logOut();
     setUser(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
   };
 
-  const updateUser = (userData: Partial<User>) => {
-    if (user) {
-      const updatedUser = { ...user, ...userData };
-      setUser(updatedUser);
-      localStorage.setItem('user', JSON.stringify(updatedUser));
+  const updateUser = async (updates: Partial<User>): Promise<boolean> => {
+    if (!user) return false;
+    const success = await updateFirestoreProfile(user.uid, updates);
+    if (success) {
+      setUser({ ...user, ...updates });
     }
+    return success;
   };
+
+  const changePassword = (currentPassword: string, newPassword: string) =>
+    changeUserPassword(currentPassword, newPassword);
+
+  const hasPermission = (permission: Permission) =>
+    !!user && checkPermission(user.role as UserRole, permission);
+
+  const isSuperAdmin = () => roleAtLeast(user?.role as UserRole, UserRole.SUPER_ADMIN);
+  const isAdmin = () => roleAtLeast(user?.role as UserRole, UserRole.ADMIN);
+  const isModerator = () => roleAtLeast(user?.role as UserRole, UserRole.MODERATOR);
+  const canAccessAdminPanel = () => isModerator();
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      isLoading,
-      login,
-      logout,
-      register,
-      updateUser
-    }}>
+    <AuthContext.Provider
+      value={{
+        user, isLoading, login, logout, register, updateUser, changePassword, hasPermission,
+        isSuperAdmin, isAdmin, isModerator, canAccessAdminPanel,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -130,14 +134,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    return {
-      user: null,
-      isLoading: false,
-      login: async () => false,
-      logout: () => {},
-      register: async () => false,
-      updateUser: () => {}
-    };
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };

@@ -1,12 +1,15 @@
 import { initializeApp } from 'firebase/app';
-import { 
-  getAuth, 
-  GoogleAuthProvider, 
-  signInWithPopup, 
-  signOut, 
-  createUserWithEmailAndPassword, 
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+  createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   updateProfile,
+  updatePassword,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
   User as FirebaseUser
 } from 'firebase/auth';
 import { 
@@ -41,6 +44,23 @@ export const logOut = () => signOut(auth);
 export const createUser = (email: string, password: string) => createUserWithEmailAndPassword(auth, email, password);
 export const signInUser = (email: string, password: string) => signInWithEmailAndPassword(auth, email, password);
 
+/** ID token for the signed-in user, to send as `Authorization: Bearer <token>` to our API routes. */
+export const getIdToken = () => auth.currentUser?.getIdToken();
+
+/**
+ * Changes the signed-in user's password. Firebase requires a recent sign-in
+ * for this operation, so it re-authenticates with the current password
+ * first rather than assuming the existing session is fresh enough.
+ */
+export const changeUserPassword = async (currentPassword: string, newPassword: string) => {
+  const user = auth.currentUser;
+  if (!user || !user.email) throw new Error('You must be signed in to change your password.');
+
+  const credential = EmailAuthProvider.credential(user.email, currentPassword);
+  await reauthenticateWithCredential(user, credential);
+  await updatePassword(user, newPassword);
+};
+
 // User profile management
 export const createUserProfile = async (firebaseUser: FirebaseUser, additionalData: Partial<CreateUserData> = {}) => {
   if (!firebaseUser) return null;
@@ -60,7 +80,7 @@ export const createUserProfile = async (firebaseUser: FirebaseUser, additionalDa
       address: additionalData.address || '',
       dateOfBirth: additionalData.dateOfBirth || '',
       interests: additionalData.interests || [],
-      role: additionalData.role || 'visitor',
+      role: additionalData.role || 'member',
       membershipStatus: additionalData.membershipStatus || 'visitor',
       joinDate: new Date().toISOString(),
       createdAt: new Date().toISOString(),
