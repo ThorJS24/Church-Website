@@ -12,6 +12,10 @@ export interface PrayerRequest {
     prayedAt: string;
   }>;
   status: 'active' | 'answered' | 'archived';
+  // Moderation gate, independent of the lifecycle `status` above — a prayer
+  // request can be 'active' but still awaiting moderator approval before
+  // it's publicly visible.
+  moderationStatus: 'pending' | 'approved' | 'rejected';
   createdAt: string;
   updatedAt: string;
 }

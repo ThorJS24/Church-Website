@@ -1,0 +1,198 @@
+rules_version = '2';
+
+// Deploy with: firebase deploy --only firestore:rules
+// (or paste into Firebase Console -> Firestore Database -> Rules)
+//
+// This is the actual access-control boundary for anyone hitting Firestore
+// directly with the public web SDK config — it must stay in sync with the
+// role checks in lib/api-auth.ts. Four-tier role model (member < moderator
+// < admin < super_admin) lives on users/{uid}.role — see lib/permissions.ts.
+//
+// Moderation model: prayerRequests, galleryImages, and comments are public-
+// write (visitors can submit) but carry a moderationStatus field
+// ('pending' | 'approved' | 'rejected'). Public reads only ever see
+// moderationStatus == 'approved' docs; moderator+ can see and act on all of
+// them. Admin-authored content (sermons/events/etc, and admin-uploaded
+// gallery images) is created with moderationStatus already 'approved'.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function ownRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    function isModerator() {
+      return isSignedIn() && ownRole() in ['moderator', 'admin', 'super_admin'];
+    }
+
+    function isAdmin() {
+      return isSignedIn() && ownRole() in ['admin', 'super_admin'];
+    }
+
+    function isSuperAdmin() {
+      return isSignedIn() && ownRole() == 'super_admin';
+    }
+
+    function isApproved() {
+      return resource.data.moderationStatus == 'approved';
+    }
+
+    // ---- Members ----
+    match /users/{userId} {
+      allow read: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow create: if isSignedIn() && request.auth.uid == userId
+        && request.resource.data.role == 'member';
+      allow update: if isSuperAdmin()
+        || (isAdmin() && request.resource.data.role == resource.data.role)
+        || (isSignedIn() && request.auth.uid == userId
+            && request.resource.data.role == resource.data.role);
+      allow delete: if isAdmin();
+    }
+
+    // ---- Prayer requests (public submit, moderator+ approve) ----
+    match /prayerRequests/{requestId} {
+      allow create: if true;
+      allow read: if isModerator()
+        || (isSignedIn() && resource.data.requestedBy == request.auth.uid)
+        || (resource.data.isPrivate == false && isApproved());
+      allow update, delete: if isModerator();
+    }
+
+    // ---- Public form submissions (write-only from the client's perspective) ----
+    match /contacts/{docId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+    match /enhanced_contacts/{docId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+    match /serviceRequests/{docId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+    match /emailNotifications/{docId} {
+      allow create: if true;
+      allow read, update, delete: if isSuperAdmin();
+    }
+    match /security_logs/{docId} {
+      allow create: if true;
+      allow read, update, delete: if isSuperAdmin();
+    }
+
+    // ---- Church content (public read of approved docs, admin+ writes) ----
+    match /sermons/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /events/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /series/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /speakers/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    // Gallery is both admin-authored (moderationStatus set 'approved' at
+    // creation) and publicly-submitted (created 'pending', needs a
+    // moderator). Public read only ever sees approved images.
+    match /galleryImages/{docId} {
+      allow read: if isApproved() || isModerator();
+      allow create: if true;
+      allow update, delete: if isModerator();
+    }
+    match /announcements/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /ministries/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /siteSettings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /pastors/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /services/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /historyTimeline/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /staffMembers/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    // Editable marketing copy for about/community/ministries/services/branches
+    // pages (doc id = page key), read by lib/content.ts's getPageContent().
+    match /pageContent/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /livestream/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /ambientAudio/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    // Written only via the Admin SDK route (app/api/livestream/chat); no
+    // client-side reads today, but rules are defense-in-depth if that changes.
+    match /chatMessages/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    // Public comment submission on gallery images, moderator+ approve.
+    match /comments/{docId} {
+      allow read: if isApproved() || isModerator();
+      allow create: if true;
+      allow update, delete: if isModerator();
+    }
+
+    // ---- Audit log: append-only, written exclusively via the Admin SDK
+    // (server already verified the actor's role before logging), never
+    // directly from a client. ----
+    match /auditLog/{docId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // ---- Rate-limit counters (lib/rateLimit.ts): server-only, no client
+    // access in either direction — a client that could read its own
+    // counter could time requests to dodge the window, and there's no
+    // legitimate reason for a client to write one directly. ----
+    match /rateLimits/{docId} {
+      allow read, write: if false;
+    }
+
+    // ---- Account deletion requests (app/api/privacy/delete-account):
+    // written only via the Admin SDK after the requester's identity is
+    // already verified server-side. Admins can read the queue to process
+    // requests; no client ever writes here directly. ----
+    match /accountDeletionRequests/{docId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // Deny everything else by default.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

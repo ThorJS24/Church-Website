@@ -1,94 +1,70 @@
+// Admin-panel permission tiers. This is the single `role` field on each
+// user's Firestore doc (users/{uid}.role) — the same field lib/api-auth.ts
+// verifies server-side and firestore.rules checks for direct client access.
+// There is no second role mechanism; congregational titles (e.g. "Pastor")
+// are display-only metadata, not a privilege level.
 export enum UserRole {
-  VISITOR = 'visitor',
   MEMBER = 'member',
-  VOLUNTEER = 'volunteer',
-  STAFF = 'staff',
-  PASTOR = 'pastor',
-  ADMIN = 'admin'
+  MODERATOR = 'moderator',
+  ADMIN = 'admin',
+  SUPER_ADMIN = 'super_admin',
+}
+
+const ROLE_LEVEL: Record<UserRole, number> = {
+  [UserRole.MEMBER]: 0,
+  [UserRole.MODERATOR]: 1,
+  [UserRole.ADMIN]: 2,
+  [UserRole.SUPER_ADMIN]: 3,
+};
+
+/** True if `role` is at or above `min` in the hierarchy (member < moderator < admin < super_admin). */
+export function roleAtLeast(role: UserRole | undefined | null, min: UserRole): boolean {
+  const level = role ? ROLE_LEVEL[role] : ROLE_LEVEL[UserRole.MEMBER];
+  return level >= ROLE_LEVEL[min];
+}
+
+export function isValidRole(value: unknown): value is UserRole {
+  return typeof value === 'string' && Object.values(UserRole).includes(value as UserRole);
 }
 
 export enum Permission {
-  // Content permissions
-  VIEW_CONTENT = 'view_content',
-  CREATE_CONTENT = 'create_content',
-  EDIT_CONTENT = 'edit_content',
-  DELETE_CONTENT = 'delete_content',
-  
-  // User management
-  VIEW_MEMBERS = 'view_members',
-  MANAGE_MEMBERS = 'manage_members',
-  
-  // Events
-  CREATE_EVENTS = 'create_events',
-  MANAGE_EVENTS = 'manage_events',
-  
-  // Financial
-  VIEW_DONATIONS = 'view_donations',
-  MANAGE_DONATIONS = 'manage_donations',
-  
-  // Prayer requests
-  VIEW_PRAYERS = 'view_prayers',
-  MANAGE_PRAYERS = 'manage_prayers',
-  
-  // Admin
-  SYSTEM_ADMIN = 'system_admin',
-  CHILD_PROTECTION = 'child_protection'
+  MODERATE = 'moderate', // approve/reject prayer requests, gallery submissions, comments
+  MANAGE_CONTENT = 'manage_content', // sermons/events/gallery/pastors CRUD
+  MANAGE_SETTINGS = 'manage_settings', // site settings, feature toggles
+  MANAGE_USERS = 'manage_users', // view/suspend/delete users, not role changes
+  MANAGE_ROLES = 'manage_roles', // change another user's role
+  VIEW_AUDIT_LOG = 'view_audit_log',
 }
 
 const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
-  [UserRole.VISITOR]: [Permission.VIEW_CONTENT],
-  
-  [UserRole.MEMBER]: [
-    Permission.VIEW_CONTENT,
-    Permission.VIEW_MEMBERS,
-    Permission.VIEW_PRAYERS
+  [UserRole.MEMBER]: [],
+  [UserRole.MODERATOR]: [Permission.MODERATE],
+  [UserRole.ADMIN]: [
+    Permission.MODERATE,
+    Permission.MANAGE_CONTENT,
+    Permission.MANAGE_SETTINGS,
+    Permission.MANAGE_USERS,
+    Permission.VIEW_AUDIT_LOG,
   ],
-  
-  [UserRole.VOLUNTEER]: [
-    Permission.VIEW_CONTENT,
-    Permission.VIEW_MEMBERS,
-    Permission.VIEW_PRAYERS,
-    Permission.CREATE_EVENTS
+  [UserRole.SUPER_ADMIN]: [
+    Permission.MODERATE,
+    Permission.MANAGE_CONTENT,
+    Permission.MANAGE_SETTINGS,
+    Permission.MANAGE_USERS,
+    Permission.MANAGE_ROLES,
+    Permission.VIEW_AUDIT_LOG,
   ],
-  
-  [UserRole.STAFF]: [
-    Permission.VIEW_CONTENT,
-    Permission.CREATE_CONTENT,
-    Permission.EDIT_CONTENT,
-    Permission.VIEW_MEMBERS,
-    Permission.MANAGE_MEMBERS,
-    Permission.CREATE_EVENTS,
-    Permission.MANAGE_EVENTS,
-    Permission.VIEW_PRAYERS,
-    Permission.MANAGE_PRAYERS,
-    Permission.CHILD_PROTECTION
-  ],
-  
-  [UserRole.PASTOR]: [
-    Permission.VIEW_CONTENT,
-    Permission.CREATE_CONTENT,
-    Permission.EDIT_CONTENT,
-    Permission.VIEW_MEMBERS,
-    Permission.MANAGE_MEMBERS,
-    Permission.CREATE_EVENTS,
-    Permission.MANAGE_EVENTS,
-    Permission.VIEW_PRAYERS,
-    Permission.MANAGE_PRAYERS,
-    Permission.VIEW_DONATIONS,
-    Permission.CHILD_PROTECTION
-  ],
-  
-  [UserRole.ADMIN]: Object.values(Permission)
 };
 
-export function hasPermission(userRole: UserRole, permission: Permission): boolean {
-  return ROLE_PERMISSIONS[userRole]?.includes(permission) || false;
+export function hasPermission(userRole: UserRole | undefined | null, permission: Permission): boolean {
+  if (!userRole) return false;
+  return ROLE_PERMISSIONS[userRole]?.includes(permission) ?? false;
 }
 
-export function getUserPermissions(userRole: UserRole): Permission[] {
-  return ROLE_PERMISSIONS[userRole] || [];
+export function getUserPermissions(userRole: UserRole | undefined | null): Permission[] {
+  return userRole ? (ROLE_PERMISSIONS[userRole] ?? []) : [];
 }
 
-export function canAccessChildProtectedContent(userRole: UserRole): boolean {
-  return hasPermission(userRole, Permission.CHILD_PROTECTION);
+export function canAccessAdminPanel(userRole: UserRole | undefined | null): boolean {
+  return roleAtLeast(userRole ?? undefined, UserRole.MODERATOR);
 }

@@ -1,42 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/firebase';
-import { db } from '@/lib/firebase';
-import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
+import { getAdminDb } from '@/lib/firebase-admin';
+import { requireAuth } from '@/lib/api-auth';
 
 export async function GET(request: NextRequest) {
-  try {
-    // In a real implementation, you'd verify the user's authentication token
-    // For now, we'll return mock data
-    
-    const stats = {
-      attendanceCount: 24,
-      prayerRequests: 3,
-      donationTotal: 2500,
-      upcomingEvents: 5
-    };
+  const authResult = await requireAuth(request);
+  if (!authResult.ok) return authResult.response;
 
-    const recentActivity = [
-      {
-        title: 'Attended Sunday Service',
-        date: '2 days ago',
-        type: 'attendance'
-      },
-      {
-        title: 'Submitted Prayer Request',
-        date: '1 week ago',
-        type: 'prayer'
-      },
-      {
-        title: 'Made Donation',
-        date: '2 weeks ago',
-        type: 'donation'
-      }
-    ];
+  try {
+    const prayerRequestsSnapshot = await getAdminDb()
+      .collection('prayerRequests')
+      .where('requestedBy', '==', authResult.user.uid)
+      .get();
+
+    // NOTE: attendance/donation aggregation is not implemented yet — there is
+    // no attendance or donation collection to query. Flagging rather than
+    // faking: these two numbers are placeholders until that data model
+    // exists (tracked for Phase 3 analytics work).
+    const stats = {
+      attendanceCount: 0,
+      prayerRequests: prayerRequestsSnapshot.size,
+      donationTotal: 0,
+      upcomingEvents: 0
+    };
 
     return NextResponse.json({
       success: true,
       stats,
-      recentActivity
+      recentActivity: []
     });
   } catch (error) {
     console.error('Dashboard API error:', error);
