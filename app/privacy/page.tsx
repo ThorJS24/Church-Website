@@ -28,15 +28,15 @@ export default function PrivacyPolicy() {
               
               {/* Quick Summary */}
               <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-6 rounded-r-lg mb-8">
-                <h3 className="text-xl font-semibold text-blue-900 dark:text-blue-100 mb-3 flex items-center">
+                <h2 className="text-xl font-semibold text-blue-900 dark:text-blue-100 mb-3 flex items-center">
                   <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                   </svg>
                   Privacy at a Glance
-                </h3>
+                </h2>
                 <ul className="text-blue-800 dark:text-blue-200 space-y-2">
                   <li>✅ We never sell your personal information</li>
-                  <li>✅ You control your data - access, correct, or delete anytime</li>
+                  <li>✅ You control your data - access, correct, or request deletion anytime</li>
                   <li>✅ Church communications only with your consent</li>
                   <li>✅ Strong security measures protect your information</li>
                   <li>✅ GDPR and CCPA compliant data handling</li>
@@ -56,10 +56,10 @@ export default function PrivacyPolicy() {
                 
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
-                    <h4 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+                    <h3 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
                       <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
                       Personal Information
-                    </h4>
+                    </h3>
                     <ul className="text-gray-600 dark:text-gray-300 space-y-1 text-sm">
                       <li>• Name and contact details</li>
                       <li>• Email address and phone number</li>
@@ -69,10 +69,10 @@ export default function PrivacyPolicy() {
                   </div>
                   
                   <div className="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
-                    <h4 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+                    <h3 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
                       <span className="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
                       Ministry Information
-                    </h4>
+                    </h3>
                     <ul className="text-gray-600 dark:text-gray-300 space-y-1 text-sm">
                       <li>• Prayer requests and testimonies</li>
                       <li>• Event registration and attendance</li>
@@ -82,10 +82,10 @@ export default function PrivacyPolicy() {
                   </div>
                   
                   <div className="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
-                    <h4 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+                    <h3 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
                       <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
                       Technical Data
-                    </h4>
+                    </h3>
                     <ul className="text-gray-600 dark:text-gray-300 space-y-1 text-sm">
                       <li>• Website usage analytics</li>
                       <li>• Device and browser information</li>
@@ -95,10 +95,10 @@ export default function PrivacyPolicy() {
                   </div>
                   
                   <div className="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
-                    <h4 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+                    <h3 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
                       <span className="w-2 h-2 bg-orange-500 rounded-full mr-2"></span>
                       Financial Information
-                    </h4>
+                    </h3>
                     <ul className="text-gray-600 dark:text-gray-300 space-y-1 text-sm">
                       <li>• Donation records and receipts</li>
                       <li>• Payment method details (encrypted)</li>
@@ -128,7 +128,7 @@ export default function PrivacyPolicy() {
                       </svg>
                     </div>
                     <div>
-                      <h4 className="font-semibold text-green-900 dark:text-green-100">Ministry Services</h4>
+                      <h3 className="font-semibold text-green-900 dark:text-green-100">Ministry Services</h3>
                       <p className="text-green-700 dark:text-green-300 text-sm">Provide pastoral care, prayer support, and spiritual guidance to our congregation members.</p>
                     </div>
                   </div>
@@ -140,7 +140,7 @@ export default function PrivacyPolicy() {
                       </svg>
                     </div>
                     <div>
-                      <h4 className="font-semibold text-blue-900 dark:text-blue-100">Communications</h4>
+                      <h3 className="font-semibold text-blue-900 dark:text-blue-100">Communications</h3>
                       <p className="text-blue-700 dark:text-blue-300 text-sm">Send church announcements, event invitations, and spiritual encouragement (with your consent).</p>
                     </div>
                   </div>
@@ -152,7 +152,7 @@ export default function PrivacyPolicy() {
                       </svg>
                     </div>
                     <div>
-                      <h4 className="font-semibold text-purple-900 dark:text-purple-100">Administrative Purposes</h4>
+                      <h3 className="font-semibold text-purple-900 dark:text-purple-100">Administrative Purposes</h3>
                       <p className="text-purple-700 dark:text-purple-300 text-sm">Maintain membership records, process donations, and fulfill legal obligations as a religious organization.</p>
                     </div>
                   </div>
@@ -180,7 +180,7 @@ export default function PrivacyPolicy() {
                           </svg>
                         </div>
                         <div>
-                          <h4 className="font-semibold text-gray-900 dark:text-white">Access Your Data</h4>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">Access Your Data</h3>
                           <p className="text-sm text-gray-600 dark:text-gray-300">Request a copy of all personal information we have about you</p>
                         </div>
                       </div>
@@ -192,7 +192,7 @@ export default function PrivacyPolicy() {
                           </svg>
                         </div>
                         <div>
-                          <h4 className="font-semibold text-gray-900 dark:text-white">Correct Information</h4>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">Correct Information</h3>
                           <p className="text-sm text-gray-600 dark:text-gray-300">Update or correct any inaccurate personal information</p>
                         </div>
                       </div>
@@ -205,7 +205,7 @@ export default function PrivacyPolicy() {
                           </svg>
                         </div>
                         <div>
-                          <h4 className="font-semibold text-gray-900 dark:text-white">Delete Your Data</h4>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">Delete Your Data</h3>
                           <p className="text-sm text-gray-600 dark:text-gray-300">Request permanent deletion of your personal information</p>
                         </div>
                       </div>
@@ -219,7 +219,7 @@ export default function PrivacyPolicy() {
                           </svg>
                         </div>
                         <div>
-                          <h4 className="font-semibold text-gray-900 dark:text-white">Download Data</h4>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">Download Data</h3>
                           <p className="text-sm text-gray-600 dark:text-gray-300">Export your data in a portable, machine-readable format</p>
                         </div>
                       </div>
@@ -231,7 +231,7 @@ export default function PrivacyPolicy() {
                           </svg>
                         </div>
                         <div>
-                          <h4 className="font-semibold text-gray-900 dark:text-white">Opt-Out</h4>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">Opt-Out</h3>
                           <p className="text-sm text-gray-600 dark:text-gray-300">Unsubscribe from communications and marketing materials</p>
                         </div>
                       </div>
@@ -243,7 +243,7 @@ export default function PrivacyPolicy() {
                           </svg>
                         </div>
                         <div>
-                          <h4 className="font-semibold text-gray-900 dark:text-white">Control Processing</h4>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">Control Processing</h3>
                           <p className="text-sm text-gray-600 dark:text-gray-300">Restrict how we process your personal information</p>
                         </div>
                       </div>
@@ -281,15 +281,15 @@ export default function PrivacyPolicy() {
                   <div className="space-y-3 text-sm">
                     <div className="flex items-center text-green-800 dark:text-green-200">
                       <span className="font-medium w-16">Email:</span>
-                      <a href="mailto:privacy@salemprimitivebaptist.org" className="text-green-600 dark:text-green-400 hover:underline">privacy@salemprimitivebaptist.org</a>
+                      <a href="mailto:privacy@salemprimitivebaptist.org" className="text-green-700 dark:text-green-400 hover:underline">privacy@salemprimitivebaptist.org</a>
                     </div>
                     <div className="flex items-center text-green-800 dark:text-green-200">
                       <span className="font-medium w-16">Phone:</span>
-                      <span>(555) 123-4567</span>
+                      <span>+91 94871 62485</span>
                     </div>
                     <div className="flex items-start text-green-800 dark:text-green-200">
                       <span className="font-medium w-16 mt-0.5">Address:</span>
-                      <span>123 Church Street<br />Your City, State 12345</span>
+                      <span>223/838, Near north post office, Kannangurichi main road, Chinnathirupathi, Salem TN, PIN- 636008</span>
                     </div>
                   </div>
                 </div>

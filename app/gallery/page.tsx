@@ -1,46 +1,33 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, MapPin, Clock, ArrowLeft, Eye, Heart, X, ChevronLeft, ChevronRight, Users, Camera } from 'lucide-react';
-import { sanityFetch } from '@/lib/sanity-fetch';
+import { Calendar, MapPin, Clock, ArrowLeft, Eye, Heart, X, ChevronLeft, ChevronRight, Users, Camera, Upload } from 'lucide-react';
+import { getEventGalleries, EventGallery } from '@/lib/content';
 import Image from 'next/image';
+import DivineButton from '@/components/DivineButton';
+import HeavenlyCard from '@/components/HeavenlyCard';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 
-interface EventGallery {
-  _id: string;
-  title: string;
-  description: any;
-  shortDescription?: string;
-  galleryDescription?: string;
-  startDate: string;
-  endDate?: string;
-  location: string;
-  address?: string;
-  category: string;
-  image?: {
-    asset: {
-      url: string;
-    };
-  };
-  photos: {
-    _id: string;
-    title: string;
-    description?: string;
-    image: {
-      asset: {
-        url: string;
-      };
-    };
-    photographer?: string;
-    dateTaken: string;
-  }[];
-}
+const MAX_SUBMIT_BYTES = 4 * 1024 * 1024; // matches app/api/gallery/submit/route.ts
+const ALLOWED_SUBMIT_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
 export default function GalleryPage() {
   const [events, setEvents] = useState<EventGallery[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<EventGallery | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [submitForm, setSubmitForm] = useState({ title: '', submitterName: '' });
+  const [submitFile, setSubmitFile] = useState<File | null>(null);
+  const [submitError, setSubmitError] = useState('');
+  const imageModalRef = useRef<HTMLDivElement>(null);
+  const submitModalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(selectedImageIndex !== null, () => setSelectedImageIndex(null), imageModalRef);
+  useFocusTrap(showSubmitModal, () => setShowSubmitModal(false), submitModalRef);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success'>('idle');
 
   useEffect(() => {
     fetchEventGalleries();
@@ -49,41 +36,64 @@ export default function GalleryPage() {
   const fetchEventGalleries = async () => {
     setLoading(true);
     try {
-      // First, check all events
-      const allEvents = await sanityFetch(`*[_type == "event"] {
-        _id, title, isPublic, showInGallery
-      }`);
-      console.log('All events:', allEvents);
-      
-      // Then check gallery images
-      const allImages = await sanityFetch(`*[_type == "galleryImage"] {
-        _id, title, isPublic, event
-      }`);
-      console.log('All gallery images:', allImages);
-      
-      // Simplified query without showInGallery filter
-      const eventsData = await sanityFetch(`*[_type == "event" && isPublic == true] {
-        _id, title, description, shortDescription, galleryDescription, startDate, endDate, location, address, category,
-        image { asset-> { url } },
-        "photos": *[_type == "galleryImage" && references(^._id) && isPublic == true] {
-          _id, title, description,
-          image { asset-> { url } },
-          photographer, dateTaken
-        }
-      } | order(startDate desc)`);
-      
-      if (eventsData) {
-        console.log('Fetched events:', eventsData);
-        // Only include events that have photos
-        const eventsWithPhotos = eventsData.filter((event: EventGallery) => event.photos && event.photos.length > 0);
-        console.log('Events with photos:', eventsWithPhotos);
-        setEvents(eventsWithPhotos);
-      }
+      const eventsWithPhotos = await getEventGalleries();
+      setEvents(eventsWithPhotos);
     } catch (error) {
       console.error('Error fetching event galleries:', error);
-      console.error('Full error:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleFileSelect = (file: File | null) => {
+    setSubmitError('');
+    if (!file) {
+      setSubmitFile(null);
+      return;
+    }
+    if (!ALLOWED_SUBMIT_TYPES.includes(file.type)) {
+      setSubmitError('Please choose a JPEG, PNG, WebP, or GIF image.');
+      setSubmitFile(null);
+      return;
+    }
+    if (file.size > MAX_SUBMIT_BYTES) {
+      setSubmitError('That image is larger than 4MB. Please choose a smaller file.');
+      setSubmitFile(null);
+      return;
+    }
+    setSubmitFile(file);
+  };
+
+  const handleSubmitPhoto = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!submitFile) {
+      setSubmitError('Please choose a photo to submit.');
+      return;
+    }
+
+    setSubmitting(true);
+    setSubmitError('');
+    try {
+      const body = new FormData();
+      body.append('file', submitFile);
+      body.append('title', submitForm.title);
+      body.append('submitterName', submitForm.submitterName);
+
+      const response = await fetch('/api/gallery/submit', { method: 'POST', body });
+      const data = await response.json();
+
+      if (data.success) {
+        setSubmitStatus('success');
+        setShowSubmitModal(false);
+        setSubmitForm({ title: '', submitterName: '' });
+        setSubmitFile(null);
+      } else {
+        setSubmitError(data.error || 'Submission failed. Please try again.');
+      }
+    } catch (error) {
+      setSubmitError('An error occurred. Please try again.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -121,9 +131,6 @@ export default function GalleryPage() {
     );
   }
   
-  console.log('Current events state:', events);
-  console.log('Loading state:', loading);
-
   if (selectedEvent) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -139,12 +146,16 @@ export default function GalleryPage() {
             </button>
             
             <div className="flex flex-col md:flex-row gap-6">
-              {selectedEvent.image?.asset?.url && (
+              {selectedEvent.imageUrl && (
                 <div className="md:w-1/3">
-                  <img
-                    src={selectedEvent.image.asset.url}
+                  <Image
+                    src={selectedEvent.imageUrl}
                     alt={selectedEvent.title}
+                    width={400}
+                    height={225}
                     className="w-full aspect-video object-cover rounded-lg"
+                    priority
+                    sizes="(max-width: 768px) 100vw, 400px"
                   />
                 </div>
               )}
@@ -187,7 +198,7 @@ export default function GalleryPage() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
             {selectedEvent.photos.map((photo, index) => (
               <motion.div
-                key={photo._id}
+                key={photo.id}
                 className="aspect-square bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden cursor-pointer relative group"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -195,7 +206,7 @@ export default function GalleryPage() {
                 onClick={() => setSelectedImageIndex(index)}
               >
                 <Image
-                  src={photo.image.asset.url}
+                  src={photo.imageUrl}
                   alt={photo.title}
                   fill
                   className="object-cover"
@@ -213,6 +224,11 @@ export default function GalleryPage() {
         <AnimatePresence>
           {selectedImageIndex !== null && (
             <motion.div
+              ref={imageModalRef}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Photo viewer"
+              tabIndex={-1}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -244,7 +260,7 @@ export default function GalleryPage() {
                 {/* Image */}
                 <div className="relative w-full h-full flex items-center justify-center p-4">
                   <Image
-                    src={selectedEvent.photos[selectedImageIndex].image.asset.url}
+                    src={selectedEvent.photos[selectedImageIndex].imageUrl}
                     alt={selectedEvent.photos[selectedImageIndex].title}
                     fill
                     className="object-contain"
@@ -280,9 +296,14 @@ export default function GalleryPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
       <div className="bg-white dark:bg-gray-800 shadow-sm">
-        <div className="px-4 py-6">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Event Gallery</h1>
-          <p className="text-gray-600 dark:text-gray-300">Browse photos from our church events and activities</p>
+        <div className="px-4 py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Event Gallery</h1>
+            <p className="text-gray-600 dark:text-gray-300">Browse photos from our church events and activities</p>
+          </div>
+          <DivineButton onClick={() => setShowSubmitModal(true)} variant="primary" className="flex items-center justify-center gap-2 shrink-0">
+            <Upload className="w-4 h-4" /> Submit a Photo
+          </DivineButton>
         </div>
       </div>
 
@@ -291,21 +312,18 @@ export default function GalleryPage() {
         {events.length === 0 ? (
           <div className="text-center py-20">
             <Camera className="mx-auto w-16 h-16 text-gray-300 mb-4" />
-            <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">
+            <h2 className="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">
               No event galleries available
-            </h3>
+            </h2>
             <p className="text-gray-500 dark:text-gray-400">
               Check back soon for photos from our upcoming events.
-            </p>
-            <p className="text-xs text-gray-400 mt-4">
-              Debug: Check browser console for data
             </p>
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {events.map((event, index) => (
               <motion.div
-                key={event._id}
+                key={event.id}
                 className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-all duration-300"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -313,9 +331,9 @@ export default function GalleryPage() {
                 onClick={() => setSelectedEvent(event)}
               >
                 <div className="aspect-video bg-gray-200 dark:bg-gray-700 relative">
-                  {event.image?.asset?.url ? (
+                  {event.imageUrl ? (
                     <Image
-                      src={event.image.asset.url}
+                      src={event.imageUrl}
                       alt={event.title}
                       fill
                       className="object-cover"
@@ -323,7 +341,7 @@ export default function GalleryPage() {
                     />
                   ) : event.photos[0] ? (
                     <Image
-                      src={event.photos[0].image.asset.url}
+                      src={event.photos[0].imageUrl}
                       alt={event.title}
                       fill
                       className="object-cover"
@@ -372,6 +390,106 @@ export default function GalleryPage() {
           </div>
         )}
       </div>
+
+      {/* Submit a Photo Modal */}
+      {showSubmitModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div ref={submitModalRef} role="dialog" aria-modal="true" aria-labelledby="submit-photo-title" tabIndex={-1} className="max-w-md w-full max-h-[90vh]">
+          <HeavenlyCard glowIntensity="high" className="w-full max-h-[90vh] overflow-y-auto">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
+              className="p-6"
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h3 id="submit-photo-title" className="text-2xl font-bold text-gray-900 dark:text-white">Submit a Photo</h3>
+                <motion.button
+                  onClick={() => setShowSubmitModal(false)}
+                  className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <X className="w-6 h-6" />
+                </motion.button>
+              </div>
+
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                Photos are reviewed by a moderator before they appear in the gallery.
+              </p>
+
+              <form onSubmit={handleSubmitPhoto} className="space-y-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Photo *
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    onChange={(e) => handleFileSelect(e.target.files?.[0] || null)}
+                    required
+                    className="w-full text-sm text-gray-700 dark:text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700 file:cursor-pointer cursor-pointer"
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">JPEG, PNG, WebP, or GIF — max 4MB</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Title
+                  </label>
+                  <input
+                    type="text"
+                    value={submitForm.title}
+                    onChange={(e) => setSubmitForm({ ...submitForm, title: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                    placeholder="What's this photo of?"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Your Name
+                  </label>
+                  <input
+                    type="text"
+                    value={submitForm.submitterName}
+                    onChange={(e) => setSubmitForm({ ...submitForm, submitterName: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                    placeholder="Your name (optional)"
+                  />
+                </div>
+
+                {submitError && (
+                  <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded text-sm">
+                    {submitError}
+                  </div>
+                )}
+
+                <div className="flex gap-4 pt-2">
+                  <DivineButton
+                    onClick={() => setShowSubmitModal(false)}
+                    variant="secondary"
+                    className="flex-1 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500"
+                  >
+                    Cancel
+                  </DivineButton>
+                  <DivineButton variant="primary" className="flex-1" disabled={submitting}>
+                    {submitting ? 'Submitting...' : 'Submit Photo'}
+                  </DivineButton>
+                </div>
+              </form>
+            </motion.div>
+          </HeavenlyCard>
+          </div>
+        </div>
+      )}
+
+      {/* Success Message */}
+      {submitStatus === 'success' && (
+        <div className="fixed bottom-4 right-4 bg-green-500 text-white p-4 rounded-lg shadow-lg z-50">
+          <p>Thanks! Your photo will appear once a moderator reviews it.</p>
+        </div>
+      )}
     </div>
   );
 }

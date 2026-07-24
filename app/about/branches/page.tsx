@@ -1,15 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Calendar, Users, Phone, Mail, ExternalLink, X, ChevronLeft, ChevronRight } from 'lucide-react';
-import { sanityFetch } from '@/lib/sanity-fetch';
+import { getPageContent } from '@/lib/content';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 import DivineEffects from '@/components/DivineEffects';
 import SacredText from '@/components/SacredText';
 import HeavenlyCard from '@/components/HeavenlyCard';
+import Image from 'next/image';
 
 interface Branch {
-  _id: string;
+  id: string;
   name: string;
   description: string;
   established: string;
@@ -24,22 +26,14 @@ interface Branch {
   pastors?: Array<{
     name: string;
     title?: string;
-    image?: {
-      asset: {
-        url: string;
-      };
-    };
+    imageUrl?: string;
   }>;
   contact: {
     phone?: string;
     email?: string;
   };
   images: Array<{
-    asset: {
-      asset: {
-        _ref: string;
-      };
-    };
+    url: string;
     alt?: string;
   }>;
   services: Array<{
@@ -63,6 +57,8 @@ export default function BranchesPage() {
   const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const branchModalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(!!selectedBranch, () => setSelectedBranch(null), branchModalRef);
 
 
   useEffect(() => {
@@ -74,54 +70,9 @@ export default function BranchesPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const data = await sanityFetch(`*[_type == "branchesPage"][0] {
-        title,
-        subtitle,
-        branches[] {
-          _id,
-          name,
-          description,
-          established,
-          location {
-            address,
-            coordinates {
-              lat,
-              lng
-            },
-            googleMapsUrl
-          },
-          pastors[]-> {
-            name,
-            title,
-            image {
-              asset-> {
-                url
-              }
-            }
-          },
-          contact {
-            phone,
-            email
-          },
-          images[] {
-            asset,
-            alt
-          },
-          services[] {
-            day,
-            time,
-            type
-          },
-          memberCount,
-          parentBranch,
-          isMainChurch
-        }
-      }`);
+      const data = await getPageContent<BranchesData>('branches');
       if (data) {
-        console.log('Branches data:', data);
         setBranchesData(data);
-        
-
       }
     } catch (error) {
       console.error('Error fetching branches data:', error);
@@ -201,7 +152,7 @@ export default function BranchesPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {branchesData?.branches?.map((branch, index) => (
               <motion.div
-                key={branch._id}
+                key={branch.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
@@ -209,12 +160,15 @@ export default function BranchesPage() {
                 <HeavenlyCard className="h-full hover:shadow-xl transition-all duration-300 group">
                   {/* Branch Image */}
                   <div className="relative h-48 rounded-t-lg overflow-hidden">
-                    {branch.images?.[0]?.asset?.asset?._ref ? (
-                      <img
-                        src={`https://cdn.sanity.io/images/jon2drzn/production/${branch.images[0].asset.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png')}?w=400&h=300&fit=crop&crop=center`}
+                    {branch.images?.[0]?.url ? (
+                      <Image
+                        src={branch.images[0].url}
                         alt={branch.name}
+                        width={400}
+                        height={300}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        loading="lazy"
+                        priority={index === 0}
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 flex items-center justify-center">
@@ -291,6 +245,11 @@ export default function BranchesPage() {
             onClick={() => setSelectedBranch(null)}
           >
             <motion.div
+              ref={branchModalRef}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="branch-modal-title"
+              tabIndex={-1}
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
@@ -299,7 +258,7 @@ export default function BranchesPage() {
             >
               {/* Modal Header */}
               <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                <h2 id="branch-modal-title" className="text-2xl font-bold text-gray-900 dark:text-white">
                   {selectedBranch.name}
                 </h2>
                 <button
@@ -316,21 +275,19 @@ export default function BranchesPage() {
                 {selectedBranch.images && selectedBranch.images.length > 0 && (
                   <div className="relative mb-6">
                     <div className="w-full aspect-video rounded-lg overflow-hidden relative bg-gray-200">
-                      {selectedBranch.images[currentImageIndex]?.asset?.asset?._ref ? (
-                        <img
-                          src={`https://cdn.sanity.io/images/jon2drzn/production/${selectedBranch.images[currentImageIndex].asset.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png')}?w=800&h=450&fit=crop&crop=center`}
+                      {selectedBranch.images[currentImageIndex]?.url ? (
+                        <Image
+                          src={selectedBranch.images[currentImageIndex].url}
                           alt={selectedBranch.images[currentImageIndex].alt || selectedBranch.name}
+                          width={800}
+                          height={450}
                           className="w-full h-full object-cover"
-                          onError={(e) => {
-                            console.log('Image failed to load:', selectedBranch.images[currentImageIndex].asset.asset._ref);
-                          }}
+                          priority
+                          sizes="(max-width: 768px) 100vw, 800px"
                         />
                       ) : (
                         <div className="w-full h-full flex flex-col items-center justify-center text-gray-500 text-sm">
                           <div>No image available</div>
-                          <div className="mt-2 text-xs">
-                            Debug: {JSON.stringify(selectedBranch.images[currentImageIndex])}
-                          </div>
                         </div>
                       )}
                       {selectedBranch.images.length > 1 && (
@@ -402,11 +359,14 @@ export default function BranchesPage() {
                       {selectedBranch.pastors && selectedBranch.pastors.length > 0 ? (
                         selectedBranch.pastors.map((pastor, index) => (
                           <div key={index} className="flex items-center mb-2">
-                            {pastor.image?.asset && (
-                              <img
-                                src={`${pastor.image.asset.url}?w=40&h=40&fit=crop`}
+                            {pastor.imageUrl && (
+                              <Image
+                                src={pastor.imageUrl}
                                 alt={pastor.name}
+                                width={40}
+                                height={40}
                                 className="w-8 h-8 rounded-full mr-2 object-cover"
+                                sizes="32px"
                               />
                             )}
                             <button
@@ -458,6 +418,7 @@ export default function BranchesPage() {
                   <h3 className="text-lg font-bold mb-3 text-gray-900 dark:text-white">Location</h3>
                   <div className="h-64 rounded-lg overflow-hidden shadow-lg">
                     <iframe
+                      title={`Map of ${selectedBranch.name}`}
                       src={`https://maps.google.com/maps?q=${selectedBranch.location.coordinates.lat},${selectedBranch.location.coordinates.lng}&hl=en&z=16&t=k&output=embed`}
                       width="100%"
                       height="100%"

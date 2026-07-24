@@ -15,7 +15,7 @@ import HeavenlyCard from '@/components/HeavenlyCard';
 import PrayerEffects from '@/components/PrayerEffects';
 import Link from 'next/link';
 
-import { fetchSanityData, batchFetchSanityData } from '@/lib/sanity-optimized';
+import { getAnnouncements, getSiteSettings, Announcement as ContentAnnouncement, SiteSettings as ContentSiteSettings } from '@/lib/content';
 import DynamicLiveStream from '@/components/DynamicLiveStream';
 import BibleVerse from '@/components/BibleVerse';
 import { useAuth } from '@/contexts/AuthContext';
@@ -30,8 +30,8 @@ const quickActions = [
   {
     href: '/give',
     icon: Heart,
-    title: 'Give Online',
-    description: 'Support our mission with a secure donation'
+    title: 'Give',
+    description: 'See how to support our mission'
   },
   {
     href: '/prayer',
@@ -47,73 +47,28 @@ const quickActions = [
   }
 ];
 
-interface SiteSettings {
-  churchName?: string;
-  tagline?: string;
-  statistics?: {
-    members?: string;
-    yearsServing?: string;
-    weeklyServices?: string;
-    ministries?: string;
-  };
-  address?: string;
-  phoneNumber?: string;
-  email?: string;
-  youtubeChannelUrl?: string;
-  facebookUrl?: string;
-  instagramUrl?: string;
-  googleMapsUrl?: string;
-  whatsappGroupUrl?: string;
-}
-
-interface Announcement {
-  title: string;
-  content: any;
-  date?: string;
-}
-
 export default function Home() {
-  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-  const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
+  const [announcements, setAnnouncements] = useState<ContentAnnouncement[]>([]);
+  const [siteSettings, setSiteSettings] = useState<ContentSiteSettings | null>(null);
   const [showLiveStream, setShowLiveStream] = useState(false);
   const { user } = useAuth();
 
   useEffect(() => {
-
     async function fetchData() {
       try {
-        const data = await batchFetchSanityData([
-          {
-            key: 'announcements',
-            query: `*[_type == "announcement"] | order(_createdAt desc)[0...3]`,
-          },
-          {
-            key: 'siteSettings',
-            query: `*[_type == "siteSettings"][0] {
-              churchName,
-              tagline,
-              statistics,
-              address,
-              phoneNumber,
-              email,
-              youtubeChannelUrl,
-              facebookUrl,
-              instagramUrl,
-              googleMapsUrl,
-              whatsappGroupUrl
-            }`,
-          },
+        const [announcementsData, siteSettingsData] = await Promise.all([
+          getAnnouncements(3),
+          getSiteSettings(),
         ]);
 
-        setAnnouncements(data.announcements || []);
-        setSiteSettings(data.siteSettings);
+        setAnnouncements(announcementsData);
+        setSiteSettings(siteSettingsData);
       } catch (error) {
         console.error('Failed to fetch data:', error);
       }
     }
 
     fetchData();
-
   }, []);
 
   return (
@@ -294,15 +249,9 @@ export default function Home() {
                       <Mail className="w-5 h-5 text-white" />
                     </motion.div>
                     <div className="flex-1">
-                      <h4 className="font-bold text-lg mb-2 text-gray-900 dark:text-white">{announcement.title}</h4>
+                      <h3 className="font-bold text-lg mb-2 text-gray-900 dark:text-white">{announcement.title}</h3>
                       <p className="text-gray-600 dark:text-gray-300 mb-2">
-                        {typeof announcement.content === 'string' 
-                          ? announcement.content 
-                          : Array.isArray(announcement.content) 
-                            ? announcement.content.map((block: any) => 
-                                block.children?.map((child: any) => child.text).join(' ') || ''
-                              ).join(' ') 
-                          : 'Announcement content available'}
+                        {announcement.content}
                       </p>
                       <small className="text-gray-500 dark:text-gray-400">
                         {announcement.date ? new Date(announcement.date).toLocaleString() : 'Recent'}
@@ -327,7 +276,7 @@ export default function Home() {
             >
               <Users className="w-12 h-12 mx-auto mb-4" />
               <div className="text-4xl font-bold mb-2">{siteSettings?.statistics?.members || '500+'}</div>
-              <div className="text-blue-200">Members</div>
+              <div className="text-blue-50">Members</div>
             </motion.div>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -336,7 +285,7 @@ export default function Home() {
             >
               <Heart className="w-12 h-12 mx-auto mb-4" />
               <div className="text-4xl font-bold mb-2">{siteSettings?.statistics?.yearsServing || '25+'}</div>
-              <div className="text-blue-200">Years Serving</div>
+              <div className="text-blue-50">Years Serving</div>
             </motion.div>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -345,7 +294,7 @@ export default function Home() {
             >
               <Church className="w-12 h-12 mx-auto mb-4" />
               <div className="text-4xl font-bold mb-2">{siteSettings?.statistics?.weeklyServices || '3'}</div>
-              <div className="text-blue-200">Weekly Services</div>
+              <div className="text-blue-50">Weekly Services</div>
             </motion.div>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -354,7 +303,7 @@ export default function Home() {
             >
               <Users className="w-12 h-12 mx-auto mb-4" />
               <div className="text-4xl font-bold mb-2">{siteSettings?.statistics?.ministries || '15+'}</div>
-              <div className="text-blue-200">Ministries</div>
+              <div className="text-blue-50">Ministries</div>
             </motion.div>
           </div>
         </div>
@@ -375,7 +324,7 @@ export default function Home() {
               className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300"
             >
               <Heart className="w-12 h-12 mx-auto mb-4 text-yellow-300" />
-              <div className="text-3xl font-bold mb-2">30</div>
+              <div className="text-3xl font-bold mb-2">{siteSettings?.prayerStats?.totalRequests ?? 30}</div>
               <div className="text-indigo-100">Total Prayer Requests</div>
             </motion.div>
             <motion.div
@@ -385,7 +334,7 @@ export default function Home() {
               className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300"
             >
               <Users className="w-12 h-12 mx-auto mb-4 text-yellow-300" />
-              <div className="text-3xl font-bold mb-2">10</div>
+              <div className="text-3xl font-bold mb-2">{siteSettings?.prayerStats?.totalPeople ?? 10}</div>
               <div className="text-indigo-100">Total People Praying</div>
             </motion.div>
             <motion.div
@@ -395,7 +344,7 @@ export default function Home() {
               className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300"
             >
               <Heart className="w-12 h-12 mx-auto mb-4 text-yellow-300" />
-              <div className="text-3xl font-bold mb-2">100</div>
+              <div className="text-3xl font-bold mb-2">{siteSettings?.prayerStats?.totalPrayers ?? 100}</div>
               <div className="text-indigo-100">Total Prayers Offered</div>
             </motion.div>
           </div>
@@ -417,7 +366,7 @@ export default function Home() {
               className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300"
             >
               <Heart className="w-12 h-12 mx-auto mb-4 text-white" />
-              <div className="text-2xl font-bold mb-2">₹20,75,000</div>
+              <div className="text-2xl font-bold mb-2">{siteSettings?.givingImpact?.communityOutreach || '∞'}</div>
               <div className="text-orange-100">Community Outreach</div>
             </motion.div>
             <motion.div
@@ -427,7 +376,7 @@ export default function Home() {
               className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300"
             >
               <Users className="w-12 h-12 mx-auto mb-4 text-white" />
-              <div className="text-2xl font-bold mb-2">₹12,45,000</div>
+              <div className="text-2xl font-bold mb-2">{siteSettings?.givingImpact?.globalMissions || '∞'}</div>
               <div className="text-orange-100">Global Missions</div>
             </motion.div>
             <motion.div
@@ -437,7 +386,7 @@ export default function Home() {
               className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300"
             >
               <Church className="w-12 h-12 mx-auto mb-4 text-white" />
-              <div className="text-2xl font-bold mb-2">₹9,96,000</div>
+              <div className="text-2xl font-bold mb-2">{siteSettings?.givingImpact?.educationMinistry || '∞'}</div>
               <div className="text-orange-100">Education Ministry</div>
             </motion.div>
             <motion.div
@@ -447,7 +396,7 @@ export default function Home() {
               className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300"
             >
               <Users className="w-12 h-12 mx-auto mb-4 text-white" />
-              <div className="text-2xl font-bold mb-2">₹6,64,000</div>
+              <div className="text-2xl font-bold mb-2">{siteSettings?.givingImpact?.youthPrograms || '∞'}</div>
               <div className="text-orange-100">Youth Programs</div>
             </motion.div>
           </div>
@@ -552,6 +501,7 @@ export default function Home() {
               transition={{ duration: 0.6, delay: 0.2 }}
             >
               <iframe
+                title="Church location map"
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d289.6717292106369!2d78.16560039927737!3d11.678130577350974!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3babf16da41b56e5%3A0x30049390bc14cac1!2sSALEM%20PRIMITIVE%20BAPTIST%20CHURCH!5e1!3m2!1sen!2sin!4v1760932034062!5m2!1sen!2sin"
                 width="100%"
                 height="100%"
