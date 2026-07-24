@@ -22,24 +22,36 @@ interface ServiceRequestForm {
 export default function ServiceRequestPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [emailConfirmed, setEmailConfirmed] = useState(true);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const { register, handleSubmit, watch, formState: { errors } } = useForm<ServiceRequestForm>();
 
   const serviceType = watch('serviceType');
 
   const onSubmit = async (data: ServiceRequestForm) => {
     setIsSubmitting(true);
+    setSubmitError(null);
     try {
       const response = await fetch('/api/services/request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
+      const result = await response.json();
 
-      if (response.ok) {
+      if (response.ok && result.success) {
+        // The request is saved as soon as the API returns success — a
+        // failed confirmation email (result.notifications.requesterConfirmed)
+        // doesn't mean the request was lost, so it still shows the success
+        // screen, just without falsely implying an email is on its way.
+        setEmailConfirmed(result.notifications?.requesterConfirmed !== false);
         setSubmitted(true);
+      } else {
+        setSubmitError(result.error || 'Something went wrong submitting your request. Please try again or call the church office.');
       }
     } catch (error) {
       console.error('Error submitting request:', error);
+      setSubmitError('Something went wrong submitting your request. Please try again or call the church office.');
     } finally {
       setIsSubmitting(false);
     }
@@ -61,6 +73,11 @@ export default function ServiceRequestPage() {
             <p className="text-gray-600 dark:text-gray-300">
               Thank you for your service request. Our pastoral team will contact you within 24-48 hours to discuss your request and schedule a consultation.
             </p>
+            {!emailConfirmed && (
+              <p className="text-amber-600 dark:text-amber-400 text-sm mt-4">
+                Your request was saved, but we couldn&apos;t send a confirmation email right now — you&apos;ll still hear from our team directly.
+              </p>
+            )}
           </motion.div>
         </div>
       </div>
@@ -275,6 +292,10 @@ export default function ServiceRequestPage() {
                 placeholder="Please share any additional details, special requests, or questions..."
               />
             </div>
+
+            {submitError && (
+              <p className="text-red-500 text-sm text-right">{submitError}</p>
+            )}
 
             <div className="flex justify-end">
               <button
