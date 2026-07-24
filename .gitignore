@@ -5,6 +5,8 @@
 
 # Testing
 /coverage
+/test-results
+/playwright-report
 
 # Next.js
 /.next/
@@ -40,10 +42,6 @@ DEPLOYMENT.md
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
-
-# Sanity
-/studio/dist
-/studio/.sanity
 
 # IDE
 .vscode/

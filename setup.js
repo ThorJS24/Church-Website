@@ -63,13 +63,19 @@ async function main() {
   log('\n📋 REQUIRED CONFIGURATION', 'bright');
   log('-'.repeat(30), 'blue');
 
-  // Sanity CMS
-  log('\n🎨 Sanity CMS Setup (Required for content management)');
-  log('Visit: https://sanity.io → Create project → Get credentials');
-  config.NEXT_PUBLIC_SANITY_PROJECT_ID = await question('Sanity Project ID: ');
-  config.NEXT_PUBLIC_SANITY_DATASET = await question('Sanity Dataset (default: production): ') || 'production';
-  config.SANITY_API_TOKEN = await question('Sanity API Token: ');
-  config.SANITY_STUDIO_TOKEN = await question('Sanity Studio Token: ');
+  // Firebase (auth, Firestore content, admin panel)
+  log('\n🔥 Firebase Setup (Required — auth, content, and admin routes)');
+  log('Visit: https://console.firebase.google.com → Create project → Get config');
+  config.NEXT_PUBLIC_FIREBASE_API_KEY = await question('Firebase API Key: ');
+  config.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN = await question('Firebase Auth Domain: ');
+  config.NEXT_PUBLIC_FIREBASE_PROJECT_ID = await question('Firebase Project ID: ');
+  config.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET = await question('Firebase Storage Bucket: ');
+  config.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID = await question('Firebase Sender ID: ');
+  config.NEXT_PUBLIC_FIREBASE_APP_ID = await question('Firebase App ID: ');
+  log('\nFirebase Admin SDK (server-only — Project Settings → Service Accounts → Generate new private key)');
+  config.FIREBASE_ADMIN_PROJECT_ID = await question('Firebase Admin Project ID: ');
+  config.FIREBASE_ADMIN_CLIENT_EMAIL = await question('Firebase Admin Client Email: ');
+  config.FIREBASE_ADMIN_PRIVATE_KEY = await question('Firebase Admin Private Key: ');
 
   // Bible API
   log('\n📖 Bible API Setup (Required for daily verses)');
@@ -80,35 +86,19 @@ async function main() {
 
   // Security
   log('\n🔒 Security Configuration');
-  config.JWT_SECRET_KEY = await question('JWT Secret Key (min 32 chars): ') || 
-    'church_jwt_secret_2024_salem_primitive_baptist_secure_key_12345';
-  config.ENCRYPTION_KEY = await question('Encryption Key (32 chars): ') || 
+  config.ENCRYPTION_KEY = await question('Encryption Key (32 chars): ') ||
     'a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6';
-  config.WEBHOOK_SECRET = await question('Webhook Secret: ') || 
+  config.WEBHOOK_SECRET = await question('Webhook Secret: ') ||
     'your_random_webhook_secret_123';
 
-  // Admin Credentials
-  log('\n👤 Admin Account Setup');
-  config.ADMIN_EMAIL = await question('Admin Email: ') || 'admin@salemprimitivebaptist.org';
-  config.ADMIN_NAME = await question('Admin Name: ') || 'Church Administrator';
-  config.ADMIN_PASSWORD = await question('Admin Password: ') || 'SecureAdmin2024!';
+  log('\n👤 Admin Access');
+  log('There is no admin password to set here — sign up normally, then grant');
+  log('the "admin" role to your user\'s Firestore users/{uid} doc (Firebase Console).');
 
   // Optional Services
   log('\n🌟 OPTIONAL SERVICES', 'bright');
   log('-'.repeat(30), 'blue');
   log('Press Enter to skip any service you don\'t want to configure now.\n');
-
-  // Firebase
-  const setupFirebase = await question('🔥 Setup Firebase? (y/N): ');
-  if (setupFirebase.toLowerCase() === 'y') {
-    log('Visit: https://console.firebase.google.com → Create project → Get config');
-    config.NEXT_PUBLIC_FIREBASE_API_KEY = await question('Firebase API Key: ');
-    config.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN = await question('Firebase Auth Domain: ');
-    config.NEXT_PUBLIC_FIREBASE_PROJECT_ID = await question('Firebase Project ID: ');
-    config.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET = await question('Firebase Storage Bucket: ');
-    config.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID = await question('Firebase Sender ID: ');
-    config.NEXT_PUBLIC_FIREBASE_APP_ID = await question('Firebase App ID: ');
-  }
 
   // Email
   const setupEmail = await question('📧 Setup Email (Gmail SMTP)? (y/N): ');

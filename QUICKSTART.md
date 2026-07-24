@@ -23,10 +23,10 @@ Open [http://localhost:3000](http://localhost:3000) 🎉
 
 You only need these 4 services to get started:
 
-### 1. Sanity CMS (Free - Content Management)
-- Go to [sanity.io](https://sanity.io)
-- Create account → New project
-- Copy Project ID and create API token
+### 1. Firebase (Free - Auth & Content Database)
+- Go to [Firebase Console](https://console.firebase.google.com/)
+- Create a project → enable Authentication and Firestore
+- Copy the web app config, and deploy `firestore.rules` / `firestore.indexes.json`
 
 ### 2. Bible API (Free - Daily Verses)
 - Go to [bible-api.com](https://bible-api.com)
@@ -45,11 +45,16 @@ You only need these 4 services to get started:
 Create `.env.local` with these minimum variables:
 
 ```env
-# Sanity CMS
-NEXT_PUBLIC_SANITY_PROJECT_ID=your_project_id
-NEXT_PUBLIC_SANITY_DATASET=production
-SANITY_API_TOKEN=your_api_token
-SANITY_STUDIO_TOKEN=your_studio_token
+# Firebase
+NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_domain
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_bucket
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+FIREBASE_ADMIN_PROJECT_ID=your_project_id
+FIREBASE_ADMIN_CLIENT_EMAIL=your_service_account_email
+FIREBASE_ADMIN_PRIVATE_KEY=your_service_account_private_key
 
 # Bible API
 BIBLE_API_KEY=your_bible_api_key
@@ -95,10 +100,6 @@ vercel
 - Check all required environment variables are set
 - Run `npm run clean` then `npm run dev`
 
-**CORS errors?**
-- Make sure Sanity API tokens are correct
-- Client requests use API proxy routes
-
 **Build fails?**
 - Run `npm run type-check` to find TypeScript errors
 - Clear cache with `npm run clean`
@@ -106,7 +107,7 @@ vercel
 ## 📚 Next Steps
 
 1. **Customize Content**
-   - Go to your Sanity Studio
+   - Go to `/admin/content` (requires an `admin` or `super_admin` role)
    - Add your church information, events, sermons
 
 2. **Add Optional Services**

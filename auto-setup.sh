@@ -41,18 +41,6 @@ if ! npm install; then
 fi
 echo -e "${GREEN}✓ Dependencies installed${NC}"
 
-# Setup Sanity Studio
-echo
-echo -e "${YELLOW}Setting up Sanity Studio...${NC}"
-cd studio
-if ! npm install; then
-    echo -e "${RED}Error: Failed to install Sanity dependencies${NC}"
-    cd ..
-    exit 1
-fi
-cd ..
-echo -e "${GREEN}✓ Sanity Studio ready${NC}"
-
 # Build project
 echo
 echo -e "${YELLOW}Building project...${NC}"

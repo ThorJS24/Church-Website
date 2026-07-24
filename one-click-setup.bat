@@ -24,7 +24,6 @@ echo %YELLOW%📦 Installing...%RESET%
 npm install >nul 2>&1
 
 echo %YELLOW%🏗️  Building...%RESET%
-cd studio && npm install >nul 2>&1 && cd ..
 npm run build >nul 2>&1
 
 :: Deploy to Vercel

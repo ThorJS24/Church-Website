@@ -5,13 +5,13 @@ A modern, full-featured church website built with Next.js 14, featuring dynamic 
 ## 🌟 Features
 
 ### Core Features
-- **Dynamic Content Management** - Powered by Sanity CMS
+- **Dynamic Content Management** - Firestore-backed content with an in-app admin panel (`/admin`)
 - **Interactive Bible Verses** - Daily verses with NKJV Bible API integration
-- **User Authentication** - JWT-based login/register system
+- **User Authentication** - Firebase Auth with 4-tier role-based access control
 - **Privacy Compliance** - GDPR-compliant privacy dialog
 - **Responsive Design** - Mobile-first approach with Tailwind CSS
 - **Progressive Web App** - Offline support and installable
-- **Real-time Updates** - Live content updates from Sanity
+- **Real-time Updates** - Live content updates from Firestore
 
 ### Advanced Features
 - **Live Streaming** - YouTube integration for services
@@ -64,14 +64,6 @@ A modern, full-featured church website built with Next.js 14, featuring dynamic 
 ## 📋 Environment Variables
 
 ### Required Variables
-
-#### Sanity CMS (Content Management)
-```env
-NEXT_PUBLIC_SANITY_PROJECT_ID=your_project_id
-NEXT_PUBLIC_SANITY_DATASET=production
-SANITY_API_TOKEN=your_api_token
-SANITY_STUDIO_TOKEN=your_studio_token
-```
 
 #### Authentication & Security
 ```env
@@ -148,52 +140,33 @@ NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_maps_api_key
 
 ## 🛠️ Setup Instructions
 
-### 1. Sanity CMS Setup
-
-1. **Create Sanity Project**
-   ```bash
-   cd studio
-   npm install
-   npx sanity init
-   ```
-
-2. **Deploy Sanity Studio**
-   ```bash
-   npx sanity deploy
-   ```
-
-3. **Get API Tokens**
-   - Go to sanity.io/manage
-   - Select your project
-   - Go to API → Tokens
-   - Create tokens for both read and write access
-
-### 2. Bible API Setup
+### 1. Bible API Setup
 
 1. **Get Free API Key**
    - Visit [Bible API](https://bible-api.com/)
    - Sign up for free account
    - Get your API key
 
-### 3. Firebase Setup (Optional)
+### 2. Firebase Setup
 
 1. **Create Firebase Project**
    - Go to [Firebase Console](https://console.firebase.google.com/)
    - Create new project
    - Enable Authentication, Firestore, Storage
+   - Deploy `firestore.rules` (`firebase deploy --only firestore:rules`) and the indexes in `firestore.indexes.json`
 
 2. **Get Configuration**
    - Project Settings → General → Your apps
    - Copy configuration values
 
-### 4. Email Setup (Gmail)
+### 3. Email Setup (Gmail)
 
 1. **Enable 2FA on Gmail**
 2. **Generate App Password**
    - Google Account → Security → App passwords
    - Generate password for "Mail"
 
-### 5. Deployment
+### 4. Deployment
 
 #### Vercel (Recommended)
 ```bash
@@ -220,7 +193,6 @@ church-website-nextjs/
 ├── lib/                   # Utility libraries
 ├── models/                # Data models
 ├── public/                # Static assets
-├── studio/                # Sanity CMS studio
 ├── types/                 # TypeScript types
 └── README.md
 ```
@@ -252,9 +224,9 @@ npm run optimize        # Build and export static files
 - **Icons**: Lucide React
 
 ### Content Management
-- **CMS**: Sanity Studio at `/studio`
-- **Schemas**: Defined in `/studio/schemaTypes`
-- **Content**: Managed through Sanity Studio interface
+- **CMS**: In-app admin panel at `/admin/content`
+- **Storage**: Firestore, read via `lib/content.ts`
+- **Content**: Managed through the admin panel interface (role: `admin` or above)
 
 ### Authentication
 - **System**: JWT-based authentication
@@ -290,22 +262,17 @@ npm run optimize        # Build and export static files
 
 ### Common Issues
 
-1. **CORS Errors with Sanity**
-   - Use API proxy routes in `/app/api/sanity-proxy`
-   - Client-side requests must go through proxy
-
-2. **Environment Variables Not Loading**
+1. **Environment Variables Not Loading**
    - Ensure `.env.local` exists
    - Restart development server
    - Check variable names (NEXT_PUBLIC_ prefix for client-side)
 
-3. **Build Errors**
+2. **Build Errors**
    - Run `npm run type-check` to find TypeScript errors
    - Check all environment variables are set
    - Clear `.next` cache: `rm -rf .next`
 
-4. **Authentication Issues**
-   - Verify JWT_SECRET_KEY is set
+3. **Authentication Issues**
    - Check admin credentials in environment
    - Clear browser localStorage
 
@@ -328,7 +295,7 @@ This project is private and proprietary to Salem Primitive Baptist Church.
 ## 🙏 Acknowledgments
 
 - **Next.js Team** - Amazing React framework
-- **Sanity** - Excellent headless CMS
+- **Firebase** - Authentication, Firestore, and hosting
 - **Vercel** - Seamless deployment platform
 - **Tailwind CSS** - Utility-first CSS framework
 - **Bible API** - Free Bible verse access

@@ -46,20 +46,6 @@ if errorlevel 1 (
 )
 echo %GREEN%✓ Dependencies installed%RESET%
 
-:: Setup Sanity Studio
-echo.
-echo %YELLOW%Setting up Sanity Studio...%RESET%
-cd studio
-npm install
-if errorlevel 1 (
-    echo %RED%Error: Failed to install Sanity dependencies%RESET%
-    cd ..
-    pause
-    exit /b 1
-)
-cd ..
-echo %GREEN%✓ Sanity Studio ready%RESET%
-
 :: Build project
 echo.
 echo %YELLOW%Building project...%RESET%

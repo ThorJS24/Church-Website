@@ -12,7 +12,6 @@ church-website-nextjs/
 ├── 📁 lib/                    # Utility libraries & configurations
 ├── 📁 models/                 # TypeScript data models
 ├── 📁 public/                 # Static assets
-├── 📁 studio/                 # Sanity CMS studio
 ├── 📁 types/                  # TypeScript type definitions
 ├── 📄 README.md               # Main documentation
 ├── 📄 QUICKSTART.md           # Quick setup guide
@@ -29,7 +28,7 @@ app/
 │   ├── 📁 auth/              # Authentication endpoints
 │   ├── 📁 bible/             # Bible verse API proxy
 │   ├── 📁 contact/           # Contact form handlers
-│   ├── 📁 sanity-proxy/      # Sanity CMS proxy (CORS fix)
+│   ├── 📁 admin/             # Admin panel API (RBAC-gated)
 │   └── 📁 [other-apis]/      # Various API endpoints
 ├── 📁 (pages)/               # Website pages
 │   ├── 📁 about/             # About church pages
@@ -100,9 +99,9 @@ contexts/
 
 ```
 lib/
-├── 📄 sanity-optimized.ts    # Sanity CMS client (CORS-safe)
+├── 📄 content.ts              # Firestore-backed public content reads
 ├── 📄 bible-api.ts           # Bible verse API integration
-├── 📄 auth.ts                # Authentication utilities
+├── 📄 api-auth.ts            # Server-side RBAC route guards
 ├── 📄 firebase.ts            # Firebase configuration
 ├── 📄 encryption.ts          # Data encryption
 ├── 📄 validation.ts          # Input validation
@@ -116,7 +115,7 @@ lib/
 ### Library Categories
 
 **🔌 External Services**
-- `sanity-optimized.ts` - Content management
+- `content.ts` - Content management (Firestore)
 - `bible-api.ts` - Bible verses
 - `firebase.ts` - Authentication & hosting
 - `cloudinary.ts` - Image CDN
@@ -162,21 +161,6 @@ public/
 └── 📄 robots.txt             # SEO robots file
 ```
 
-## 🎛️ Studio Directory (Sanity CMS)
-
-```
-studio/
-├── 📁 schemaTypes/           # Content schemas
-│   ├── 📄 sermon.ts         # Sermon content type
-│   ├── 📄 event.ts          # Event content type
-│   ├── 📄 pastor.ts         # Pastor profile type
-│   ├── 📄 announcement.ts   # Announcement type
-│   └── 📄 [other-schemas]/  # Additional content types
-├── 📄 sanity.config.ts       # Studio configuration
-├── 📄 package.json           # Studio dependencies
-└── 📄 README.md              # Studio documentation
-```
-
 ## 📝 Types Directory
 
 ```
@@ -210,16 +194,15 @@ User Request → Next.js App Router → API Routes → External Services
                      ↓
               React Components → Contexts → UI Updates
                      ↓
-              Sanity CMS ← → Database/Storage
+              Firestore ← → Admin Panel
 ```
 
 ## 🎯 Key Features by Directory
 
 ### `/app/api/` - Backend Logic
-- Authentication (JWT)
+- Authentication (Firebase Auth + RBAC)
 - Contact form processing
 - Bible verse fetching
-- Sanity CMS proxy (CORS fix)
 - Email notifications
 
 ### `/components/` - UI Layer
@@ -234,15 +217,15 @@ User Request → Next.js App Router → API Routes → External Services
 - Data processing
 - Configuration management
 
-### `/studio/` - Content Management
-- Sanity CMS schemas
+### `/app/admin/` - Content Management
+- Firestore-backed content editor
 - Content editing interface
 - Media management
 - Content validation
 
 ## 🚀 Development Workflow
 
-1. **Content** → Edit in Sanity Studio
+1. **Content** → Edit in the admin panel (`/admin/content`)
 2. **Styling** → Modify Tailwind classes
 3. **Logic** → Update components/lib files
 4. **API** → Add routes in app/api/
@@ -264,7 +247,7 @@ User Request → Next.js App Router → API Routes → External Services
 - **Authentication** → `contexts/AuthContext.tsx`
 - **API endpoints** → `app/api/[endpoint]/route.ts`
 - **Styles** → `app/globals.css` or component files
-- **Content schemas** → `studio/schemaTypes/`
+- **Content shapes** → `lib/content.ts`
 
 ---
 

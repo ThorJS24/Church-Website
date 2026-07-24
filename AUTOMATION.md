@@ -32,7 +32,6 @@ Complete automation for Salem Primitive Baptist Church website setup and deploym
 ### 2. **auto-setup.bat/.sh** - Full Setup
 - Checks Node.js installation
 - Installs all dependencies
-- Sets up Sanity Studio
 - Builds project
 - Cleans up cache
 - Offers to start dev server
@@ -145,10 +144,9 @@ npm run auto-deploy    # Deployment options
 ### auto-setup.bat
 1. ✅ System checks
 2. 📦 Install dependencies
-3. 🎨 Setup Sanity Studio
-4. 🏗️ Build project
-5. 🧹 Clean cache
-6. 🖥️ Start dev server (optional)
+3. 🏗️ Build project
+4. 🧹 Clean cache
+5. 🖥️ Start dev server (optional)
 
 ### auto-deploy.bat
 1. 🏗️ Build if needed
