@@ -1,47 +1,97 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Church, Menu, X, ChevronDown, User, LogOut, Sun, Moon } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { 
+  Church, Menu, X, ChevronDown, User, LogOut, Sun, Moon, Search,
+  Home, Calendar, BookOpen, Users, Heart, Camera, Phone, Gift
+} from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
-import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import SearchModal from '@/components/SearchModal';
-import { Search } from 'lucide-react';
-
+import LanguageToggle from '@/components/LanguageToggle';
 import { motion, AnimatePresence } from 'framer-motion';
 import EnhancedLoginModal from './EnhancedLoginModal';
 
-const navigation = [
-  { name: 'Home', href: '/' },
+const navigationItems = [
   { 
-    name: 'About', 
-    href: '/about/beliefs',
+    key: 'home', 
+    href: '/', 
+    icon: Home, 
+    labelKey: 'nav.home',
+    primary: true
+  },
+  { 
+    key: 'about', 
+    href: '/about/beliefs', 
+    icon: Users, 
+    labelKey: 'nav.about',
     dropdown: [
-      { name: 'Our Beliefs', href: '/about/beliefs' },
-      { name: 'Our Branches', href: '/about/branches' },
-      { name: 'Our Pastors', href: '/about/pastors' },
-      { name: 'Our History', href: '/about/history' }
+      { key: 'beliefs', href: '/about/beliefs', labelKey: 'nav.beliefs' },
+      { key: 'branches', href: '/about/branches', labelKey: 'nav.branches' },
+      { key: 'pastors', href: '/about/pastors', labelKey: 'nav.pastors' },
+      { key: 'history', href: '/about/history', labelKey: 'nav.history' }
     ]
   },
-  { name: 'Services', href: '/services' },
   { 
-    name: 'Ministries', 
-    href: '/ministries',
+    key: 'services', 
+    href: '/services', 
+    icon: Heart, 
+    labelKey: 'nav.services',
+    primary: true
+  },
+  { 
+    key: 'events', 
+    href: '/events', 
+    icon: Calendar, 
+    labelKey: 'nav.events',
+    primary: true
+  },
+  { 
+    key: 'sermons', 
+    href: '/sermons', 
+    icon: BookOpen, 
+    labelKey: 'nav.sermons',
+    primary: true
+  },
+  { 
+    key: 'ministries', 
+    href: '/ministries', 
+    icon: Users, 
+    labelKey: 'nav.ministries',
     dropdown: [
-      { name: 'All Ministries', href: '/ministries' },
-      { name: 'Children', href: '/ministries#children' },
-      { name: 'Youth', href: '/ministries#youth' },
-      { name: 'Adults', href: '/ministries#adults' }
+      { key: 'all', href: '/ministries', labelKey: 'nav.allMinistries' },
+      { key: 'children', href: '/ministries#children', labelKey: 'nav.children' },
+      { key: 'youth', href: '/ministries#youth', labelKey: 'nav.youth' },
+      { key: 'adults', href: '/ministries#adults', labelKey: 'nav.adults' }
     ]
   },
-  { name: 'Events', href: '/events' },
-  { name: 'Sermons', href: '/sermons' },
-  { name: 'Community', href: '/community' },
-  { name: 'Gallery', href: '/gallery' },
-  { name: 'Give', href: '/give' },
-  { name: 'Contact', href: '/contact' }
+  { 
+    key: 'community', 
+    href: '/community', 
+    icon: Users, 
+    labelKey: 'nav.community'
+  },
+  { 
+    key: 'gallery', 
+    href: '/gallery', 
+    icon: Camera, 
+    labelKey: 'nav.gallery'
+  },
+  { 
+    key: 'give', 
+    href: '/give', 
+    icon: Gift, 
+    labelKey: 'nav.give'
+  },
+  { 
+    key: 'contact', 
+    href: '/contact', 
+    icon: Phone, 
+    labelKey: 'nav.contact'
+  }
 ];
 
 export default function Navbar() {
@@ -49,333 +99,432 @@ export default function Navbar() {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  
   const { user, logout } = useAuth();
-  const themeContext = useTheme();
-  const theme = themeContext?.theme || 'light';
-  const toggleTheme = themeContext?.toggleTheme || (() => {});
-  const { language, t } = useLanguage();
-
+  const { theme, toggleTheme } = useTheme() || { theme: 'light', toggleTheme: () => {} };
+  const { t, language } = useLanguage();
   const pathname = usePathname();
+  const router = useRouter();
+  const navRef = useRef<HTMLElement>(null);
 
-  const toggleDropdown = (name: string) => {
-    setActiveDropdown(activeDropdown === name ? null : name);
+  // Handle scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (navRef.current && !navRef.current.contains(event.target as Node)) {
+        setActiveDropdown(null);
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const toggleDropdown = (key: string) => {
+    setActiveDropdown(activeDropdown === key ? null : key);
   };
 
-  const handleLogin = () => {
-    setShowLoginModal(false);
+  const handleNavigation = (href: string) => {
+    setIsOpen(false);
+    setActiveDropdown(null);
+    router.push(href);
   };
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     setActiveDropdown(null);
   };
 
-  return (
-    <nav className="bg-white dark:bg-gray-800 shadow-lg fixed w-full top-0 z-50 transition-colors">
-      {/* Logo - Responsive */}
-      <div className="absolute left-2 sm:left-4 top-2 z-10">
-        <Link href="/" className="flex items-center space-x-1 sm:space-x-2">
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-1 sm:p-1.5 rounded-lg">
-            <Church className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-          </div>
-          <div className="hidden md:block">
-            <h1 className="text-xs font-bold text-gray-900 dark:text-white leading-tight">
-              Welcome to<br />Salem Primitive Baptist Church
-            </h1>
-          </div>
-          <div className="md:hidden">
-            <h1 className="text-xs font-bold text-gray-900 dark:text-white">
-              SPBC
-            </h1>
-          </div>
-        </Link>
-      </div>
-      
-      {/* Top Right Auth Buttons */}
-      <div className="absolute right-2 sm:right-4 top-2 sm:top-4 z-20">
-        <div className="flex items-center space-x-1 sm:space-x-2">
-          {user ? (
-            <div className="relative">
-              <button
-                onClick={() => toggleDropdown('user')}
-                className="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 transition-colors bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 min-w-0 max-w-[120px] sm:max-w-none"
-              >
-                <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center flex-shrink-0">
-                  <User className="w-3 h-3" />
-                </div>
-                <span className="truncate hidden sm:block">{user.name}</span>
-                <span className="truncate sm:hidden">{user.name.split(' ')[0]}</span>
-                <ChevronDown className="w-3 h-3 flex-shrink-0" />
-              </button>
-              
-              <AnimatePresence>
-                {activeDropdown === 'user' && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2 }}
-                    className="absolute top-full right-0 mt-1 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2"
-                  >
-                    <Link href="/profile" className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                      My Profile
-                    </Link>
-                    <Link href="/dashboard" className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                      Dashboard
-                    </Link>
-                    <hr className="my-2" />
-                    <button
-                      onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center"
-                    >
-                      <LogOut className="w-4 h-4 mr-2" />
-                      Logout
-                    </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          ) : (
-            <>
-              <button
-                onClick={() => setShowLoginModal(true)}
-                className="px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 transition-all duration-300 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 btn-touch whitespace-nowrap"
-              >
-                Login
-              </button>
-              <Link
-                href="/register"
-                className="px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 btn-touch whitespace-nowrap text-center min-w-[60px] sm:min-w-[80px]"
-              >
-                Register
-              </Link>
-            </>
-          )}
-        </div>
-      </div>
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-14 sm:h-16 pl-20 sm:pl-32 md:pl-48">
+  const isActive = (href: string) => {
+    if (href === '/') return pathname === '/';
+    return pathname.startsWith(href);
+  };
 
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-3">
-            {navigation.map((item) => (
-              <div key={item.name} className="relative">
-                {item.dropdown ? (
-                  <div
-                    className="relative"
-                    onMouseEnter={() => setActiveDropdown(item.name)}
-                    onMouseLeave={() => setActiveDropdown(null)}
-                  >
-                    <motion.div
-                      whileHover={{ scale: 1.05, y: -2 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <Link
-                        href={item.href}
-                        className={`flex items-center px-3 py-2 text-sm font-medium transition-all duration-300 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 ${
-                          pathname === item.href
-                            ? 'text-blue-600 bg-blue-100 dark:bg-blue-900/30'
-                            : 'text-gray-700 dark:text-gray-300 hover:text-blue-600'
-                        }`}
-                      >
-                        {item.name}
-                        <motion.div
-                          animate={{ rotate: activeDropdown === item.name ? 180 : 0 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          <ChevronDown className="ml-1 h-4 w-4" />
-                        </motion.div>
-                      </Link>
-                    </motion.div>
-                    
-                    <AnimatePresence>
-                      {activeDropdown === item.name && (
-                        <motion.div
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -10 }}
-                          transition={{ duration: 0.2 }}
-                          className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2"
-                        >
-                          {item.dropdown.map((dropdownItem) => (
-                            <Link
-                              key={dropdownItem.name}
-                              href={dropdownItem.href}
-                              className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-blue-600 transition-colors"
-                            >
-                              {dropdownItem.name}
-                            </Link>
-                          ))}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                ) : (
+  const primaryItems = navigationItems.filter(item => item.primary);
+  const secondaryItems = navigationItems.filter(item => !item.primary);
+
+  return (
+    <>
+      <nav 
+        ref={navRef}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          scrolled 
+            ? 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-lg border-b border-gray-200/50 dark:border-gray-700/50' 
+            : 'bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-700'
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            
+            {/* Logo */}
+            <Link 
+              href="/" 
+              className="flex items-center space-x-3 group transition-transform hover:scale-105"
+            >
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl blur opacity-75 group-hover:opacity-100 transition-opacity"></div>
+                <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 p-2.5 rounded-xl">
+                  <Church className="h-6 w-6 text-white" />
+                </div>
+              </div>
+              <div className="hidden sm:block">
+                <h1 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                  Salem PBC
+                </h1>
+                <p className="text-xs text-gray-500 dark:text-gray-400 -mt-1">
+                  {t('nav.tagline')}
+                </p>
+              </div>
+            </Link>
+
+            {/* Desktop Navigation */}
+            <div className="hidden lg:flex items-center space-x-1">
+              {primaryItems.map((item) => {
+                const Icon = item.icon;
+                const active = isActive(item.href);
+                
+                return (
                   <motion.div
-                    whileHover={{ scale: 1.05, y: -2 }}
+                    key={item.key}
+                    whileHover={{ y: -2 }}
                     whileTap={{ scale: 0.95 }}
                   >
                     <Link
                       href={item.href}
-                      className={`px-3 py-2 text-sm font-medium transition-all duration-300 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 ${
-                        pathname === item.href
-                          ? 'text-blue-600 bg-blue-100 dark:bg-blue-900/30'
-                          : 'text-gray-700 dark:text-gray-300 hover:text-blue-600'
+                      className={`group flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                        active
+                          ? 'bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 text-blue-600 dark:text-blue-400 shadow-sm'
+                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-blue-600 dark:hover:text-blue-400'
                       }`}
                     >
-                      {item.name}
+                      <Icon className={`h-4 w-4 transition-colors ${
+                        active ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 group-hover:text-blue-600'
+                      }`} />
+                      <span>{t(item.labelKey)}</span>
+                      {active && (
+                        <motion.div
+                          layoutId="activeTab"
+                          className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"
+                        />
+                      )}
                     </Link>
                   </motion.div>
-                )}
+                );
+              })}
+              
+              {/* More Dropdown */}
+              <div className="relative">
+                <motion.button
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => toggleDropdown('more')}
+                  className="flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200"
+                >
+                  <span>{t('nav.more')}</span>
+                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${
+                    activeDropdown === 'more' ? 'rotate-180' : ''
+                  }`} />
+                </motion.button>
+                
+                <AnimatePresence>
+                  {activeDropdown === 'more' && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute top-full right-0 mt-2 w-64 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 py-2 overflow-hidden"
+                    >
+                      {secondaryItems.map((item) => {
+                        const Icon = item.icon;
+                        return (
+                          <div key={item.key}>
+                            {item.dropdown ? (
+                              <div className="relative group/sub">
+                                <Link
+                                  href={item.href}
+                                  className="flex items-center justify-between px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                                >
+                                  <div className="flex items-center space-x-3">
+                                    <Icon className="h-4 w-4 text-gray-500" />
+                                    <span>{t(item.labelKey)}</span>
+                                  </div>
+                                  <ChevronDown className="h-4 w-4 -rotate-90" />
+                                </Link>
+                                <div className="absolute left-full top-0 ml-1 w-48 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md rounded-xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 py-2 opacity-0 invisible group-hover/sub:opacity-100 group-hover/sub:visible transition-all duration-200">
+                                  {item.dropdown.map((subItem) => (
+                                    <Link
+                                      key={subItem.key}
+                                      href={subItem.href}
+                                      className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                                    >
+                                      {t(subItem.labelKey)}
+                                    </Link>
+                                  ))}
+                                </div>
+                              </div>
+                            ) : (
+                              <Link
+                                href={item.href}
+                                className="flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                              >
+                                <Icon className="h-4 w-4 text-gray-500" />
+                                <span>{t(item.labelKey)}</span>
+                              </Link>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
-            ))}
-          </div>
-
-          {/* Search Bar & Theme Toggle */}
-          <div className="hidden lg:flex items-center space-x-6 mr-40 ml-8">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="text"
-                placeholder="Search..."
-                onClick={() => setShowSearchModal(true)}
-                className="pl-9 pr-4 py-2 w-40 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm cursor-pointer"
-                readOnly
-              />
             </div>
 
-
-
-            <motion.button
-              onClick={toggleTheme}
-              className="p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-yellow-100 dark:hover:bg-yellow-900/30 transition-all duration-300"
-              aria-label="Toggle theme"
-              whileHover={{ scale: 1.1, rotate: 180 }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <motion.div
-                animate={{ rotate: theme === 'dark' ? 180 : 0 }}
-                transition={{ duration: 0.5 }}
+            {/* Right Actions */}
+            <div className="flex items-center space-x-2">
+              {/* Search */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowSearchModal(true)}
+                className="p-2.5 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800/50 rounded-xl transition-all duration-200"
+                aria-label={t('common.search')}
               >
-                {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
-              </motion.div>
-            </motion.button>
-          </div>
+                <Search className="h-5 w-5" />
+              </motion.button>
 
-          {/* Mobile menu button */}
-          <div className="lg:hidden flex items-center ml-2">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="p-2 rounded-md text-gray-700 dark:text-gray-300 hover:text-blue-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors btn-touch"
-            >
-              {isOpen ? <X className="h-5 w-5 sm:h-6 sm:w-6" /> : <Menu className="h-5 w-5 sm:h-6 sm:w-6" />}
-            </button>
-          </div>
-        </div>
-      </div>
+              {/* Theme Toggle */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={toggleTheme}
+                className="p-2.5 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800/50 rounded-xl transition-all duration-200"
+                aria-label={t('nav.toggleTheme')}
+              >
+                {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+              </motion.button>
 
-      {/* Mobile Navigation */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-            className="lg:hidden bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mobile-menu"
-          >
-            <div className="px-4 py-6 space-y-4">
-              {/* Mobile Auth Buttons */}
-              {!user && (
-                <div className="flex flex-col space-y-2 pb-4 border-b border-gray-200 dark:border-gray-700">
-                  <button
-                    onClick={() => {
-                      setShowLoginModal(true);
-                      setIsOpen(false);
-                    }}
-                    className="w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 transition-colors rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 text-center"
+              {/* Language Toggle */}
+              <LanguageToggle />
+
+              {/* Auth Section */}
+              {user ? (
+                <div className="relative">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => toggleDropdown('user')}
+                    className="flex items-center space-x-2 px-3 py-2 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 rounded-xl border border-blue-200/50 dark:border-blue-700/50 transition-all duration-200"
                   >
-                    Login
-                  </button>
-                  <Link
-                    href="/register"
-                    className="w-full px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-center"
-                    onClick={() => setIsOpen(false)}
+                    <div className="w-7 h-7 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                      <User className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="hidden sm:block text-sm font-medium text-gray-700 dark:text-gray-300 max-w-24 truncate">
+                      {user.displayName || user.firstName || user.email}
+                    </span>
+                    <ChevronDown className="w-4 h-4 text-gray-500" />
+                  </motion.button>
+                  
+                  <AnimatePresence>
+                    {activeDropdown === 'user' && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        transition={{ duration: 0.2 }}
+                        className="absolute top-full right-0 mt-2 w-48 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 py-2 overflow-hidden"
+                      >
+                        <Link 
+                          href="/profile" 
+                          className="block px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                        >
+                          {t('nav.profile')}
+                        </Link>
+                        <Link 
+                          href="/dashboard" 
+                          className="block px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                        >
+                          {t('nav.dashboard')}
+                        </Link>
+                        <hr className="my-2 border-gray-200 dark:border-gray-600" />
+                        <button
+                          onClick={handleLogout}
+                          className="w-full text-left px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors flex items-center space-x-2"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          <span>{t('nav.logout')}</span>
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setShowLoginModal(true)}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800/50 rounded-xl transition-all duration-200"
                   >
-                    Register
-                  </Link>
+                    {t('nav.login')}
+                  </motion.button>
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Link
+                      href="/register"
+                      className="px-4 py-2 text-sm font-medium bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-sm hover:shadow-md"
+                    >
+                      {t('nav.register')}
+                    </Link>
+                  </motion.div>
                 </div>
               )}
-              
-              {navigation.map((item) => (
-                <div key={item.name}>
-                  {item.dropdown ? (
-                    <div>
-                      <button
-                        onClick={() => toggleDropdown(item.name)}
-                        className="flex items-center justify-between w-full px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 transition-colors"
-                      >
-                        {item.name}
-                        <ChevronDown className={`h-4 w-4 transition-transform ${
-                          activeDropdown === item.name ? 'rotate-180' : ''
-                        }`} />
-                      </button>
-                      <AnimatePresence>
-                        {activeDropdown === item.name && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            transition={{ duration: 0.2 }}
-                            className="ml-4 mt-2 space-y-2"
-                          >
-                            {item.dropdown.map((dropdownItem) => (
-                              <Link
-                                key={dropdownItem.name}
-                                href={dropdownItem.href}
-                                className="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 transition-colors"
-                                onClick={() => setIsOpen(false)}
-                              >
-                                {dropdownItem.name}
-                              </Link>
-                            ))}
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  ) : (
+
+              {/* Mobile menu button */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setIsOpen(!isOpen)}
+                className="lg:hidden p-2.5 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800/50 rounded-xl transition-all duration-200"
+              >
+                {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </motion.button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Navigation */}
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="lg:hidden bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200/50 dark:border-gray-700/50"
+            >
+              <div className="px-4 py-6 space-y-4 max-h-[calc(100vh-4rem)] overflow-y-auto">
+                {/* Mobile Auth */}
+                {!user && (
+                  <div className="flex space-x-3 pb-4 border-b border-gray-200 dark:border-gray-700">
+                    <button
+                      onClick={() => {
+                        setShowLoginModal(true);
+                        setIsOpen(false);
+                      }}
+                      className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800/50 rounded-xl transition-all duration-200 text-center"
+                    >
+                      {t('nav.login')}
+                    </button>
                     <Link
-                      href={item.href}
-                      className={`block px-3 py-2 text-base font-medium transition-colors ${
-                        pathname === item.href
-                          ? 'text-blue-600'
-                          : 'text-gray-700 dark:text-gray-300 hover:text-blue-600'
-                      }`}
+                      href="/register"
+                      className="flex-1 px-4 py-2.5 text-sm font-medium bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 text-center"
                       onClick={() => setIsOpen(false)}
                     >
-                      {item.name}
+                      {t('nav.register')}
                     </Link>
-                  )}
+                  </div>
+                )}
+                
+                {/* Mobile Navigation Items */}
+                <div className="space-y-2">
+                  {navigationItems.map((item) => {
+                    const Icon = item.icon;
+                    const active = isActive(item.href);
+                    
+                    return (
+                      <div key={item.key}>
+                        {item.dropdown ? (
+                          <div>
+                            <button
+                              onClick={() => toggleDropdown(item.key)}
+                              className={`flex items-center justify-between w-full px-4 py-3 text-base font-medium rounded-xl transition-all duration-200 ${
+                                active
+                                  ? 'bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 text-blue-600 dark:text-blue-400'
+                                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                              }`}
+                            >
+                              <div className="flex items-center space-x-3">
+                                <Icon className={`h-5 w-5 ${
+                                  active ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500'
+                                }`} />
+                                <span>{t(item.labelKey)}</span>
+                              </div>
+                              <ChevronDown className={`h-4 w-4 transition-transform ${
+                                activeDropdown === item.key ? 'rotate-180' : ''
+                              }`} />
+                            </button>
+                            <AnimatePresence>
+                              {activeDropdown === item.key && (
+                                <motion.div
+                                  initial={{ opacity: 0, height: 0 }}
+                                  animate={{ opacity: 1, height: 'auto' }}
+                                  exit={{ opacity: 0, height: 0 }}
+                                  transition={{ duration: 0.2 }}
+                                  className="ml-8 mt-2 space-y-1"
+                                >
+                                  {item.dropdown.map((subItem) => (
+                                    <Link
+                                      key={subItem.key}
+                                      href={subItem.href}
+                                      className="block px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg transition-all duration-200"
+                                      onClick={() => handleNavigation(subItem.href)}
+                                    >
+                                      {t(subItem.labelKey)}
+                                    </Link>
+                                  ))}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        ) : (
+                          <Link
+                            href={item.href}
+                            className={`flex items-center space-x-3 px-4 py-3 text-base font-medium rounded-xl transition-all duration-200 ${
+                              active
+                                ? 'bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 text-blue-600 dark:text-blue-400'
+                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                            }`}
+                            onClick={() => handleNavigation(item.href)}
+                          >
+                            <Icon className={`h-5 w-5 ${
+                              active ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500'
+                            }`} />
+                            <span>{t(item.labelKey)}</span>
+                          </Link>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
-              ))}
-              
-
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </nav>
       
       <EnhancedLoginModal 
         isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
-        onLogin={handleLogin}
+        onLogin={() => setShowLoginModal(false)}
       />
       
       <SearchModal 
         isOpen={showSearchModal}
         onClose={() => setShowSearchModal(false)}
       />
-    </nav>
+    </>
   );
 }

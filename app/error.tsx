@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 export default function Error({
   error,
   reset,
@@ -16,16 +18,16 @@ export default function Error({
         <div className="space-x-4">
           <button
             onClick={reset}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors min-w-touch min-h-touch"
           >
             Try Again
           </button>
-          <a
+          <Link
             href="/"
-            className="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors inline-block"
+            className="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors inline-block min-w-touch min-h-touch"
           >
             Go Home
-          </a>
+          </Link>
         </div>
       </div>
     </div>

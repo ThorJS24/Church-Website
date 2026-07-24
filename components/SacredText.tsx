@@ -22,7 +22,7 @@ export default function SacredText({
   };
 
   return (
-    <div className={`${sizeClasses[size]} ${className} hover:text-yellow-600 dark:hover:text-yellow-400 transition-colors duration-300`}>
+    <div className={`${sizeClasses[size]} ${className} text-gray-900 dark:text-gray-100 transition-colors duration-300`}>
       {children}
     </div>
   );

@@ -21,6 +21,27 @@ const translations = {
     'nav.give': 'Give',
     'nav.login': 'Login',
     'nav.logout': 'Logout',
+    'nav.register': 'Register',
+    'nav.ministries': 'Ministries',
+    'nav.community': 'Community',
+    'nav.announcements': 'News',
+    'nav.more': 'More',
+    'nav.profile': 'My Profile',
+    'nav.dashboard': 'Dashboard',
+    'nav.toggleTheme': 'Toggle Theme',
+    'nav.tagline': 'Faith • Hope • Love',
+    
+    // About submenu
+    'nav.beliefs': 'Our Beliefs',
+    'nav.branches': 'Our Branches', 
+    'nav.pastors': 'Our Pastors',
+    'nav.history': 'Our History',
+    
+    // Ministries submenu
+    'nav.allMinistries': 'All Ministries',
+    'nav.children': 'Children',
+    'nav.youth': 'Youth',
+    'nav.adults': 'Adults',
     
     // Home Page
     'home.welcome': 'Welcome to Salem Primitive Baptist Church',
@@ -28,12 +49,33 @@ const translations = {
     'home.liveStream': 'Live Stream',
     'home.upcomingEvents': 'Upcoming Events',
     'home.latestSermons': 'Latest Sermons',
+    'home.joinUs': 'Join Us',
+    'home.learnMore': 'Learn More',
+    'home.watchLive': 'Watch Live',
+    'home.ourMission': 'Our Mission',
+    'home.ourVision': 'Our Vision',
+    'home.ourValues': 'Our Values',
     
     // Services
     'services.wedding': 'Wedding',
     'services.baptism': 'Baptism',
     'services.request': 'Request Service',
     'services.title': 'Our Services',
+    'services.description': 'We offer various services to serve our community',
+    'services.schedule': 'Service Schedule',
+    'services.sunday': 'Sunday Service',
+    'services.prayer': 'Prayer Meeting',
+    'services.bible': 'Bible Study',
+    
+    // Events
+    'events.title': 'Upcoming Events',
+    'events.noEvents': 'No upcoming events',
+    'events.viewAll': 'View All Events',
+    'events.register': 'Register',
+    'events.details': 'Event Details',
+    'events.date': 'Date',
+    'events.time': 'Time',
+    'events.location': 'Location',
     
     // Forms
     'form.firstName': 'First Name',
@@ -43,6 +85,10 @@ const translations = {
     'form.message': 'Message',
     'form.submit': 'Submit',
     'form.required': 'Required',
+    'form.optional': 'Optional',
+    'form.sending': 'Sending...',
+    'form.sent': 'Message Sent',
+    'form.error': 'Error sending message',
     
     // Donations
     'donations.history': 'Donation History',
@@ -52,6 +98,10 @@ const translations = {
     'donations.status': 'Status',
     'donations.receipt': 'Receipt',
     'donations.total': 'Total Donated',
+    'donations.donate': 'Donate Now',
+    'donations.oneTime': 'One-time',
+    'donations.monthly': 'Monthly',
+    'donations.thank': 'Thank you for your generosity',
     
     // Common
     'common.loading': 'Loading...',
@@ -65,7 +115,14 @@ const translations = {
     'common.filter': 'Filter',
     'common.all': 'All',
     'common.yes': 'Yes',
-    'common.no': 'No'
+    'common.no': 'No',
+    'common.close': 'Close',
+    'common.open': 'Open',
+    'common.back': 'Back',
+    'common.next': 'Next',
+    'common.previous': 'Previous',
+    'common.readMore': 'Read More',
+    'common.showLess': 'Show Less'
   },
   ta: {
     // Navigation
@@ -79,6 +136,27 @@ const translations = {
     'nav.give': 'நன்கொடை',
     'nav.login': 'உள்நுழைவு',
     'nav.logout': 'வெளியேறு',
+    'nav.register': 'பதிவு செய்யவும்',
+    'nav.ministries': 'ஊழியங்கள்',
+    'nav.community': 'சமூகம்',
+    'nav.announcements': 'செய்திகள்',
+    'nav.more': 'மேலும்',
+    'nav.profile': 'என் சுயவிவரம்',
+    'nav.dashboard': 'டாஷ்போர்டு',
+    'nav.toggleTheme': 'தீம் மாற்று',
+    'nav.tagline': 'நம்பிக்கை • நம்பிக்கை • அன்பு',
+    
+    // About submenu
+    'nav.beliefs': 'எங்கள் நம்பிக்கைகள்',
+    'nav.branches': 'எங்கள் கிளைகள்',
+    'nav.pastors': 'எங்கள் போதகர்கள்',
+    'nav.history': 'எங்கள் வரலாறு',
+    
+    // Ministries submenu
+    'nav.allMinistries': 'அனைத்து ஊழியங்கள்',
+    'nav.children': 'குழந்தைகள்',
+    'nav.youth': 'இளைஞர்கள்',
+    'nav.adults': 'பெரியவர்கள்',
     
     // Home Page
     'home.welcome': 'சேலம் பிரிமிட்டிவ் பாப்டிஸ்ட் தேவாலயத்திற்கு வரவேற்கிறோம்',
@@ -86,12 +164,33 @@ const translations = {
     'home.liveStream': 'நேரடி ஒளிபரப்பு',
     'home.upcomingEvents': 'வரவிருக்கும் நிகழ்வுகள்',
     'home.latestSermons': 'சமீபத்திய பிரசங்கங்கள்',
+    'home.joinUs': 'எங்களுடன் சேரவும்',
+    'home.learnMore': 'மேலும் அறிக',
+    'home.watchLive': 'நேரடி பார்க்க',
+    'home.ourMission': 'எங்கள் நோக்கம்',
+    'home.ourVision': 'எங்கள் பார்வை',
+    'home.ourValues': 'எங்கள் மதிப்புகள்',
     
     // Services
     'services.wedding': 'திருமணம்',
     'services.baptism': 'ஞானஸ்நானம்',
     'services.request': 'சேவை கோரிக்கை',
     'services.title': 'எங்கள் சேவைகள்',
+    'services.description': 'எங்கள் சமூகத்திற்கு சேவை செய்ய பல்வேறு சேவைகளை வழங்குகிறோம்',
+    'services.schedule': 'சேவை அட்டவணை',
+    'services.sunday': 'ஞாயிறு சேவை',
+    'services.prayer': 'ஜெப கூட்டம்',
+    'services.bible': 'பைபிள் படிப்பு',
+    
+    // Events
+    'events.title': 'வரவிருக்கும் நிகழ்வுகள்',
+    'events.noEvents': 'வரவிருக்கும் நிகழ்வுகள் இல்லை',
+    'events.viewAll': 'அனைத்து நிகழ்வுகளையும் பார்க்க',
+    'events.register': 'பதிவு செய்யவும்',
+    'events.details': 'நிகழ்வு விவரங்கள்',
+    'events.date': 'தேதி',
+    'events.time': 'நேரம்',
+    'events.location': 'இடம்',
     
     // Forms
     'form.firstName': 'முதல் பெயர்',
@@ -101,6 +200,10 @@ const translations = {
     'form.message': 'செய்தி',
     'form.submit': 'சமர்ப்பிக்கவும்',
     'form.required': 'தேவையான',
+    'form.optional': 'விருப்பமான',
+    'form.sending': 'அனுப்புகிறது...',
+    'form.sent': 'செய்தி அனுப்பப்பட்டது',
+    'form.error': 'செய்தி அனுப்புவதில் பிழை',
     
     // Donations
     'donations.history': 'நன்கொடை வரலாறு',
@@ -110,6 +213,10 @@ const translations = {
     'donations.status': 'நிலை',
     'donations.receipt': 'ரசீது',
     'donations.total': 'மொத்த நன்கொடை',
+    'donations.donate': 'இப்போது நன்கொடை',
+    'donations.oneTime': 'ஒரு முறை',
+    'donations.monthly': 'மாதாந்திர',
+    'donations.thank': 'உங்கள் தாராள மனதிற்கு நன்றி',
     
     // Common
     'common.loading': 'ஏற்றுகிறது...',
@@ -123,7 +230,14 @@ const translations = {
     'common.filter': 'வடிகட்டி',
     'common.all': 'அனைத்தும்',
     'common.yes': 'ஆம்',
-    'common.no': 'இல்லை'
+    'common.no': 'இல்லை',
+    'common.close': 'மூடு',
+    'common.open': 'திற',
+    'common.back': 'பின்',
+    'common.next': 'அடுத்து',
+    'common.previous': 'முந்தைய',
+    'common.readMore': 'மேலும் படிக்க',
+    'common.showLess': 'குறைவாக காட்டு'
   }
 };
 

@@ -2,50 +2,20 @@
 
 import { useState, useEffect } from 'react';
 import { Play, Calendar, Clock } from 'lucide-react';
-import { sanityFetch } from '@/lib/sanity-fetch';
-
-interface LiveStreamData {
-  _id: string;
-  title: string;
-  description?: string;
-  streamType: string;
-  streamUrl?: string;
-  streamKey?: string;
-  isLive: boolean;
-  scheduledStart?: string;
-  thumbnail?: { asset: { url: string } };
-  category: string;
-}
+import { getLivestream, Livestream } from '@/lib/content';
+import Image from 'next/image';
 
 export default function DynamicLiveStream() {
-  const [streamData, setStreamData] = useState<LiveStreamData | null>(null);
+  const [streamData, setStreamData] = useState<Livestream | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchStreamData();
   }, []);
 
-
-
   const fetchStreamData = async () => {
     try {
-      const data = await sanityFetch(`*[_type == "livestream"] | order(_createdAt desc)[0] {
-        _id,
-        title,
-        description,
-        streamType,
-        streamUrl,
-        streamKey,
-        isLive,
-        scheduledStart,
-        thumbnail {
-          asset-> {
-            url
-          }
-        },
-        category
-      }`);
-      
+      const data = await getLivestream();
       if (data) {
         setStreamData(data);
       }
@@ -98,11 +68,15 @@ export default function DynamicLiveStream() {
     return (
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
         <div className="relative">
-          {streamData.thumbnail?.asset?.url && (
-            <img 
-              src={streamData.thumbnail.asset.url} 
+          {streamData.thumbnailUrl && (
+            <Image
+              src={streamData.thumbnailUrl}
               alt={streamData.title}
+              width={800}
+              height={450}
               className="w-full h-64 object-cover"
+              priority
+              sizes="(max-width: 768px) 100vw, 800px"
             />
           )}
           <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
