@@ -25,3 +25,4 @@ export * from './States';
 export * from './Toast';
 export * from './Breadcrumbs';
 export * from './Pagination';
+export * from './DataTable';
