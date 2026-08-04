@@ -38,7 +38,13 @@ export async function requireRole(request: NextRequest, minRole: UserRole): Prom
   let decoded;
   try {
     decoded = await getAdminAuth().verifyIdToken(token);
-  } catch {
+  } catch (error) {
+    // Was a silent catch — every "Invalid or expired session" response
+    // looked identical whether the token was genuinely expired, malformed,
+    // signed by the wrong project, or verifyIdToken() itself threw for an
+    // infrastructure reason. Logging the real error is the only way to
+    // tell those apart from the client-visible message alone.
+    console.error('verifyIdToken failed:', error);
     return { ok: false, response: unauthorized('Invalid or expired session') };
   }
 
