@@ -67,34 +67,71 @@ npm dependencies, backend/Firestore/API untouched, `ThemeContext`/
 - Verified: `type-check`, `lint`, dev-server render, no console/runtime
   errors in rendered HTML.
 
+### Phase 3 — Core informational pages
+- About/Beliefs, About/History, About/Pastors, About/Branches, Services,
+  Services/Request, Contact, Community rebuilt on primitives. New
+  `PageHero` primitive for consistent page headers. `ScriptureReference`
+  reskinned. All functional behavior preserved (history search/filter/
+  autoplay, pastor/branch detail modals now on the `Modal` primitive,
+  multi-step contact form, react-hook-form service request).
+
+### Phase 4 — Sermon experience
+- Sermons list + detail rebuilt. Unified video modal (was three
+  near-duplicate inline modals). New localStorage-backed "Continue
+  Watching" strip. New `ShareButton` (Web Share API + clipboard fallback).
+  Detail page stays a server component; gains related-sermons + breadcrumbs.
+
+### Phase 5 — Event experience
+- New `lib/eventCategories.ts` centralizes category-color config and the
+  weekly-service→recurring-events expansion, previously duplicated across
+  `events/page.tsx`, `EventModal.tsx`, `InteractiveCalendar.tsx`.
+  `EventModal` rebuilt on `Modal`. `InteractiveCalendar` rebuilt on tokens.
+  Event detail page gains a countdown, per-event map embed, share, and
+  related events by category.
+
+### Phase 6 — Blog experience
+- List gains search/category filter + featured-post hero slot. Detail page
+  gains a reading-progress bar, computed reading time, and a heuristic
+  table of contents (`lib/blogContent.ts` — content is plain text with no
+  markdown, so short non-sentence lines are treated as headings; TOC and
+  article body share the same parser so they can't disagree) plus related
+  posts by category. No new markdown dependency.
+
+### Phase 7 — Gallery
+- Album grid gains search/category filters. Individual event photo grid is
+  now true masonry (CSS columns) with `IntersectionObserver`-based
+  infinite scroll. New `PhotoLightbox` with arrow-key navigation. Submit-
+  a-photo flow preserved exactly; success now surfaces via `ToastProvider`.
+
+### Phase 8 — Remaining public pages
+- Small Groups, Resources, Testimonials, Ministries (+contact/volunteer),
+  top-level Volunteer, Give, Prayer, `/forms/[id]` (public form-render
+  contract preserved exactly), `MemberDashboard`, Profile, Settings, Login,
+  Register, Privacy, Terms, Offline — all rebuilt on primitives.
+- Deleted all 10 legacy decorative components (`DivineButton`,
+  `HeavenlyCard`, `DivineEffects`, `AnimatedBackground`, `AnimatedButton`,
+  `AnimatedCard`, `HeavenlyBackground`, `PrayerEffects`, `SacredText`,
+  `FloatingElements`) — confirmed zero remaining references before deleting.
+- **Bug found and fixed:** `components/ui/PageHero.tsx` used framer-motion
+  without `'use client'`. Silently broke (React falls back to client
+  rendering) whenever a plain Server Component page was its first
+  non-client ancestor — invisible everywhere it had only ever been used
+  from already-`'use client'` pages, surfaced on the new Privacy/Terms
+  pages. Fixed; audited every other `components/ui` file for the same gap
+  (framer-motion/hooks without `'use client'`) — none found.
+- Verified: type-check, lint, and a full 30-route sweep specifically
+  re-checking for the "element type is invalid" signature (broader than
+  earlier phases' spot checks).
+
 ---
 
 ## Remaining (see plan for full detail)
 
-- Phase 3 — Core informational pages (About/History/Pastors/Beliefs/Branches,
-  Services, Contact, Community)
-- Phase 4 — Sermon experience
-- Phase 5 — Event experience
-- Phase 6 — Blog experience
-- Phase 7 — Gallery
-- Phase 8 — Remaining public pages (Ministries, Small Groups, Testimonials,
-  Resources, Give, Prayer, Volunteer, Forms renderer, Dashboard, Profile,
-  Settings, Login, Register, Privacy, Terms, Offline)
 - Phase 9 — Admin shell + shared `DataTable` primitive
 - Phase 10 — `GenericContentTab` reskin (covers 10/13 content tabs at once)
 - Phase 11 — Remaining admin screens
 - Phase 12 — Motion/accessibility/performance pass
-- Phase 13 — Cleanup & full verification (delete retired components once
-  unreferenced, full Playwright suite)
-
-## Components still pending retirement (in active use by unmigrated pages)
-
-`DivineButton`, `HeavenlyCard`, `AnimatedButton`, `AnimatedCard`,
-`DivineEffects`, `HeavenlyBackground`, `AnimatedBackground`, `FloatingElements`,
-`SacredText`, `PrayerEffects` — still referenced by `app/gallery`,
-`app/sermons`, `app/prayer`, `app/about/branches`, `app/community`,
-`app/about/beliefs`. Delete each only once its call sites are migrated in
-the corresponding phase above and `grep` confirms zero remaining references.
+- Phase 13 — Cleanup & full verification (full Playwright suite)
 
 ## Known issues carried forward (not introduced by this rebuild, not yet fixed)
 
@@ -106,4 +143,4 @@ the corresponding phase above and `grep` confirms zero remaining references.
   `/sermons/[id]` (documented Next.js/Suspense interaction, see
   `SITE_OVERVIEW.md` §18 — not a frontend styling issue, out of scope here).
 - `DynamicLiveStream.tsx` not yet reskinned onto tokens (functional, visually
-  acceptable, low priority — candidate for a polish pass during Phase 4).
+  acceptable, low priority).
