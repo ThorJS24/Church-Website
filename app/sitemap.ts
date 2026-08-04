@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next';
-import { getBlogPosts } from '@/lib/content';
+import { getBlogPosts, getEvents, getSermons } from '@/lib/content';
 
 const BASE_URL = 'https://salempbc.in';
 
@@ -51,5 +51,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error('Sitemap: failed to load blog posts:', error);
   }
 
-  return [...staticEntries, ...blogEntries];
+  let eventEntries: MetadataRoute.Sitemap = [];
+  try {
+    const events = await getEvents();
+    eventEntries = events.map(event => ({
+      url: `${BASE_URL}/events/${event.id}`,
+      lastModified: new Date(event.startDate),
+      changeFrequency: 'weekly',
+      priority: 0.5,
+    }));
+  } catch (error) {
+    console.error('Sitemap: failed to load events:', error);
+  }
+
+  let sermonEntries: MetadataRoute.Sitemap = [];
+  try {
+    const sermons = await getSermons(200);
+    sermonEntries = sermons.map(sermon => ({
+      url: `${BASE_URL}/sermons/${sermon.id}`,
+      lastModified: new Date(sermon.date),
+      changeFrequency: 'monthly',
+      priority: 0.5,
+    }));
+  } catch (error) {
+    console.error('Sitemap: failed to load sermons:', error);
+  }
+
+  return [...staticEntries, ...blogEntries, ...eventEntries, ...sermonEntries];
 }

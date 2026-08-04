@@ -67,6 +67,13 @@ export async function getSermons(max = 20): Promise<Sermon[]> {
   return snap.docs.map(d => withId<Sermon>(d)).filter(isEffectivelyPublished);
 }
 
+export async function getSermonById(id: string): Promise<Sermon | null> {
+  const snap = await getDoc(doc(db, 'sermons', id));
+  if (!snap.exists()) return null;
+  const sermon = withId<Sermon>(snap);
+  return isEffectivelyPublished(sermon) ? sermon : null;
+}
+
 export async function getSeriesList(): Promise<{ id: string; title: string }[]> {
   const snap = await getDocs(collection(db, 'series'));
   return snap.docs.map(d => withId<{ id: string; title: string } & Publishable>(d)).filter(isEffectivelyPublished);
@@ -127,6 +134,13 @@ export interface EventItem extends Publishable {
 export async function getEvents(): Promise<EventItem[]> {
   const snap = await getDocs(collection(db, 'events'));
   return snap.docs.map(d => withId<EventItem>(d)).filter(isEffectivelyPublished);
+}
+
+export async function getEventById(id: string): Promise<EventItem | null> {
+  const snap = await getDoc(doc(db, 'events', id));
+  if (!snap.exists()) return null;
+  const event = withId<EventItem>(snap);
+  return isEffectivelyPublished(event) ? event : null;
 }
 
 export interface ServiceTime extends Publishable {
