@@ -15,14 +15,13 @@ interface Campaign {
   recipientCount: number;
   sentCount: number;
   failedCount: number;
-  sentAt?: { seconds: number } | string;
+  sentAt?: string;
 }
 
 function formatTimestamp(value: Campaign['sentAt']): string {
   if (!value) return '—';
-  if (typeof value === 'string') return new Date(value).toLocaleString();
-  if (typeof value === 'object' && 'seconds' in value) return new Date(value.seconds * 1000).toLocaleString();
-  return '—';
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? '—' : d.toLocaleString();
 }
 
 export default function NewsletterPage() {

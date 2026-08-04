@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAdminDb } from '@/lib/firebase-admin';
+import { getAdminDb, serializeTimestamps } from '@/lib/firebase-admin';
 import { requireAdmin } from '@/lib/api-auth';
 
 // Same allowlist as app/api/admin/content/[type] — kept in sync manually
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       .orderBy('editedAt', 'desc')
       .get();
 
-    const versions = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const versions = snap.docs.map(d => serializeTimestamps({ id: d.id, ...d.data() }));
     return NextResponse.json({ success: true, versions });
   } catch (error) {
     console.error(`Error listing versions for ${collectionName}/${id}:`, error);

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getResend } from '@/lib/resend';
-import { getAdminDb } from '@/lib/firebase-admin';
+import { getAdminDb, serializeTimestamps } from '@/lib/firebase-admin';
 import { requireAdmin, withAudit } from '@/lib/api-auth';
 import { FieldValue } from 'firebase-admin/firestore';
 
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const snap = await getAdminDb().collection('newsletterCampaigns').orderBy('sentAt', 'desc').get();
-    const campaigns = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const campaigns = snap.docs.map(d => serializeTimestamps({ id: d.id, ...d.data() }));
     return NextResponse.json({ success: true, campaigns });
   } catch (error) {
     console.error('Error listing campaigns:', error);

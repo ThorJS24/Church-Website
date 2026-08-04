@@ -1,6 +1,6 @@
 import { cert, getApps, initializeApp, type App } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
-import { getFirestore } from 'firebase-admin/firestore';
+import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 
 function loadServiceAccount() {
   const projectId = process.env.FIREBASE_ADMIN_PROJECT_ID;
@@ -48,4 +48,30 @@ export function getAdminAuth() {
 export function getAdminDb() {
   if (!_adminDb) _adminDb = getFirestore(getAdminApp());
   return _adminDb;
+}
+
+/**
+ * Recursively converts Firestore `Timestamp` values to ISO date strings.
+ * The Admin SDK's `Timestamp` only exposes `_seconds`/`_nanoseconds` as
+ * real (JSON.stringify-visible) own properties — `.seconds` is a getter
+ * that `JSON.stringify` silently drops — so `NextResponse.json(doc.data())`
+ * ships a shape frontend code checking `typeof ts.seconds === 'number'`
+ * can never match. Call this on any Firestore doc data before returning it
+ * from an API route.
+ */
+export function serializeTimestamps<T>(value: T): T {
+  if (value instanceof Timestamp) {
+    return value.toDate().toISOString() as unknown as T;
+  }
+  if (Array.isArray(value)) {
+    return value.map((v) => serializeTimestamps(v)) as unknown as T;
+  }
+  if (value && typeof value === 'object') {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value)) {
+      out[k] = serializeTimestamps(v);
+    }
+    return out as T;
+  }
+  return value;
 }

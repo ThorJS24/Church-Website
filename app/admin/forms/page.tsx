@@ -30,9 +30,8 @@ function emptyField(): FieldSchema {
 
 function formatTimestamp(value: any): string {
   if (!value) return '—';
-  if (typeof value === 'string') return new Date(value).toLocaleString();
-  if (typeof value === 'object' && 'seconds' in value) return new Date(value.seconds * 1000).toLocaleString();
-  return '—';
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? '—' : d.toLocaleString();
 }
 
 export default function FormsBuilderPage() {

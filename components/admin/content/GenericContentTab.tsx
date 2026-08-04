@@ -39,7 +39,7 @@ interface Version {
   id: string;
   snapshot: Record<string, any>;
   editedByEmail?: string | null;
-  editedAt?: { seconds: number } | string | null;
+  editedAt?: string | null;
 }
 
 function emptyForm(fields: FieldSchema[]): Record<string, any> {
@@ -50,9 +50,8 @@ function emptyForm(fields: FieldSchema[]): Record<string, any> {
 
 function formatTimestamp(value: Version['editedAt']): string {
   if (!value) return '—';
-  if (typeof value === 'string') return new Date(value).toLocaleString();
-  if (typeof value === 'object' && 'seconds' in value) return new Date(value.seconds * 1000).toLocaleString();
-  return '—';
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? '—' : d.toLocaleString();
 }
 
 export default function GenericContentTab({

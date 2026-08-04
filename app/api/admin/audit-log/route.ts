@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAdminDb } from '@/lib/firebase-admin';
+import { getAdminDb, serializeTimestamps } from '@/lib/firebase-admin';
 import { requireAdmin } from '@/lib/api-auth';
 
 const MAX_LIMIT = 100;
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     q = q.orderBy('timestamp', 'desc').limit(limit);
 
     const snap = await q.get();
-    const entries = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const entries = snap.docs.map(d => serializeTimestamps({ id: d.id, ...d.data() }));
 
     return NextResponse.json({ success: true, entries });
   } catch (error) {

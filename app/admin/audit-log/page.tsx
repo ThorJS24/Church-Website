@@ -16,13 +16,14 @@ interface AuditEntry {
   targetId: string;
   before: unknown;
   after: unknown;
-  timestamp: { seconds?: number } | null;
+  timestamp: string | null;
   ip?: string;
 }
 
 function formatTimestamp(ts: AuditEntry['timestamp']) {
-  if (!ts || typeof ts.seconds !== 'number') return '—';
-  return new Date(ts.seconds * 1000).toLocaleString();
+  if (!ts) return '—';
+  const d = new Date(ts);
+  return Number.isNaN(d.getTime()) ? '—' : d.toLocaleString();
 }
 
 export default function AuditLogPage() {
