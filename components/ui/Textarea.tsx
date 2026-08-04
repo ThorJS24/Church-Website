@@ -15,7 +15,9 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
     const errorId = error ? `${inputId}-error` : undefined;
 
     return (
-      <div className="w-full">
+      // className also goes on the wrapper — see Input.tsx for why an
+      // inner-only max-w-*/w-* is silently ignored by flex/grid layout.
+      <div className={cn('w-full', className)}>
         {label && (
           <label htmlFor={inputId} className="mb-1.5 block text-label text-foreground">
             {label}

@@ -27,7 +27,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     const errorId = error ? `${inputId}-error` : undefined;
 
     return (
-      <div className="w-full">
+      // className also goes on the wrapper (not just the <input> below): as
+      // the actual flex/grid item, an inner-only max-w-*/w-* would be
+      // ignored by layout — this div's own width:100% would still dominate
+      // its container's flex-basis calculation and swallow the space anyway.
+      <div className={cn('w-full', className)}>
         {label && (
           <label htmlFor={inputId} className="mb-1.5 block text-label text-foreground">
             {label}

@@ -203,14 +203,14 @@ export default function SermonsPage() {
       )}
 
       <Section spacing="sm" className="bg-surface">
-        <div className="flex flex-col items-center gap-4 md:flex-row md:justify-between">
+        <div className="flex flex-col items-center gap-4 md:flex-row md:justify-center">
           <Input
             placeholder="Search sermons..."
             aria-label="Search sermons"
             leftIcon={<Search />}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="max-w-md"
+            className="max-w-md md:w-80"
           />
           <div className="flex flex-wrap items-center gap-3">
             <Select
