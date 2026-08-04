@@ -122,7 +122,7 @@ export default function PrayerPage() {
             <div key={stat.label} className="rounded-2xl border border-white/20 bg-white/10 p-6 backdrop-blur-sm">
               <stat.icon className="mx-auto mb-4 h-10 w-10 opacity-90" />
               <div className="text-display-sm">{stat.value}</div>
-              <div className="mt-1 opacity-80">{stat.label}</div>
+              <div className="mt-1 text-body-sm">{stat.label}</div>
             </div>
           ))}
         </Grid>

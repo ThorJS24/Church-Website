@@ -10,18 +10,24 @@ export interface EventCategory {
   badgeVariant: BadgeVariant;
 }
 
+// `dotClass` is paired with `text-white` on small pill/badge labels in
+// several places (InteractiveCalendar, events list), not just used as a
+// plain decorative swatch, so — like `chipActiveClass` — it needs a shade
+// that clears WCAG AA's 4.5:1 text contrast minimum against white. Plain
+// Tailwind -500 shades range from 2.3:1 to 4.0:1 and fail; -600 clears it
+// for most hues, green and orange need -700 (verified numerically).
 export const EVENT_CATEGORIES: EventCategory[] = [
-  { id: 'all', label: 'All Events', dotClass: 'bg-zinc-500', chipActiveClass: 'bg-zinc-500 text-white', badgeVariant: 'neutral' },
-  { id: 'regular-service', label: 'Regular Services', dotClass: 'bg-blue-500', chipActiveClass: 'bg-blue-500 text-white', badgeVariant: 'info' },
-  { id: 'special', label: 'Special Events', dotClass: 'bg-purple-500', chipActiveClass: 'bg-purple-500 text-white', badgeVariant: 'accent' },
-  { id: 'ministry', label: 'Ministry Events', dotClass: 'bg-green-500', chipActiveClass: 'bg-green-500 text-white', badgeVariant: 'success' },
-  { id: 'community', label: 'Community', dotClass: 'bg-orange-500', chipActiveClass: 'bg-orange-500 text-white', badgeVariant: 'warning' },
-  { id: 'youth', label: 'Youth Events', dotClass: 'bg-pink-500', chipActiveClass: 'bg-pink-500 text-white', badgeVariant: 'danger' },
-  { id: 'worship', label: 'Worship Events', dotClass: 'bg-indigo-500', chipActiveClass: 'bg-indigo-500 text-white', badgeVariant: 'accent' },
+  { id: 'all', label: 'All Events', dotClass: 'bg-zinc-600', chipActiveClass: 'bg-zinc-600 text-white', badgeVariant: 'neutral' },
+  { id: 'regular-service', label: 'Regular Services', dotClass: 'bg-blue-600', chipActiveClass: 'bg-blue-600 text-white', badgeVariant: 'info' },
+  { id: 'special', label: 'Special Events', dotClass: 'bg-purple-600', chipActiveClass: 'bg-purple-600 text-white', badgeVariant: 'accent' },
+  { id: 'ministry', label: 'Ministry Events', dotClass: 'bg-green-700', chipActiveClass: 'bg-green-700 text-white', badgeVariant: 'success' },
+  { id: 'community', label: 'Community', dotClass: 'bg-orange-700', chipActiveClass: 'bg-orange-700 text-white', badgeVariant: 'warning' },
+  { id: 'youth', label: 'Youth Events', dotClass: 'bg-pink-600', chipActiveClass: 'bg-pink-600 text-white', badgeVariant: 'danger' },
+  { id: 'worship', label: 'Worship Events', dotClass: 'bg-indigo-600', chipActiveClass: 'bg-indigo-600 text-white', badgeVariant: 'accent' },
 ];
 
 export function getEventCategory(id: string): EventCategory {
-  return EVENT_CATEGORIES.find((c) => c.id === id) ?? { id, label: id, dotClass: 'bg-zinc-500', chipActiveClass: 'bg-zinc-500 text-white', badgeVariant: 'neutral' };
+  return EVENT_CATEGORIES.find((c) => c.id === id) ?? { id, label: id, dotClass: 'bg-zinc-600', chipActiveClass: 'bg-zinc-600 text-white', badgeVariant: 'neutral' };
 }
 
 /**

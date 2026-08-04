@@ -114,9 +114,15 @@ export default function MessagesPage() {
           {filtered.map((item) => {
             const key = `${item.collection}-${item.id}`;
             const isOpen = expanded === key;
+            const panelId = `message-detail-${key}`;
             return (
               <Card key={key} padding="none" className="overflow-hidden">
-                <button onClick={() => setExpanded(isOpen ? null : key)} className="flex w-full items-center justify-between gap-4 p-4 text-left">
+                <button
+                  onClick={() => setExpanded(isOpen ? null : key)}
+                  aria-expanded={isOpen}
+                  aria-controls={panelId}
+                  className="flex w-full items-center justify-between gap-4 p-4 text-left"
+                >
                   <div className="min-w-0 flex-1">
                     <div className="mb-1 flex items-center gap-2">
                       <span className="text-caption font-semibold uppercase tracking-wide text-accent">{typeOf(item)}</span>
@@ -129,7 +135,9 @@ export default function MessagesPage() {
                 </button>
 
                 {isOpen && (
-                  <MessageDetail item={item} saving={saving === key} onSave={(status, notes) => updateStatus(item, status, notes)} />
+                  <div id={panelId}>
+                    <MessageDetail item={item} saving={saving === key} onSave={(status, notes) => updateStatus(item, status, notes)} />
+                  </div>
                 )}
               </Card>
             );

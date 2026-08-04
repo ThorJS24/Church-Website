@@ -115,16 +115,24 @@ export default function InteractiveCalendar() {
       <div className="overflow-x-auto bg-surface p-4">
         <div className="grid grid-cols-7 gap-1.5">
           {days.map((day, index) => {
-            const dayEvents = day ? getEventsForDay(day) : [];
-            const isToday = !!day && new Date().toDateString() === new Date(currentDate.getFullYear(), currentDate.getMonth(), day).toDateString();
+            if (!day) {
+              // Leading/trailing blank grid cells (days outside this month)
+              // — purely structural filler, never interactive, so this must
+              // not be a <button> (an empty disabled button has no
+              // accessible name and fails WCAG 4.1.2 / axe's button-name
+              // check).
+              return <div key={index} className="min-h-[5rem] rounded-lg border border-transparent" aria-hidden="true" />;
+            }
+
+            const dayEvents = getEventsForDay(day);
+            const isToday = new Date().toDateString() === new Date(currentDate.getFullYear(), currentDate.getMonth(), day).toDateString();
 
             return (
               <motion.button
                 key={index}
                 type="button"
-                disabled={!day}
                 onClick={() => {
-                  if (!day || dayEvents.length === 0) return;
+                  if (dayEvents.length === 0) return;
                   const dayDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
                   if (dayEvents.length === 1) setSelectedEvent(dayEvents[0]);
                   else setSelectedDay({ date: dayDate, events: dayEvents });
@@ -134,29 +142,24 @@ export default function InteractiveCalendar() {
                 transition={{ delay: Math.min(index * 0.005, 0.2) }}
                 className={cn(
                   'flex min-h-[5rem] flex-col rounded-lg border p-1.5 text-left transition-shadow',
-                  !day && 'border-transparent',
-                  day && !isToday && 'border-border bg-background hover:shadow-sm',
+                  !isToday && 'border-border bg-background hover:shadow-sm',
                   isToday && 'border-accent bg-accent text-accent-foreground'
                 )}
               >
-                {day && (
-                  <>
-                    <span className={cn('mb-1 text-caption font-bold', isToday ? 'text-accent-foreground' : 'text-foreground-muted')}>{day}</span>
-                    <div className="flex flex-1 flex-col gap-1 overflow-hidden">
-                      {dayEvents.slice(0, 2).map((event) => {
-                        const cat = getEventCategory(event.category || 'default');
-                        return (
-                          <span key={event.id} className={cn('truncate rounded px-1.5 py-0.5 text-left text-caption text-white', cat.dotClass)}>
-                            {event.title}
-                          </span>
-                        );
-                      })}
-                      {dayEvents.length > 2 && (
-                        <span className="text-caption text-foreground-subtle">+{dayEvents.length - 2} more</span>
-                      )}
-                    </div>
-                  </>
-                )}
+                <span className={cn('mb-1 text-caption font-bold', isToday ? 'text-accent-foreground' : 'text-foreground-muted')}>{day}</span>
+                <div className="flex flex-1 flex-col gap-1 overflow-hidden">
+                  {dayEvents.slice(0, 2).map((event) => {
+                    const cat = getEventCategory(event.category || 'default');
+                    return (
+                      <span key={event.id} className={cn('truncate rounded px-1.5 py-0.5 text-left text-caption text-white', cat.dotClass)}>
+                        {event.title}
+                      </span>
+                    );
+                  })}
+                  {dayEvents.length > 2 && (
+                    <span className="text-caption text-foreground-subtle">+{dayEvents.length - 2} more</span>
+                  )}
+                </div>
               </motion.button>
             );
           })}

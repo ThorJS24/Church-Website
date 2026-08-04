@@ -38,7 +38,7 @@
   /* Foreground */
   --foreground: 24 24 27;
   --foreground-muted: 82 82 91;
-  --foreground-subtle: 161 161 170;
+  --foreground-subtle: 113 113 122;
 
   /* Accent — single interactive accent (indigo) */
   --accent: 79 70 229;
@@ -47,8 +47,15 @@
   --accent-foreground: 255 255 255;
   --accent-subtle: 238 242 255;
 
-  /* Warm accent — sparse use only (verse-of-the-day, prayer CTA) */
-  --accent-warm: 217 119 6;
+  /* Warm accent — sparse use only (verse-of-the-day, prayer CTA).
+     amber-800, not amber-600: amber-600 with white foreground text only
+     hits 3.18:1 contrast (fails WCAG AA's 4.5:1). amber-700 clears 4.5:1
+     against a solid amber-700 background (~5:1) but several call sites
+     layer a translucent bg-white/10 "glass card" or opacity-90 text on
+     top, which lightens the effective background and drops that back
+     under 4.5:1 (measured 4.21:1). amber-800 keeps ~5.7-6:1 even through
+     those overlays while still reading as warm/amber. */
+  --accent-warm: 146 64 14;
   --accent-warm-foreground: 255 255 255;
   --accent-warm-subtle: 255 251 235;
 
