@@ -212,7 +212,6 @@ npm run type-check      # TypeScript type checking
 
 # Deployment
 npm run deploy          # Deploy to Vercel
-npm run optimize        # Build and export static files
 ```
 
 ## 🎨 Customization

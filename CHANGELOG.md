@@ -206,7 +206,7 @@ AWS_SECRET_ACCESS_KEY=your_secret
 
 #### High Priority
 1. **Image Optimization**: Convert remaining `<img>` tags to `next/image`
-2. **Sanity CMS Localization**: Add Tamil fields to content schemas
+2. **Firestore Content Localization**: Add Tamil fields to admin-editable content
 3. **Form Enhancements**: Implement Tamil form validation
 4. **PWA Updates**: Update manifest for Tamil language support
 

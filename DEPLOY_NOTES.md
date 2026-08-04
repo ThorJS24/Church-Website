@@ -50,7 +50,7 @@ curl -X POST http://localhost:3000/api/tts \
 ```
 
 #### 2. Database/CMS Preparation
-- [ ] Sanity Studio: No schema changes required yet
+- [ ] Firestore admin panel (`app/admin/content`): No schema changes required yet
 - [ ] Firebase: Existing configuration compatible
 - [ ] Algolia: Existing indexes will work (Tamil indexing is future enhancement)
 
@@ -321,7 +321,7 @@ curl -X GET https://your-domain.com/api/tts
 #### Month 1
 - [ ] Comprehensive performance review
 - [ ] User satisfaction survey
-- [ ] Plan advanced features (Sanity localization, etc.)
+- [ ] Plan advanced features (Firestore content localization, etc.)
 - [ ] Document lessons learned
 
 ---
