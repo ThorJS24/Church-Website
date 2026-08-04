@@ -11,7 +11,13 @@ const nextConfig = {
     remotePatterns: [
       { protocol: 'https', hostname: 'img.youtube.com' },
       { protocol: 'https', hostname: 'res.cloudinary.com' },
-      { protocol: 'https', hostname: 'images.unsplash.com' }
+      { protocol: 'https', hostname: 'images.unsplash.com' },
+      // Content migrated from the church's old Sanity CMS project keeps
+      // its imageUrl fields pointing at Sanity's own CDN rather than
+      // re-hosting every image — those URLs are permanent per Sanity's
+      // asset model, so this is safe to allowlist rather than a temporary
+      // workaround.
+      { protocol: 'https', hostname: 'cdn.sanity.io' }
     ],
     formats: ['image/webp', 'image/avif'],
   },
