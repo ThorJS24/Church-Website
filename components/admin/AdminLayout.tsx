@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard, Users, FileText, ShieldCheck, ScrollText, Settings as SettingsIcon,
-  Shield, LogOut,
+  Shield, LogOut, Image as ImageIcon, ClipboardList, Mail,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserRole, roleAtLeast } from '@/lib/permissions';
@@ -21,6 +21,9 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, minRole: UserRole.ADMIN },
   { href: '/admin/users', label: 'Members', icon: Users, minRole: UserRole.ADMIN },
   { href: '/admin/content', label: 'Content', icon: FileText, minRole: UserRole.ADMIN },
+  { href: '/admin/media', label: 'Media Library', icon: ImageIcon, minRole: UserRole.ADMIN },
+  { href: '/admin/forms', label: 'Forms', icon: ClipboardList, minRole: UserRole.ADMIN },
+  { href: '/admin/newsletter', label: 'Newsletter', icon: Mail, minRole: UserRole.ADMIN },
   { href: '/admin/moderation', label: 'Moderation Queue', icon: ShieldCheck, minRole: UserRole.MODERATOR },
   { href: '/admin/audit-log', label: 'Audit Log', icon: ScrollText, minRole: UserRole.ADMIN },
   { href: '/admin/settings', label: 'Settings', icon: SettingsIcon, minRole: UserRole.ADMIN },

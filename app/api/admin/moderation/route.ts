@@ -7,7 +7,7 @@ import { requireModerator } from '@/lib/api-auth';
 // per the brief — these collections overlap conceptually (a moderator
 // approving something makes it visible; that's the same action regardless
 // of which collection it's in) even though they're stored separately.
-const MODERATION_COLLECTIONS = ['prayerRequests', 'comments', 'galleryImages'] as const;
+const MODERATION_COLLECTIONS = ['prayerRequests', 'comments', 'galleryImages', 'testimonials'] as const;
 
 export async function GET(request: NextRequest) {
   const authResult = await requireModerator(request);

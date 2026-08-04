@@ -65,23 +65,31 @@ const navigationItems = [
       { key: 'all', href: '/ministries', labelKey: 'nav.allMinistries' },
       { key: 'children', href: '/ministries#children', labelKey: 'nav.children' },
       { key: 'youth', href: '/ministries#youth', labelKey: 'nav.youth' },
-      { key: 'adults', href: '/ministries#adults', labelKey: 'nav.adults' }
+      { key: 'adults', href: '/ministries#adults', labelKey: 'nav.adults' },
+      { key: 'smallGroups', href: '/small-groups', labelKey: 'nav.smallGroups' },
+      { key: 'testimonials', href: '/testimonials', labelKey: 'nav.testimonials' }
     ]
   },
-  { 
-    key: 'community', 
-    href: '/community', 
-    icon: Users, 
+  {
+    key: 'community',
+    href: '/community',
+    icon: Users,
     labelKey: 'nav.community'
   },
-  { 
-    key: 'gallery', 
-    href: '/gallery', 
-    icon: Camera, 
+  {
+    key: 'gallery',
+    href: '/gallery',
+    icon: Camera,
     labelKey: 'nav.gallery'
   },
-  { 
-    key: 'give', 
+  {
+    key: 'blog',
+    href: '/blog',
+    icon: BookOpen,
+    labelKey: 'nav.blog'
+  },
+  {
+    key: 'give',
     href: '/give', 
     icon: Gift, 
     labelKey: 'nav.give'

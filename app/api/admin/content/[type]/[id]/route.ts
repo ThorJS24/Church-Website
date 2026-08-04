@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminDb } from '@/lib/firebase-admin';
 import { requireAdmin, withAudit } from '@/lib/api-auth';
+import { saveContentVersion } from '@/lib/contentVersions';
 
 const COLLECTIONS: Record<string, string> = {
   sermons: 'sermons',
@@ -11,6 +12,9 @@ const COLLECTIONS: Record<string, string> = {
   ministries: 'ministries',
   announcements: 'announcements',
   services: 'services',
+  smallGroups: 'smallGroups',
+  testimonials: 'testimonials',
+  redirects: 'redirects',
 };
 
 function resolveCollection(type: string): string | null {
@@ -42,6 +46,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       request,
       { action: `${type}.update`, targetType: collectionName, targetId: id },
       async () => {
+        await saveContentVersion(authResult.user, { collection: collectionName, docId: id, snapshot: before });
         await ref.update(updates);
         return { before, after: updates, result: null };
       }

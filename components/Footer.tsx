@@ -5,6 +5,7 @@ import { Facebook, Instagram, Youtube, Twitter, Church, MessageCircle } from 'lu
 import { useState, useEffect } from 'react'
 import { getSiteSettings, SiteSettings } from '@/lib/content'
 import PrivacyDialog from './PrivacyDialog'
+import NewsletterSignup from './NewsletterSignup'
 
 const Footer = () => {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
@@ -61,6 +62,8 @@ const Footer = () => {
                 </a>
               )}
             </div>
+            <h3 className="text-sm font-semibold mt-6 mb-2 text-yellow-400">Newsletter</h3>
+            <NewsletterSignup />
           </div>
 
           <div>

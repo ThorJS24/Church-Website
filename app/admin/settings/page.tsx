@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Save } from 'lucide-react';
+import { Save, Download } from 'lucide-react';
 import { adminFetch } from '@/lib/adminApi';
+import { getIdToken } from '@/lib/firebase';
 import { LoadingState, ErrorState } from '@/components/admin/States';
 import GenericContentTab, { FieldSchema } from '@/components/admin/content/GenericContentTab';
 
@@ -86,6 +87,48 @@ function FeatureToggles() {
   );
 }
 
+function BackupSection() {
+  const [exporting, setExporting] = useState(false);
+
+  const exportBackup = async () => {
+    setExporting(true);
+    try {
+      const token = await getIdToken();
+      const response = await fetch('/api/admin/backup', {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!response.ok) throw new Error('Backup failed');
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `salempbc-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+      <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+        Download every content collection (sermons, events, pastors, blog posts, etc.) as one JSON file.
+        Does not include member accounts or the audit log.
+      </p>
+      <button
+        onClick={exportBackup}
+        disabled={exporting}
+        className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+      >
+        <Download className="w-4 h-4" /> {exporting ? 'Exporting...' : 'Export All Content as JSON'}
+      </button>
+    </div>
+  );
+}
+
 export default function SettingsPage() {
   return (
     <div>
@@ -96,8 +139,13 @@ export default function SettingsPage() {
         <FeatureToggles />
       </div>
 
-      <div>
+      <div className="mb-10">
         <GenericContentTab type="services" label="Service Times" fields={SERVICE_FIELDS} columns={['title', 'time', 'location']} />
+      </div>
+
+      <div>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Backup</h2>
+        <BackupSection />
       </div>
     </div>
   );

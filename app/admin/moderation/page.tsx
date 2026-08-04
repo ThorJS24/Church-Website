@@ -8,10 +8,11 @@ import { LoadingState, EmptyState, ErrorState } from '@/components/admin/States'
 
 interface QueueItem {
   id: string;
-  collection: 'prayerRequests' | 'comments' | 'galleryImages';
+  collection: 'prayerRequests' | 'comments' | 'galleryImages' | 'testimonials';
   title?: string;
   text?: string;
   description?: string;
+  content?: string;
   authorName?: string;
   author?: string;
   photographer?: string;
@@ -23,6 +24,7 @@ const COLLECTION_LABEL: Record<string, string> = {
   prayerRequests: 'Prayer Request',
   comments: 'Comment',
   galleryImages: 'Gallery Submission',
+  testimonials: 'Testimonial',
 };
 
 export default function ModerationQueuePage() {
@@ -81,10 +83,10 @@ export default function ModerationQueuePage() {
                   {COLLECTION_LABEL[item.collection]}
                 </span>
                 <p className="font-medium text-gray-900 dark:text-white truncate">
-                  {item.title || item.text || item.description || 'Untitled'}
+                  {item.title || item.text || item.description || item.content || 'Untitled'}
                 </p>
-                {item.collection === 'comments' && item.text && (
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">&ldquo;{item.text}&rdquo;</p>
+                {(item.collection === 'comments' || item.collection === 'testimonials') && (item.text || item.content) && (
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">&ldquo;{item.text || item.content}&rdquo;</p>
                 )}
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   {item.authorName || item.author || item.photographer || 'Anonymous'}

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAdminDb } from '@/lib/firebase-admin';
 import { requireModerator, withAudit } from '@/lib/api-auth';
 
-const MODERATION_COLLECTIONS = new Set(['prayerRequests', 'comments', 'galleryImages']);
+const MODERATION_COLLECTIONS = new Set(['prayerRequests', 'comments', 'galleryImages', 'testimonials']);
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ collection: string; id: string }> }) {
   const authResult = await requireModerator(request);

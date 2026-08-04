@@ -16,6 +16,9 @@ const COLLECTIONS: Record<string, string> = {
   ministries: 'ministries',
   announcements: 'announcements',
   services: 'services',
+  smallGroups: 'smallGroups',
+  testimonials: 'testimonials',
+  redirects: 'redirects',
 };
 
 function resolveCollection(type: string): string | null {
@@ -55,7 +58,12 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   try {
     const body = await request.json();
     const now = new Date().toISOString();
-    const data = { ...body, createdAt: now, updatedAt: now };
+    // Testimonials submitted through this route came from an admin, not
+    // the public form (app/api/testimonials/submit) — pre-approve them,
+    // matching the same convention app/api/gallery/upload uses for
+    // admin-uploaded (vs. publicly-submitted) gallery images.
+    const extra = collectionName === 'testimonials' ? { moderationStatus: 'approved' } : {};
+    const data = { ...body, ...extra, createdAt: now, updatedAt: now };
 
     // Pre-generate the doc ref so its real ID is known before the audit
     // entry is written — logging targetId as a placeholder here would mean

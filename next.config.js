@@ -20,6 +20,46 @@ const nextConfig = {
   reactStrictMode: true,
   trailingSlash: false,
   generateBuildId: () => 'build',
+  // Admin-managed redirects (app/admin/content -> Redirects tab), resolved
+  // here rather than per-request in middleware or app/not-found.tsx.
+  // Tried the not-found.tsx route first: reading the request path there
+  // needs next/headers' headers(), and that single dynamic call turned out
+  // to force the ENTIRE site to render dynamically instead of statically
+  // (confirmed by removing it and rebuilding: every route flipped back to
+  // static) — a real cost/performance regression for a project that
+  // explicitly tightened Firestore reads elsewhere. redirects() here is
+  // the documented, build-time-safe way to source this from a database:
+  // it doesn't touch per-page rendering at all. Trade-off, stated plainly:
+  // a newly added/edited redirect takes effect on the next deploy, not
+  // instantly — acceptable for a small site's occasional URL cleanup.
+  async redirects() {
+    const projectId = process.env.FIREBASE_ADMIN_PROJECT_ID;
+    const clientEmail = process.env.FIREBASE_ADMIN_CLIENT_EMAIL;
+    const privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY;
+    if (!projectId || !clientEmail || !privateKey) return [];
+
+    try {
+      const { cert, getApps, initializeApp } = require('firebase-admin/app');
+      const { getFirestore } = require('firebase-admin/firestore');
+      const app = getApps()[0] || initializeApp({
+        credential: cert({ projectId, clientEmail, privateKey: privateKey.replace(/\\n/g, '\n') }),
+      });
+      const snap = await getFirestore(app).collection('redirects').get();
+      return snap.docs
+        .map((d) => d.data())
+        .filter((r) => r.fromPath && r.toPath)
+        .map((r) => ({
+          source: r.fromPath,
+          destination: r.toPath,
+          permanent: Number(r.statusCode) !== 302,
+        }));
+    } catch (error) {
+      // Never fail the build over this — an unreachable Firestore at build
+      // time should just mean "no redirects this deploy," not a broken site.
+      console.error('Failed to load redirects for next.config.js:', error);
+      return [];
+    }
+  },
   async headers() {
     const allowedOrigin = process.env.NODE_ENV === 'production'
       ? 'https://salempbc.in'

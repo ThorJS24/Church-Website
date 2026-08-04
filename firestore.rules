@@ -138,6 +138,22 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
+    match /blogPosts/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /smallGroups/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    // Same shape as galleryImages: publicly-submitted (created 'pending')
+    // or admin-authored (pre-approved) — see app/api/testimonials/submit
+    // and the 'testimonials' special-case in app/api/admin/content/[type].
+    match /testimonials/{docId} {
+      allow read: if isApproved() || isModerator();
+      allow create: if true;
+      allow update, delete: if isModerator();
+    }
     // Editable marketing copy for about/community/ministries/services/branches
     // pages (doc id = page key), read by lib/content.ts's getPageContent().
     match /pageContent/{docId} {
@@ -169,6 +185,73 @@ service cloud.firestore {
     // (server already verified the actor's role before logging), never
     // directly from a client. ----
     match /auditLog/{docId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // ---- Content versioning: one snapshot per edit, written exclusively
+    // via the Admin SDK (app/api/admin/content/[type]/[id]/versions) so a
+    // client can't forge history. ----
+    match /contentVersions/{docId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // ---- Custom content type registry (schema builder). Definitions are
+    // metadata, not site content — admin-only in both directions. ----
+    match /contentTypes/{docId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // ---- Custom content documents. All admin-defined types share this one
+    // collection (partitioned by a `contentType` field) specifically so a
+    // newly created type never needs a firestore.rules redeploy to become
+    // publicly readable. Draft/scheduled filtering happens in lib/content.ts,
+    // not here, same as every other content collection. ----
+    match /customContent/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // ---- Redirect manager: internal routing metadata, looked up from
+    // app/not-found.tsx via the Admin SDK, never read directly by a
+    // client. Written exclusively through app/api/admin/content/redirects. ----
+    match /redirects/{docId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // ---- Forms builder. Definitions are admin-only; the public-facing
+    // /forms/[id] page reads them through app/api/forms/[id] (Admin SDK),
+    // not a direct client read, so this stays admin-only in both
+    // directions. Submissions are written only via app/api/forms/[id]/submit
+    // (Admin SDK, so a submitter's client never gets read access to other
+    // people's answers) and read by moderator+ via app/api/admin/forms/[id]/submissions. ----
+    match /formDefinitions/{docId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+    match /formSubmissions/{docId} {
+      allow read: if isModerator();
+      allow write: if false;
+    }
+
+    // ---- Newsletter: subscribe/unsubscribe/send are all mediated by
+    // Admin-SDK routes (app/api/newsletter/*, app/api/admin/newsletter/*)
+    // so a subscriber's email is never directly client-readable. ----
+    match /newsletterSubscribers/{docId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+    match /newsletterCampaigns/{docId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // ---- Media library: internal asset index, not itself page content.
+    // Written exclusively via the Admin SDK (app/api/admin/media). ----
+    match /mediaLibrary/{docId} {
       allow read: if isAdmin();
       allow write: if false;
     }
