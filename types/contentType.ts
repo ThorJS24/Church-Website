@@ -9,8 +9,8 @@ export interface FieldSchema {
   label: string;
   type: FieldType;
   required?: boolean;
-  /** For `type: 'url'` fields that hold an image — shows a "Browse Media" picker button. */
-  accept?: 'image';
+  /** For `type: 'url'` fields that hold a file — shows a "Browse Media" picker button, scoped to images or any file type. */
+  accept?: 'image' | 'file';
 }
 
 /** An admin-defined custom content type (the schema builder). Stored in

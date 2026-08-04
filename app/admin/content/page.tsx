@@ -86,14 +86,40 @@ const REDIRECT_FIELDS: FieldSchema[] = [
   { key: 'statusCode', label: 'Status Code (301 = permanent, 302 = temporary)', type: 'number' },
 ];
 
+const RESOURCE_FIELDS: FieldSchema[] = [
+  { key: 'title', label: 'Title', type: 'text', required: true },
+  { key: 'description', label: 'Description', type: 'textarea' },
+  { key: 'fileUrl', label: 'File', type: 'url', accept: 'file', required: true },
+  { key: 'category', label: 'Category', type: 'text' },
+];
+
+const ANNOUNCEMENT_FIELDS: FieldSchema[] = [
+  { key: 'title', label: 'Title', type: 'text', required: true },
+  { key: 'content', label: 'Content', type: 'textarea', required: true },
+  { key: 'date', label: 'Date', type: 'date', required: true },
+  { key: 'expiresAt', label: 'Expires At (stops showing publicly after this, even if still Published)', type: 'datetime' },
+];
+
+const MINISTRY_FIELDS: FieldSchema[] = [
+  { key: 'title', label: 'Title', type: 'text', required: true },
+  { key: 'description', label: 'Description', type: 'textarea', required: true },
+  { key: 'category', label: 'Category (children, youth, adults, worship, outreach)', type: 'text' },
+  { key: 'ageGroup', label: 'Age Group', type: 'text' },
+  { key: 'meetingTime', label: 'Meeting Time', type: 'text' },
+  { key: 'location', label: 'Location', type: 'text' },
+];
+
 const BUILT_IN_TABS = [
   { key: 'sermons', label: 'Sermons' },
   { key: 'events', label: 'Events' },
   { key: 'gallery', label: 'Gallery' },
   { key: 'pastors', label: 'Pastors' },
+  { key: 'ministries', label: 'Ministries' },
+  { key: 'announcements', label: 'Announcements' },
   { key: 'blog', label: 'Blog' },
   { key: 'small-groups', label: 'Small Groups' },
   { key: 'testimonials', label: 'Testimonials' },
+  { key: 'resources', label: 'Resources' },
   { key: 'redirects', label: 'Redirects' },
   { key: 'settings', label: 'Site Settings' },
   { key: 'content-types', label: 'Content Types' },
@@ -163,6 +189,12 @@ export default function ContentEditorPage() {
       {tab === 'pastors' && (
         <GenericContentTab type="pastors" label="Pastors" fields={PASTOR_FIELDS} columns={['name', 'title', 'email']} />
       )}
+      {tab === 'ministries' && (
+        <GenericContentTab type="ministries" label="Ministries" fields={MINISTRY_FIELDS} columns={['title', 'category', 'meetingTime']} />
+      )}
+      {tab === 'announcements' && (
+        <GenericContentTab type="announcements" label="Announcements" fields={ANNOUNCEMENT_FIELDS} columns={['title', 'date']} />
+      )}
       {tab === 'blog' && (
         <GenericContentTab type="blog" label="Blog Posts" fields={BLOG_FIELDS} columns={['title', 'authorName', 'category']} apiBase="/api/admin" />
       )}
@@ -171,6 +203,9 @@ export default function ContentEditorPage() {
       )}
       {tab === 'testimonials' && (
         <GenericContentTab type="testimonials" label="Testimonials" fields={TESTIMONIAL_FIELDS} columns={['authorName', 'content']} />
+      )}
+      {tab === 'resources' && (
+        <GenericContentTab type="resources" label="Resources" fields={RESOURCE_FIELDS} columns={['title', 'category']} />
       )}
       {tab === 'redirects' && (
         <div>

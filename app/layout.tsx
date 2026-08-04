@@ -65,9 +65,23 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const organizationJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Church',
+    name: 'Salem Primitive Baptist Church',
+    url: 'https://salempbc.in',
+    description: 'A place where faith, hope, and love come together. Join us every Sunday at 9:30 AM.',
+    address: { '@type': 'PostalAddress', addressLocality: 'Salem', addressRegion: 'Tamil Nadu', addressCountry: 'IN' },
+  };
+
   return (
     <html lang="en" className={inter.variable} suppressHydrationWarning>
       <body className={`${inter.className} antialiased`}>
+        <script
+          type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
         <ThemeProvider>
           <LanguageProvider>
             <AuthProvider>

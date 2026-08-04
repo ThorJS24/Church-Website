@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { Trash2, Image as ImageIcon, Upload, Copy, Check, Search } from 'lucide-react';
+import { Trash2, Image as ImageIcon, Upload, Copy, Check, Search, FileText } from 'lucide-react';
 import { adminFetch } from '@/lib/adminApi';
 import { getIdToken } from '@/lib/firebase';
 import { LoadingState, EmptyState, ErrorState } from '@/components/admin/States';
@@ -13,6 +13,7 @@ interface MediaItem {
   url: string;
   fileName: string;
   size?: number;
+  mimeType?: string;
   tags?: string[];
   uploadedAt?: { seconds: number } | string;
 }
@@ -104,18 +105,25 @@ export default function MediaLibraryPage() {
         </div>
         <label className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer shrink-0">
           <Upload className="w-4 h-4" /> {uploading ? 'Uploading...' : 'Upload'}
-          <input type="file" multiple accept="image/*" className="hidden" disabled={uploading} onChange={(e) => upload(e.target.files)} />
+          <input type="file" multiple className="hidden" disabled={uploading} onChange={(e) => upload(e.target.files)} />
         </label>
       </div>
 
       {filtered.length === 0 ? (
-        <EmptyState icon={ImageIcon} title="No media yet" description="Upload images here to reuse them across sermons, events, pastors, and any other content field." />
+        <EmptyState icon={ImageIcon} title="No media yet" description="Upload images or files here to reuse them across sermons, events, pastors, resources, and any other content field." />
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
           {filtered.map((item) => (
             <div key={item.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
               <div className="relative aspect-square bg-gray-100 dark:bg-gray-700">
-                <Image src={item.url} alt={item.fileName} fill className="object-cover" sizes="200px" />
+                {(item.mimeType?.startsWith('image/') ?? true) ? (
+                  <Image src={item.url} alt={item.fileName} fill className="object-cover" sizes="200px" />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center p-2">
+                    <FileText className="w-10 h-10 text-gray-400 mb-1" />
+                    <span className="text-xs text-gray-500 dark:text-gray-400 truncate w-full text-center">{item.fileName}</span>
+                  </div>
+                )}
               </div>
               <div className="p-3">
                 <p className="text-sm font-medium text-gray-900 dark:text-white truncate" title={item.fileName}>{item.fileName}</p>

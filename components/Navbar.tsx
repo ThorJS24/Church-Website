@@ -67,7 +67,8 @@ const navigationItems = [
       { key: 'youth', href: '/ministries#youth', labelKey: 'nav.youth' },
       { key: 'adults', href: '/ministries#adults', labelKey: 'nav.adults' },
       { key: 'smallGroups', href: '/small-groups', labelKey: 'nav.smallGroups' },
-      { key: 'testimonials', href: '/testimonials', labelKey: 'nav.testimonials' }
+      { key: 'testimonials', href: '/testimonials', labelKey: 'nav.testimonials' },
+      { key: 'resources', href: '/resources', labelKey: 'nav.resources' }
     ]
   },
   {

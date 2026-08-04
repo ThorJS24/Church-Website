@@ -202,13 +202,20 @@ export interface Announcement extends Publishable {
   title: string;
   content: string;
   date?: string;
+  /** Optional — once past, the announcement stops showing publicly even
+   * though status stays 'published' (no need to remember to unpublish it). */
+  expiresAt?: string;
+}
+
+function isNotExpired(a: { expiresAt?: string }): boolean {
+  return !a.expiresAt || new Date(a.expiresAt).getTime() > Date.now();
 }
 
 export async function getAnnouncements(max = 3): Promise<Announcement[]> {
   const snap = await getDocs(
     query(collection(db, 'announcements'), orderBy('date', 'desc'), fbLimit(max))
   );
-  return snap.docs.map(d => withId<Announcement>(d)).filter(isEffectivelyPublished);
+  return snap.docs.map(d => withId<Announcement>(d)).filter(isEffectivelyPublished).filter(isNotExpired);
 }
 
 export interface Ministry extends Publishable {
@@ -363,6 +370,19 @@ export interface Testimonial {
 export async function getTestimonials(): Promise<Testimonial[]> {
   const snap = await getDocs(query(collection(db, 'testimonials'), where('moderationStatus', '==', 'approved')));
   return snap.docs.map(d => withId<Testimonial>(d));
+}
+
+export interface Resource extends Publishable {
+  id: string;
+  title: string;
+  description?: string;
+  fileUrl: string;
+  category?: string;
+}
+
+export async function getResources(): Promise<Resource[]> {
+  const snap = await getDocs(collection(db, 'resources'));
+  return snap.docs.map(d => withId<Resource>(d)).filter(isEffectivelyPublished);
 }
 
 export interface BlogPost extends Publishable {

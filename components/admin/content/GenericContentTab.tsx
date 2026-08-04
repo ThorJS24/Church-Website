@@ -74,7 +74,7 @@ export default function GenericContentTab({
   const historyModalRef = useRef<HTMLDivElement>(null);
   useFocusTrap(!!historyTarget, () => setHistoryTarget(null), historyModalRef);
 
-  const [mediaPickerField, setMediaPickerField] = useState<string | null>(null);
+  const [mediaPickerField, setMediaPickerField] = useState<{ key: string; accept: 'image' | 'file' } | null>(null);
   const [importing, setImporting] = useState(false);
   const csvInputRef = useRef<HTMLInputElement>(null);
 
@@ -368,7 +368,7 @@ export default function GenericContentTab({
                       onChange={(e) => setForm({ ...form, [f.key]: e.target.checked })}
                       className="w-4 h-4"
                     />
-                  ) : f.type === 'url' && f.accept === 'image' ? (
+                  ) : f.type === 'url' && (f.accept === 'image' || f.accept === 'file') ? (
                     <div className="flex gap-2">
                       <input
                         id={`field-${f.key}`}
@@ -379,7 +379,7 @@ export default function GenericContentTab({
                       />
                       <button
                         type="button"
-                        onClick={() => setMediaPickerField(f.key)}
+                        onClick={() => setMediaPickerField({ key: f.key, accept: f.accept as 'image' | 'file' })}
                         className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 shrink-0 inline-flex items-center gap-1.5"
                       >
                         <ImageIcon className="w-4 h-4" /> Browse
@@ -438,8 +438,9 @@ export default function GenericContentTab({
 
       <MediaPickerModal
         isOpen={!!mediaPickerField}
+        accept={mediaPickerField?.accept}
         onClose={() => setMediaPickerField(null)}
-        onSelect={(url) => { if (mediaPickerField) setForm(prev => ({ ...prev, [mediaPickerField]: url })); }}
+        onSelect={(url) => { if (mediaPickerField) setForm(prev => ({ ...prev, [mediaPickerField.key]: url })); }}
       />
 
       {historyTarget && (

@@ -43,7 +43,11 @@ export async function POST(request: NextRequest) {
           files.map(async (file) => {
             const bytes = Buffer.from(await file.arrayBuffer());
             const dataUri = `data:${file.type};base64,${bytes.toString('base64')}`;
-            const asset = await cloudinary.uploader.upload(dataUri, { folder: 'media-library' });
+            // 'auto' rather than the default 'image' — the library also
+            // holds PDFs/docs for the Resources section, which Cloudinary
+            // stores as 'raw' assets; 'auto' picks the right type per file
+            // instead of rejecting anything that isn't an image.
+            const asset = await cloudinary.uploader.upload(dataUri, { folder: 'media-library', resource_type: 'auto' });
 
             const docRef = await getAdminDb().collection('mediaLibrary').add({
               url: asset.secure_url,

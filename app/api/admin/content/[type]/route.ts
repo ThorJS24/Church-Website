@@ -19,6 +19,7 @@ const COLLECTIONS: Record<string, string> = {
   smallGroups: 'smallGroups',
   testimonials: 'testimonials',
   redirects: 'redirects',
+  resources: 'resources',
 };
 
 function resolveCollection(type: string): string | null {

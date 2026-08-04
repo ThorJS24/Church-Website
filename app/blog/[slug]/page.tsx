@@ -38,8 +38,25 @@ export default async function BlogPostPage({ params }: Props) {
   const post = await getBlogPost(slug);
   if (!post) notFound();
 
+  const articleJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: post.title,
+    description: post.excerpt || post.content.slice(0, 160),
+    image: post.imageUrl || undefined,
+    datePublished: post.date,
+    author: post.authorName ? { '@type': 'Person', name: post.authorName } : undefined,
+    publisher: { '@type': 'Organization', name: 'Salem Primitive Baptist Church' },
+    mainEntityOfPage: `https://salempbc.in/blog/${post.slug}`,
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
       <article className="py-16">
         <div className="container mx-auto px-4 max-w-3xl">
           <Link href="/blog" className="text-sm text-blue-600 hover:underline">&larr; Back to Blog</Link>

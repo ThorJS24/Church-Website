@@ -146,6 +146,10 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
+    match /resources/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
     // Same shape as galleryImages: publicly-submitted (created 'pending')
     // or admin-authored (pre-approved) — see app/api/testimonials/submit
     // and the 'testimonials' special-case in app/api/admin/content/[type].

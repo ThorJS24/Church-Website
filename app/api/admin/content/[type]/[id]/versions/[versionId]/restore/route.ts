@@ -15,6 +15,7 @@ const COLLECTIONS: Record<string, string> = {
   smallGroups: 'smallGroups',
   testimonials: 'testimonials',
   redirects: 'redirects',
+  resources: 'resources',
 };
 
 export async function POST(

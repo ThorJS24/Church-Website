@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
-import { Search, Upload, X, Image as ImageIcon } from 'lucide-react';
+import { Search, Upload, X, Image as ImageIcon, FileText } from 'lucide-react';
 import { adminFetch } from '@/lib/adminApi';
 import { getIdToken } from '@/lib/firebase';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
@@ -12,6 +12,7 @@ interface MediaItem {
   id: string;
   url: string;
   fileName: string;
+  mimeType?: string;
   tags?: string[];
 }
 
@@ -19,12 +20,15 @@ interface MediaPickerModalProps {
   isOpen: boolean;
   onSelect: (url: string) => void;
   onClose: () => void;
+  /** 'image' (default) shows only image/* uploads; 'file' shows everything
+   * (PDFs, docs, etc.) — used by the Resources content type's file field. */
+  accept?: 'image' | 'file';
 }
 
 /** Browse/upload/reuse assets from the shared media library, for any
  * image-URL field in the content forms — avoids re-uploading the same
  * photo per sermon/event/pastor. */
-export default function MediaPickerModal({ isOpen, onSelect, onClose }: MediaPickerModalProps) {
+export default function MediaPickerModal({ isOpen, onSelect, onClose, accept = 'image' }: MediaPickerModalProps) {
   const [items, setItems] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -67,11 +71,13 @@ export default function MediaPickerModal({ isOpen, onSelect, onClose }: MediaPic
 
   if (!isOpen) return null;
 
-  const filtered = items.filter(item => {
-    if (!search.trim()) return true;
-    const q = search.toLowerCase();
-    return item.fileName?.toLowerCase().includes(q) || item.tags?.some(t => t.toLowerCase().includes(q));
-  });
+  const filtered = items
+    .filter(item => (accept === 'image' ? (item.mimeType?.startsWith('image/') ?? true) : true))
+    .filter(item => {
+      if (!search.trim()) return true;
+      const q = search.toLowerCase();
+      return item.fileName?.toLowerCase().includes(q) || item.tags?.some(t => t.toLowerCase().includes(q));
+    });
 
   return (
     <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4" onClick={onClose}>
@@ -106,7 +112,7 @@ export default function MediaPickerModal({ isOpen, onSelect, onClose }: MediaPic
           </div>
           <label className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer shrink-0">
             <Upload className="w-4 h-4" /> {uploading ? 'Uploading...' : 'Upload'}
-            <input type="file" multiple accept="image/*" className="hidden" disabled={uploading} onChange={(e) => upload(e.target.files)} />
+            <input type="file" multiple accept={accept === 'image' ? 'image/*' : undefined} className="hidden" disabled={uploading} onChange={(e) => upload(e.target.files)} />
           </label>
         </div>
 
@@ -114,19 +120,29 @@ export default function MediaPickerModal({ isOpen, onSelect, onClose }: MediaPic
           {loading ? (
             <LoadingState label="Loading media..." />
           ) : filtered.length === 0 ? (
-            <EmptyState icon={ImageIcon} title="No media found" description="Upload an image to get started." />
+            <EmptyState icon={ImageIcon} title="No media found" description="Upload a file to get started." />
           ) : (
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-              {filtered.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => { onSelect(item.url); onClose(); }}
-                  className="relative aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden border-2 border-transparent hover:border-blue-500 transition-colors focus:outline-none focus:border-blue-500"
-                  title={item.fileName}
-                >
-                  <Image src={item.url} alt={item.fileName} fill className="object-cover" sizes="150px" />
-                </button>
-              ))}
+              {filtered.map((item) => {
+                const isImage = item.mimeType?.startsWith('image/') ?? true;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => { onSelect(item.url); onClose(); }}
+                    className="relative aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden border-2 border-transparent hover:border-blue-500 transition-colors focus:outline-none focus:border-blue-500"
+                    title={item.fileName}
+                  >
+                    {isImage ? (
+                      <Image src={item.url} alt={item.fileName} fill className="object-cover" sizes="150px" />
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center p-2">
+                        <FileText className="w-8 h-8 text-gray-400 mb-1" />
+                        <span className="text-xs text-gray-500 dark:text-gray-400 truncate w-full text-center">{item.fileName}</span>
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>

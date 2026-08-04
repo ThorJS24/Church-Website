@@ -16,6 +16,7 @@ const COLLECTIONS: Record<string, string> = {
   smallGroups: 'smallGroups',
   testimonials: 'testimonials',
   redirects: 'redirects',
+  resources: 'resources',
 };
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ type: string; id: string }> }) {
