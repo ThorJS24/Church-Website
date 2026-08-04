@@ -123,13 +123,46 @@ npm dependencies, backend/Firestore/API untouched, `ThemeContext`/
   re-checking for the "element type is invalid" signature (broader than
   earlier phases' spot checks).
 
+### Phase 9 — Admin shell + DataTable primitive
+- New `components/ui/DataTable.tsx`: sort/search/resizable/column-visibility/
+  bulk-select/CSV export/keyboard nav, built entirely on the existing stack
+  (papaparse for CSV, no new library) — the shared primitive Phases 10-11
+  build every admin table on.
+- `AdminLayout` rebuilt: collapsible sidebar, topbar with the same Ctrl/Cmd+K
+  `CommandPalette` used on the public site, breadcrumbs, role badge.
+  `ConfirmModal` rebuilt on `Modal` (same props API). Admin `States.tsx`
+  now re-exports `components/ui/States`, instantly reskinning 14 files.
+- New `components/PublicChrome.tsx`: public Navbar/Footer/MobileBottomNav/
+  ambient-audio/PWA-prompt/cookie-notice now render only outside `/admin`,
+  so the admin panel is its own immersive dashboard shell instead of
+  nesting inside the public marketing chrome (explicit brief ask).
+
+### Phase 10 — GenericContentTab reskin
+- Rebuilt on `DataTable` — this one component drives 10 of the 13 admin
+  Content tabs (Sermons, Events, Pastors, Ministries, Announcements, Blog,
+  Small Groups, Testimonials, Resources, Redirects, plus every custom
+  content type), so this single change visually transforms all of them.
+  `MediaPickerModal` rebuilt on the same primitives. Draft/publish/schedule,
+  CSV import/export, version history + restore, bulk delete, media picker
+  wiring all preserved exactly; `alert()` calls replaced with `ToastProvider`.
+
+### Phase 11 — Remaining admin screens
+- Dashboard, Members (→ `DataTable`), Content tab-switcher (→ `Tabs`
+  primitive) + its three bespoke tabs (Gallery, Site Settings, Content
+  Types), Messages (→ `Accordion` for expand-to-edit rows), Media Library,
+  Forms builder (submissions viewer → `DataTable`), Newsletter, Moderation
+  Queue, Audit Log, Settings — every remaining admin screen rebuilt.
+  All behavior preserved: role/suspend/delete flows, schema builders,
+  media upload/copy/delete, campaign sending, feature toggles, JSON
+  backup export, moderation approve/reject, audit before/after diff.
+
+**This completes the full site rebuild — every public page and every
+admin screen now runs on the design system.**
+
 ---
 
 ## Remaining (see plan for full detail)
 
-- Phase 9 — Admin shell + shared `DataTable` primitive
-- Phase 10 — `GenericContentTab` reskin (covers 10/13 content tabs at once)
-- Phase 11 — Remaining admin screens
 - Phase 12 — Motion/accessibility/performance pass
 - Phase 13 — Cleanup & full verification (full Playwright suite)
 
