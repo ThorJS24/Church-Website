@@ -4,181 +4,107 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { User, Eye, EyeOff, Mail } from 'lucide-react'
+import { Church, User, Eye, EyeOff, Mail, Lock } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
+import { Card } from '@/components/ui/Card'
+import { Input } from '@/components/ui/Input'
+import { Button } from '@/components/ui/Button'
+import { IconButton } from '@/components/ui/IconButton'
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
-  })
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', confirmPassword: '' })
   const router = useRouter()
   const { user, register } = useAuth()
 
-  // Redirect if already logged in
   useEffect(() => {
-    if (user) {
-      router.push('/dashboard')
-    }
+    if (user) router.push('/dashboard')
   }, [user, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
-    
+
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match')
       setLoading(false)
       return
     }
-
     if (formData.password.length < 6) {
       setError('Password must be at least 6 characters')
       setLoading(false)
       return
     }
-    
+
     try {
-      const success = await register({
-        name: formData.name,
-        email: formData.email,
-        password: formData.password
-      })
-      
+      const success = await register({ name: formData.name, email: formData.email, password: formData.password })
       if (success) {
         router.push('/dashboard')
       } else {
         setError('Registration failed. Please try again.')
       }
-    } catch (error) {
+    } catch {
       setError('An error occurred. Please try again.')
     } finally {
       setLoading(false)
     }
   }
 
-  // Don't render if user is already logged in
-  if (user) {
-    return null
-  }
+  if (user) return null
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-md"
-      >
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-            <User className="text-white w-8 h-8" />
-          </div>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Join Our Community
-          </h2>
-          <p className="text-gray-600 dark:text-gray-300">
-            Create your account to connect with our church family
-          </p>
-        </div>
-
-        {error && (
-          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="relative">
-            <label htmlFor="name" className="sr-only">Full Name</label>
-            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input
-              id="name"
-              type="text"
-              placeholder="Full Name"
-              value={formData.name}
-              onChange={(e) => setFormData({...formData, name: e.target.value})}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              required
-            />
+    <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center bg-surface p-4">
+      <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
+        <Card variant="raised" padding="lg">
+          <div className="mb-8 text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-accent">
+              <Church className="h-7 w-7 text-accent-foreground" />
+            </div>
+            <h1 className="text-headline-sm text-foreground">Join Our Community</h1>
+            <p className="mt-1 text-body-sm text-foreground-muted">Create your account to connect with our church family</p>
           </div>
 
-          <div className="relative">
-            <label htmlFor="email" className="sr-only">Email Address</label>
-            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input
-              id="email"
-              type="email"
-              placeholder="Email Address"
-              value={formData.email}
-              onChange={(e) => setFormData({...formData, email: e.target.value})}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              required
-            />
-          </div>
+          {error && <p className="mb-4 rounded-lg border border-danger/30 bg-danger-subtle p-3 text-body-sm text-danger">{error}</p>}
 
-          <div className="relative">
-            <label htmlFor="password" className="sr-only">Password</label>
-            <input
-              id="password"
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <Input label="Full Name" leftIcon={<User />} value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
+            <Input type="email" label="Email Address" leftIcon={<Mail />} value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} required />
+            <Input
               type={showPassword ? 'text' : 'password'}
-              placeholder="Password"
+              label="Password"
+              leftIcon={<Lock />}
+              rightIcon={
+                <IconButton type="button" label={showPassword ? 'Hide password' : 'Show password'} size="sm" onClick={() => setShowPassword(!showPassword)}>
+                  {showPassword ? <EyeOff /> : <Eye />}
+                </IconButton>
+              }
               value={formData.password}
-              onChange={(e) => setFormData({...formData, password: e.target.value})}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-12 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               required
             />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-            >
-              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-            </button>
-          </div>
-
-          <div className="relative">
-            <label htmlFor="confirmPassword" className="sr-only">Confirm Password</label>
-            <input
-              id="confirmPassword"
+            <Input
               type={showPassword ? 'text' : 'password'}
-              placeholder="Confirm Password"
+              label="Confirm Password"
+              leftIcon={<Lock />}
               value={formData.confirmPassword}
-              onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
               required
             />
-          </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-lg font-semibold hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center min-h-[48px] text-center"
-          >
-            {loading ? 'Creating Account...' : 'Create Account'}
-          </button>
-        </form>
+            <Button type="submit" fullWidth size="lg" loading={loading}>{loading ? 'Creating Account...' : 'Create Account'}</Button>
+          </form>
 
-        <div className="mt-6 text-center">
-          <p className="text-gray-600 dark:text-gray-300">
+          <p className="mt-6 text-center text-body-sm text-foreground-muted">
             Already have an account?{' '}
-            <Link href="/login" className="text-blue-600 hover:text-blue-700 font-semibold">
-              Sign In
-            </Link>
+            <Link href="/login" className="font-semibold text-accent hover:text-accent-hover">Sign In</Link>
           </p>
-        </div>
-
-        <div className="mt-6 text-center">
-          <Link href="/" className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 text-sm">
-            ← Back to Home
-          </Link>
-        </div>
+          <p className="mt-4 text-center">
+            <Link href="/" className="text-body-sm text-foreground-subtle hover:text-foreground">← Back to Home</Link>
+          </p>
+        </Card>
       </motion.div>
     </div>
   )

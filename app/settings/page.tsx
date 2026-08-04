@@ -7,6 +7,12 @@ import { Settings, Bell, Shield, User as UserIcon, Eye, EyeOff } from 'lucide-re
 import { useAuth } from '@/contexts/AuthContext';
 import { getIdToken } from '@/lib/firebase';
 import ConfirmModal from '@/components/admin/ConfirmModal';
+import { Container } from '@/components/ui/Container';
+import { Card } from '@/components/ui/Card';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
+import { Switch } from '@/components/ui/Switch';
+import { LoadingState } from '@/components/ui/States';
 
 type Notifications = { email: boolean; events: boolean; prayers: boolean };
 type Privacy = { profileVisible: boolean; contactVisible: boolean };
@@ -50,22 +56,11 @@ export default function SettingsPage() {
     }
   }, [user]);
 
-  const handleToggleNotification = (key: keyof Notifications) => {
-    setNotifications(prev => ({ ...prev, [key]: !prev[key] }));
-  };
-
-  const handleTogglePrivacy = (key: keyof Privacy) => {
-    setPrivacy(prev => ({ ...prev, [key]: !prev[key] }));
-  };
-
   const handleSave = async () => {
     setSaving(true);
     setSaveStatus('idle');
     try {
-      const success = await updateUser({
-        notificationPreferences: notifications,
-        privacyPreferences: privacy,
-      });
+      const success = await updateUser({ notificationPreferences: notifications, privacyPreferences: privacy });
       setSaveStatus(success ? 'success' : 'error');
     } catch {
       setSaveStatus('error');
@@ -78,7 +73,6 @@ export default function SettingsPage() {
     e.preventDefault();
     setPasswordError('');
     setPasswordStatus('idle');
-
     if (newPassword.length < 6) {
       setPasswordError('New password must be at least 6 characters.');
       return;
@@ -87,7 +81,6 @@ export default function SettingsPage() {
       setPasswordError('New passwords do not match.');
       return;
     }
-
     setPasswordChanging(true);
     try {
       await changePassword(currentPassword, newPassword);
@@ -98,11 +91,7 @@ export default function SettingsPage() {
     } catch (err: unknown) {
       setPasswordStatus('error');
       const code = (err as { code?: string })?.code;
-      setPasswordError(
-        code === 'auth/wrong-password' || code === 'auth/invalid-credential'
-          ? 'Current password is incorrect.'
-          : 'Could not change your password. Please try again.'
-      );
+      setPasswordError(code === 'auth/wrong-password' || code === 'auth/invalid-credential' ? 'Current password is incorrect.' : 'Could not change your password. Please try again.');
     } finally {
       setPasswordChanging(false);
     }
@@ -112,10 +101,7 @@ export default function SettingsPage() {
     setDeleteStatus('idle');
     try {
       const token = await getIdToken();
-      const response = await fetch('/api/privacy/delete-account', {
-        method: 'DELETE',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
+      const response = await fetch('/api/privacy/delete-account', { method: 'DELETE', headers: token ? { Authorization: `Bearer ${token}` } : {} });
       const data = await response.json();
       setDeleteStatus(data.success ? 'success' : 'error');
     } catch {
@@ -123,159 +109,80 @@ export default function SettingsPage() {
     }
   };
 
-  if (isLoading || !user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
+  if (isLoading || !user) return <LoadingState />;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-      <div className="max-w-4xl mx-auto px-4">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-            <div className="flex items-center">
-              <Settings className="w-6 h-6 text-blue-600 mr-3" />
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Settings</h1>
-            </div>
+    <Container size="md" className="py-10">
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
+        <Card variant="raised" padding="none">
+          <div className="flex items-center gap-3 border-b border-border p-6">
+            <Settings className="h-6 w-6 text-accent" />
+            <h1 className="text-headline-sm text-foreground">Settings</h1>
           </div>
 
-          <div className="p-6 space-y-8">
-            {/* Notifications */}
+          <div className="space-y-8 p-6">
             <div>
-              <div className="flex items-center mb-4">
-                <Bell className="w-5 h-5 text-gray-600 mr-2" />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Notifications</h3>
+              <div className="mb-4 flex items-center gap-2">
+                <Bell className="h-5 w-5 text-foreground-muted" />
+                <h3 className="text-title-md text-foreground">Notifications</h3>
               </div>
-              <div className="space-y-3 ml-7">
+              <div className="ml-7 space-y-3">
                 {(Object.entries(notifications) as [keyof Notifications, boolean][]).map(([key, value]) => (
                   <div key={key} className="flex items-center justify-between">
-                    <span className="text-gray-700 dark:text-gray-300 capitalize">{key.replace(/([A-Z])/g, ' $1')}</span>
-                    <button
-                      onClick={() => handleToggleNotification(key)}
-                      aria-pressed={value}
-                      aria-label={`Toggle ${key} notifications`}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${value ? 'bg-blue-600' : 'bg-gray-300'}`}
-                    >
-                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${value ? 'translate-x-6' : 'translate-x-1'}`} />
-                    </button>
+                    <span className="text-body-sm capitalize text-foreground-muted">{key.replace(/([A-Z])/g, ' $1')}</span>
+                    <Switch checked={value} onChange={() => setNotifications((prev) => ({ ...prev, [key]: !prev[key] }))} label={`Toggle ${key} notifications`} />
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Privacy */}
             <div>
-              <div className="flex items-center mb-4">
-                <Shield className="w-5 h-5 text-gray-600 mr-2" />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Privacy</h3>
+              <div className="mb-4 flex items-center gap-2">
+                <Shield className="h-5 w-5 text-foreground-muted" />
+                <h3 className="text-title-md text-foreground">Privacy</h3>
               </div>
-              <div className="space-y-3 ml-7">
+              <div className="ml-7 space-y-3">
                 {(Object.entries(privacy) as [keyof Privacy, boolean][]).map(([key, value]) => (
                   <div key={key} className="flex items-center justify-between">
-                    <span className="text-gray-700 dark:text-gray-300 capitalize">{key.replace(/([A-Z])/g, ' $1')}</span>
-                    <button
-                      onClick={() => handleTogglePrivacy(key)}
-                      aria-pressed={value}
-                      aria-label={`Toggle ${key}`}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${value ? 'bg-blue-600' : 'bg-gray-300'}`}
-                    >
-                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${value ? 'translate-x-6' : 'translate-x-1'}`} />
-                    </button>
+                    <span className="text-body-sm capitalize text-foreground-muted">{key.replace(/([A-Z])/g, ' $1')}</span>
+                    <Switch checked={value} onChange={() => setPrivacy((prev) => ({ ...prev, [key]: !prev[key] }))} label={`Toggle ${key}`} />
                   </div>
                 ))}
               </div>
             </div>
 
-            {saveStatus === 'success' && (
-              <div className="ml-7 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                <p className="text-green-700 dark:text-green-300 text-sm">Settings saved.</p>
-              </div>
-            )}
-            {saveStatus === 'error' && (
-              <div className="ml-7 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                <p className="text-red-700 dark:text-red-300 text-sm">Couldn&apos;t save your settings. Please try again.</p>
-              </div>
-            )}
+            {saveStatus === 'success' && <p className="ml-7 rounded-lg border border-success/30 bg-success-subtle p-3 text-body-sm text-success">Settings saved.</p>}
+            {saveStatus === 'error' && <p className="ml-7 rounded-lg border border-danger/30 bg-danger-subtle p-3 text-body-sm text-danger">Couldn&apos;t save your settings. Please try again.</p>}
 
-            {/* Account */}
-            <div className="pt-6 border-t border-gray-200 dark:border-gray-700">
-              <div className="flex items-center mb-4">
-                <UserIcon className="w-5 h-5 text-gray-600 mr-2" />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Account</h3>
+            <div className="border-t border-border pt-6">
+              <div className="mb-4 flex items-center gap-2">
+                <UserIcon className="h-5 w-5 text-foreground-muted" />
+                <h3 className="text-title-md text-foreground">Account</h3>
               </div>
               <div className="ml-7 space-y-4">
                 <div>
                   <button
-                    onClick={() => { setShowPasswordForm(v => !v); setPasswordStatus('idle'); setPasswordError(''); }}
-                    className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                    onClick={() => { setShowPasswordForm((v) => !v); setPasswordStatus('idle'); setPasswordError(''); }}
+                    className="text-body-sm font-medium text-accent hover:text-accent-hover"
                   >
                     {showPasswordForm ? 'Cancel' : 'Change Password'}
                   </button>
 
                   {showPasswordForm && (
-                    <form onSubmit={handleChangePassword} className="mt-4 space-y-3 max-w-sm">
-                      <div>
-                        <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          Current Password
-                        </label>
-                        <input
-                          id="currentPassword"
-                          type={showPasswords ? 'text' : 'password'}
-                          required
-                          value={currentPassword}
-                          onChange={(e) => setCurrentPassword(e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          New Password
-                        </label>
-                        <input
-                          id="newPassword"
-                          type={showPasswords ? 'text' : 'password'}
-                          required
-                          value={newPassword}
-                          onChange={(e) => setNewPassword(e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="confirmNewPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          Confirm New Password
-                        </label>
-                        <input
-                          id="confirmNewPassword"
-                          type={showPasswords ? 'text' : 'password'}
-                          required
-                          value={confirmNewPassword}
-                          onChange={(e) => setConfirmNewPassword(e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white text-sm"
-                        />
-                      </div>
+                    <form onSubmit={handleChangePassword} className="mt-4 max-w-sm space-y-3">
+                      <Input label="Current Password" type={showPasswords ? 'text' : 'password'} required value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
+                      <Input label="New Password" type={showPasswords ? 'text' : 'password'} required value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+                      <Input label="Confirm New Password" type={showPasswords ? 'text' : 'password'} required value={confirmNewPassword} onChange={(e) => setConfirmNewPassword(e.target.value)} />
 
-                      <button
-                        type="button"
-                        onClick={() => setShowPasswords(v => !v)}
-                        className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
-                      >
-                        {showPasswords ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      <button type="button" onClick={() => setShowPasswords((v) => !v)} className="flex items-center gap-1 text-caption text-foreground-subtle hover:text-foreground">
+                        {showPasswords ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                         {showPasswords ? 'Hide' : 'Show'} passwords
                       </button>
 
-                      {passwordError && <p className="text-sm text-red-600 dark:text-red-400">{passwordError}</p>}
-                      {passwordStatus === 'success' && <p className="text-sm text-green-600 dark:text-green-400">Password changed successfully.</p>}
+                      {passwordError && <p className="text-body-sm text-danger">{passwordError}</p>}
+                      {passwordStatus === 'success' && <p className="text-body-sm text-success">Password changed successfully.</p>}
 
-                      <button
-                        type="submit"
-                        disabled={passwordChanging}
-                        className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm px-4 py-2 rounded-lg"
-                      >
-                        {passwordChanging ? 'Changing...' : 'Update Password'}
-                      </button>
+                      <Button type="submit" size="sm" loading={passwordChanging}>{passwordChanging ? 'Changing...' : 'Update Password'}</Button>
                     </form>
                   )}
                 </div>
@@ -284,36 +191,26 @@ export default function SettingsPage() {
                   <button
                     onClick={() => setShowDeleteConfirm(true)}
                     disabled={deleteStatus === 'success'}
-                    className="text-red-600 hover:text-red-700 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="text-body-sm font-medium text-danger hover:text-danger/80 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Delete Account
                   </button>
                   {deleteStatus === 'success' && (
-                    <p className="mt-2 text-sm text-green-600 dark:text-green-400">
-                      Deletion request submitted. Our staff will review it and follow up with you by email.
-                    </p>
+                    <p className="mt-2 text-body-sm text-success">Deletion request submitted. Our staff will review it and follow up with you by email.</p>
                   )}
                   {deleteStatus === 'error' && (
-                    <p className="mt-2 text-sm text-red-600 dark:text-red-400">
-                      Couldn&apos;t submit your deletion request. Please try again or contact us directly.
-                    </p>
+                    <p className="mt-2 text-body-sm text-danger">Couldn&apos;t submit your deletion request. Please try again or contact us directly.</p>
                   )}
                 </div>
               </div>
             </div>
 
-            <div className="pt-6 border-t border-gray-200 dark:border-gray-700">
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-6 py-2 rounded-lg"
-              >
-                {saving ? 'Saving...' : 'Save Settings'}
-              </button>
+            <div className="border-t border-border pt-6">
+              <Button loading={saving} onClick={handleSave}>{saving ? 'Saving...' : 'Save Settings'}</Button>
             </div>
           </div>
-        </motion.div>
-      </div>
+        </Card>
+      </motion.div>
 
       <ConfirmModal
         isOpen={showDeleteConfirm}
@@ -324,6 +221,6 @@ export default function SettingsPage() {
         onConfirm={handleDeleteAccount}
         onClose={() => setShowDeleteConfirm(false)}
       />
-    </div>
+    </Container>
   );
 }

@@ -2,13 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import {
-  User, Calendar, Heart, DollarSign, Book, Users,
-  Bell, Settings, Download
-} from 'lucide-react';
+import { User, Calendar, Heart, DollarSign, Book, Users, Bell, Settings, Download } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { getIdToken } from '@/lib/firebase';
+import { Container } from '@/components/ui/Container';
+import { Card } from '@/components/ui/Card';
+import { Grid } from '@/components/ui/Grid';
+import { Avatar } from '@/components/ui/Avatar';
+import { EmptyState } from '@/components/ui/States';
 
 interface DashboardStats {
   attendanceCount: number;
@@ -17,52 +19,55 @@ interface DashboardStats {
   upcomingEvents: number;
 }
 
+const STAT_CARDS = [
+  { key: 'attendanceCount' as const, icon: Calendar, label: 'Services Attended', color: 'text-info' },
+  { key: 'prayerRequests' as const, icon: Heart, label: 'Prayer Requests', color: 'text-danger' },
+  { key: 'donationTotal' as const, icon: DollarSign, label: 'Total Given', color: 'text-success', prefix: '₹' },
+  { key: 'upcomingEvents' as const, icon: Calendar, label: 'Upcoming Events', color: 'text-accent' },
+];
+
+const QUICK_ACTIONS = [
+  { icon: Calendar, label: 'View Events', href: '/events' },
+  { icon: Heart, label: 'Prayer Requests', href: '/prayer' },
+  { icon: DollarSign, label: 'Give Online', href: '/give' },
+  { icon: Book, label: 'Sermons', href: '/sermons' },
+  { icon: Users, label: 'Small Groups', href: '/ministries' },
+  { icon: Settings, label: 'Settings', href: '/settings' },
+];
+
 export default function MemberDashboard() {
   const { user } = useAuth();
   const router = useRouter();
-  const [stats, setStats] = useState<DashboardStats>({
-    attendanceCount: 0,
-    prayerRequests: 0,
-    donationTotal: 0,
-    upcomingEvents: 0
-  });
+  const [stats, setStats] = useState<DashboardStats>({ attendanceCount: 0, prayerRequests: 0, donationTotal: 0, upcomingEvents: 0 });
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
   const [downloadingData, setDownloadingData] = useState(false);
   const [downloadError, setDownloadError] = useState('');
 
   useEffect(() => {
-    if (user) {
-      fetchDashboardData();
-    }
-  }, [user]);
-
-  const fetchDashboardData = async () => {
-    try {
-      const token = await getIdToken();
-      const response = await fetch('/api/member/dashboard', {
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
-      });
-      const data = await response.json();
-      if (data.success) {
-        setStats(data.stats);
-        setRecentActivity(data.recentActivity);
+    if (!user) return;
+    async function fetchDashboardData() {
+      try {
+        const token = await getIdToken();
+        const response = await fetch('/api/member/dashboard', { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+        const data = await response.json();
+        if (data.success) {
+          setStats(data.stats);
+          setRecentActivity(data.recentActivity);
+        }
+      } catch (error) {
+        console.error('Dashboard data fetch error:', error);
       }
-    } catch (error) {
-      console.error('Dashboard data fetch error:', error);
     }
-  };
+    fetchDashboardData();
+  }, [user]);
 
   const handleDownloadData = async () => {
     setDownloadingData(true);
     setDownloadError('');
     try {
       const token = await getIdToken();
-      const response = await fetch('/api/privacy/download-data', {
-        method: 'POST',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
+      const response = await fetch('/api/privacy/download-data', { method: 'POST', headers: token ? { Authorization: `Bearer ${token}` } : {} });
       if (!response.ok) throw new Error('Download failed');
-
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -80,200 +85,111 @@ export default function MemberDashboard() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Please log in to access your dashboard</h2>
-        </div>
-      </div>
+      <Container size="sm" className="flex min-h-[60vh] items-center justify-center text-center">
+        <h2 className="text-headline-sm text-foreground">Please log in to access your dashboard</h2>
+      </Container>
     );
   }
 
-  const quickActions = [
-    { icon: Calendar, label: 'View Events', href: '/events', color: 'bg-blue-500' },
-    { icon: Heart, label: 'Prayer Requests', href: '/prayer', color: 'bg-pink-500' },
-    { icon: DollarSign, label: 'Give Online', href: '/give', color: 'bg-green-500' },
-    { icon: Book, label: 'Sermons', href: '/sermons', color: 'bg-purple-500' },
-    { icon: Users, label: 'Small Groups', href: '/ministries', color: 'bg-orange-500' },
-    { icon: Settings, label: 'Settings', href: '/settings', color: 'bg-gray-500' }
-  ];
-
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Welcome Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <h1 className="text-3xl font-bold text-gray-900">
-            Welcome back, {user.firstName || user.displayName}!
-          </h1>
-          <p className="text-gray-600 mt-2">Here's what's happening in your church community</p>
-        </motion.div>
+    <Container size="lg" className="py-10">
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+        <h1 className="text-headline-lg text-foreground">Welcome back, {user.firstName || user.displayName}!</h1>
+        <p className="mt-2 text-body-md text-foreground-muted">Here&apos;s what&apos;s happening in your church community</p>
+      </motion.div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-lg shadow p-6"
-          >
-            <div className="flex items-center">
-              <Calendar className="w-8 h-8 text-blue-500" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Services Attended</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.attendanceCount}</p>
+      <Grid cols={4} gap={6} className="mb-8">
+        {STAT_CARDS.map((stat, index) => (
+          <motion.div key={stat.key} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: index * 0.05 }}>
+            <Card variant="raised" className="flex items-center gap-4">
+              <stat.icon className={`h-8 w-8 shrink-0 ${stat.color}`} />
+              <div>
+                <p className="text-body-sm text-foreground-muted">{stat.label}</p>
+                <p className="text-title-lg text-foreground">{stat.prefix}{stats[stat.key]}</p>
               </div>
-            </div>
+            </Card>
           </motion.div>
+        ))}
+      </Grid>
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.1 }}
-            className="bg-white rounded-lg shadow p-6"
-          >
-            <div className="flex items-center">
-              <Heart className="w-8 h-8 text-pink-500" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Prayer Requests</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.prayerRequests}</p>
-              </div>
-            </div>
-          </motion.div>
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <h2 className="mb-4 text-title-lg text-foreground">Quick Actions</h2>
+          <Grid cols={3} gap={4}>
+            {QUICK_ACTIONS.map((action, index) => (
+              <motion.a
+                key={action.label}
+                href={action.href}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+                className="block"
+              >
+                <Card variant="interactive" className="text-center">
+                  <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-lg bg-accent-subtle">
+                    <action.icon className="h-6 w-6 text-accent" />
+                  </div>
+                  <p className="text-body-sm font-medium text-foreground">{action.label}</p>
+                </Card>
+              </motion.a>
+            ))}
+          </Grid>
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2 }}
-            className="bg-white rounded-lg shadow p-6"
-          >
-            <div className="flex items-center">
-              <DollarSign className="w-8 h-8 text-green-500" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Given</p>
-                <p className="text-2xl font-bold text-gray-900">₹{stats.donationTotal}</p>
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3 }}
-            className="bg-white rounded-lg shadow p-6"
-          >
-            <div className="flex items-center">
-              <Calendar className="w-8 h-8 text-purple-500" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Upcoming Events</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.upcomingEvents}</p>
-              </div>
-            </div>
-          </motion.div>
+          <div className="mt-8">
+            <h2 className="mb-4 text-title-lg text-foreground">Recent Activity</h2>
+            <Card padding="none">
+              {recentActivity.length > 0 ? (
+                <div className="divide-y divide-border">
+                  {recentActivity.map((activity, index) => (
+                    <div key={index} className="flex items-center gap-4 p-4">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent-subtle">
+                        <Calendar className="h-4 w-4 text-accent" />
+                      </div>
+                      <div>
+                        <p className="text-body-sm font-medium text-foreground">{activity.title}</p>
+                        <p className="text-caption text-foreground-subtle">{activity.date}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <EmptyState icon={Calendar} title="No recent activity" />
+              )}
+            </Card>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Quick Actions */}
-          <div className="lg:col-span-2">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {quickActions.map((action, index) => (
-                <motion.a
-                  key={action.label}
-                  href={action.href}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="bg-white rounded-lg shadow p-4 hover:shadow-lg transition-shadow text-center"
-                >
-                  <div className={`w-12 h-12 ${action.color} rounded-lg flex items-center justify-center mx-auto mb-3`}>
-                    <action.icon className="w-6 h-6 text-white" />
-                  </div>
-                  <p className="text-sm font-medium text-gray-900">{action.label}</p>
-                </motion.a>
-              ))}
-            </div>
-
-            {/* Recent Activity */}
-            <div className="mt-8">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Recent Activity</h2>
-              <div className="bg-white rounded-lg shadow">
-                {recentActivity.length > 0 ? (
-                  <div className="divide-y divide-gray-200">
-                    {recentActivity.map((activity, index) => (
-                      <div key={index} className="p-4">
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0">
-                            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                              <Calendar className="w-4 h-4 text-blue-600" />
-                            </div>
-                          </div>
-                          <div className="ml-4">
-                            <p className="text-sm font-medium text-gray-900">{activity.title}</p>
-                            <p className="text-sm text-gray-500">{activity.date}</p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="p-8 text-center text-gray-500">
-                    <Calendar className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                    <p>No recent activity</p>
-                  </div>
-                )}
+        <div>
+          <h2 className="mb-4 text-title-lg text-foreground">Profile &amp; Security</h2>
+          <Card>
+            <div className="mb-6 flex items-center gap-4">
+              <Avatar name={`${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || user.email} size="lg" />
+              <div>
+                <h3 className="text-title-sm text-foreground">{user.firstName} {user.lastName}</h3>
+                <p className="text-body-sm text-foreground-muted">{user.email}</p>
+                <p className="text-body-sm capitalize text-accent">{user.role}</p>
               </div>
             </div>
-          </div>
 
-          {/* Profile & Security */}
-          <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Profile & Security</h2>
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center mb-6">
-                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
-                  <User className="w-8 h-8 text-blue-600" />
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-lg font-medium text-gray-900">
-                    {user.firstName} {user.lastName}
-                  </h3>
-                  <p className="text-sm text-gray-500">{user.email}</p>
-                  <p className="text-sm text-blue-600 capitalize">{user.role}</p>
-                </div>
-              </div>
+            <div className="space-y-2">
+              <button
+                onClick={handleDownloadData}
+                disabled={downloadingData}
+                className="flex w-full items-center justify-between rounded-lg bg-surface p-3 transition-colors hover:bg-surface-hover disabled:opacity-50"
+              >
+                <span className="flex items-center gap-3 text-body-sm font-medium text-foreground"><Download className="h-4 w-4 text-foreground-muted" /> Download Data</span>
+                <span className="text-caption text-foreground-subtle">{downloadingData ? 'Preparing...' : 'GDPR'}</span>
+              </button>
+              {downloadError && <p className="text-caption text-danger">{downloadError}</p>}
 
-              <div className="space-y-3">
-                <button
-                  onClick={handleDownloadData}
-                  disabled={downloadingData}
-                  className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50"
-                >
-                  <div className="flex items-center">
-                    <Download className="w-5 h-5 text-gray-600 mr-3" />
-                    <span className="text-sm font-medium">Download Data</span>
-                  </div>
-                  <span className="text-xs text-gray-500">{downloadingData ? 'Preparing...' : 'GDPR'}</span>
-                </button>
-                {downloadError && <p className="text-xs text-red-600">{downloadError}</p>}
-
-                <button
-                  onClick={() => router.push('/settings')}
-                  className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                >
-                  <div className="flex items-center">
-                    <Bell className="w-5 h-5 text-gray-600 mr-3" />
-                    <span className="text-sm font-medium">Notifications</span>
-                  </div>
-                  <span className="text-xs text-gray-500">Manage</span>
-                </button>
-              </div>
+              <button onClick={() => router.push('/settings')} className="flex w-full items-center justify-between rounded-lg bg-surface p-3 transition-colors hover:bg-surface-hover">
+                <span className="flex items-center gap-3 text-body-sm font-medium text-foreground"><Bell className="h-4 w-4 text-foreground-muted" /> Notifications</span>
+                <span className="text-caption text-foreground-subtle">Manage</span>
+              </button>
             </div>
-          </div>
+          </Card>
         </div>
       </div>
-    </div>
+    </Container>
   );
 }
