@@ -33,7 +33,7 @@ export default function SmallGroupsPage() {
         <div className="container mx-auto px-4">
           {groups.length === 0 ? (
             <p className="text-center text-gray-500 dark:text-gray-400">
-              No small groups are listed yet — <a href="/contact" className="text-blue-600 hover:underline">contact us</a> to find one.
+              No small groups are listed yet — <a href="/contact" className="text-blue-600 underline">contact us</a> to find one.
             </p>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
