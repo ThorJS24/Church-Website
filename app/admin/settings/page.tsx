@@ -6,6 +6,9 @@ import { adminFetch } from '@/lib/adminApi';
 import { getIdToken } from '@/lib/firebase';
 import { LoadingState, ErrorState } from '@/components/admin/States';
 import GenericContentTab, { FieldSchema } from '@/components/admin/content/GenericContentTab';
+import { Card } from '@/components/ui/Card';
+import { Checkbox } from '@/components/ui/Checkbox';
+import { Button } from '@/components/ui/Button';
 
 const SERVICE_FIELDS: FieldSchema[] = [
   { key: 'title', label: 'Service Name', type: 'text', required: true },
@@ -56,34 +59,25 @@ function FeatureToggles() {
   if (error) return <ErrorState message={error} onRetry={load} />;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+    <Card>
       <div className="space-y-4">
         {FEATURE_FLAGS.map((flag) => (
-          <label key={flag.key} className="flex items-start gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={flags[flag.key] ?? true}
-              onChange={(e) => setFlags({ ...flags, [flag.key]: e.target.checked })}
-              className="mt-1 w-4 h-4"
-            />
-            <div>
-              <p className="text-sm font-medium text-gray-900 dark:text-white">{flag.label}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">{flag.description}</p>
-            </div>
-          </label>
+          <Checkbox
+            key={flag.key}
+            label={flag.label}
+            description={flag.description}
+            checked={flags[flag.key] ?? true}
+            onChange={(e) => setFlags({ ...flags, [flag.key]: e.target.checked })}
+          />
         ))}
       </div>
-      <div className="flex items-center gap-3 mt-6">
-        <button
-          onClick={save}
-          disabled={saving}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-        >
-          <Save className="w-4 h-4" /> {saving ? 'Saving...' : 'Save Changes'}
-        </button>
-        {saved && <span className="text-sm text-green-600 dark:text-green-400">Saved</span>}
+      <div className="mt-6 flex items-center gap-3">
+        <Button leftIcon={<Save className="h-4 w-4" />} loading={saving} onClick={save}>
+          {saving ? 'Saving...' : 'Save Changes'}
+        </Button>
+        {saved && <span className="text-body-sm text-success">Saved</span>}
       </div>
-    </div>
+    </Card>
   );
 }
 
@@ -113,29 +107,25 @@ function BackupSection() {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-      <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+    <Card>
+      <p className="mb-4 text-body-sm text-foreground-muted">
         Download every content collection (sermons, events, pastors, blog posts, etc.) as one JSON file.
         Does not include member accounts or the audit log.
       </p>
-      <button
-        onClick={exportBackup}
-        disabled={exporting}
-        className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-      >
-        <Download className="w-4 h-4" /> {exporting ? 'Exporting...' : 'Export All Content as JSON'}
-      </button>
-    </div>
+      <Button leftIcon={<Download className="h-4 w-4" />} loading={exporting} onClick={exportBackup}>
+        {exporting ? 'Exporting...' : 'Export All Content as JSON'}
+      </Button>
+    </Card>
   );
 }
 
 export default function SettingsPage() {
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Settings</h1>
+      <h1 className="mb-6 text-headline-md text-foreground">Settings</h1>
 
       <div className="mb-10">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Feature Toggles</h2>
+        <h2 className="mb-4 text-title-lg text-foreground">Feature Toggles</h2>
         <FeatureToggles />
       </div>
 
@@ -144,7 +134,7 @@ export default function SettingsPage() {
       </div>
 
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Backup</h2>
+        <h2 className="mb-4 text-title-lg text-foreground">Backup</h2>
         <BackupSection />
       </div>
     </div>

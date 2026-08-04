@@ -1,14 +1,22 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Papa from 'papaparse';
 import { Plus, Pencil, Trash2, ClipboardList, X, Eye, Download, Link as LinkIcon } from 'lucide-react';
 import { adminFetch } from '@/lib/adminApi';
 import { LoadingState, EmptyState, ErrorState } from '@/components/admin/States';
 import ConfirmModal from '@/components/admin/ConfirmModal';
-import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { FieldSchema, FieldType } from '@/types/contentType';
 import { FORM_SLUG_PATTERN, FormDefinition } from '@/types/formSchema';
+import { Modal } from '@/components/ui/Modal';
+import { Button } from '@/components/ui/Button';
+import { IconButton } from '@/components/ui/IconButton';
+import { Input } from '@/components/ui/Input';
+import { Textarea } from '@/components/ui/Textarea';
+import { Select } from '@/components/ui/Select';
+import { Checkbox } from '@/components/ui/Checkbox';
+import { DataTable, type DataTableColumn } from '@/components/ui/DataTable';
+import { useToast } from '@/components/ui/Toast';
 
 const FIELD_TYPES: FieldType[] = ['text', 'email', 'textarea', 'date', 'datetime', 'number', 'checkbox', 'url'];
 
@@ -20,6 +28,13 @@ function emptyField(): FieldSchema {
   return { key: '', label: '', type: 'text', required: false };
 }
 
+function formatTimestamp(value: any): string {
+  if (!value) return '—';
+  if (typeof value === 'string') return new Date(value).toLocaleString();
+  if (typeof value === 'object' && 'seconds' in value) return new Date(value.seconds * 1000).toLocaleString();
+  return '—';
+}
+
 export default function FormsBuilderPage() {
   const [forms, setForms] = useState<FormDefinition[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,8 +44,7 @@ export default function FormsBuilderPage() {
   const [deleteTarget, setDeleteTarget] = useState<FormDefinition | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const formModalRef = useRef<HTMLDivElement>(null);
-  useFocusTrap(showForm, () => setShowForm(false), formModalRef);
+  const { toast } = useToast();
 
   const [slug, setSlug] = useState('');
   const [slugTouched, setSlugTouched] = useState(false);
@@ -42,8 +56,6 @@ export default function FormsBuilderPage() {
   const [submissionsTarget, setSubmissionsTarget] = useState<FormDefinition | null>(null);
   const [submissions, setSubmissions] = useState<Record<string, any>[]>([]);
   const [submissionsLoading, setSubmissionsLoading] = useState(false);
-  const submissionsModalRef = useRef<HTMLDivElement>(null);
-  useFocusTrap(!!submissionsTarget, () => setSubmissionsTarget(null), submissionsModalRef);
 
   const load = () => {
     setLoading(true);
@@ -131,7 +143,7 @@ export default function FormsBuilderPage() {
       const data = await adminFetch(`/api/admin/forms/${form.id}/submissions`);
       setSubmissions(data.submissions);
     } catch (err: any) {
-      alert(err.message);
+      toast({ title: 'Failed to load submissions', description: err.message, variant: 'danger' });
       setSubmissionsTarget(null);
     } finally {
       setSubmissionsLoading(false);
@@ -153,60 +165,62 @@ export default function FormsBuilderPage() {
 
   const copyFormLink = async (form: FormDefinition) => {
     await navigator.clipboard.writeText(`${window.location.origin}/forms/${form.id}`);
-    alert('Form link copied to clipboard.');
+    toast({ title: 'Form link copied to clipboard', variant: 'success' });
   };
 
   if (loading) return <LoadingState label="Loading forms..." />;
   if (error) return <ErrorState message={error} onRetry={load} />;
 
+  const submissionColumns: DataTableColumn<Record<string, any>>[] = submissionsTarget
+    ? [
+        { key: 'submittedAt', header: 'Submitted', accessor: (s) => formatTimestamp(s.submittedAt), sortValue: (s) => formatTimestamp(s.submittedAt) },
+        ...submissionsTarget.fields.map((f): DataTableColumn<Record<string, any>> => ({
+          key: f.key,
+          header: f.label,
+          accessor: (s) => String(s.data?.[f.key] ?? '—'),
+        })),
+      ]
+    : [];
+
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Forms</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Build a custom form, share its link, and view submissions here.</p>
+          <h1 className="text-headline-md text-foreground">Forms</h1>
+          <p className="text-body-sm text-foreground-muted">Build a custom form, share its link, and view submissions here.</p>
         </div>
-        <button
-          onClick={openCreate}
-          className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          <Plus className="w-4 h-4" /> New Form
-        </button>
+        <Button leftIcon={<Plus className="h-4 w-4" />} onClick={openCreate}>New Form</Button>
       </div>
 
       {forms.length === 0 ? (
         <EmptyState icon={ClipboardList} title="No forms yet" description="Create a form for volunteer sign-ups, event registration, or anything else you need to collect." />
       ) : (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-200 dark:border-gray-700 text-left text-gray-500 dark:text-gray-400">
-                <th className="p-3">Title</th>
-                <th className="p-3">Link</th>
-                <th className="p-3">Fields</th>
-                <th className="p-3 text-right">Actions</th>
+        <div className="overflow-x-auto rounded-lg border border-border">
+          <table className="w-full text-left text-body-sm">
+            <thead className="bg-surface">
+              <tr>
+                <th className="p-3 text-label text-foreground-subtle">Title</th>
+                <th className="p-3 text-label text-foreground-subtle">Link</th>
+                <th className="p-3 text-label text-foreground-subtle">Fields</th>
+                <th className="p-3 text-right text-label text-foreground-subtle">Actions</th>
               </tr>
             </thead>
             <tbody>
               {forms.map((form) => (
-                <tr key={form.id} className="border-b border-gray-100 dark:border-gray-700 last:border-0">
-                  <td className="p-3 text-gray-700 dark:text-gray-300">{form.title}</td>
+                <tr key={form.id} className="border-t border-border">
+                  <td className="p-3 text-foreground">{form.title}</td>
                   <td className="p-3">
-                    <button onClick={() => copyFormLink(form)} className="text-blue-600 hover:underline inline-flex items-center gap-1 text-xs font-mono">
-                      <LinkIcon className="w-3 h-3" /> /forms/{form.id}
+                    <button onClick={() => copyFormLink(form)} className="inline-flex items-center gap-1 font-mono text-caption text-accent hover:underline">
+                      <LinkIcon className="h-3 w-3" /> /forms/{form.id}
                     </button>
                   </td>
-                  <td className="p-3 text-gray-500 dark:text-gray-400">{form.fields.length}</td>
-                  <td className="p-3 text-right space-x-3 whitespace-nowrap">
-                    <button onClick={() => openSubmissions(form)} className="text-gray-600 dark:text-gray-300 hover:underline inline-flex items-center gap-1 text-xs">
-                      <Eye className="w-3 h-3" /> Submissions
-                    </button>
-                    <button onClick={() => openEdit(form)} className="text-blue-600 hover:underline inline-flex items-center gap-1 text-xs">
-                      <Pencil className="w-3 h-3" /> Edit
-                    </button>
-                    <button onClick={() => setDeleteTarget(form)} className="text-red-600 hover:underline inline-flex items-center gap-1 text-xs">
-                      <Trash2 className="w-3 h-3" /> Delete
-                    </button>
+                  <td className="p-3 text-foreground-muted">{form.fields.length}</td>
+                  <td className="p-3">
+                    <div className="flex items-center justify-end gap-1">
+                      <IconButton label="Submissions" size="sm" onClick={() => openSubmissions(form)}><Eye className="h-3.5 w-3.5" /></IconButton>
+                      <IconButton label="Edit" size="sm" onClick={() => openEdit(form)}><Pencil className="h-3.5 w-3.5" /></IconButton>
+                      <IconButton label="Delete" size="sm" onClick={() => setDeleteTarget(form)}><Trash2 className="h-3.5 w-3.5 text-danger" /></IconButton>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -215,195 +229,110 @@ export default function FormsBuilderPage() {
         </div>
       )}
 
-      {showForm && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowForm(false)}>
-          <div
-            ref={formModalRef}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="form-builder-title"
-            tabIndex={-1}
-            className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-2xl p-6 max-h-[85vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 id="form-builder-title" className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-              {editing ? `Edit "${editing.title}"` : 'New Form'}
-            </h3>
+      <Modal
+        isOpen={showForm}
+        onClose={() => setShowForm(false)}
+        title={editing ? `Edit "${editing.title}"` : 'New Form'}
+        size="lg"
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setShowForm(false)}>Cancel</Button>
+            <Button onClick={save} loading={saving} disabled={!title || !FORM_SLUG_PATTERN.test(slug)}>
+              {saving ? 'Saving...' : editing ? 'Save Changes' : 'Create Form'}
+            </Button>
+          </>
+        }
+      >
+        <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Input
+            label="Title"
+            required
+            value={title}
+            onChange={(e) => { setTitle(e.target.value); if (!slugTouched) setSlug(slugify(e.target.value)); }}
+            placeholder="Volunteer Sign-Up"
+          />
+          <Input
+            label="Slug"
+            required
+            disabled={!!editing}
+            value={slug}
+            onChange={(e) => { setSlugTouched(true); setSlug(slugify(e.target.value)); }}
+            className="font-mono"
+            error={slug && !FORM_SLUG_PATTERN.test(slug) ? 'Lowercase letters, numbers, hyphens; must start with a letter.' : undefined}
+          />
+        </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-              <div>
-                <label htmlFor="form-title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title *</label>
-                <input
-                  id="form-title"
-                  type="text"
-                  value={title}
-                  onChange={(e) => {
-                    setTitle(e.target.value);
-                    if (!slugTouched) setSlug(slugify(e.target.value));
-                  }}
-                  placeholder="Volunteer Sign-Up"
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 dark:text-white"
-                />
-              </div>
-              <div>
-                <label htmlFor="form-slug" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Slug *</label>
-                <input
-                  id="form-slug"
-                  type="text"
-                  value={slug}
-                  disabled={!!editing}
-                  onChange={(e) => { setSlugTouched(true); setSlug(slugify(e.target.value)); }}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 dark:text-white disabled:opacity-60 font-mono text-sm"
-                />
-                {slug && !FORM_SLUG_PATTERN.test(slug) && (
-                  <p className="text-xs text-red-600 mt-1">Lowercase letters, numbers, hyphens; must start with a letter.</p>
-                )}
-              </div>
-            </div>
+        <Textarea label="Description" value={description} onChange={(e) => setDescription(e.target.value)} rows={2} className="mb-4" />
+        <Input
+          label="Success Message"
+          value={successMessage}
+          onChange={(e) => setSuccessMessage(e.target.value)}
+          placeholder="Thank you — we'll be in touch."
+          className="mb-4"
+        />
 
-            <div className="mb-4">
-              <label htmlFor="form-description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
-              <textarea
-                id="form-description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={2}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 dark:text-white"
-              />
-            </div>
+        <div className="mb-2 flex items-center justify-between">
+          <span className="text-label text-foreground">Fields</span>
+          <button type="button" onClick={() => setFields(prev => [...prev, emptyField()])} className="inline-flex items-center gap-1 text-caption text-accent hover:underline">
+            <Plus className="h-3 w-3" /> Add Field
+          </button>
+        </div>
 
-            <div className="mb-4">
-              <label htmlFor="form-success" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Success Message</label>
+        <div className="mb-4 space-y-2">
+          {fields.map((f, i) => (
+            <div key={i} className="flex flex-wrap items-center gap-2 rounded-lg bg-surface p-2">
               <input
-                id="form-success"
                 type="text"
-                value={successMessage}
-                onChange={(e) => setSuccessMessage(e.target.value)}
-                placeholder="Thank you — we'll be in touch."
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 dark:text-white"
+                value={f.key}
+                onChange={(e) => updateField(i, { key: e.target.value.replace(/[^a-zA-Z0-9]/g, '') })}
+                placeholder="fieldKey"
+                aria-label="Field key"
+                className="w-28 rounded-md border border-border bg-background px-2 py-1.5 font-mono text-body-sm text-foreground"
               />
+              <input
+                type="text"
+                value={f.label}
+                onChange={(e) => updateField(i, { label: e.target.value })}
+                placeholder="Field Label"
+                aria-label="Field label"
+                className="flex-1 rounded-md border border-border bg-background px-2 py-1.5 text-body-sm text-foreground"
+              />
+              <Select
+                aria-label="Field type"
+                value={f.type}
+                onChange={(e) => updateField(i, { type: e.target.value as FieldType })}
+                options={FIELD_TYPES.map(t => ({ value: t, label: t }))}
+                size="sm"
+                className="w-auto"
+              />
+              <Checkbox label="Req." checked={!!f.required} onChange={(e) => updateField(i, { required: e.target.checked })} />
+              <IconButton label="Remove field" size="sm" onClick={() => removeField(i)}><X className="h-4 w-4" /></IconButton>
             </div>
-
-            <div className="mb-2 flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Fields</span>
-              <button
-                type="button"
-                onClick={() => setFields(prev => [...prev, emptyField()])}
-                className="text-xs text-blue-600 hover:underline inline-flex items-center gap-1"
-              >
-                <Plus className="w-3 h-3" /> Add Field
-              </button>
-            </div>
-
-            <div className="space-y-2 mb-4">
-              {fields.map((f, i) => (
-                <div key={i} className="flex items-center gap-2 bg-gray-50 dark:bg-gray-900/40 p-2 rounded-lg">
-                  <input
-                    type="text"
-                    value={f.key}
-                    onChange={(e) => updateField(i, { key: e.target.value.replace(/[^a-zA-Z0-9]/g, '') })}
-                    placeholder="fieldKey"
-                    aria-label="Field key"
-                    className="w-28 px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 dark:text-white font-mono"
-                  />
-                  <input
-                    type="text"
-                    value={f.label}
-                    onChange={(e) => updateField(i, { label: e.target.value })}
-                    placeholder="Field Label"
-                    aria-label="Field label"
-                    className="flex-1 px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 dark:text-white"
-                  />
-                  <label htmlFor={`form-field-type-${i}`} className="sr-only">Field type</label>
-                  <select
-                    id={`form-field-type-${i}`}
-                    value={f.type}
-                    onChange={(e) => updateField(i, { type: e.target.value as FieldType })}
-                    className="px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 dark:text-white"
-                  >
-                    {FIELD_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                  </select>
-                  <label className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-300 whitespace-nowrap">
-                    <input type="checkbox" checked={!!f.required} onChange={(e) => updateField(i, { required: e.target.checked })} /> Req.
-                  </label>
-                  <button type="button" onClick={() => removeField(i)} aria-label="Remove field" className="text-gray-400 hover:text-red-600">
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            {saveError && <p className="text-sm text-red-600 mb-3">{saveError}</p>}
-
-            <div className="flex justify-end gap-3">
-              <button onClick={() => setShowForm(false)} className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                Cancel
-              </button>
-              <button
-                onClick={save}
-                disabled={saving || !title || !FORM_SLUG_PATTERN.test(slug)}
-                className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-              >
-                {saving ? 'Saving...' : editing ? 'Save Changes' : 'Create Form'}
-              </button>
-            </div>
-          </div>
+          ))}
         </div>
-      )}
 
-      {submissionsTarget && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setSubmissionsTarget(null)}>
-          <div
-            ref={submissionsModalRef}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="submissions-title"
-            tabIndex={-1}
-            className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-              <h3 id="submissions-title" className="text-lg font-bold text-gray-900 dark:text-white">
-                {submissionsTarget.title} — Submissions ({submissions.length})
-              </h3>
-              <div className="flex items-center gap-3">
-                <button onClick={exportSubmissionsCsv} disabled={submissions.length === 0} className="text-sm text-blue-600 hover:underline inline-flex items-center gap-1 disabled:opacity-50">
-                  <Download className="w-4 h-4" /> Export CSV
-                </button>
-                <button onClick={() => setSubmissionsTarget(null)} aria-label="Close" className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-            <div className="flex-1 overflow-auto p-4">
-              {submissionsLoading ? (
-                <LoadingState label="Loading submissions..." />
-              ) : submissions.length === 0 ? (
-                <EmptyState icon={ClipboardList} title="No submissions yet" />
-              ) : (
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-gray-200 dark:border-gray-700 text-left text-gray-500 dark:text-gray-400">
-                      <th className="p-2">Submitted</th>
-                      {submissionsTarget.fields.map(f => <th key={f.key} className="p-2">{f.label}</th>)}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {submissions.map((s) => (
-                      <tr key={s.id} className="border-b border-gray-100 dark:border-gray-700 last:border-0">
-                        <td className="p-2 text-gray-500 dark:text-gray-400 whitespace-nowrap">{formatTimestamp(s.submittedAt)}</td>
-                        {submissionsTarget.fields.map(f => (
-                          <td key={f.key} className="p-2 text-gray-700 dark:text-gray-300">{String(s.data?.[f.key] ?? '—')}</td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+        {saveError && <p className="mb-3 text-body-sm text-danger">{saveError}</p>}
+      </Modal>
+
+      <Modal
+        isOpen={!!submissionsTarget}
+        onClose={() => setSubmissionsTarget(null)}
+        title={`${submissionsTarget?.title} — Submissions (${submissions.length})`}
+        size="xl"
+        footer={
+          <Button variant="outline" leftIcon={<Download className="h-4 w-4" />} disabled={submissions.length === 0} onClick={exportSubmissionsCsv}>
+            Export CSV
+          </Button>
+        }
+      >
+        {submissionsLoading ? (
+          <LoadingState label="Loading submissions..." />
+        ) : submissions.length === 0 ? (
+          <EmptyState icon={ClipboardList} title="No submissions yet" />
+        ) : (
+          <DataTable data={submissions} columns={submissionColumns} getRowId={(s) => s.id} exportFilename={`${submissionsTarget?.id}-submissions.csv`} />
+        )}
+      </Modal>
 
       <ConfirmModal
         isOpen={!!deleteTarget}
@@ -415,11 +344,4 @@ export default function FormsBuilderPage() {
       />
     </div>
   );
-}
-
-function formatTimestamp(value: any): string {
-  if (!value) return '—';
-  if (typeof value === 'string') return new Date(value).toLocaleString();
-  if (typeof value === 'object' && 'seconds' in value) return new Date(value.seconds * 1000).toLocaleString();
-  return '—';
 }

@@ -7,6 +7,7 @@ import SiteSettingsTab from '@/components/admin/content/SiteSettingsTab';
 import ContentTypesTab from '@/components/admin/content/ContentTypesTab';
 import { adminFetch } from '@/lib/adminApi';
 import { ContentTypeDefinition } from '@/types/contentType';
+import { Tabs, TabList, Tab, TabPanel } from '@/components/ui/Tabs';
 
 const SERMON_FIELDS: FieldSchema[] = [
   { key: 'title', label: 'Title', type: 'text', required: true },
@@ -146,87 +147,67 @@ export default function ContentEditorPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Content</h1>
+      <h1 className="mb-6 text-headline-md text-foreground">Content</h1>
 
-      <div className="border-b border-gray-200 dark:border-gray-700 mb-6">
-        <nav className="flex gap-6 flex-wrap">
+      <Tabs value={tab} onChange={(v) => setTab(v as TabKey)} className="mb-6">
+        <TabList className="flex-wrap">
           {BUILT_IN_TABS.map((t) => (
-            <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
-              className={`py-3 px-1 border-b-2 text-sm font-medium transition-colors whitespace-nowrap ${
-                tab === t.key
-                  ? 'border-blue-600 text-blue-600 dark:text-blue-400'
-                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
-              }`}
-            >
-              {t.label}
-            </button>
+            <Tab key={t.key} value={t.key}>{t.label}</Tab>
           ))}
           {customTypes.map((ct) => (
-            <button
-              key={ct.id}
-              onClick={() => setTab(`custom:${ct.id}`)}
-              className={`py-3 px-1 border-b-2 text-sm font-medium transition-colors whitespace-nowrap ${
-                tab === `custom:${ct.id}`
-                  ? 'border-blue-600 text-blue-600 dark:text-blue-400'
-                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
-              }`}
-            >
-              {ct.pluralLabel}
-            </button>
+            <Tab key={ct.id} value={`custom:${ct.id}`}>{ct.pluralLabel}</Tab>
           ))}
-        </nav>
-      </div>
+        </TabList>
 
-      {tab === 'sermons' && (
-        <GenericContentTab type="sermons" label="Sermons" fields={SERMON_FIELDS} columns={['title', 'speakerName', 'date']} />
-      )}
-      {tab === 'events' && (
-        <GenericContentTab type="events" label="Events" fields={EVENT_FIELDS} columns={['title', 'startDate', 'location']} />
-      )}
-      {tab === 'gallery' && <GalleryTab />}
-      {tab === 'pastors' && (
-        <GenericContentTab type="pastors" label="Pastors" fields={PASTOR_FIELDS} columns={['name', 'title', 'email']} />
-      )}
-      {tab === 'ministries' && (
-        <GenericContentTab type="ministries" label="Ministries" fields={MINISTRY_FIELDS} columns={['title', 'category', 'meetingTime']} />
-      )}
-      {tab === 'announcements' && (
-        <GenericContentTab type="announcements" label="Announcements" fields={ANNOUNCEMENT_FIELDS} columns={['title', 'date']} />
-      )}
-      {tab === 'blog' && (
-        <GenericContentTab type="blog" label="Blog Posts" fields={BLOG_FIELDS} columns={['title', 'authorName', 'category']} apiBase="/api/admin" />
-      )}
-      {tab === 'small-groups' && (
-        <GenericContentTab type="smallGroups" label="Small Groups" fields={SMALL_GROUP_FIELDS} columns={['name', 'leaderName', 'meetingSchedule']} />
-      )}
-      {tab === 'testimonials' && (
-        <GenericContentTab type="testimonials" label="Testimonials" fields={TESTIMONIAL_FIELDS} columns={['authorName', 'content']} />
-      )}
-      {tab === 'resources' && (
-        <GenericContentTab type="resources" label="Resources" fields={RESOURCE_FIELDS} columns={['title', 'category']} />
-      )}
-      {tab === 'redirects' && (
-        <div>
-          <p className="text-sm text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 mb-4">
+        <TabPanel value="sermons">
+          <GenericContentTab type="sermons" label="Sermons" fields={SERMON_FIELDS} columns={['title', 'speakerName', 'date']} />
+        </TabPanel>
+        <TabPanel value="events">
+          <GenericContentTab type="events" label="Events" fields={EVENT_FIELDS} columns={['title', 'startDate', 'location']} />
+        </TabPanel>
+        <TabPanel value="gallery"><GalleryTab /></TabPanel>
+        <TabPanel value="pastors">
+          <GenericContentTab type="pastors" label="Pastors" fields={PASTOR_FIELDS} columns={['name', 'title', 'email']} />
+        </TabPanel>
+        <TabPanel value="ministries">
+          <GenericContentTab type="ministries" label="Ministries" fields={MINISTRY_FIELDS} columns={['title', 'category', 'meetingTime']} />
+        </TabPanel>
+        <TabPanel value="announcements">
+          <GenericContentTab type="announcements" label="Announcements" fields={ANNOUNCEMENT_FIELDS} columns={['title', 'date']} />
+        </TabPanel>
+        <TabPanel value="blog">
+          <GenericContentTab type="blog" label="Blog Posts" fields={BLOG_FIELDS} columns={['title', 'authorName', 'category']} apiBase="/api/admin" />
+        </TabPanel>
+        <TabPanel value="small-groups">
+          <GenericContentTab type="smallGroups" label="Small Groups" fields={SMALL_GROUP_FIELDS} columns={['name', 'leaderName', 'meetingSchedule']} />
+        </TabPanel>
+        <TabPanel value="testimonials">
+          <GenericContentTab type="testimonials" label="Testimonials" fields={TESTIMONIAL_FIELDS} columns={['authorName', 'content']} />
+        </TabPanel>
+        <TabPanel value="resources">
+          <GenericContentTab type="resources" label="Resources" fields={RESOURCE_FIELDS} columns={['title', 'category']} />
+        </TabPanel>
+        <TabPanel value="redirects">
+          <p className="mb-4 rounded-lg border border-warning/30 bg-warning-subtle p-3 text-body-sm text-warning">
             Redirects take effect on the next deploy, not immediately — they&apos;re resolved at build time, not on every request.
           </p>
           <GenericContentTab type="redirects" label="Redirects" fields={REDIRECT_FIELDS} columns={['fromPath', 'toPath', 'statusCode']} supportsVersions={false} />
-        </div>
-      )}
-      {tab === 'settings' && <SiteSettingsTab />}
-      {tab === 'content-types' && <ContentTypesTab onChange={loadCustomTypes} />}
-      {activeCustomType && (
-        <GenericContentTab
-          key={activeCustomType.id}
-          type={activeCustomType.id}
-          label={activeCustomType.pluralLabel}
-          fields={activeCustomType.fields}
-          columns={activeCustomType.columns}
-          apiBase="/api/admin/custom-content"
-        />
-      )}
+        </TabPanel>
+        <TabPanel value="settings"><SiteSettingsTab /></TabPanel>
+        <TabPanel value="content-types"><ContentTypesTab onChange={loadCustomTypes} /></TabPanel>
+        {activeCustomType && (
+          <TabPanel value={tab}>
+            <GenericContentTab
+              key={activeCustomType.id}
+              type={activeCustomType.id}
+              label={activeCustomType.pluralLabel}
+              fields={activeCustomType.fields}
+              columns={activeCustomType.columns}
+              apiBase="/api/admin/custom-content"
+            />
+          </TabPanel>
+        )}
+      </Tabs>
     </div>
   );
 }

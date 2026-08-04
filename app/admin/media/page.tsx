@@ -7,6 +7,12 @@ import { adminFetch } from '@/lib/adminApi';
 import { getIdToken } from '@/lib/firebase';
 import { LoadingState, EmptyState, ErrorState } from '@/components/admin/States';
 import ConfirmModal from '@/components/admin/ConfirmModal';
+import { Card } from '@/components/ui/Card';
+import { Grid } from '@/components/ui/Grid';
+import { Input } from '@/components/ui/Input';
+import { IconButton } from '@/components/ui/IconButton';
+import { buttonClasses } from '@/components/ui/Button';
+import { useToast } from '@/components/ui/Toast';
 
 interface MediaItem {
   id: string;
@@ -32,6 +38,7 @@ export default function MediaLibraryPage() {
   const [uploading, setUploading] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<MediaItem | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const load = () => {
     setLoading(true);
@@ -59,7 +66,7 @@ export default function MediaLibraryPage() {
       if (!response.ok) throw new Error('Upload failed');
       load();
     } catch (err: any) {
-      alert(err.message);
+      toast({ title: 'Upload failed', description: err.message, variant: 'danger' });
     } finally {
       setUploading(false);
     }
@@ -88,23 +95,12 @@ export default function MediaLibraryPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Media Library</h1>
+      <h1 className="mb-6 text-headline-md text-foreground">Media Library</h1>
 
-      <div className="flex items-center justify-between mb-4 gap-3">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <label htmlFor="media-search" className="sr-only">Search media</label>
-          <input
-            id="media-search"
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name or tag..."
-            className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 dark:text-white"
-          />
-        </div>
-        <label className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer shrink-0">
-          <Upload className="w-4 h-4" /> {uploading ? 'Uploading...' : 'Upload'}
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name or tag..." leftIcon={<Search />} className="max-w-sm" />
+        <label className={buttonClasses({ className: 'shrink-0 cursor-pointer gap-1.5', disabled: uploading })}>
+          <Upload className="h-4 w-4" /> {uploading ? 'Uploading...' : 'Upload'}
           <input type="file" multiple className="hidden" disabled={uploading} onChange={(e) => upload(e.target.files)} />
         </label>
       </div>
@@ -112,38 +108,35 @@ export default function MediaLibraryPage() {
       {filtered.length === 0 ? (
         <EmptyState icon={ImageIcon} title="No media yet" description="Upload images or files here to reuse them across sermons, events, pastors, resources, and any other content field." />
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        <Grid cols={5} gap={4}>
           {filtered.map((item) => (
-            <div key={item.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-              <div className="relative aspect-square bg-gray-100 dark:bg-gray-700">
+            <Card key={item.id} padding="none" className="overflow-hidden">
+              <div className="relative aspect-square bg-surface-active">
                 {(item.mimeType?.startsWith('image/') ?? true) ? (
                   <Image src={item.url} alt={item.fileName} fill className="object-cover" sizes="200px" />
                 ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center p-2">
-                    <FileText className="w-10 h-10 text-gray-400 mb-1" />
-                    <span className="text-xs text-gray-500 dark:text-gray-400 truncate w-full text-center">{item.fileName}</span>
+                  <div className="flex h-full w-full flex-col items-center justify-center p-2">
+                    <FileText className="mb-1 h-10 w-10 text-foreground-subtle" />
+                    <span className="w-full truncate text-center text-caption text-foreground-subtle">{item.fileName}</span>
                   </div>
                 )}
               </div>
               <div className="p-3">
-                <p className="text-sm font-medium text-gray-900 dark:text-white truncate" title={item.fileName}>{item.fileName}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{formatSize(item.size)}</p>
-                <div className="flex items-center justify-between mt-2">
-                  <button
-                    onClick={() => copyUrl(item)}
-                    className="text-xs text-blue-600 hover:underline inline-flex items-center gap-1"
-                  >
-                    {copiedId === item.id ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                <p className="truncate text-body-sm font-medium text-foreground" title={item.fileName}>{item.fileName}</p>
+                <p className="text-caption text-foreground-subtle">{formatSize(item.size)}</p>
+                <div className="mt-2 flex items-center justify-between">
+                  <button onClick={() => copyUrl(item)} className="inline-flex items-center gap-1 text-caption text-accent hover:underline">
+                    {copiedId === item.id ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
                     {copiedId === item.id ? 'Copied' : 'Copy URL'}
                   </button>
-                  <button onClick={() => setDeleteTarget(item)} className="text-red-600 hover:text-red-700" aria-label={`Delete ${item.fileName}`}>
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <IconButton label={`Delete ${item.fileName}`} size="sm" onClick={() => setDeleteTarget(item)}>
+                    <Trash2 className="h-4 w-4 text-danger" />
+                  </IconButton>
                 </div>
               </div>
-            </div>
+            </Card>
           ))}
-        </div>
+        </Grid>
       )}
 
       <ConfirmModal
