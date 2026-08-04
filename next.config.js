@@ -26,17 +26,6 @@ const nextConfig = {
   reactStrictMode: true,
   trailingSlash: false,
   generateBuildId: () => 'build',
-  // firebase-admin pulls in jwks-rsa, which has its own nested ESM-only
-  // `jose` build. Webpack's bundling for Vercel's serverless functions
-  // tries to require() that ESM module and crashes with ERR_REQUIRE_ESM —
-  // confirmed live in production via Vercel's runtime logs, on every route
-  // that calls verifyIdToken() (all of /api/admin/*, /api/search). Doesn't
-  // reproduce under `next dev`, which uses a different, less aggressive
-  // bundling pipeline. Marking the package external skips webpack's
-  // bundling for it entirely and lets Node's own module resolution — which
-  // handles this kind of nested ESM/CJS interop correctly — load it at
-  // runtime instead.
-  serverExternalPackages: ['firebase-admin'],
   // Admin-managed redirects (app/admin/content -> Redirects tab), resolved
   // here rather than per-request in middleware or app/not-found.tsx.
   // Tried the not-found.tsx route first: reading the request path there
