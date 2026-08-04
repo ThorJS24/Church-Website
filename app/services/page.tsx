@@ -1,10 +1,17 @@
 'use client';
 
-import { useState, useEffect, useRef, lazy, Suspense } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { Sun, Moon, BookOpen, Clock, MapPin, Calendar, Video, Coffee, Baby, Users, Bell, Heart, Radio } from 'lucide-react';
 import { getPageContent, getServiceTimes, getSiteSettings, getLivestream } from '@/lib/content';
-import { useFocusTrap } from '@/hooks/useFocusTrap';
+import { PageHero } from '@/components/ui/PageHero';
+import { Section } from '@/components/ui/Section';
+import { Card } from '@/components/ui/Card';
+import { Grid } from '@/components/ui/Grid';
+import { Button, LinkButton } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
+import { Modal } from '@/components/ui/Modal';
+import { LoadingState, EmptyState } from '@/components/ui/States';
 
 const DynamicLiveStream = lazy(() => import('@/components/DynamicLiveStream'));
 
@@ -20,24 +27,14 @@ interface ServicesPage {
   title: string;
   subtitle: string;
   whatToExpectSectionTitle: string;
-  whatToExpect: Array<{
-    title: string;
-    description: string;
-  }>;
+  whatToExpect: Array<{ title: string; description: string }>;
   specialEventsSectionTitle: string;
-  specialEvents: Array<{
-    title: string;
-    date: string;
-    description: string;
-  }>;
+  specialEvents: Array<{ title: string; date: string; description: string }>;
   onlineServicesTitle: string;
   onlineServicesDescription: string;
   planYourVisitTitle: string;
   planYourVisitDescription: string;
-  planYourVisit: Array<{
-    title: string;
-    description: string;
-  }>;
+  planYourVisit: Array<{ title: string; description: string }>;
 }
 
 const iconMap: { [key: string]: any } = {
@@ -50,11 +47,24 @@ const iconMap: { [key: string]: any } = {
   'Practical Messages': BookOpen,
   'Kids Programs': Baby,
   'Fellowship Time': Coffee,
-  'Address': MapPin,
-  'Parking': MapPin,
-  'Accessibility': Users,
-  'Nursery': Baby,
+  Address: MapPin,
+  Parking: MapPin,
+  Accessibility: Users,
+  Nursery: Baby,
 };
+
+function addServiceToCalendar(service: Service) {
+  const now = new Date();
+  const [hours, minutes] = service.time.split(':');
+  const serviceDate = new Date(now);
+  serviceDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+  if (serviceDate < now) serviceDate.setDate(serviceDate.getDate() + 7);
+
+  const startDate = serviceDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  const endDate = new Date(serviceDate.getTime() + 3600000).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(service.title)}&dates=${startDate}/${endDate}&details=${encodeURIComponent(service.description || '')}&location=${encodeURIComponent(service.location)}&recur=RRULE:FREQ=WEEKLY`;
+  window.open(url, '_blank');
+}
 
 export default function ServicesPage() {
   const [servicesPage, setServicesPage] = useState<ServicesPage | null>(null);
@@ -63,355 +73,235 @@ export default function ServicesPage() {
   const [loading, setLoading] = useState(true);
   const [showLiveStream, setShowLiveStream] = useState(false);
   const [hasLiveStream, setHasLiveStream] = useState(false);
-  const liveStreamModalRef = useRef<HTMLDivElement>(null);
-  useFocusTrap(showLiveStream, () => setShowLiveStream(false), liveStreamModalRef);
 
   useEffect(() => {
+    async function fetchData() {
+      try {
+        const [servicesPageData, servicesData, settingsData, livestreamData] = await Promise.all([
+          getPageContent<ServicesPage>('services'),
+          getServiceTimes(),
+          getSiteSettings(),
+          getLivestream(),
+        ]);
+        if (servicesPageData) setServicesPage(servicesPageData);
+        setServices(servicesData);
+        if (settingsData) setSiteSettings(settingsData);
+        if (livestreamData) setHasLiveStream(livestreamData.isLive);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
     fetchData();
   }, []);
 
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const [servicesPageData, servicesData, settingsData, livestreamData] = await Promise.all([
-        getPageContent<ServicesPage>('services'),
-        getServiceTimes(),
-        getSiteSettings(),
-        getLivestream()
-      ]);
-
-      if (servicesPageData) setServicesPage(servicesPageData);
-      setServices(servicesData);
-      if (settingsData) setSiteSettings(settingsData);
-      if (livestreamData) setHasLiveStream(livestreamData.isLive);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-300">Loading services...</p>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <LoadingState label="Loading services..." />;
 
   if (!servicesPage) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-600 dark:text-gray-300 mb-4">Services page content not found</h2>
-          <p className="text-gray-500 dark:text-gray-400">Please add content through the admin panel</p>
-        </div>
-      </div>
+      <EmptyState
+        icon={Clock}
+        title="Services page content not found"
+        description="Please add content through the admin panel"
+      />
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-purple-700 text-white py-20">
-        <div className="container mx-auto px-4 text-center">
-          <motion.h1 
-            className="text-5xl font-bold mb-4"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            {servicesPage.title}
-          </motion.h1>
-          <motion.p 
-            className="text-xl mb-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
-            {servicesPage.subtitle}
-          </motion.p>
-          
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-          >
-            {hasLiveStream ? (
-              <button
-                onClick={() => setShowLiveStream(true)}
-                className="bg-gradient-to-r from-red-500 to-pink-600 text-white hover:from-red-600 hover:to-pink-700 px-6 py-3 rounded-lg font-semibold transition-all duration-300 inline-flex items-center shadow-lg"
-              >
-                <Radio className="w-5 h-5 mr-2 animate-pulse" />
-                Watch Live Stream
-              </button>
-            ) : (
-              <div className="bg-gray-600 text-gray-300 px-6 py-3 rounded-lg inline-flex items-center">
-                <Radio className="w-5 h-5 mr-2" />
-                No Live Stream Currently
-              </div>
-            )}
-          </motion.div>
-        </div>
-      </section>
+    <div>
+      <PageHero
+        icon={<Clock />}
+        eyebrow="Worship With Us"
+        title={servicesPage.title}
+        description={servicesPage.subtitle}
+        actions={
+          hasLiveStream ? (
+            <Button variant="danger" leftIcon={<Radio className="h-4 w-4 animate-pulse" />} onClick={() => setShowLiveStream(true)}>
+              Watch Live Stream
+            </Button>
+          ) : (
+            <Badge variant="neutral"><Radio className="h-4 w-4" /> No Live Stream Currently</Badge>
+          )
+        }
+      />
 
-      {/* Service Times */}
       {services.length > 0 && (
-        <section className="py-16">
-          <div className="container mx-auto px-4">
-            <div className="grid md:grid-cols-3 gap-8">
-              {services.map((service, index) => {
-                const Icon = iconMap[service.title] || BookOpen;
-                return (
-                  <motion.div 
-                    key={service.id}
-                    className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg text-center hover:shadow-xl transition-shadow"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: index * 0.1 }}
-                  >
-                    <Icon className="w-16 h-16 text-blue-600 mx-auto mb-4" />
-                    <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">{service.title}</h2>
-                    <div className="flex items-center justify-center mb-2 text-gray-600 dark:text-gray-300">
-                      <Clock className="w-4 h-4 mr-2" />
-                      <span>{service.time}</span>
-                    </div>
-                    <div className="flex items-center justify-center mb-4 text-gray-600 dark:text-gray-300">
-                      <MapPin className="w-4 h-4 mr-2" />
-                      <span>{service.location}</span>
-                    </div>
-                    <p className="mb-4 text-gray-700 dark:text-gray-300">{service.description}</p>
-                    <button 
-                      onClick={() => {
-                        const now = new Date();
-                        const [hours, minutes] = service.time.split(':');
-                        const serviceDate = new Date(now);
-                        serviceDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-                        
-                        if (serviceDate < now) {
-                          serviceDate.setDate(serviceDate.getDate() + 7);
-                        }
-                        
-                        const startDate = serviceDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-                        const endDate = new Date(serviceDate.getTime() + 3600000).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-                        const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(service.title)}&dates=${startDate}/${endDate}&details=${encodeURIComponent(service.description || '')}&location=${encodeURIComponent(service.location)}&recur=RRULE:FREQ=WEEKLY`;
-                        window.open(calendarUrl, '_blank');
-                      }}
-                      className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      <Calendar className="w-4 h-4 inline mr-2" />
+        <Section spacing="lg">
+          <Grid cols={3} gap={6}>
+            {services.map((service, index) => {
+              const Icon = iconMap[service.title] || BookOpen;
+              return (
+                <motion.div
+                  key={service.id}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-80px' }}
+                  transition={{ delay: index * 0.05, duration: 0.4 }}
+                >
+                  <Card variant="raised" padding="lg" className="h-full text-center">
+                    <Icon className="mx-auto mb-4 h-10 w-10 text-accent" aria-hidden="true" />
+                    <h2 className="text-headline-sm text-foreground">{service.title}</h2>
+                    <p className="mt-3 flex items-center justify-center gap-2 text-body-sm text-foreground-muted">
+                      <Clock className="h-4 w-4" /> {service.time}
+                    </p>
+                    <p className="mt-1 flex items-center justify-center gap-2 text-body-sm text-foreground-muted">
+                      <MapPin className="h-4 w-4" /> {service.location}
+                    </p>
+                    {service.description && <p className="mt-4 text-body-sm text-foreground-muted">{service.description}</p>}
+                    <Button variant="secondary" className="mt-5" leftIcon={<Calendar className="h-4 w-4" />} onClick={() => addServiceToCalendar(service)}>
                       Add to Calendar
-                    </button>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* What to Expect */}
-      {servicesPage.whatToExpect && servicesPage.whatToExpect.length > 0 && (
-        <section className="py-16 bg-white dark:bg-gray-800">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold mb-4 text-gray-900 dark:text-white">{servicesPage.whatToExpectSectionTitle}</h2>
-              <p className="text-gray-600 dark:text-gray-300">Your first visit made easy - here&apos;s what you can expect when you join us</p>
-            </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {servicesPage.whatToExpect.map((item, index) => {
-                const Icon = iconMap[item.title] || Heart;
-                return (
-                  <motion.div 
-                    key={item.title}
-                    className="text-center p-6"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: index * 0.1 }}
-                  >
-                    <Icon className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-                    <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">{item.title}</h3>
-                    <p className="text-gray-600 dark:text-gray-300">{item.description}</p>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Special Services */}
-      {servicesPage.specialEvents && servicesPage.specialEvents.length > 0 && (
-        <section className="py-16 bg-gray-100 dark:bg-gray-700">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold mb-4 text-gray-900 dark:text-white">{servicesPage.specialEventsSectionTitle}</h2>
-              <p className="text-gray-600 dark:text-gray-300">Join us for these special worship experiences throughout the year</p>
-            </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {servicesPage.specialEvents.map((event, index) => (
-                <motion.div 
-                  key={event.title}
-                  className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg relative"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                >
-                  <div className="absolute top-4 right-4 bg-blue-600 text-white px-3 py-1 rounded-full text-sm">
-                    {event.date}
-                  </div>
-                  <h3 className="text-xl font-bold mb-3 text-gray-900 dark:text-white">{event.title}</h3>
-                  <p className="text-gray-600 dark:text-gray-300">{event.description}</p>
+                    </Button>
+                  </Card>
                 </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
+              );
+            })}
+          </Grid>
+        </Section>
       )}
 
-      {/* Online Services */}
-      <section className="py-16 bg-white dark:bg-gray-800">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-            >
-              <h2 className="text-4xl font-bold mb-4 text-gray-900 dark:text-white">{servicesPage.onlineServicesTitle}</h2>
-              <p className="text-gray-600 dark:text-gray-300 mb-6">{servicesPage.onlineServicesDescription}</p>
-              <div className="flex flex-wrap gap-4">
-                <button 
-                  onClick={() => siteSettings?.youtubeChannelUrl && window.open(siteSettings.youtubeChannelUrl, '_blank')}
-                  className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center"
-                >
-                  <Video className="w-4 h-4 mr-2" />
-                  Watch on YouTube
-                </button>
-                {siteSettings?.zoomMeetingUrl && (
-                  <button 
-                    onClick={() => window.open(siteSettings.zoomMeetingUrl, '_blank')}
-                    className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors flex items-center"
-                  >
-                    <Video className="w-4 h-4 mr-2" />
-                    Join via Zoom
-                  </button>
-                )}
-                <button 
-                  onClick={() => siteSettings?.youtubeChannelUrl && window.open(`${siteSettings.youtubeChannelUrl}?sub_confirmation=1`, '_blank')}
-                  className="border-2 border-blue-600 text-blue-600 px-6 py-3 rounded-lg hover:bg-blue-600 hover:text-white transition-colors flex items-center"
-                >
-                  <Bell className="w-4 h-4 mr-2" />
-                  Get Notifications
-                </button>
-              </div>
-            </motion.div>
-            <motion.div 
-              className="bg-gray-100 dark:bg-gray-700 p-12 rounded-lg text-center"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
-              <Video className="w-16 h-16 text-blue-600 mx-auto mb-4" />
-              <p className="text-xl font-bold mb-2 text-gray-900 dark:text-white">Live Stream Available</p>
-              <small className="text-gray-600 dark:text-gray-300">
-                {services.length > 0 ? `Next service: ${services[0]?.time}` : 'Check schedule for times'}
-              </small>
-            </motion.div>
+      {servicesPage.whatToExpect?.length > 0 && (
+        <Section spacing="lg" className="bg-surface">
+          <div className="mb-10 text-center">
+            <h2 className="text-headline-md text-foreground">{servicesPage.whatToExpectSectionTitle}</h2>
+            <p className="mt-2 text-body-md text-foreground-muted">Your first visit made easy — here&apos;s what you can expect when you join us</p>
           </div>
-        </div>
-      </section>
+          <Grid cols={3} gap={6}>
+            {servicesPage.whatToExpect.map((item, index) => {
+              const Icon = iconMap[item.title] || Heart;
+              return (
+                <motion.div
+                  key={item.title}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-80px' }}
+                  transition={{ delay: index * 0.05, duration: 0.4 }}
+                  className="text-center"
+                >
+                  <Icon className="mx-auto mb-4 h-9 w-9 text-accent" aria-hidden="true" />
+                  <h3 className="text-title-md text-foreground">{item.title}</h3>
+                  <p className="mt-2 text-body-sm text-foreground-muted">{item.description}</p>
+                </motion.div>
+              );
+            })}
+          </Grid>
+        </Section>
+      )}
 
-      {/* Visit Info */}
-      <section className="py-16 bg-gradient-to-r from-purple-600 to-blue-600 text-white">
-        <div className="container mx-auto px-4 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <h2 className="text-4xl font-bold mb-4">{servicesPage.planYourVisitTitle}</h2>
-            <p className="text-xl mb-8">{servicesPage.planYourVisitDescription}</p>
-            {servicesPage.planYourVisit && servicesPage.planYourVisit.length > 0 && (
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
-                {servicesPage.planYourVisit.map((item, index) => {
-                  const Icon = iconMap[item.title] || MapPin;
-                  return (
-                    <div className="flex items-center justify-center" key={item.title}>
-                      <Icon className="w-6 h-6 mr-3" />
-                      <div className="text-left">
-                        <strong>{item.title}</strong>
-                        <br />
-                        <span className="text-blue-200">{item.description}</span>
-                      </div>
+      {servicesPage.specialEvents?.length > 0 && (
+        <Section spacing="lg">
+          <div className="mb-10 text-center">
+            <h2 className="text-headline-md text-foreground">{servicesPage.specialEventsSectionTitle}</h2>
+            <p className="mt-2 text-body-md text-foreground-muted">Join us for these special worship experiences throughout the year</p>
+          </div>
+          <Grid cols={4} gap={6}>
+            {servicesPage.specialEvents.map((event, index) => (
+              <motion.div
+                key={event.title}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-80px' }}
+                transition={{ delay: index * 0.05, duration: 0.4 }}
+              >
+                <Card className="relative h-full">
+                  <Badge variant="accent" className="absolute top-4 right-4">{event.date}</Badge>
+                  <h3 className="pr-16 text-title-md text-foreground">{event.title}</h3>
+                  <p className="mt-2 text-body-sm text-foreground-muted">{event.description}</p>
+                </Card>
+              </motion.div>
+            ))}
+          </Grid>
+        </Section>
+      )}
+
+      <Section spacing="lg" className="bg-surface">
+        <Grid cols={2} gap={12} className="items-center">
+          <div>
+            <h2 className="text-headline-md text-foreground">{servicesPage.onlineServicesTitle}</h2>
+            <p className="mt-4 text-body-md text-foreground-muted">{servicesPage.onlineServicesDescription}</p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Button leftIcon={<Video className="h-4 w-4" />} onClick={() => siteSettings?.youtubeChannelUrl && window.open(siteSettings.youtubeChannelUrl, '_blank')}>
+                Watch on YouTube
+              </Button>
+              {siteSettings?.zoomMeetingUrl && (
+                <Button variant="secondary" leftIcon={<Video className="h-4 w-4" />} onClick={() => window.open(siteSettings.zoomMeetingUrl, '_blank')}>
+                  Join via Zoom
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                leftIcon={<Bell className="h-4 w-4" />}
+                onClick={() => siteSettings?.youtubeChannelUrl && window.open(`${siteSettings.youtubeChannelUrl}?sub_confirmation=1`, '_blank')}
+              >
+                Get Notifications
+              </Button>
+            </div>
+          </div>
+          <Card variant="raised" padding="lg" className="text-center">
+            <Video className="mx-auto mb-4 h-12 w-12 text-accent" aria-hidden="true" />
+            <p className="text-title-lg text-foreground">Live Stream Available</p>
+            <p className="mt-1 text-body-sm text-foreground-muted">
+              {services.length > 0 ? `Next service: ${services[0]?.time}` : 'Check schedule for times'}
+            </p>
+          </Card>
+        </Grid>
+      </Section>
+
+      <Section spacing="lg" className="bg-accent text-accent-foreground">
+        <div className="mx-auto max-w-3xl text-center">
+          <h2 className="text-headline-md">{servicesPage.planYourVisitTitle}</h2>
+          <p className="mt-3 text-body-lg opacity-90">{servicesPage.planYourVisitDescription}</p>
+          {servicesPage.planYourVisit?.length > 0 && (
+            <Grid cols={4} gap={6} className="mt-10 text-left">
+              {servicesPage.planYourVisit.map((item) => {
+                const Icon = iconMap[item.title] || MapPin;
+                return (
+                  <div className="flex items-start gap-3" key={item.title}>
+                    <Icon className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
+                    <div>
+                      <strong className="block">{item.title}</strong>
+                      <span className="text-body-sm opacity-80">{item.description}</span>
                     </div>
+                  </div>
+                );
+              })}
+            </Grid>
+          )}
+          <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
+            <LinkButton href="/contact" variant="secondary" size="lg">
+              Contact Us
+            </LinkButton>
+            <Button
+              variant="outline"
+              size="lg"
+              className="border-white/40 text-accent-foreground hover:bg-white/10"
+              leftIcon={<MapPin className="h-4 w-4" />}
+              onClick={() => {
+                if (siteSettings?.googleMapsUrl) {
+                  window.open(siteSettings.googleMapsUrl, '_blank');
+                } else {
+                  navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                      const { latitude, longitude } = position.coords;
+                      const destination = '223/838, Near north post office, Kannangurichi main road, Chinnathirupathi, Salem TN, PIN- 636008';
+                      window.open(`https://www.google.com/maps/dir/${latitude},${longitude}/${encodeURIComponent(destination)}`, '_blank');
+                    },
+                    () => window.open('https://maps.app.goo.gl/Qhr3P8sXxebH6skNA', '_blank')
                   );
-                })}
-              </div>
-            )}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button 
-                onClick={() => window.location.href = '/contact'}
-                className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
-              >
-                Contact Us
-              </button>
-              <button 
-                onClick={() => {
-                  if (siteSettings?.googleMapsUrl) {
-                    window.open(siteSettings.googleMapsUrl, '_blank');
-                  } else {
-                    navigator.geolocation.getCurrentPosition(
-                      (position) => {
-                        const { latitude, longitude } = position.coords;
-                        const destination = '223/838, Near north post office, Kannangurichi main road, Chinnathirupathi, Salem TN, PIN- 636008';
-                        window.open(`https://www.google.com/maps/dir/${latitude},${longitude}/${encodeURIComponent(destination)}`, '_blank');
-                      },
-                      () => {
-                        window.open('https://maps.app.goo.gl/Qhr3P8sXxebH6skNA', '_blank');
-                      }
-                    );
-                  }
-                }}
-                className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors flex items-center justify-center"
-              >
-                <MapPin className="w-4 h-4 mr-2" />
-                Get Directions
-              </button>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Live Stream Modal */}
-      {showLiveStream && (
-        <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4">
-          <div
-            ref={liveStreamModalRef}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="livestream-modal-title"
-            tabIndex={-1}
-            className="max-w-6xl w-full max-h-[95vh] overflow-hidden"
-          >
-            <div className="mb-4 flex justify-between items-center">
-              <h2 id="livestream-modal-title" className="text-white text-2xl font-bold">Live Stream</h2>
-              <button 
-                onClick={() => setShowLiveStream(false)}
-                className="bg-white text-black px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors"
-              >
-                Close
-              </button>
-            </div>
-            <Suspense fallback={<div className="text-white text-center">Loading stream...</div>}>
-              <DynamicLiveStream />
-            </Suspense>
+                }
+              }}
+            >
+              Get Directions
+            </Button>
           </div>
         </div>
-      )}
+      </Section>
+
+      <Modal isOpen={showLiveStream} onClose={() => setShowLiveStream(false)} title="Live Stream" size="xl">
+        <Suspense fallback={<LoadingState label="Loading stream..." />}>
+          <DynamicLiveStream />
+        </Suspense>
+      </Modal>
     </div>
   );
 }

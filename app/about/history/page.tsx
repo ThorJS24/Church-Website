@@ -2,13 +2,31 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, Calendar, MapPin, Users, Building, Award, Heart, Filter, Search, ChevronDown, Play, Pause } from 'lucide-react';
+import { Clock, Users, Building, Award, Heart, Search, Play, Pause, Star } from 'lucide-react';
 import { getHistoryTimeline, TimelineEvent } from '@/lib/content';
 import Image from 'next/image';
+import { PageHero } from '@/components/ui/PageHero';
+import { Section } from '@/components/ui/Section';
+import { Card } from '@/components/ui/Card';
+import { Grid } from '@/components/ui/Grid';
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
+import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
+import { LoadingState, EmptyState } from '@/components/ui/States';
+
+const CATEGORY_ICONS: Record<string, typeof Clock> = {
+  foundation: Building,
+  growth: Users,
+  ministry: Heart,
+  building: Building,
+  leadership: Award,
+  community: Users,
+  milestone: Award,
+};
 
 export default function HistoryPage() {
   const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
-  const [filteredEvents, setFilteredEvents] = useState<TimelineEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -16,347 +34,182 @@ export default function HistoryPage() {
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
 
   useEffect(() => {
-    fetchTimelineEvents();
+    getHistoryTimeline()
+      .then(setTimelineEvents)
+      .catch((error) => console.error('Error fetching timeline events:', error))
+      .finally(() => setLoading(false));
   }, []);
 
-  useEffect(() => {
-    let filtered = timelineEvents;
-    
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(event => event.category === selectedCategory);
-    }
-    
-    if (searchTerm) {
-      filtered = filtered.filter(event => 
-        event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        event.description.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-    
-    setFilteredEvents(filtered);
-  }, [timelineEvents, selectedCategory, searchTerm]);
+  const filteredEvents = timelineEvents
+    .filter((e) => selectedCategory === 'all' || e.category === selectedCategory)
+    .filter(
+      (e) =>
+        !searchTerm ||
+        e.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        e.description.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
   useEffect(() => {
-    if (isAutoPlay && filteredEvents.length > 0) {
-      const interval = setInterval(() => {
-        setCurrentEventIndex(prev => {
-          const nextIndex = (prev + 1) % filteredEvents.length;
-          document.getElementById(`event-${nextIndex}`)?.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'center' 
-          });
-          return nextIndex;
-        });
-      }, 4000);
-      return () => clearInterval(interval);
-    }
+    if (!isAutoPlay || filteredEvents.length === 0) return;
+    const interval = setInterval(() => {
+      setCurrentEventIndex((prev) => {
+        const next = (prev + 1) % filteredEvents.length;
+        document.getElementById(`event-${next}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return next;
+      });
+    }, 4000);
+    return () => clearInterval(interval);
   }, [isAutoPlay, filteredEvents.length]);
 
-  const categories = ['all', ...Array.from(new Set(timelineEvents.map(event => event.category)))];
-  
+  const categories = ['all', ...Array.from(new Set(timelineEvents.map((e) => e.category)))];
   const stats = {
     totalEvents: timelineEvents.length,
-    yearsSpanned: timelineEvents.length > 0 ? 
-      Math.max(...timelineEvents.map(e => e.year)) - Math.min(...timelineEvents.map(e => e.year)) : 0,
-    featuredEvents: timelineEvents.filter(e => e.featured).length,
-    categories: new Set(timelineEvents.map(e => e.category)).size
+    yearsSpanned:
+      timelineEvents.length > 0 ? Math.max(...timelineEvents.map((e) => e.year)) - Math.min(...timelineEvents.map((e) => e.year)) : 0,
+    featuredEvents: timelineEvents.filter((e) => e.featured).length,
+    categories: new Set(timelineEvents.map((e) => e.category)).size,
   };
 
-  const fetchTimelineEvents = async () => {
-    setLoading(true);
-    try {
-      const events = await getHistoryTimeline();
-      setTimelineEvents(events);
-      setFilteredEvents(events);
-    } catch (error) {
-      console.error('Error fetching timeline events:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case 'foundation': return Building;
-      case 'growth': return Users;
-      case 'ministry': return Heart;
-      case 'building': return Building;
-      case 'leadership': return Award;
-      case 'community': return Users;
-      case 'milestone': return Award;
-      default: return Clock;
-    }
-  };
-
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case 'foundation': return 'from-amber-500 to-orange-600';
-      case 'growth': return 'from-green-500 to-emerald-600';
-      case 'ministry': return 'from-purple-500 to-violet-600';
-      case 'building': return 'from-blue-500 to-cyan-600';
-      case 'leadership': return 'from-red-500 to-pink-600';
-      case 'community': return 'from-indigo-500 to-purple-600';
-      case 'milestone': return 'from-yellow-500 to-amber-600';
-      default: return 'from-gray-500 to-gray-600';
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-amber-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-300">Loading church history...</p>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <LoadingState label="Loading church history..." />;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-orange-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <section className="bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 text-white py-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-black/20"></div>
-        <div className="container mx-auto px-4 text-center relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+    <div>
+      <PageHero
+        icon={<Clock />}
+        eyebrow="Our Story"
+        title="Our History"
+        description="A legacy of faith and service to our community"
+        actions={
+          <Grid cols={4} gap={3} className="mx-auto mt-2 max-w-lg text-center">
+            {[
+              { value: stats.totalEvents, label: 'Events' },
+              { value: `${stats.yearsSpanned}+`, label: 'Years' },
+              { value: stats.featuredEvents, label: 'Milestones' },
+              { value: stats.categories, label: 'Categories' },
+            ].map((s) => (
+              <div key={s.label}>
+                <div className="text-title-lg text-foreground">{s.value}</div>
+                <div className="text-caption text-foreground-subtle">{s.label}</div>
+              </div>
+            ))}
+          </Grid>
+        }
+      />
+
+      <Section spacing="lg">
+        <Card className="mb-10 flex flex-col items-center gap-4 lg:flex-row">
+          <Input
+            placeholder="Search timeline events..."
+            aria-label="Search timeline events"
+            leftIcon={<Search />}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="max-w-md"
+          />
+          <Select
+            aria-label="Filter by category"
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            options={categories.map((c) => ({ value: c, label: c === 'all' ? 'All Categories' : c }))}
+            className="w-auto capitalize"
+          />
+          <Button
+            variant={isAutoPlay ? 'primary' : 'secondary'}
+            leftIcon={isAutoPlay ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+            onClick={() => setIsAutoPlay(!isAutoPlay)}
           >
-            <Clock className="w-16 h-16 mx-auto mb-6 text-white/90" />
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white to-amber-100 bg-clip-text text-transparent">
-              Our History
-            </h1>
-            <p className="text-xl md:text-2xl text-amber-100 max-w-3xl mx-auto leading-relaxed mb-8">
-              A legacy of faith and service to our community
-            </p>
-            
-            {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto">
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                <div className="text-2xl font-bold">{stats.totalEvents}</div>
-                <div className="text-sm text-amber-100">Events</div>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                <div className="text-2xl font-bold">{stats.yearsSpanned}+</div>
-                <div className="text-sm text-amber-100">Years</div>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                <div className="text-2xl font-bold">{stats.featuredEvents}</div>
-                <div className="text-sm text-amber-100">Milestones</div>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                <div className="text-2xl font-bold">{stats.categories}</div>
-                <div className="text-sm text-amber-100">Categories</div>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        {/* Controls */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-12 bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6"
-        >
-          <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
-            {/* Search */}
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                aria-label="Search timeline events"
-                placeholder="Search timeline events..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-              />
-            </div>
-
-            {/* Category Filter */}
-            <div className="relative">
-              <select
-                aria-label="Filter by category"
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="appearance-none bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 pr-8 focus:ring-2 focus:ring-amber-500 focus:border-transparent dark:text-white capitalize"
-              >
-                {categories.map(category => (
-                  <option key={category} value={category}>
-                    {category === 'all' ? 'All Categories' : category}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
-            </div>
-            
-            {/* Auto-play Toggle */}
-            <button
-              onClick={() => setIsAutoPlay(!isAutoPlay)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
-                isAutoPlay 
-                  ? 'bg-amber-500 text-white' 
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-              }`}
-            >
-              {isAutoPlay ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-              {isAutoPlay ? 'Pause' : 'Auto-play'}
-            </button>
-          </div>
-          
-          <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+            {isAutoPlay ? 'Pause' : 'Auto-play'}
+          </Button>
+          <p className="ml-auto text-caption text-foreground-subtle">
             Showing {filteredEvents.length} of {timelineEvents.length} events
-          </div>
-        </motion.div>
+          </p>
+        </Card>
+
         {filteredEvents.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-12 text-center"
-          >
-            <Clock className="w-16 h-16 mx-auto mb-6 text-gray-300" />
-            <h2 className="text-2xl font-bold text-gray-600 dark:text-gray-300 mb-4">
-              No timeline events available
-            </h2>
-            <p className="text-gray-500 dark:text-gray-400">
-              Add timeline events through the admin panel to display church history.
-            </p>
-          </motion.div>
+          <EmptyState icon={Clock} title="No timeline events available" description="Add timeline events through the admin panel to display church history." />
         ) : (
           <div className="relative">
-            {/* Timeline Line */}
-            <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-amber-400 via-orange-500 to-red-500"></div>
-            
-            {/* Timeline Events */}
-            <div className="space-y-12">
+            <div className="absolute left-7 top-0 bottom-0 hidden w-px bg-border sm:block" />
+            <div className="space-y-8">
               <AnimatePresence mode="wait">
                 {filteredEvents.map((event, index) => {
-                const IconComponent = getCategoryIcon(event.category);
-                const colorClass = getCategoryColor(event.category);
-                
-                return (
-                  <motion.div
-                    key={event.id}
-                    id={`event-${index}`}
-                    initial={{ opacity: 0, x: -50 }}
-                    animate={{ 
-                      opacity: 1, 
-                      x: 0,
-                      scale: isAutoPlay && index === currentEventIndex ? 1.05 : 1
-                    }}
-                    transition={{ delay: index * 0.1, duration: 0.6 }}
-                    className={`relative flex items-start transition-all duration-500 ${
-                      isAutoPlay && index === currentEventIndex 
-                        ? 'ring-4 ring-amber-400 ring-opacity-50 rounded-2xl' 
-                        : ''
-                    }`}
-                  >
-                    {/* Timeline Node */}
-                    <div className={`relative z-10 w-16 h-16 bg-gradient-to-br ${colorClass} rounded-full flex items-center justify-center shadow-lg`}>
-                      <IconComponent className="w-8 h-8 text-white" />
-                      {event.featured && (
-                        <div className="absolute -top-1 -right-1 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center">
-                          <span className="text-xs">⭐</span>
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* Event Content */}
-                    <div className="ml-8 flex-1">
-                      <motion.div 
-                        whileHover={{ y: -5, scale: 1.02 }}
-                        className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-all duration-300 cursor-pointer group"
+                  const Icon = CATEGORY_ICONS[event.category] ?? Clock;
+                  const isCurrent = isAutoPlay && index === currentEventIndex;
+                  return (
+                    <motion.div
+                      key={event.id}
+                      id={`event-${index}`}
+                      initial={{ opacity: 0, x: -24 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true, margin: '-80px' }}
+                      transition={{ delay: index * 0.03, duration: 0.4 }}
+                      className="relative flex items-start gap-6"
+                    >
+                      <div
+                        className={`relative z-10 hidden h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-accent-subtle text-accent sm:flex ${isCurrent ? 'ring-2 ring-accent' : ''}`}
+                      >
+                        <Icon className="h-6 w-6" aria-hidden="true" />
+                        {event.featured && (
+                          <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-warm text-warm-foreground">
+                            <Star className="h-3 w-3 fill-current" />
+                          </span>
+                        )}
+                      </div>
+
+                      <Card
+                        variant="interactive"
+                        className={`flex-1 ${isCurrent ? 'border-accent shadow-md' : ''}`}
                         onClick={() => setCurrentEventIndex(index)}
                       >
-                        <div className="flex flex-col lg:flex-row gap-6">
-                          {/* Text Content */}
+                        <div className="flex flex-col gap-5 lg:flex-row">
                           <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-3">
-                              <span className={`inline-block px-3 py-1 bg-gradient-to-r ${colorClass} text-white text-sm font-bold rounded-full`}>
-                                {event.year}
-                              </span>
-                              <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded-full capitalize">
-                                {event.category}
-                              </span>
+                            <div className="mb-3 flex items-center gap-2">
+                              <Badge variant="accent">{event.year}</Badge>
+                              <Badge variant="neutral" className="capitalize">{event.category}</Badge>
                             </div>
-                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-amber-600 transition-colors">
-                              {event.title}
-                            </h3>
-                            <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                              {event.description}
-                            </p>
+                            <h3 className="text-title-lg text-foreground">{event.title}</h3>
+                            <p className="mt-2 text-body-sm leading-relaxed text-foreground-muted">{event.description}</p>
                           </div>
-                          
-                          {/* Image */}
                           {event.imageUrl && (
-                            <div className="lg:w-1/3">
-                              <div className="aspect-video rounded-lg overflow-hidden group-hover:scale-105 transition-transform duration-300">
-                                <Image
-                                  src={event.imageUrl}
-                                  alt={event.title}
-                                  width={300}
-                                  height={200}
-                                  className="w-full h-full object-cover"
-                                />
-                              </div>
+                            <div className="relative aspect-video overflow-hidden rounded-lg lg:w-1/3">
+                              <Image src={event.imageUrl} alt={event.title} fill sizes="(max-width: 1024px) 100vw, 300px" className="object-cover" />
                             </div>
                           )}
                         </div>
-                      </motion.div>
-                    </div>
-                  </motion.div>
-                );
-              })}
+                      </Card>
+                    </motion.div>
+                  );
+                })}
               </AnimatePresence>
             </div>
-            
-            {/* Progress Indicator */}
-            {isAutoPlay && filteredEvents.length > 0 && (
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="mt-8 flex justify-center"
-              >
-                <div className="flex gap-2">
-                  {filteredEvents.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setCurrentEventIndex(index)}
-                      className={`h-2 rounded-full transition-all cursor-pointer ${
-                        index === currentEventIndex ? 'bg-amber-500 w-8' : 'bg-gray-300 w-2 hover:bg-gray-400'
-                      }`}
-                    />
-                  ))}
+
+            {filteredEvents.length > 1 && (
+              <div className="mt-10 flex flex-col items-center gap-4">
+                {isAutoPlay && (
+                  <div className="flex gap-2">
+                    {filteredEvents.map((_, index) => (
+                      <button
+                        key={index}
+                        aria-label={`Go to event ${index + 1}`}
+                        onClick={() => setCurrentEventIndex(index)}
+                        className={`h-1.5 rounded-full transition-all duration-base ${index === currentEventIndex ? 'w-8 bg-accent' : 'w-1.5 bg-border-strong hover:bg-foreground-subtle'}`}
+                      />
+                    ))}
+                  </div>
+                )}
+                <div className="flex gap-3">
+                  <Button variant="secondary" onClick={() => setCurrentEventIndex((prev) => (prev === 0 ? filteredEvents.length - 1 : prev - 1))}>
+                    Previous
+                  </Button>
+                  <Button variant="secondary" onClick={() => setCurrentEventIndex((prev) => (prev + 1) % filteredEvents.length)}>
+                    Next
+                  </Button>
                 </div>
-              </motion.div>
-            )}
-            
-            {/* Navigation Controls */}
-            {filteredEvents.length > 0 && (
-              <div className="mt-8 flex justify-center gap-4">
-                <button
-                  onClick={() => setCurrentEventIndex(prev => 
-                    prev === 0 ? filteredEvents.length - 1 : prev - 1
-                  )}
-                  className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors"
-                >
-                  Previous
-                </button>
-                <button
-                  onClick={() => setCurrentEventIndex(prev => 
-                    (prev + 1) % filteredEvents.length
-                  )}
-                  className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors"
-                >
-                  Next
-                </button>
               </div>
             )}
           </div>
         )}
-      </div>
+      </Section>
     </div>
   );
 }

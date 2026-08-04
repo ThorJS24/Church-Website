@@ -3,7 +3,14 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { motion } from 'framer-motion';
-import { Calendar, Heart, Droplets, Send, Phone, Mail, User } from 'lucide-react';
+import { Calendar, Heart, Droplets, Send, Phone, Mail, User, CheckCircle2 } from 'lucide-react';
+import { Container } from '@/components/ui/Container';
+import { Card } from '@/components/ui/Card';
+import { Grid } from '@/components/ui/Grid';
+import { Input } from '@/components/ui/Input';
+import { Textarea } from '@/components/ui/Textarea';
+import { Button } from '@/components/ui/Button';
+import { cn } from '@/lib/cn';
 
 interface ServiceRequestForm {
   serviceType: 'wedding' | 'baptism';
@@ -40,10 +47,6 @@ export default function ServiceRequestPage() {
       const result = await response.json();
 
       if (response.ok && result.success) {
-        // The request is saved as soon as the API returns success — a
-        // failed confirmation email (result.notifications.requesterConfirmed)
-        // doesn't mean the request was lost, so it still shows the success
-        // screen, just without falsely implying an email is on its way.
         setEmailConfirmed(result.notifications?.requesterConfirmed !== false);
         setSubmitted(true);
       } else {
@@ -59,266 +62,106 @@ export default function ServiceRequestPage() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 py-12">
-        <div className="max-w-2xl mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8 text-center"
-          >
-            <div className="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Send className="w-8 h-8 text-green-600 dark:text-green-400" />
+      <Container size="sm" className="py-16">
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
+          <Card variant="raised" padding="lg" className="text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-success-subtle">
+              <CheckCircle2 className="h-8 w-8 text-success" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Request Submitted!</h2>
-            <p className="text-gray-600 dark:text-gray-300">
+            <h2 className="text-headline-sm text-foreground">Request Submitted!</h2>
+            <p className="mt-3 text-body-md text-foreground-muted">
               Thank you for your service request. Our pastoral team will contact you within 24-48 hours to discuss your request and schedule a consultation.
             </p>
             {!emailConfirmed && (
-              <p className="text-amber-600 dark:text-amber-400 text-sm mt-4">
+              <p className="mt-4 text-body-sm text-warning">
                 Your request was saved, but we couldn&apos;t send a confirmation email right now — you&apos;ll still hear from our team directly.
               </p>
             )}
-          </motion.div>
-        </div>
-      </div>
+          </Card>
+        </motion.div>
+      </Container>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 py-12">
-      <div className="max-w-4xl mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden"
-        >
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-6">
-            <h1 className="text-3xl font-bold text-white">Service Request</h1>
-            <p className="text-blue-100 mt-2">Request wedding or baptism services</p>
+    <Container size="md" className="py-16">
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
+        <Card variant="raised" padding="none" className="overflow-hidden">
+          <div className="bg-accent px-8 py-6 text-accent-foreground">
+            <h1 className="text-headline-sm">Service Request</h1>
+            <p className="mt-1 opacity-90">Request wedding or baptism services</p>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="p-8 space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 p-8">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                Service Type *
-              </label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <label className="relative">
-                  <input
-                    type="radio"
-                    value="wedding"
-                    {...register('serviceType', { required: 'Please select a service type' })}
-                    className="sr-only"
-                  />
-                  <div className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                    serviceType === 'wedding' 
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
-                      : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'
-                  }`}>
-                    <Heart className="w-8 h-8 text-pink-500 mb-2" />
-                    <h3 className="font-semibold text-gray-900 dark:text-white">Wedding</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Marriage ceremony service</p>
+              <p className="mb-3 text-label text-foreground">Service Type *</p>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <label className="relative cursor-pointer">
+                  <input type="radio" value="wedding" {...register('serviceType', { required: 'Please select a service type' })} className="sr-only" />
+                  <div className={cn('rounded-lg border-2 p-4 transition-colors', serviceType === 'wedding' ? 'border-accent bg-accent-subtle' : 'border-border hover:border-border-strong')}>
+                    <Heart className="mb-2 h-7 w-7 text-danger" />
+                    <h3 className="text-title-sm text-foreground">Wedding</h3>
+                    <p className="text-body-sm text-foreground-muted">Marriage ceremony service</p>
                   </div>
                 </label>
-
-                <label className="relative">
-                  <input
-                    type="radio"
-                    value="baptism"
-                    {...register('serviceType', { required: 'Please select a service type' })}
-                    className="sr-only"
-                  />
-                  <div className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                    serviceType === 'baptism' 
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
-                      : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'
-                  }`}>
-                    <Droplets className="w-8 h-8 text-blue-500 mb-2" />
-                    <h3 className="font-semibold text-gray-900 dark:text-white">Baptism</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Baptism ceremony service</p>
+                <label className="relative cursor-pointer">
+                  <input type="radio" value="baptism" {...register('serviceType', { required: 'Please select a service type' })} className="sr-only" />
+                  <div className={cn('rounded-lg border-2 p-4 transition-colors', serviceType === 'baptism' ? 'border-accent bg-accent-subtle' : 'border-border hover:border-border-strong')}>
+                    <Droplets className="mb-2 h-7 w-7 text-info" />
+                    <h3 className="text-title-sm text-foreground">Baptism</h3>
+                    <p className="text-body-sm text-foreground-muted">Baptism ceremony service</p>
                   </div>
                 </label>
               </div>
-              {errors.serviceType && (
-                <p className="text-red-500 text-sm mt-1">{errors.serviceType.message}</p>
-              )}
+              {errors.serviceType && <p className="mt-1.5 text-caption text-danger">{errors.serviceType.message}</p>}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  First Name *
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-                  <input
-                    type="text"
-                    {...register('firstName', { required: 'First name is required' })}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                    placeholder="Enter your first name"
-                  />
-                </div>
-                {errors.firstName && (
-                  <p className="text-red-500 text-sm mt-1">{errors.firstName.message}</p>
-                )}
-              </div>
+            <Grid cols={2} gap={6}>
+              <Input label="First Name" required leftIcon={<User />} placeholder="Enter your first name" error={errors.firstName?.message} {...register('firstName', { required: 'First name is required' })} />
+              <Input label="Last Name" required leftIcon={<User />} placeholder="Enter your last name" error={errors.lastName?.message} {...register('lastName', { required: 'Last name is required' })} />
+            </Grid>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Last Name *
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-                  <input
-                    type="text"
-                    {...register('lastName', { required: 'Last name is required' })}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                    placeholder="Enter your last name"
-                  />
-                </div>
-                {errors.lastName && (
-                  <p className="text-red-500 text-sm mt-1">{errors.lastName.message}</p>
-                )}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Email *
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-                  <input
-                    type="email"
-                    {...register('email', { 
-                      required: 'Email is required',
-                      pattern: {
-                        value: /^\S+@\S+$/i,
-                        message: 'Invalid email address'
-                      }
-                    })}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                    placeholder="your.email@example.com"
-                  />
-                </div>
-                {errors.email && (
-                  <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Phone Number *
-                </label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-                  <input
-                    type="tel"
-                    {...register('phone', { required: 'Phone number is required' })}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                    placeholder="+1 (555) 123-4567"
-                  />
-                </div>
-                {errors.phone && (
-                  <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>
-                )}
-              </div>
-            </div>
+            <Grid cols={2} gap={6}>
+              <Input
+                label="Email"
+                type="email"
+                required
+                leftIcon={<Mail />}
+                placeholder="your.email@example.com"
+                error={errors.email?.message}
+                {...register('email', { required: 'Email is required', pattern: { value: /^\S+@\S+$/i, message: 'Invalid email address' } })}
+              />
+              <Input label="Phone Number" type="tel" required leftIcon={<Phone />} placeholder="+1 (555) 123-4567" error={errors.phone?.message} {...register('phone', { required: 'Phone number is required' })} />
+            </Grid>
 
             {serviceType === 'wedding' && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Partner's Full Name *
-                </label>
-                <div className="relative">
-                  <Heart className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-                  <input
-                    type="text"
-                    {...register('partnerName', { 
-                      required: serviceType === 'wedding' ? 'Partner name is required for wedding' : false 
-                    })}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                    placeholder="Enter your partner's full name"
-                  />
-                </div>
-                {errors.partnerName && (
-                  <p className="text-red-500 text-sm mt-1">{errors.partnerName.message}</p>
-                )}
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Preferred Date *
-                </label>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-                  <input
-                    type="date"
-                    {...register('preferredDate', { required: 'Preferred date is required' })}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                  />
-                </div>
-                {errors.preferredDate && (
-                  <p className="text-red-500 text-sm mt-1">{errors.preferredDate.message}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Alternate Date
-                </label>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-                  <input
-                    type="date"
-                    {...register('alternateDate')}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Additional Information
-              </label>
-              <textarea
-                {...register('message')}
-                rows={4}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                placeholder="Please share any additional details, special requests, or questions..."
+              <Input
+                label="Partner's Full Name"
+                required
+                leftIcon={<Heart />}
+                placeholder="Enter your partner's full name"
+                error={errors.partnerName?.message}
+                {...register('partnerName', { required: serviceType === 'wedding' ? 'Partner name is required for wedding' : false })}
               />
-            </div>
-
-            {submitError && (
-              <p className="text-red-500 text-sm text-right">{submitError}</p>
             )}
+
+            <Grid cols={2} gap={6}>
+              <Input label="Preferred Date" type="date" required leftIcon={<Calendar />} error={errors.preferredDate?.message} {...register('preferredDate', { required: 'Preferred date is required' })} />
+              <Input label="Alternate Date" type="date" leftIcon={<Calendar />} {...register('alternateDate')} />
+            </Grid>
+
+            <Textarea label="Additional Information" rows={4} placeholder="Please share any additional details, special requests, or questions..." {...register('message')} />
+
+            {submitError && <p className="text-right text-body-sm text-danger">{submitError}</p>}
 
             <div className="flex justify-end">
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-              >
-                {isSubmitting ? (
-                  <div className="flex items-center">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    Submitting...
-                  </div>
-                ) : (
-                  <div className="flex items-center">
-                    <Send className="w-5 h-5 mr-2" />
-                    Submit Request
-                  </div>
-                )}
-              </button>
+              <Button type="submit" size="lg" loading={isSubmitting} leftIcon={!isSubmitting ? <Send className="h-4 w-4" /> : undefined}>
+                {isSubmitting ? 'Submitting...' : 'Submit Request'}
+              </Button>
             </div>
           </form>
-        </motion.div>
-      </div>
-    </div>
+        </Card>
+      </motion.div>
+    </Container>
   );
 }

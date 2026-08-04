@@ -11,6 +11,7 @@ export * from './Switch';
 export * from './Container';
 export * from './Stack';
 export * from './Section';
+export * from './PageHero';
 export * from './Grid';
 export * from './Avatar';
 export * from './Tooltip';
