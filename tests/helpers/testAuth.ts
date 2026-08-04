@@ -117,6 +117,14 @@ export async function deleteFirestoreDocsWhere(collection: string, field: string
   return snap.size;
 }
 
+/** Read counterpart to deleteFirestoreDocsWhere — for asserting on docs a
+ * route writes without a recoverable ID in its response (e.g. contentVersions
+ * entries, which are looked up by collection+docId rather than returned). */
+export async function queryFirestoreDocs(collection: string, field: string, value: unknown) {
+  const snap = await adminDb.collection(collection).where(field, '==', value).get();
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
 /**
  * Seeds an auditLog entry with a specific timestamp (bypassing
  * FieldValue.serverTimestamp(), which can't be backdated) so date-range
