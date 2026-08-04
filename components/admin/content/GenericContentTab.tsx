@@ -2,13 +2,22 @@
 
 import { useEffect, useState, useRef } from 'react';
 import Papa from 'papaparse';
-import { Plus, Pencil, Trash2, FileText, History, Image as ImageIcon, Download, Upload, X } from 'lucide-react';
+import { Plus, Pencil, Trash2, FileText, History, Image as ImageIcon, Download, Upload } from 'lucide-react';
 import { adminFetch } from '@/lib/adminApi';
 import { LoadingState, EmptyState, ErrorState } from '@/components/admin/States';
 import ConfirmModal from '@/components/admin/ConfirmModal';
 import MediaPickerModal from '@/components/admin/content/MediaPickerModal';
-import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { FieldSchema } from '@/types/contentType';
+import { DataTable, type DataTableColumn } from '@/components/ui/DataTable';
+import { Modal } from '@/components/ui/Modal';
+import { Button, buttonClasses } from '@/components/ui/Button';
+import { IconButton } from '@/components/ui/IconButton';
+import { Input } from '@/components/ui/Input';
+import { Textarea } from '@/components/ui/Textarea';
+import { Checkbox } from '@/components/ui/Checkbox';
+import { Select } from '@/components/ui/Select';
+import { Badge } from '@/components/ui/Badge';
+import { useToast } from '@/components/ui/Toast';
 
 export type { FieldSchema } from '@/types/contentType';
 
@@ -61,34 +70,32 @@ export default function GenericContentTab({
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<Record<string, any>>(emptyForm(fields));
   const [deleteTarget, setDeleteTarget] = useState<Item | null>(null);
-  const formModalRef = useRef<HTMLDivElement>(null);
-  useFocusTrap(showForm, () => setShowForm(false), formModalRef);
   const [saving, setSaving] = useState(false);
+  const { toast } = useToast();
 
-  const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [bulkDeleteIds, setBulkDeleteIds] = useState<string[] | null>(null);
 
   const [historyTarget, setHistoryTarget] = useState<Item | null>(null);
   const [versions, setVersions] = useState<Version[]>([]);
   const [versionsLoading, setVersionsLoading] = useState(false);
-  const historyModalRef = useRef<HTMLDivElement>(null);
-  useFocusTrap(!!historyTarget, () => setHistoryTarget(null), historyModalRef);
 
   const [mediaPickerField, setMediaPickerField] = useState<{ key: string; accept: 'image' | 'file' } | null>(null);
   const [importing, setImporting] = useState(false);
   const csvInputRef = useRef<HTMLInputElement>(null);
 
-  const load = () => {
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [type, apiBase]);
+
+  function load() {
     setLoading(true);
     setError(null);
-    setSelected(new Set());
     adminFetch(`${apiBase}/${type}`)
       .then((data) => setItems(data.items))
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  };
-
-  useEffect(() => { load(); }, [type, apiBase]);
+  }
 
   const openCreate = () => {
     setEditing(null);
@@ -119,7 +126,7 @@ export default function GenericContentTab({
       setShowForm(false);
       load();
     } catch (err: any) {
-      alert(err.message);
+      toast({ title: 'Failed to save', description: err.message, variant: 'danger' });
     } finally {
       setSaving(false);
     }
@@ -132,23 +139,11 @@ export default function GenericContentTab({
   };
 
   const bulkDelete = async () => {
-    const ids = Array.from(selected);
-    for (const id of ids) {
+    if (!bulkDeleteIds) return;
+    for (const id of bulkDeleteIds) {
       await adminFetch(`${apiBase}/${type}/${id}`, { method: 'DELETE' });
     }
     load();
-  };
-
-  const toggleSelected = (id: string) => {
-    setSelected(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      return next;
-    });
-  };
-
-  const toggleSelectAll = () => {
-    setSelected(prev => (prev.size === items.length ? new Set() : new Set(items.map(i => i.id))));
   };
 
   const openHistory = async (item: Item) => {
@@ -158,7 +153,7 @@ export default function GenericContentTab({
       const data = await adminFetch(`${apiBase}/${type}/${item.id}/versions`);
       setVersions(data.versions);
     } catch (err: any) {
-      alert(err.message);
+      toast({ title: 'Failed to load history', description: err.message, variant: 'danger' });
       setHistoryTarget(null);
     } finally {
       setVersionsLoading(false);
@@ -173,7 +168,7 @@ export default function GenericContentTab({
       setHistoryTarget(null);
       load();
     } catch (err: any) {
-      alert(err.message);
+      toast({ title: 'Failed to restore version', description: err.message, variant: 'danger' });
     }
   };
 
@@ -221,15 +216,16 @@ export default function GenericContentTab({
         }
         setImporting(false);
         if (csvInputRef.current) csvInputRef.current.value = '';
-        alert(
-          `Imported ${succeeded} of ${results.data.length} rows.` +
-          (failures.length ? `\n\nFailures:\n${failures.slice(0, 5).join('\n')}` : '')
-        );
+        toast({
+          title: `Imported ${succeeded} of ${results.data.length} rows`,
+          description: failures.length ? failures.slice(0, 3).join(' · ') : undefined,
+          variant: failures.length ? 'warning' : 'success',
+        });
         load();
       },
       error: (err) => {
         setImporting(false);
-        alert(`CSV parse error: ${err.message}`);
+        toast({ title: 'CSV parse error', description: err.message, variant: 'danger' });
       },
     });
   };
@@ -237,204 +233,170 @@ export default function GenericContentTab({
   if (loading) return <LoadingState label={`Loading ${label.toLowerCase()}...`} />;
   if (error) return <ErrorState message={error} onRetry={load} />;
 
+  const tableColumns: DataTableColumn<Item>[] = [
+    ...columns.map((col): DataTableColumn<Item> => {
+      const field = fields.find(f => f.key === col);
+      return {
+        key: col,
+        header: field?.label || col,
+        accessor: (item) => (typeof item[col] === 'boolean' ? (item[col] ? 'Yes' : 'No') : String(item[col] ?? '—')),
+        sortValue: (item) => (typeof item[col] === 'boolean' ? Number(item[col]) : String(item[col] ?? '')),
+      };
+    }),
+    {
+      key: 'status',
+      header: 'Status',
+      sortValue: (item) => item.status ?? 'published',
+      accessor: (item) => {
+        const isDraft = item.status === 'draft';
+        const isScheduled = isDraft && item.publishAt && new Date(item.publishAt).getTime() > Date.now();
+        return (
+          <Badge variant={!isDraft ? 'success' : isScheduled ? 'warning' : 'neutral'}>
+            {!isDraft ? 'Published' : isScheduled ? 'Scheduled' : 'Draft'}
+          </Badge>
+        );
+      },
+    },
+  ];
+
   return (
     <div>
-      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{label} ({items.length})</h2>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-title-lg text-foreground">{label} ({items.length})</h2>
         <div className="flex items-center gap-2">
-          <button
-            onClick={exportCsv}
-            disabled={items.length === 0}
-            className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
-          >
-            <Download className="w-4 h-4" /> Export CSV
-          </button>
-          <label className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer">
-            <Upload className="w-4 h-4" /> {importing ? 'Importing...' : 'Import CSV'}
+          <Button variant="outline" size="sm" leftIcon={<Download className="h-4 w-4" />} disabled={items.length === 0} onClick={exportCsv}>
+            Export All (CSV)
+          </Button>
+          <label className={buttonClasses({ variant: 'outline', size: 'sm', disabled: importing, className: 'cursor-pointer gap-1.5' })}>
+            <Upload className="h-4 w-4" /> {importing ? 'Importing...' : 'Import CSV'}
             <input ref={csvInputRef} type="file" accept=".csv" className="hidden" disabled={importing} onChange={(e) => importCsv(e.target.files?.[0])} />
           </label>
-          <button
-            onClick={openCreate}
-            className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <Plus className="w-4 h-4" /> Add {label.replace(/s$/, '')}
-          </button>
+          <Button size="sm" leftIcon={<Plus className="h-4 w-4" />} onClick={openCreate}>
+            Add {label.replace(/s$/, '')}
+          </Button>
         </div>
       </div>
-
-      {selected.size > 0 && (
-        <div className="flex items-center justify-between mb-3 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-sm">
-          <span className="text-blue-800 dark:text-blue-300">{selected.size} selected</span>
-          <button onClick={() => setBulkDeleteOpen(true)} className="text-red-600 hover:underline font-medium">
-            Delete selected
-          </button>
-        </div>
-      )}
 
       {items.length === 0 ? (
         <EmptyState icon={FileText} title={`No ${label.toLowerCase()} yet`} description="Add one to get started." />
       ) : (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-200 dark:border-gray-700 text-left text-gray-500 dark:text-gray-400">
-                <th className="p-3 w-8">
-                  <input type="checkbox" aria-label="Select all" checked={selected.size === items.length} onChange={toggleSelectAll} />
-                </th>
-                {columns.map(col => (
-                  <th key={col} className="p-3">{fields.find(f => f.key === col)?.label || col}</th>
-                ))}
-                <th className="p-3">Status</th>
-                <th className="p-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((item) => {
-                const isDraft = item.status === 'draft';
-                const isScheduled = isDraft && item.publishAt && new Date(item.publishAt).getTime() > Date.now();
-                return (
-                  <tr key={item.id} className="border-b border-gray-100 dark:border-gray-700 last:border-0">
-                    <td className="p-3">
-                      <input type="checkbox" aria-label={`Select ${item.title || item.name || item.id}`} checked={selected.has(item.id)} onChange={() => toggleSelected(item.id)} />
-                    </td>
-                    {columns.map(col => (
-                      <td key={col} className="p-3 text-gray-700 dark:text-gray-300 max-w-xs truncate">
-                        {typeof item[col] === 'boolean' ? (item[col] ? 'Yes' : 'No') : String(item[col] ?? '—')}
-                      </td>
-                    ))}
-                    <td className="p-3">
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${
-                        !isDraft ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-                        : isScheduled ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
-                        : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
-                      }`}>
-                        {!isDraft ? 'Published' : isScheduled ? 'Scheduled' : 'Draft'}
-                      </span>
-                    </td>
-                    <td className="p-3 text-right space-x-3 whitespace-nowrap">
-                      {supportsVersions && (
-                        <button onClick={() => openHistory(item)} className="text-gray-500 hover:underline inline-flex items-center gap-1 text-xs">
-                          <History className="w-3 h-3" /> History
-                        </button>
-                      )}
-                      <button onClick={() => openEdit(item)} className="text-blue-600 hover:underline inline-flex items-center gap-1 text-xs">
-                        <Pencil className="w-3 h-3" /> Edit
-                      </button>
-                      <button onClick={() => setDeleteTarget(item)} className="text-red-600 hover:underline inline-flex items-center gap-1 text-xs">
-                        <Trash2 className="w-3 h-3" /> Delete
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          data={items}
+          columns={tableColumns}
+          getRowId={(item) => item.id}
+          selectable
+          searchKeys={(item) => columns.map((c) => String(item[c] ?? '')).join(' ')}
+          searchPlaceholder={`Search ${label.toLowerCase()}...`}
+          exportFilename={`${type}-view.csv`}
+          bulkActions={(ids, clear) => (
+            <button
+              onClick={() => { setBulkDeleteIds(ids); }}
+              className="font-medium text-danger hover:underline"
+            >
+              Delete selected
+            </button>
+          )}
+          rowActions={(item) => (
+            <div className="flex items-center justify-end gap-1">
+              {supportsVersions && (
+                <IconButton label="History" size="sm" onClick={() => openHistory(item)}>
+                  <History className="h-3.5 w-3.5" />
+                </IconButton>
+              )}
+              <IconButton label="Edit" size="sm" onClick={() => openEdit(item)}>
+                <Pencil className="h-3.5 w-3.5" />
+              </IconButton>
+              <IconButton label="Delete" size="sm" onClick={() => setDeleteTarget(item)}>
+                <Trash2 className="h-3.5 w-3.5 text-danger" />
+              </IconButton>
+            </div>
+          )}
+        />
       )}
 
-      {showForm && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowForm(false)}>
-          <div
-            ref={formModalRef}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="content-form-title"
-            tabIndex={-1}
-            className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg p-6 max-h-[85vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 id="content-form-title" className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-              {editing ? `Edit ${label.replace(/s$/, '')}` : `Add ${label.replace(/s$/, '')}`}
-            </h3>
-            <div className="space-y-4">
-              {fields.map((f) => (
-                <div key={f.key}>
-                  <label htmlFor={`field-${f.key}`} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    {f.label}{f.required && ' *'}
-                  </label>
-                  {f.type === 'textarea' ? (
-                    <textarea
-                      id={`field-${f.key}`}
+      <Modal
+        isOpen={showForm}
+        onClose={() => setShowForm(false)}
+        title={editing ? `Edit ${label.replace(/s$/, '')}` : `Add ${label.replace(/s$/, '')}`}
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setShowForm(false)}>Cancel</Button>
+            <Button onClick={save} loading={saving}>{saving ? 'Saving...' : 'Save'}</Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          {fields.map((f) => (
+            <div key={f.key}>
+              {f.type === 'textarea' ? (
+                <Textarea
+                  label={f.label}
+                  required={f.required}
+                  value={form[f.key] ?? ''}
+                  onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
+                  rows={3}
+                />
+              ) : f.type === 'checkbox' ? (
+                <Checkbox
+                  label={`${f.label}${f.required ? ' *' : ''}`}
+                  checked={!!form[f.key]}
+                  onChange={(e) => setForm({ ...form, [f.key]: e.target.checked })}
+                />
+              ) : f.type === 'url' && (f.accept === 'image' || f.accept === 'file') ? (
+                <div>
+                  <label className="mb-1.5 block text-label text-foreground">{f.label}{f.required && <span className="ml-0.5 text-danger">*</span>}</label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="url"
                       value={form[f.key] ?? ''}
                       onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
-                      rows={3}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 dark:text-white"
+                      className="flex-1"
                     />
-                  ) : f.type === 'checkbox' ? (
-                    <input
-                      id={`field-${f.key}`}
-                      type="checkbox"
-                      checked={!!form[f.key]}
-                      onChange={(e) => setForm({ ...form, [f.key]: e.target.checked })}
-                      className="w-4 h-4"
-                    />
-                  ) : f.type === 'url' && (f.accept === 'image' || f.accept === 'file') ? (
-                    <div className="flex gap-2">
-                      <input
-                        id={`field-${f.key}`}
-                        type="url"
-                        value={form[f.key] ?? ''}
-                        onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
-                        className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 dark:text-white"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setMediaPickerField({ key: f.key, accept: f.accept as 'image' | 'file' })}
-                        className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 shrink-0 inline-flex items-center gap-1.5"
-                      >
-                        <ImageIcon className="w-4 h-4" /> Browse
-                      </button>
-                    </div>
-                  ) : (
-                    <input
-                      id={`field-${f.key}`}
-                      type={f.type === 'datetime' ? 'datetime-local' : f.type}
-                      value={form[f.key] ?? ''}
-                      onChange={(e) => setForm({ ...form, [f.key]: f.type === 'number' ? Number(e.target.value) : e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 dark:text-white"
-                    />
-                  )}
-                </div>
-              ))}
-
-              <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
-                <label htmlFor="field-status" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Publishing</label>
-                <select
-                  id="field-status"
-                  value={form.status ?? 'published'}
-                  onChange={(e) => setForm({ ...form, status: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 dark:text-white mb-2"
-                >
-                  <option value="published">Published (visible now)</option>
-                  <option value="draft">Draft (hidden from the public site)</option>
-                </select>
-                {form.status === 'draft' && (
-                  <div>
-                    <label htmlFor="field-publishAt" className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
-                      Optionally schedule: goes live automatically once this passes
-                    </label>
-                    <input
-                      id="field-publishAt"
-                      type="datetime-local"
-                      value={form.publishAt ?? ''}
-                      onChange={(e) => setForm({ ...form, publishAt: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 dark:text-white"
-                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      leftIcon={<ImageIcon className="h-4 w-4" />}
+                      onClick={() => setMediaPickerField({ key: f.key, accept: f.accept as 'image' | 'file' })}
+                    >
+                      Browse
+                    </Button>
                   </div>
-                )}
-              </div>
+                </div>
+              ) : (
+                <Input
+                  label={f.label}
+                  required={f.required}
+                  type={f.type === 'datetime' ? 'datetime-local' : f.type}
+                  value={form[f.key] ?? ''}
+                  onChange={(e) => setForm({ ...form, [f.key]: f.type === 'number' ? Number(e.target.value) : e.target.value })}
+                />
+              )}
             </div>
-            <div className="flex justify-end gap-3 mt-6">
-              <button onClick={() => setShowForm(false)} className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                Cancel
-              </button>
-              <button onClick={save} disabled={saving} className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
-                {saving ? 'Saving...' : 'Save'}
-              </button>
-            </div>
+          ))}
+
+          <div className="border-t border-border pt-4">
+            <Select
+              label="Publishing"
+              value={form.status ?? 'published'}
+              onChange={(e) => setForm({ ...form, status: e.target.value })}
+              options={[
+                { value: 'published', label: 'Published (visible now)' },
+                { value: 'draft', label: 'Draft (hidden from the public site)' },
+              ]}
+            />
+            {form.status === 'draft' && (
+              <Input
+                className="mt-3"
+                label="Optionally schedule"
+                hint="Goes live automatically once this passes"
+                type="datetime-local"
+                value={form.publishAt ?? ''}
+                onChange={(e) => setForm({ ...form, publishAt: e.target.value })}
+              />
+            )}
           </div>
         </div>
-      )}
+      </Modal>
 
       <MediaPickerModal
         isOpen={!!mediaPickerField}
@@ -443,49 +405,31 @@ export default function GenericContentTab({
         onSelect={(url) => { if (mediaPickerField) setForm(prev => ({ ...prev, [mediaPickerField.key]: url })); }}
       />
 
-      {historyTarget && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setHistoryTarget(null)}>
-          <div
-            ref={historyModalRef}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="history-modal-title"
-            tabIndex={-1}
-            className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-              <h3 id="history-modal-title" className="text-lg font-bold text-gray-900 dark:text-white">
-                History: {historyTarget.title || historyTarget.name || historyTarget.id}
-              </h3>
-              <button onClick={() => setHistoryTarget(null)} aria-label="Close" className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="flex-1 overflow-y-auto p-4">
-              {versionsLoading ? (
-                <LoadingState label="Loading history..." />
-              ) : versions.length === 0 ? (
-                <EmptyState icon={History} title="No prior versions" description="Edits create a version automatically — this is the first one." />
-              ) : (
-                <ul className="space-y-2">
-                  {versions.map((v) => (
-                    <li key={v.id} className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
-                      <div>
-                        <p className="text-sm text-gray-900 dark:text-white">{v.editedByEmail || 'Unknown'}</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">{formatTimestamp(v.editedAt)}</p>
-                      </div>
-                      <button onClick={() => restoreVersion(v.id)} className="text-sm text-blue-600 hover:underline font-medium">
-                        Restore
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      <Modal
+        isOpen={!!historyTarget}
+        onClose={() => setHistoryTarget(null)}
+        title={`History: ${historyTarget?.title || historyTarget?.name || historyTarget?.id}`}
+      >
+        {versionsLoading ? (
+          <LoadingState label="Loading history..." />
+        ) : versions.length === 0 ? (
+          <EmptyState icon={History} title="No prior versions" description="Edits create a version automatically — this is the first one." />
+        ) : (
+          <ul className="space-y-2">
+            {versions.map((v) => (
+              <li key={v.id} className="flex items-center justify-between rounded-lg border border-border p-3">
+                <div>
+                  <p className="text-body-sm text-foreground">{v.editedByEmail || 'Unknown'}</p>
+                  <p className="text-caption text-foreground-subtle">{formatTimestamp(v.editedAt)}</p>
+                </div>
+                <button onClick={() => restoreVersion(v.id)} className="text-body-sm font-medium text-accent hover:underline">
+                  Restore
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Modal>
 
       <ConfirmModal
         isOpen={!!deleteTarget}
@@ -497,12 +441,12 @@ export default function GenericContentTab({
       />
 
       <ConfirmModal
-        isOpen={bulkDeleteOpen}
-        title={`Delete ${selected.size} ${selected.size === 1 ? 'item' : 'items'}`}
-        consequence={`This will permanently delete ${selected.size} selected ${label.toLowerCase()}. This cannot be undone.`}
+        isOpen={!!bulkDeleteIds}
+        title={`Delete ${bulkDeleteIds?.length ?? 0} ${(bulkDeleteIds?.length ?? 0) === 1 ? 'item' : 'items'}`}
+        consequence={`This will permanently delete ${bulkDeleteIds?.length ?? 0} selected ${label.toLowerCase()}. This cannot be undone.`}
         confirmLabel="Delete All"
         onConfirm={bulkDelete}
-        onClose={() => setBulkDeleteOpen(false)}
+        onClose={() => setBulkDeleteIds(null)}
       />
     </div>
   );
