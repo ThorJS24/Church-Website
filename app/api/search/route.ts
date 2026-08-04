@@ -46,11 +46,13 @@ export async function GET(request: NextRequest) {
     const needle = query.toLowerCase();
 
     const db = getAdminDb();
-    const [sermonsSnap, eventsSnap, announcementsSnap, gallerySnap] = await Promise.all([
+    const [sermonsSnap, eventsSnap, announcementsSnap, gallerySnap, blogPostsSnap, formsSnap] = await Promise.all([
       db.collection('sermons').limit(SCAN_LIMIT).get(),
       db.collection('events').limit(SCAN_LIMIT).get(),
       db.collection('announcements').limit(SCAN_LIMIT).get(),
       db.collection('galleryImages').limit(SCAN_LIMIT).get(),
+      db.collection('blogPosts').limit(SCAN_LIMIT).get(),
+      db.collection('formDefinitions').limit(SCAN_LIMIT).get(),
     ]);
 
     const sermons = sermonsSnap.docs
@@ -73,12 +75,27 @@ export async function GET(request: NextRequest) {
       .filter((g: any) => matches(g.title, needle) || matches(g.description, needle))
       .slice(0, limit);
 
-    const totalResults = sermons.length + events.length + announcements.length + gallery.length;
+    // Blog posts have an explicit draft/publish workflow (unlike the four
+    // collections above, which this route has never gated on status) — drafts
+    // must not leak into public search results.
+    const blogPosts = blogPostsSnap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .filter((p: any) => p.status !== 'draft' || (p.publishAt && new Date(p.publishAt).getTime() <= Date.now()))
+      .filter((p: any) => matches(p.title, needle) || matches(p.excerpt, needle))
+      .slice(0, limit);
+
+    const forms = formsSnap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .filter((f: any) => matches(f.title, needle) || matches(f.description, needle))
+      .slice(0, limit);
+
+    const totalResults =
+      sermons.length + events.length + announcements.length + gallery.length + blogPosts.length + forms.length;
 
     return NextResponse.json({
       query,
       totalResults,
-      results: { sermons, events, announcements, gallery },
+      results: { sermons, events, announcements, gallery, blogPosts, forms },
     });
   } catch (error) {
     console.error('Search error:', error);

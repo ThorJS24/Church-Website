@@ -11,6 +11,7 @@ import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 import GDPRCompliance from '@/components/GDPRCompliance';
 import SkipLink from '@/components/SkipLink';
 import MobileBottomNav from '@/components/MobileBottomNav';
+import { ToastProvider } from '@/components/ui/Toast';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -85,24 +86,26 @@ export default function RootLayout({
         <ThemeProvider>
           <LanguageProvider>
             <AuthProvider>
-              <ClientLayout>
-                <SkipLink />
-                <div className="min-h-screen flex flex-col">
-                  <Navbar />
-                  <main 
-                    id="main-content"
-                    className="flex-grow pt-16 pb-16 md:pb-0"
-                    role="main"
-                  >
-                    {children}
-                  </main>
-                  <Footer />
-                </div>
-                <MobileBottomNav />
-                <DivineAudio autoPlay={false} showControls={true} />
-                <PWAInstallPrompt />
-                <GDPRCompliance />
-              </ClientLayout>
+              <ToastProvider>
+                <ClientLayout>
+                  <SkipLink />
+                  <div className="min-h-screen flex flex-col">
+                    <Navbar />
+                    <main
+                      id="main-content"
+                      className="flex-grow pt-16 pb-16 md:pb-0"
+                      role="main"
+                    >
+                      {children}
+                    </main>
+                    <Footer />
+                  </div>
+                  <MobileBottomNav />
+                  <DivineAudio autoPlay={false} showControls={true} />
+                  <PWAInstallPrompt />
+                  <GDPRCompliance />
+                </ClientLayout>
+              </ToastProvider>
             </AuthProvider>
           </LanguageProvider>
         </ThemeProvider>

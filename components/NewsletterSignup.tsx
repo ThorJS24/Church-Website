@@ -33,7 +33,7 @@ export default function NewsletterSignup() {
 
   if (status === 'success') {
     return (
-      <p className="flex items-center gap-2 text-sm text-green-400">
+      <p className="flex items-center gap-2 text-body-sm text-emerald-400">
         <CheckCircle className="w-4 h-4" /> Thanks for subscribing!
       </p>
     );
@@ -50,18 +50,18 @@ export default function NewsletterSignup() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@example.com"
-          className="flex-1 min-w-0 px-3 py-2 text-sm rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:border-white/40"
+          className="flex-1 min-w-0 rounded-md border border-white/15 bg-white/5 px-3 py-2 text-body-sm text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/30"
         />
         <button
           type="submit"
           disabled={status === 'submitting'}
           aria-label="Subscribe to newsletter"
-          className="shrink-0 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+          className="shrink-0 rounded-md bg-white px-3 py-2 text-zinc-900 transition-colors hover:bg-white/90 disabled:opacity-50"
         >
-          <Mail className="w-4 h-4" />
+          <Mail className="h-4 w-4" />
         </button>
       </div>
-      {status === 'error' && <p className="text-xs text-red-400">{message}</p>}
+      {status === 'error' && <p className="text-caption text-red-400">{message}</p>}
     </form>
   );
 }
