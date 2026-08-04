@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { Users as UsersIcon } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import Papa from 'papaparse';
+import { Users as UsersIcon, LayoutGrid, List, Upload, Mail, Pencil } from 'lucide-react';
 import { adminFetch } from '@/lib/adminApi';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserRole } from '@/lib/permissions';
@@ -10,6 +11,14 @@ import ConfirmModal from '@/components/admin/ConfirmModal';
 import { DataTable, type DataTableColumn } from '@/components/ui/DataTable';
 import { Select } from '@/components/ui/Select';
 import { Badge } from '@/components/ui/Badge';
+import { Avatar } from '@/components/ui/Avatar';
+import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { IconButton } from '@/components/ui/IconButton';
+import { Modal } from '@/components/ui/Modal';
+import { Input } from '@/components/ui/Input';
+import { Textarea } from '@/components/ui/Textarea';
+import { useToast } from '@/components/ui/Toast';
 
 interface AdminUser {
   id: string;
@@ -20,6 +29,12 @@ interface AdminUser {
   role: UserRole;
   isActive: boolean;
   createdAt?: string;
+  lastSignInTime?: string | null;
+  tags?: string[];
+  pastoralNotes?: string;
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
+  householdName?: string;
 }
 
 type PendingAction =
@@ -27,20 +42,34 @@ type PendingAction =
   | { type: 'role'; ids: string[]; role: UserRole };
 
 const ROLE_OPTIONS: UserRole[] = [UserRole.MEMBER, UserRole.MODERATOR, UserRole.ADMIN, UserRole.SUPER_ADMIN];
+const INACTIVE_AFTER_DAYS = 90;
 
 function displayName(u: AdminUser) {
   return u.displayName || [u.firstName, u.lastName].filter(Boolean).join(' ') || u.email;
 }
 
+function isInactive(u: AdminUser) {
+  const last = u.lastSignInTime ? new Date(u.lastSignInTime) : u.createdAt ? new Date(u.createdAt) : null;
+  if (!last) return false;
+  return Date.now() - last.getTime() > INACTIVE_AFTER_DAYS * 24 * 60 * 60 * 1000;
+}
+
 export default function UserManagementPage() {
   const { user: actor, isSuperAdmin } = useAuth();
+  const { toast } = useToast();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [roleFilter, setRoleFilter] = useState<UserRole | 'all'>('all');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'suspended'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'suspended' | 'inactive'>('all');
+  const [tagFilter, setTagFilter] = useState<string>('all');
+  const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
+  const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
+  const [emailTargets, setEmailTargets] = useState<string[] | null>(null);
+  const [importing, setImporting] = useState(false);
+  const csvInputRef = useRef<HTMLInputElement>(null);
 
   const load = () => {
     setLoading(true);
@@ -53,14 +82,21 @@ export default function UserManagementPage() {
 
   useEffect(() => { load(); }, []);
 
+  const allTags = useMemo(() => {
+    const set = new Set<string>();
+    users.forEach((u) => (u.tags || []).forEach((t) => set.add(t)));
+    return [...set].sort();
+  }, [users]);
+
   const filtered = useMemo(() => {
     let result = users;
     if (roleFilter !== 'all') result = result.filter((u) => u.role === roleFilter);
-    if (statusFilter !== 'all') {
-      result = result.filter((u) => (statusFilter === 'active' ? u.isActive !== false : u.isActive === false));
-    }
+    if (statusFilter === 'active') result = result.filter((u) => u.isActive !== false);
+    else if (statusFilter === 'suspended') result = result.filter((u) => u.isActive === false);
+    else if (statusFilter === 'inactive') result = result.filter(isInactive);
+    if (tagFilter !== 'all') result = result.filter((u) => (u.tags || []).includes(tagFilter));
     return result;
-  }, [users, roleFilter, statusFilter]);
+  }, [users, roleFilter, statusFilter, tagFilter]);
 
   const runAction = async () => {
     if (!pendingAction) return;
@@ -81,6 +117,47 @@ export default function UserManagementPage() {
       }
     }
     load();
+  };
+
+  const importCsv = (file: File | undefined) => {
+    if (!file) return;
+    setImporting(true);
+    Papa.parse<Record<string, string>>(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: async (results) => {
+        let updated = 0;
+        const failures: string[] = [];
+        for (const row of results.data) {
+          const email = row.email?.trim();
+          const match = users.find((u) => u.email?.toLowerCase() === email?.toLowerCase());
+          if (!match) {
+            if (email) failures.push(`${email}: no existing account`);
+            continue;
+          }
+          const profile: Record<string, unknown> = {};
+          if (row.tags !== undefined) profile.tags = row.tags.split(';').map((t) => t.trim()).filter(Boolean);
+          if (row.pastoralNotes !== undefined) profile.pastoralNotes = row.pastoralNotes;
+          if (row.emergencyContactName !== undefined) profile.emergencyContactName = row.emergencyContactName;
+          if (row.emergencyContactPhone !== undefined) profile.emergencyContactPhone = row.emergencyContactPhone;
+          if (row.householdName !== undefined) profile.householdName = row.householdName;
+          try {
+            await adminFetch('/api/admin/users', { method: 'PATCH', body: JSON.stringify({ userId: match.id, profile }) });
+            updated++;
+          } catch (err: any) {
+            failures.push(`${email}: ${err.message}`);
+          }
+        }
+        setImporting(false);
+        if (csvInputRef.current) csvInputRef.current.value = '';
+        toast({
+          title: `Updated ${updated} of ${results.data.length} rows`,
+          description: failures.length ? failures.slice(0, 3).join(' · ') : 'Matched by email — rows with no existing account were skipped.',
+          variant: failures.length ? 'warning' : 'success',
+        });
+        load();
+      },
+    });
   };
 
   const consequenceFor = (action: PendingAction) => {
@@ -104,6 +181,16 @@ export default function UserManagementPage() {
   const columns: DataTableColumn<AdminUser>[] = [
     { key: 'name', header: 'Name', accessor: (u) => <span className="font-medium text-foreground">{displayName(u)}</span>, sortValue: displayName },
     { key: 'email', header: 'Email', accessor: (u) => u.email, sortValue: (u) => u.email || '' },
+    {
+      key: 'tags',
+      header: 'Tags',
+      sortValue: (u) => (u.tags || []).join(','),
+      accessor: (u) => (
+        <div className="flex flex-wrap gap-1">
+          {(u.tags || []).map((t) => <Badge key={t} variant="neutral">{t}</Badge>)}
+        </div>
+      ),
+    },
     {
       key: 'role',
       header: 'Role',
@@ -130,15 +217,34 @@ export default function UserManagementPage() {
     {
       key: 'status',
       header: 'Status',
-      sortValue: (u) => (u.isActive === false ? 0 : 1),
-      accessor: (u) => <Badge variant={u.isActive === false ? 'danger' : 'success'}>{u.isActive === false ? 'Suspended' : 'Active'}</Badge>,
+      sortValue: (u) => (u.isActive === false ? 0 : isInactive(u) ? 1 : 2),
+      accessor: (u) => (
+        <div className="flex flex-wrap gap-1">
+          <Badge variant={u.isActive === false ? 'danger' : 'success'}>{u.isActive === false ? 'Suspended' : 'Active'}</Badge>
+          {isInactive(u) && u.isActive !== false && <Badge variant="warning">Inactive 90d+</Badge>}
+        </div>
+      ),
     },
   ];
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-headline-md text-foreground">Members ({filtered.length})</h1>
+        <div className="flex items-center gap-2">
+          <input ref={csvInputRef} type="file" accept=".csv" className="hidden" onChange={(e) => importCsv(e.target.files?.[0])} />
+          <Button variant="secondary" size="sm" leftIcon={<Upload className="h-4 w-4" />} loading={importing} onClick={() => csvInputRef.current?.click()}>
+            Import CSV
+          </Button>
+          <div className="flex rounded-lg bg-surface-active p-1">
+            <IconButton label="Table view" size="sm" className={viewMode === 'table' ? 'bg-background shadow-xs' : ''} onClick={() => setViewMode('table')}>
+              <List className="h-4 w-4" />
+            </IconButton>
+            <IconButton label="Grid view" size="sm" className={viewMode === 'grid' ? 'bg-background shadow-xs' : ''} onClick={() => setViewMode('grid')}>
+              <LayoutGrid className="h-4 w-4" />
+            </IconButton>
+          </div>
+        </div>
       </div>
 
       <div className="mb-4 flex flex-col gap-3 sm:flex-row">
@@ -151,9 +257,22 @@ export default function UserManagementPage() {
         <Select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value as any)}
-          options={[{ value: 'all', label: 'All statuses' }, { value: 'active', label: 'Active' }, { value: 'suspended', label: 'Suspended' }]}
+          options={[
+            { value: 'all', label: 'All statuses' },
+            { value: 'active', label: 'Active' },
+            { value: 'suspended', label: 'Suspended' },
+            { value: 'inactive', label: `Inactive ${INACTIVE_AFTER_DAYS}d+` },
+          ]}
           className="w-auto"
         />
+        {allTags.length > 0 && (
+          <Select
+            value={tagFilter}
+            onChange={(e) => setTagFilter(e.target.value)}
+            options={[{ value: 'all', label: 'All tags' }, ...allTags.map((t) => ({ value: t, label: t }))]}
+            className="w-auto"
+          />
+        )}
       </div>
 
       {filtered.length === 0 ? (
@@ -162,17 +281,43 @@ export default function UserManagementPage() {
           <h3 className="text-title-sm text-foreground">No members match your filters</h3>
           <p className="mt-1 text-body-sm text-foreground-muted">Try clearing the search or filters.</p>
         </div>
+      ) : viewMode === 'grid' ? (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {filtered.map((u) => (
+            <Card key={u.id} padding="md">
+              <div className="mb-3 flex items-center gap-3">
+                <Avatar name={displayName(u)} size="md" />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-body-sm font-medium text-foreground">{displayName(u)}</p>
+                  <p className="truncate text-caption text-foreground-subtle">{u.email}</p>
+                </div>
+                <IconButton label="Edit profile" size="sm" onClick={() => setEditingUser(u)}><Pencil className="h-3.5 w-3.5" /></IconButton>
+              </div>
+              <div className="mb-2 flex flex-wrap gap-1">
+                <Badge variant="neutral">{u.role}</Badge>
+                <Badge variant={u.isActive === false ? 'danger' : 'success'}>{u.isActive === false ? 'Suspended' : 'Active'}</Badge>
+                {u.householdName && <Badge variant="accent">{u.householdName}</Badge>}
+              </div>
+              {(u.tags || []).length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  {u.tags!.map((t) => <Badge key={t} variant="neutral">{t}</Badge>)}
+                </div>
+              )}
+            </Card>
+          ))}
+        </div>
       ) : (
         <DataTable
           data={filtered}
           columns={columns}
           getRowId={(u) => u.id}
           selectable
-          searchKeys={(u) => `${displayName(u)} ${u.email}`}
-          searchPlaceholder="Search name or email..."
+          searchKeys={(u) => `${displayName(u)} ${u.email} ${(u.tags || []).join(' ')}`}
+          searchPlaceholder="Search name, email, or tag..."
           exportFilename={`members-${new Date().toISOString().split('T')[0]}.csv`}
           bulkActions={(ids) => (
             <div className="flex items-center gap-3">
+              <button onClick={() => setEmailTargets(ids)} className="flex items-center gap-1 font-medium hover:underline"><Mail className="h-3.5 w-3.5" /> Email</button>
               <button onClick={() => setPendingAction({ type: 'suspend', ids })} className="font-medium hover:underline">Suspend</button>
               <button onClick={() => setPendingAction({ type: 'reactivate', ids })} className="font-medium hover:underline">Reactivate</button>
               <button onClick={() => setPendingAction({ type: 'delete', ids })} className="font-medium text-danger hover:underline">Delete</button>
@@ -180,6 +325,7 @@ export default function UserManagementPage() {
           )}
           rowActions={(u) => (
             <div className="flex items-center justify-end gap-3 whitespace-nowrap text-caption">
+              <button onClick={() => setEditingUser(u)} className="text-accent hover:underline">Edit</button>
               {u.isActive === false ? (
                 <button onClick={() => setPendingAction({ type: 'reactivate', ids: [u.id] })} className="text-success hover:underline">Reactivate</button>
               ) : (
@@ -202,6 +348,108 @@ export default function UserManagementPage() {
         onConfirm={runAction}
         onClose={() => setPendingAction(null)}
       />
+
+      {editingUser && (
+        <EditProfileModal
+          user={editingUser}
+          onClose={() => setEditingUser(null)}
+          onSaved={() => { setEditingUser(null); load(); }}
+        />
+      )}
+
+      {emailTargets && (
+        <BulkEmailModal
+          userIds={emailTargets}
+          count={emailTargets.length}
+          onClose={() => setEmailTargets(null)}
+        />
+      )}
     </div>
+  );
+}
+
+function EditProfileModal({ user, onClose, onSaved }: { user: AdminUser; onClose: () => void; onSaved: () => void }) {
+  const { toast } = useToast();
+  const [tags, setTags] = useState((user.tags || []).join(', '));
+  const [pastoralNotes, setPastoralNotes] = useState(user.pastoralNotes || '');
+  const [emergencyContactName, setEmergencyContactName] = useState(user.emergencyContactName || '');
+  const [emergencyContactPhone, setEmergencyContactPhone] = useState(user.emergencyContactPhone || '');
+  const [householdName, setHouseholdName] = useState(user.householdName || '');
+  const [saving, setSaving] = useState(false);
+
+  const save = async () => {
+    setSaving(true);
+    try {
+      await adminFetch('/api/admin/users', {
+        method: 'PATCH',
+        body: JSON.stringify({
+          userId: user.id,
+          profile: {
+            tags: tags.split(',').map((t) => t.trim()).filter(Boolean),
+            pastoralNotes,
+            emergencyContactName,
+            emergencyContactPhone,
+            householdName,
+          },
+        }),
+      });
+      toast({ title: 'Profile updated', variant: 'success' });
+      onSaved();
+    } catch (err: any) {
+      toast({ title: 'Could not save', description: err.message, variant: 'danger' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Modal isOpen onClose={onClose} title={`Edit ${displayName(user)}`}>
+      <div className="space-y-4">
+        <Input label="Tags (comma-separated)" value={tags} onChange={(e) => setTags(e.target.value)} placeholder="choir, usher team, new believer" />
+        <Input label="Household name" value={householdName} onChange={(e) => setHouseholdName(e.target.value)} hint="Members sharing this value are treated as one household." />
+        <div className="grid grid-cols-2 gap-4">
+          <Input label="Emergency contact name" value={emergencyContactName} onChange={(e) => setEmergencyContactName(e.target.value)} />
+          <Input label="Emergency contact phone" value={emergencyContactPhone} onChange={(e) => setEmergencyContactPhone(e.target.value)} />
+        </div>
+        <Textarea label="Pastoral notes (staff-only)" rows={4} value={pastoralNotes} onChange={(e) => setPastoralNotes(e.target.value)} hint="Never visible to the member themselves." />
+        <div className="flex justify-end gap-3">
+          <Button variant="secondary" onClick={onClose}>Cancel</Button>
+          <Button loading={saving} onClick={save}>Save</Button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+function BulkEmailModal({ userIds, count, onClose }: { userIds: string[]; count: number; onClose: () => void }) {
+  const { toast } = useToast();
+  const [subject, setSubject] = useState('');
+  const [body, setBody] = useState('');
+  const [sending, setSending] = useState(false);
+
+  const send = async () => {
+    setSending(true);
+    try {
+      const data = await adminFetch('/api/admin/users/email', { method: 'POST', body: JSON.stringify({ userIds, subject, body }) });
+      toast({ title: `Sent to ${data.sent} of ${data.sent + data.failed}`, variant: data.failed ? 'warning' : 'success' });
+      onClose();
+    } catch (err: any) {
+      toast({ title: 'Could not send', description: err.message, variant: 'danger' });
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <Modal isOpen onClose={onClose} title={`Email ${count} member${count === 1 ? '' : 's'}`}>
+      <div className="space-y-4">
+        <Input label="Subject" value={subject} onChange={(e) => setSubject(e.target.value)} required />
+        <Textarea label="Body (HTML)" rows={8} value={body} onChange={(e) => setBody(e.target.value)} className="font-mono" required />
+        <div className="flex justify-end gap-3">
+          <Button variant="secondary" onClick={onClose}>Cancel</Button>
+          <Button loading={sending} disabled={!subject.trim() || !body.trim()} onClick={send}>Send</Button>
+        </div>
+      </div>
+    </Modal>
   );
 }

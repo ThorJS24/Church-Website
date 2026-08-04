@@ -24,15 +24,15 @@ type-check/lint/a quick manual pass, commit, check it off, move to the next.
 - [x] Quick announcement composer (post to homepage banner from dashboard)
 - [x] New-member welcome queue (recent registrations)
 
-### Batch A2 — Members
-- [ ] Photo grid view toggle
-- [ ] Custom tags/segments
-- [ ] CSV roster import
-- [ ] Staff-only pastoral notes field
-- [ ] Emergency contact fields
-- [ ] Inactive-member flagging
-- [ ] Bulk email to a filtered segment (via Resend)
-- [ ] Household/family grouping
+### Batch A2 — Members ✅
+- [x] Photo grid view toggle
+- [x] Custom tags/segments
+- [x] CSV roster import
+- [x] Staff-only pastoral notes field
+- [x] Emergency contact fields
+- [x] Inactive-member flagging
+- [x] Bulk email to a filtered segment (via Resend)
+- [x] Household/family grouping
 
 ### Batch A3 — Content
 - [ ] Shared content calendar view
