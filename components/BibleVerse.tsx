@@ -20,9 +20,7 @@ export default function BibleVerse() {
     { code: 'ESV', name: 'English Standard Version' },
     { code: 'KJV', name: 'King James Version' },
     { code: 'NLT', name: 'New Living Translation' },
-
     { code: 'CJB', name: 'Complete Jewish Bible' },
-
   ];
 
   const fetchVerse = async () => {
@@ -49,7 +47,7 @@ export default function BibleVerse() {
   const shareVerse = async () => {
     if (verse && navigator.share) {
       await navigator.share({
-        title: 'Daily Blessing',
+        title: "Today's Verse",
         text: `${verse.content} - ${verse.reference}`
       });
     }
@@ -74,23 +72,19 @@ export default function BibleVerse() {
 
   if (loading) {
     return (
-      <motion.div 
-        className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 dark:from-amber-900/20 dark:via-orange-900/20 dark:to-yellow-900/20 p-8 rounded-2xl shadow-xl border border-amber-200/50 dark:border-amber-700/50"
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-      >
+      <div className="relative overflow-hidden rounded-2xl border border-border bg-warm-subtle p-8 shadow-sm">
         <div className="animate-pulse space-y-4">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-amber-200 rounded-full"></div>
-            <div className="h-6 bg-amber-200 rounded w-32"></div>
+            <div className="h-8 w-8 rounded-full bg-warm/20" />
+            <div className="h-6 w-32 rounded bg-warm/20" />
           </div>
           <div className="space-y-3">
-            <div className="h-4 bg-amber-200 rounded w-full"></div>
-            <div className="h-4 bg-amber-200 rounded w-3/4"></div>
-            <div className="h-4 bg-amber-200 rounded w-1/2"></div>
+            <div className="h-4 w-full rounded bg-warm/20" />
+            <div className="h-4 w-3/4 rounded bg-warm/20" />
+            <div className="h-4 w-1/2 rounded bg-warm/20" />
           </div>
         </div>
-      </motion.div>
+      </div>
     );
   }
 
@@ -106,10 +100,10 @@ export default function BibleVerse() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.6, ease: 'easeOut' }}
-      className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 dark:from-amber-900/20 dark:via-orange-900/20 dark:to-yellow-900/20 p-8 rounded-2xl shadow-xl border border-amber-200/50 dark:border-amber-700/50 group hover:shadow-2xl transition-all duration-500"
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+      className="relative overflow-hidden rounded-2xl border border-border bg-warm-subtle p-8 shadow-sm"
     >
       <AnimatePresence>
         {sparkles.map((sparkle) => (
@@ -119,37 +113,26 @@ export default function BibleVerse() {
             animate={{ opacity: 1, scale: 1, rotate: 180 }}
             exit={{ opacity: 0, scale: 0, rotate: 360 }}
             transition={{ duration: 0.8 }}
-            className="absolute pointer-events-none"
+            className="pointer-events-none absolute"
             style={{ left: `${sparkle.x}%`, top: `${sparkle.y}%` }}
           >
-            <Sparkles className="w-4 h-4 text-yellow-400" />
+            <Sparkles className="h-4 w-4 text-warm" />
           </motion.div>
         ))}
       </AnimatePresence>
 
-      <div className="relative flex items-center justify-between mb-6">
-        <motion.div 
-          className="flex items-center space-x-3"
-          whileHover={{ scale: 1.05 }}
-        >
-          <div className="relative">
-            <motion.div
-              animate={{ rotate: [0, 5, -5, 0] }}
-              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-              className="p-3 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl shadow-lg"
-            >
-              <Book className="w-6 h-6 text-white drop-shadow-sm" />
-            </motion.div>
+      <div className="relative mb-6 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="rounded-xl bg-warm p-3 shadow-sm">
+            <Book className="h-5 w-5 text-warm-foreground" aria-hidden="true" />
           </div>
           <div>
-            <h2 className="text-xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
-              ✨ Today's Divine Message
-            </h2>
-            <p className="text-sm text-amber-600/70 dark:text-amber-400/70">Blessed words for your soul</p>
+            <h2 className="text-title-md text-foreground">Today's Verse</h2>
+            <p className="text-caption text-foreground-subtle">A blessing for your day</p>
           </div>
-        </motion.div>
-        
-        <div className="flex items-center space-x-2">
+        </div>
+
+        <div className="flex items-center gap-2">
           <select
             value={bibleVersion}
             aria-label="Bible translation version"
@@ -163,7 +146,7 @@ export default function BibleVerse() {
                 }
               }
             }}
-            className="px-2 py-1 text-xs bg-white/60 hover:bg-white/80 rounded-full border-none outline-none text-gray-700 font-medium"
+            className="rounded-full border-none bg-background/70 px-2 py-1 text-caption font-medium text-foreground-muted outline-none"
           >
             {bibleVersions.map(version => (
               <option key={version.code} value={version.code}>
@@ -171,101 +154,65 @@ export default function BibleVerse() {
               </option>
             ))}
           </select>
-          
-          <motion.button
+
+          <button
             onClick={handleLike}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
             aria-label={liked ? 'Unlike this verse' : 'Like this verse'}
-            className={`p-2 rounded-full transition-all duration-300 ${liked ? 'bg-red-100 text-red-500' : 'bg-white/50 text-gray-600 hover:bg-white/80'}`}
+            className={`rounded-full p-2 transition-colors duration-fast ${liked ? 'bg-danger-subtle text-danger' : 'bg-background/60 text-foreground-muted hover:bg-background/90'}`}
           >
-            <Heart className={`w-5 h-5 ${liked ? 'fill-current' : ''}`} />
-          </motion.button>
-          
-          <motion.button
+            <Heart className={`h-5 w-5 ${liked ? 'fill-current' : ''}`} />
+          </button>
+
+          <button
             onClick={fetchVerse}
             disabled={loading}
-            whileHover={{ scale: 1.1, rotate: 180 }}
-            whileTap={{ scale: 0.9 }}
-            className={`p-2 rounded-full transition-all duration-300 group ${
-              loading 
-                ? 'bg-gray-200 cursor-not-allowed' 
-                : 'bg-white/50 hover:bg-white/80'
-            }`}
-            title="Get new blessing"
+            title="Get new verse"
+            className="rounded-full bg-background/60 p-2 text-foreground-muted transition-colors duration-fast hover:bg-background/90 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <RefreshCw className={`w-5 h-5 transition-all ${
-              loading 
-                ? 'animate-spin text-gray-400' 
-                : 'text-gray-600 group-hover:text-amber-600'
-            }`} />
-          </motion.button>
+            <RefreshCw className="h-5 w-5" />
+          </button>
         </div>
       </div>
-      
-      <motion.div
-        key={displayVerse.id}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-        className="relative"
-      >
-        <div className="text-2xl leading-relaxed font-medium text-gray-800 dark:text-gray-200 mb-6 relative px-8 font-serif">
-          <span className="text-6xl text-amber-300/30 absolute -top-4 left-2 font-serif">"</span>
-          <span className="relative z-10 italic block text-center">
+
+      <div key={displayVerse.id} className="relative">
+        <div className="relative mb-6 px-8 text-center font-serif text-headline-sm leading-relaxed text-foreground">
+          <span className="absolute -top-4 left-2 font-serif text-6xl text-warm/20" aria-hidden="true">&ldquo;</span>
+          <span className="relative z-10 block italic">
             {displayVerse.content.replace(/"/g, '')}
           </span>
-          <span className="text-6xl text-amber-300/30 absolute -bottom-8 right-2 font-serif">"</span>
+          <span className="absolute -bottom-8 right-2 font-serif text-6xl text-warm/20" aria-hidden="true">&rdquo;</span>
         </div>
-        
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.4 }}
-          className="flex items-center justify-between"
-        >
-          <div className="flex items-center space-x-2">
-            <Star className="w-4 h-4 text-amber-500" />
-            <p className="text-lg font-semibold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
-              {displayVerse.reference}
-            </p>
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Star className="h-4 w-4 text-warm" aria-hidden="true" />
+            <p className="text-title-sm text-warm">{displayVerse.reference}</p>
           </div>
-          
-          <div className="flex items-center space-x-2">
-            <motion.button
+
+          <div className="flex items-center gap-2">
+            <button
               onClick={copyVerse}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="flex items-center space-x-1 px-3 py-1 bg-white/60 hover:bg-white/80 rounded-full text-sm font-medium text-gray-700 transition-all duration-300"
+              className="flex items-center gap-1.5 rounded-full bg-background/60 px-3 py-1 text-body-sm font-medium text-foreground-muted transition-colors duration-fast hover:bg-background/90"
             >
-              <Copy className="w-4 h-4" />
+              <Copy className="h-4 w-4" />
               <span>{copied ? 'Copied!' : 'Copy'}</span>
-            </motion.button>
-            
+            </button>
+
             {typeof window !== 'undefined' && typeof navigator?.share === 'function' && (
-              <motion.button
+              <button
                 onClick={shareVerse}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center space-x-1 px-3 py-1 bg-white/60 hover:bg-white/80 rounded-full text-sm font-medium text-gray-700 transition-all duration-300"
+                className="flex items-center gap-1.5 rounded-full bg-background/60 px-3 py-1 text-body-sm font-medium text-foreground-muted transition-colors duration-fast hover:bg-background/90"
               >
-                <Share2 className="w-4 h-4" />
+                <Share2 className="h-4 w-4" />
                 <span>Share</span>
-              </motion.button>
+              </button>
             )}
           </div>
-        </motion.div>
-      </motion.div>
-      
+        </div>
+      </div>
+
       {displayVerse.copyright && (
-        <motion.p 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
-          className="text-xs text-amber-600/60 dark:text-amber-400/60 mt-4 text-center"
-        >
-          {displayVerse.copyright}
-        </motion.p>
+        <p className="mt-4 text-center text-caption text-foreground-subtle">{displayVerse.copyright}</p>
       )}
     </motion.div>
   );

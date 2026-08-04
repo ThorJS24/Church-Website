@@ -1,9 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Mail, ChevronDown, ChevronUp } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import { adminFetch } from '@/lib/adminApi';
 import { LoadingState, EmptyState, ErrorState } from '@/components/admin/States';
+import { Card } from '@/components/ui/Card';
+import { Badge, type BadgeVariant } from '@/components/ui/Badge';
+import { Select } from '@/components/ui/Select';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
 
 interface MessageItem {
   id: string;
@@ -33,11 +38,11 @@ const TYPE_LABEL: Record<string, string> = {
 
 const STATUS_OPTIONS = ['new', 'pending', 'contacted', 'closed'];
 
-const STATUS_BADGE: Record<string, string> = {
-  new: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
-  pending: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
-  contacted: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
-  closed: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+const STATUS_VARIANT: Record<string, BadgeVariant> = {
+  new: 'info',
+  pending: 'warning',
+  contacted: 'accent',
+  closed: 'neutral',
 };
 
 function typeOf(item: MessageItem): string {
@@ -91,18 +96,15 @@ export default function MessagesPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Messages ({items.length})</h1>
-        <label htmlFor="message-filter" className="sr-only">Filter by status</label>
-        <select
-          id="message-filter"
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-headline-md text-foreground">Messages ({items.length})</h1>
+        <Select
+          aria-label="Filter by status"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 dark:text-white"
-        >
-          <option value="all">All statuses</option>
-          {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
-        </select>
+          options={[{ value: 'all', label: 'All statuses' }, ...STATUS_OPTIONS.map(s => ({ value: s, label: s }))]}
+          className="w-auto"
+        />
       </div>
 
       {filtered.length === 0 ? (
@@ -112,36 +114,32 @@ export default function MessagesPage() {
           {filtered.map((item) => {
             const key = `${item.collection}-${item.id}`;
             const isOpen = expanded === key;
+            const panelId = `message-detail-${key}`;
             return (
-              <div key={key} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <Card key={key} padding="none" className="overflow-hidden">
                 <button
                   onClick={() => setExpanded(isOpen ? null : key)}
-                  className="w-full flex items-center justify-between p-4 text-left"
+                  aria-expanded={isOpen}
+                  aria-controls={panelId}
+                  className="flex w-full items-center justify-between gap-4 p-4 text-left"
                 >
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs font-semibold uppercase tracking-wide text-blue-600 dark:text-blue-400">{typeOf(item)}</span>
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${STATUS_BADGE[item.status || 'new'] || STATUS_BADGE.new}`}>
-                        {item.status || 'new'}
-                      </span>
+                    <div className="mb-1 flex items-center gap-2">
+                      <span className="text-caption font-semibold uppercase tracking-wide text-accent">{typeOf(item)}</span>
+                      <Badge variant={STATUS_VARIANT[item.status || 'new'] || 'info'}>{item.status || 'new'}</Badge>
                     </div>
-                    <p className="font-medium text-gray-900 dark:text-white truncate">{nameOf(item)} &lt;{item.email}&gt;</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{item.subject || item.message || 'No message'}</p>
+                    <p className="truncate text-body-sm font-medium text-foreground">{nameOf(item)} &lt;{item.email}&gt;</p>
+                    <p className="truncate text-body-sm text-foreground-muted">{item.subject || item.message || 'No message'}</p>
                   </div>
-                  <div className="flex items-center gap-3 shrink-0 ml-4">
-                    <span className="text-xs text-gray-400">{new Date(item.createdAt).toLocaleDateString()}</span>
-                    {isOpen ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
-                  </div>
+                  <span className="shrink-0 text-caption text-foreground-subtle">{new Date(item.createdAt).toLocaleDateString()}</span>
                 </button>
 
                 {isOpen && (
-                  <MessageDetail
-                    item={item}
-                    saving={saving === key}
-                    onSave={(status, notes) => updateStatus(item, status, notes)}
-                  />
+                  <div id={panelId}>
+                    <MessageDetail item={item} saving={saving === key} onSave={(status, notes) => updateStatus(item, status, notes)} />
+                  </div>
                 )}
-              </div>
+              </Card>
             );
           })}
         </div>
@@ -162,45 +160,20 @@ function MessageDetail({ item, saving, onSave }: { item: MessageItem; saving: bo
   }).filter(([, v]) => v !== undefined && v !== null && v !== '');
 
   return (
-    <div className="border-t border-gray-100 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-900/30">
-      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 mb-4 text-sm">
+    <div className="border-t border-border bg-surface p-4">
+      <dl className="mb-4 grid grid-cols-1 gap-x-6 gap-y-2 text-body-sm sm:grid-cols-2">
         {fields.map(([label, value]) => (
           <div key={label}>
-            <dt className="text-gray-500 dark:text-gray-400 capitalize">{label}</dt>
-            <dd className="text-gray-800 dark:text-gray-200 break-words">{Array.isArray(value) ? value.join(', ') : String(value)}</dd>
+            <dt className="capitalize text-foreground-subtle">{label}</dt>
+            <dd className="break-words text-foreground">{Array.isArray(value) ? value.join(', ') : String(value)}</dd>
           </div>
         ))}
       </dl>
 
-      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-end">
-        <div>
-          <label htmlFor={`status-${item.id}`} className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">Status</label>
-          <select
-            id={`status-${item.id}`}
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 dark:text-white"
-          >
-            {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
-        </div>
-        <div className="flex-1 min-w-[200px]">
-          <label htmlFor={`notes-${item.id}`} className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">Notes</label>
-          <input
-            id={`notes-${item.id}`}
-            type="text"
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            className="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 dark:text-white"
-          />
-        </div>
-        <button
-          onClick={() => onSave(status, notes)}
-          disabled={saving}
-          className="px-4 py-1.5 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-        >
-          {saving ? 'Saving...' : 'Save'}
-        </button>
+      <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-end">
+        <Select label="Status" value={status} onChange={(e) => setStatus(e.target.value)} options={STATUS_OPTIONS.map(s => ({ value: s, label: s }))} size="sm" className="w-auto" />
+        <Input label="Notes" size="sm" value={notes} onChange={(e) => setNotes(e.target.value)} className="min-w-[200px] flex-1" />
+        <Button size="sm" loading={saving} onClick={() => onSave(status, notes)}>{saving ? 'Saving...' : 'Save'}</Button>
       </div>
     </div>
   );

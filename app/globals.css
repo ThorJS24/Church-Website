@@ -2,7 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Critical CSS inlined for performance */
+/* ==========================================================================
+   Fonts
+   ========================================================================== */
+
 @font-face {
   font-family: 'Noto Sans Tamil';
   font-style: normal;
@@ -12,374 +15,184 @@
   unicode-range: U+0964-0965,U+0B82-0BFA,U+200C-200D,U+20B9,U+25CC;
 }
 
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;500;600&family=Noto+Sans+Tamil:wght@400;500;600&display=swap');
+
+/* ==========================================================================
+   Design tokens
+   Consumed by tailwind.config.js — color tokens are raw "R G B" triplets so
+   Tailwind's `rgb(var(--x) / <alpha-value>)` pattern keeps opacity modifiers
+   (bg-surface/50, etc.) working. Shadow tokens are full CSS values.
+   ========================================================================== */
+
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  color-scheme: light;
+
+  /* Neutral surfaces (zinc scale) */
+  --background: 255 255 255;
+  --surface: 250 250 250;
+  --surface-hover: 244 244 245;
+  --surface-active: 228 228 231;
+  --border: 228 228 231;
+  --border-strong: 212 212 216;
+
+  /* Foreground */
+  --foreground: 24 24 27;
+  --foreground-muted: 82 82 91;
+  --foreground-subtle: 113 113 122;
+
+  /* Accent — single interactive accent (indigo) */
+  --accent: 79 70 229;
+  --accent-hover: 67 56 202;
+  --accent-active: 55 48 163;
+  --accent-foreground: 255 255 255;
+  --accent-subtle: 238 242 255;
+
+  /* Warm accent — sparse use only (verse-of-the-day, prayer CTA).
+     amber-800, not amber-600: amber-600 with white foreground text only
+     hits 3.18:1 contrast (fails WCAG AA's 4.5:1). amber-700 clears 4.5:1
+     against a solid amber-700 background (~5:1) but several call sites
+     layer a translucent bg-white/10 "glass card" or opacity-90 text on
+     top, which lightens the effective background and drops that back
+     under 4.5:1 (measured 4.21:1). amber-800 keeps ~5.7-6:1 even through
+     those overlays while still reading as warm/amber. */
+  --accent-warm: 146 64 14;
+  --accent-warm-foreground: 255 255 255;
+  --accent-warm-subtle: 255 251 235;
+
+  /* Semantic */
+  --success: 22 163 74;
+  --success-subtle: 240 253 244;
+  --warning: 217 119 6;
+  --warning-subtle: 255 251 235;
+  --danger: 220 38 38;
+  --danger-subtle: 254 242 242;
+  --info: 37 99 235;
+  --info-subtle: 239 246 255;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  /* Shadow / elevation */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.06);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.06);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.09), 0 8px 10px -6px rgb(0 0 0 / 0.06);
+
+  /* Motion */
+  --duration-fast: 120ms;
+  --duration-base: 180ms;
+  --duration-slow: 240ms;
+  --duration-slower: 320ms;
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
+  --ease-accelerate: cubic-bezier(0.4, 0, 1, 1);
+
+  /* Section rhythm */
+  --space-section-sm: 3rem;
+  --space-section-md: 5rem;
+  --space-section-lg: 8rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+.dark {
+  color-scheme: dark;
+
+  --background: 9 9 11;
+  --surface: 24 24 27;
+  --surface-hover: 39 39 42;
+  --surface-active: 63 63 70;
+  --border: 39 39 42;
+  --border-strong: 63 63 70;
+
+  --foreground: 250 250 250;
+  --foreground-muted: 161 161 170;
+  --foreground-subtle: 113 113 122;
+
+  --accent: 129 140 248;
+  --accent-hover: 165 180 252;
+  --accent-active: 199 210 254;
+  --accent-foreground: 24 24 27;
+  --accent-subtle: 30 27 75;
+
+  --accent-warm: 245 158 11;
+  --accent-warm-foreground: 24 24 27;
+  --accent-warm-subtle: 69 44 7;
+
+  --success: 34 197 94;
+  --success-subtle: 5 46 22;
+  --warning: 245 158 11;
+  --warning-subtle: 69 44 7;
+  --danger: 239 68 68;
+  --danger-subtle: 69 10 10;
+  --info: 59 130 246;
+  --info-subtle: 23 37 84;
+
+  /* Shadows barely read on dark backgrounds — lean on a hairline border glow instead */
+  --shadow-xs: 0 0 0 1px rgb(255 255 255 / 0.04);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3), 0 0 0 1px rgb(255 255 255 / 0.05);
+  --shadow-md: 0 4px 8px 0 rgb(0 0 0 / 0.35), 0 0 0 1px rgb(255 255 255 / 0.06);
+  --shadow-lg: 0 12px 20px -4px rgb(0 0 0 / 0.4), 0 0 0 1px rgb(255 255 255 / 0.06);
+  --shadow-xl: 0 24px 32px -8px rgb(0 0 0 / 0.45), 0 0 0 1px rgb(255 255 255 / 0.07);
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
-  font-family: 'Noto Sans Tamil', sans-serif;
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+* {
+  border-color: rgb(var(--border));
 }
 
-.tamil-text {
-  font-family: 'Noto Sans Tamil', sans-serif;
-  line-height: 1.6;
-}
-
-/* Simplified Divine Effects */
-.divine-glow {
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-.dark .divine-glow {
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.1);
-}
-
-/* Mobile-First Responsive Design */
-@layer utilities {
-  .container-responsive {
-    @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
-  }
-  
-  .text-responsive {
-    @apply text-sm sm:text-base lg:text-lg;
-  }
-  
-  .heading-responsive {
-    @apply text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl;
-  }
-  
-  .card-responsive {
-    @apply p-4 sm:p-6 lg:p-8;
-  }
-  
-  .grid-responsive {
-    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8;
-  }
-  
-  .flex-responsive {
-    @apply flex flex-col sm:flex-row items-center gap-4 sm:gap-6;
-  }
-}
-
-/* Touch-friendly buttons */
-.btn-touch {
-  @apply min-h-[44px] min-w-[44px] touch-manipulation;
-}
-
-/* Prevent horizontal scroll */
-html, body {
-  overflow-x: hidden;
-  width: 100%;
-}
-
-/* Responsive images */
-img {
-  max-width: 100%;
-  height: auto;
-}
-
-/* Mobile navigation */
-@media (max-width: 768px) {
-  .mobile-menu {
-    @apply fixed inset-0 z-50 bg-white dark:bg-gray-900;
-  }
-}
-
-/* Performance optimizations */
-.will-change-transform {
-  will-change: transform;
-}
-
-.will-change-opacity {
-  will-change: opacity;
-}
-
-.gpu-accelerated {
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  perspective: 1000px;
-}
-
-/* Lazy loading placeholder */
-.lazy-placeholder {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: loading 1.5s infinite;
-}
-
-@keyframes loading {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-/* Reduce motion for accessibility and reverence */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-/* Default reduced motion for church setting */
-.float {
-  animation: none;
-}
-
-.pulse-custom {
-  animation: none;
-}
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* Responsive Button Fixes */
-.btn-touch {
-  min-height: 44px;
-  min-width: 44px;
-  touch-action: manipulation;
-}
-
-.btn-primary, .btn-outline {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-  min-height: 48px;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-  color: white;
-  border: none;
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
-}
-
-.btn-outline {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(10px);
-}
-
-.btn-outline:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.5);
-}
-
-/* Mobile Responsive Adjustments */
-@media (max-width: 640px) {
-  .btn-primary, .btn-outline {
-    padding: 10px 20px;
-    font-size: 14px;
-    min-height: 44px;
-  }
-  
-  .mobile-menu {
-    max-height: calc(100vh - 64px);
-    overflow-y: auto;
-  }
-}
-
-/* Dynamic button sizing */
-.dynamic-btn {
-  padding: 8px 16px;
-  font-size: clamp(12px, 2.5vw, 14px);
-  min-width: fit-content;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-@media (max-width: 480px) {
-  .dynamic-btn {
-    padding: 6px 12px;
-    font-size: 12px;
-  }
-}
-
-/* Navigation improvements */
-.nav-dropdown {
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
-.nav-item {
-  position: relative;
-  overflow: hidden;
-}
-
-.nav-item::before {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  width: 0;
-  height: 2px;
-  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
-  transition: all 0.3s ease;
-  transform: translateX(-50%);
-}
-
-.nav-item:hover::before,
-.nav-item.active::before {
-  width: 100%;
-}
-
-/* Premium glass morphism effects */
-.glass {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.glass-dark {
-  background: rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Modern button styles */
-.btn-premium {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border: none;
-  color: white;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.btn-premium::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-  transition: left 0.5s;
-}
-
-.btn-premium:hover::before {
-  left: 100%;
-}
-
-.btn-premium:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
-}
-
-/* Smooth scrolling */
 html {
   scroll-behavior: smooth;
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
+html,
+body {
+  overflow-x: hidden;
+  width: 100%;
 }
 
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
+body {
+  color: rgb(var(--foreground));
+  background: rgb(var(--background));
+  font-family: var(--font-inter), 'Noto Sans Tamil', sans-serif;
+  transition: background-color var(--duration-base) var(--ease-standard),
+    color var(--duration-base) var(--ease-standard);
 }
 
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  border-radius: 4px;
+img,
+video {
+  max-width: 100%;
+  height: auto;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #5a67d8, #6b46c1);
+::selection {
+  background: rgb(var(--accent) / 0.2);
+  color: rgb(var(--foreground));
 }
 
-/* Dark mode scrollbar */
-.dark ::-webkit-scrollbar-track {
-  background: #374151;
+/* Default focus ring — components should rely on this rather than reinventing one */
+:focus-visible {
+  outline: 2px solid rgb(var(--accent));
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
 }
 
-/* Enhanced focus states */
-.focus-ring {
-  @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800;
-}
+/* ==========================================================================
+   Internationalization
+   ========================================================================== */
 
-/* Gradient text */
-.gradient-text {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+.tamil-text,
+.font-tamil {
+  font-family: 'Noto Sans Tamil', sans-serif;
+  line-height: 1.75;
 }
-
-/* Floating animation */
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-}
-
-.float {
-  animation: float 3s ease-in-out infinite;
-}
-
-/* Pulse animation */
-@keyframes pulse-custom {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-
-.pulse-custom {
-  animation: pulse-custom 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-/* Modern card styles */
-.card-modern {
-  @apply bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 transition-all duration-300;
-}
-
-.card-modern:hover {
-  @apply shadow-xl transform -translate-y-1;
-}
-
-/* Language toggle improvements */
-.language-toggle {
-  transition: all 0.2s ease;
-}
-
-.language-toggle:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;500;600&family=Noto+Sans+Tamil:wght@400;500;600&display=swap');
 
 .font-hebrew {
   font-family: 'Noto Sans Hebrew', 'SBL Hebrew', 'Times New Roman', serif;
@@ -387,27 +200,40 @@ html {
   text-align: right;
 }
 
-.font-tamil {
-  font-family: 'Noto Sans Tamil', sans-serif;
+/* ==========================================================================
+   Scrollbar
+   ========================================================================== */
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
 }
 
-/* Calendar responsive fixes */
-.calendar-grid {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(120px, 1fr));
-  gap: 12px;
+::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-@media (max-width: 768px) {
-  .calendar-grid {
-    grid-template-columns: repeat(7, minmax(80px, 1fr));
-    gap: 8px;
-  }
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--border-strong));
+  border-radius: var(--radius-full);
+  border: 2px solid rgb(var(--background));
 }
 
-@media (max-width: 480px) {
-  .calendar-grid {
-    grid-template-columns: repeat(7, minmax(60px, 1fr));
-    gap: 4px;
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--foreground-subtle));
+}
+
+/* ==========================================================================
+   Motion
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

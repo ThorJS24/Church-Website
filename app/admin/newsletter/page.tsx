@@ -4,6 +4,10 @@ import { useEffect, useState } from 'react';
 import { Send, Users, Mail } from 'lucide-react';
 import { adminFetch } from '@/lib/adminApi';
 import { LoadingState, EmptyState } from '@/components/admin/States';
+import { Card } from '@/components/ui/Card';
+import { Input } from '@/components/ui/Input';
+import { Textarea } from '@/components/ui/Textarea';
+import { Button } from '@/components/ui/Button';
 
 interface Campaign {
   id: string;
@@ -69,67 +73,51 @@ export default function NewsletterPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Newsletter</h1>
+      <h1 className="mb-6 text-headline-md text-foreground">Newsletter</h1>
 
-      <div className="flex items-center gap-2 mb-6 text-sm text-gray-600 dark:text-gray-300">
-        <Users className="w-4 h-4" /> {count} active subscriber{count === 1 ? '' : 's'}
+      <div className="mb-6 flex items-center gap-2 text-body-sm text-foreground-muted">
+        <Users className="h-4 w-4" /> {count} active subscriber{count === 1 ? '' : 's'}
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-8 max-w-2xl">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">New Campaign</h2>
+      <Card className="mb-8 max-w-2xl">
+        <h2 className="mb-4 text-title-lg text-foreground">New Campaign</h2>
         <div className="space-y-4">
-          <div>
-            <label htmlFor="campaign-subject" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Subject</label>
-            <input
-              id="campaign-subject"
-              type="text"
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 dark:text-white"
-            />
-          </div>
-          <div>
-            <label htmlFor="campaign-body" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Body (HTML)</label>
-            <textarea
-              id="campaign-body"
-              rows={8}
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              placeholder="<p>This week at Salem PBC...</p>"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 dark:text-white font-mono text-sm"
-            />
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">An unsubscribe link is appended automatically.</p>
-          </div>
-          {result && <p className="text-sm text-gray-700 dark:text-gray-300">{result}</p>}
-          <button
-            onClick={send}
-            disabled={sending || !subject || !body || !count}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-          >
-            <Send className="w-4 h-4" /> {sending ? 'Sending...' : `Send to ${count ?? 0} Subscribers`}
-          </button>
+          <Input label="Subject" value={subject} onChange={(e) => setSubject(e.target.value)} />
+          <Textarea
+            label="Body (HTML)"
+            rows={8}
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            placeholder="<p>This week at Salem PBC...</p>"
+            hint="An unsubscribe link is appended automatically."
+            className="font-mono"
+          />
+          {result && <p className="text-body-sm text-foreground-muted">{result}</p>}
+          <Button leftIcon={<Send className="h-4 w-4" />} loading={sending} disabled={!subject || !body || !count} onClick={send}>
+            {sending ? 'Sending...' : `Send to ${count ?? 0} Subscribers`}
+          </Button>
         </div>
-      </div>
+      </Card>
 
-      <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Past Campaigns</h2>
+      <h2 className="mb-3 text-title-lg text-foreground">Past Campaigns</h2>
       {campaigns.length === 0 ? (
         <EmptyState icon={Mail} title="No campaigns sent yet" />
       ) : (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-200 dark:border-gray-700 text-left text-gray-500 dark:text-gray-400">
-                <th className="p-3">Subject</th>
-                <th className="p-3">Sent</th>
-                <th className="p-3">Recipients</th>
+        <div className="overflow-x-auto rounded-lg border border-border">
+          <table className="w-full text-left text-body-sm">
+            <thead className="bg-surface">
+              <tr>
+                <th className="p-3 text-label text-foreground-subtle">Subject</th>
+                <th className="p-3 text-label text-foreground-subtle">Sent</th>
+                <th className="p-3 text-label text-foreground-subtle">Recipients</th>
               </tr>
             </thead>
             <tbody>
               {campaigns.map((c) => (
-                <tr key={c.id} className="border-b border-gray-100 dark:border-gray-700 last:border-0">
-                  <td className="p-3 text-gray-700 dark:text-gray-300">{c.subject}</td>
-                  <td className="p-3 text-gray-500 dark:text-gray-400">{formatTimestamp(c.sentAt)}</td>
-                  <td className="p-3 text-gray-500 dark:text-gray-400">{c.sentCount}/{c.recipientCount}</td>
+                <tr key={c.id} className="border-t border-border">
+                  <td className="p-3 text-foreground">{c.subject}</td>
+                  <td className="p-3 text-foreground-muted">{formatTimestamp(c.sentAt)}</td>
+                  <td className="p-3 text-foreground-muted">{c.sentCount}/{c.recipientCount}</td>
                 </tr>
               ))}
             </tbody>

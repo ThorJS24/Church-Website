@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Calendar, Clock, MapPin, User, Phone, Mail, Tag, DollarSign } from 'lucide-react';
+import { Calendar, Clock, MapPin, User, Phone, Mail, Tag, DollarSign, ExternalLink } from 'lucide-react';
 import Image from 'next/image';
-import { useFocusTrap } from '@/hooks/useFocusTrap';
+import { Modal } from '@/components/ui/Modal';
+import { Badge } from '@/components/ui/Badge';
+import { LinkButton } from '@/components/ui/Button';
+import { getEventCategory } from '@/lib/eventCategories';
 
 interface EventModalProps {
   event: any;
@@ -12,234 +13,123 @@ interface EventModalProps {
   onClose: () => void;
 }
 
+function renderDescription(description: any): string {
+  if (typeof description === 'string') return description;
+  if (Array.isArray(description)) {
+    return description
+      .map((block: any) => (block._type === 'block' ? block.children?.map((c: any) => c.text).join('') || '' : ''))
+      .join('\n');
+  }
+  return 'No description available';
+}
+
+const formatDate = (d: string) => new Date(d).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+const formatTime = (d: string) => new Date(d).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+
 export default function EventModal({ event, isOpen, onClose }: EventModalProps) {
-  const modalRef = useRef<HTMLDivElement>(null);
-  useFocusTrap(isOpen && !!event, onClose, modalRef);
-
   if (!event) return null;
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
-
-  const formatTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    });
-  };
-
-  const renderDescription = (description: any) => {
-    if (typeof description === 'string') return description;
-    if (Array.isArray(description)) {
-      return description.map((block: any) => {
-        if (block._type === 'block') {
-          return block.children?.map((child: any) => child.text).join('') || '';
-        }
-        return '';
-      }).join('\n');
-    }
-    return 'No description available';
-  };
+  const category = event.category ? getEventCategory(event.category) : null;
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 transition-opacity bg-black bg-opacity-30"
-              onClick={onClose}
-            />
+    <Modal isOpen={isOpen} onClose={onClose} title={event.title} size="xl">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="space-y-6">
+          {event.imageUrl && (
+            <div className="relative h-64 overflow-hidden rounded-lg bg-surface-active">
+              <Image src={event.imageUrl} alt={event.title} fill sizes="(max-width: 1024px) 100vw, 500px" className="object-cover" />
+            </div>
+          )}
 
-            <motion.div
-              ref={modalRef}
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="event-modal-title"
-              tabIndex={-1}
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="inline-block w-full max-w-4xl p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-gray-800 shadow-2xl rounded-2xl relative z-50"
-            >
-              <div className="flex justify-between items-start mb-6">
-                <h2 id="event-modal-title" className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {event.title}
-                </h2>
-                <button
-                  onClick={onClose}
-                  className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <X className="w-6 h-6" />
-                </button>
+          <div className="space-y-4 text-body-sm text-foreground-muted">
+            <div className="flex items-center gap-3">
+              <Calendar className="h-5 w-5 shrink-0 text-accent" />
+              <div>
+                <p className="font-medium text-foreground">{formatDate(event.startDate)}</p>
+                {event.endDate && <p className="text-caption">Until {formatDate(event.endDate)}</p>}
               </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="space-y-6">
-                  {event.imageUrl && (
-                    <div className="relative h-64 rounded-lg overflow-hidden">
-                      <Image
-                        src={event.imageUrl}
-                        alt={event.title}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                  )}
-
-                  <div className="space-y-4">
-                    <div className="flex items-center text-gray-600 dark:text-gray-300">
-                      <Calendar className="w-5 h-5 mr-3" />
-                      <div>
-                        <p className="font-medium">{formatDate(event.startDate)}</p>
-                        {event.endDate && (
-                          <p className="text-sm">Until {formatDate(event.endDate)}</p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center text-gray-600 dark:text-gray-300">
-                      <Clock className="w-5 h-5 mr-3" />
-                      <div>
-                        <p>{formatTime(event.startDate)}</p>
-                        {event.endDate && (
-                          <p className="text-sm">- {formatTime(event.endDate)}</p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center text-gray-600 dark:text-gray-300">
-                      <MapPin className="w-5 h-5 mr-3" />
-                      <div>
-                        <p className="font-medium">{event.location}</p>
-                        {event.address && (
-                          <p className="text-sm">{event.address}</p>
-                        )}
-                      </div>
-                    </div>
-
-                    {event.category && (
-                      <div className="flex items-center text-gray-600 dark:text-gray-300">
-                        <Tag className="w-5 h-5 mr-3" />
-                        <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium">
-                          {event.category.replace(/([A-Z])/g, ' $1').replace(/^./, (str: string) => str.toUpperCase())}
-                        </span>
-                      </div>
-                    )}
-
-                    {event.cost !== undefined && (
-                      <div className="flex items-center text-gray-600 dark:text-gray-300">
-                        <DollarSign className="w-5 h-5 mr-3" />
-                        <span className="font-medium">
-                          {event.cost === 0 ? 'Free' : `$${event.cost}`}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                      Description
-                    </h3>
-                    <div className="text-gray-600 dark:text-gray-300 whitespace-pre-line">
-                      {event.shortDescription || renderDescription(event.description)}
-                    </div>
-                  </div>
-
-                  {(event.organizerName || event.contactEmail || event.contactPhone) && (
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                        Contact Information
-                      </h3>
-                      <div className="space-y-2">
-                        {event.organizerName && (
-                          <div className="flex items-center text-gray-600 dark:text-gray-300">
-                            <User className="w-4 h-4 mr-2" />
-                            <span>{event.organizerName}</span>
-                          </div>
-                        )}
-                        {event.contactEmail && (
-                          <div className="flex items-center text-gray-600 dark:text-gray-300">
-                            <Mail className="w-4 h-4 mr-2" />
-                            <a href={`mailto:${event.contactEmail}`} className="hover:text-blue-600">
-                              {event.contactEmail}
-                            </a>
-                          </div>
-                        )}
-                        {event.contactPhone && (
-                          <div className="flex items-center text-gray-600 dark:text-gray-300">
-                            <Phone className="w-4 h-4 mr-2" />
-                            <a href={`tel:${event.contactPhone}`} className="hover:text-blue-600">
-                              {event.contactPhone}
-                            </a>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {event.tags && event.tags.length > 0 && (
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                        Tags
-                      </h3>
-                      <div className="flex flex-wrap gap-2">
-                        {event.tags.map((tag: string, index: number) => (
-                          <span
-                            key={index}
-                            className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-sm"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {event.registrationRequired && (
-                    <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-                      <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-2">
-                        Registration Required
-                      </h3>
-                      {event.maxAttendees && (
-                        <p className="text-blue-700 dark:text-blue-200 text-sm mb-2">
-                          Limited to {event.maxAttendees} attendees
-                        </p>
-                      )}
-                      {event.registrationUrl ? (
-                        <a
-                          href={event.registrationUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                        >
-                          Register Now
-                        </a>
-                      ) : (
-                        <p className="text-blue-700 dark:text-blue-200 text-sm">
-                          Contact us for registration details
-                        </p>
-                      )}
-                    </div>
-                  )}
-                </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <Clock className="h-5 w-5 shrink-0 text-accent" />
+              <p>
+                {formatTime(event.startDate)}
+                {event.endDate && <span> - {formatTime(event.endDate)}</span>}
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <MapPin className="h-5 w-5 shrink-0 text-accent" />
+              <div>
+                <p className="font-medium text-foreground">{event.location}</p>
+                {event.address && <p className="text-caption">{event.address}</p>}
               </div>
-            </motion.div>
+            </div>
+            {category && (
+              <div className="flex items-center gap-3">
+                <Tag className="h-5 w-5 shrink-0 text-accent" />
+                <Badge variant={category.badgeVariant}>{category.label}</Badge>
+              </div>
+            )}
+            {event.cost !== undefined && (
+              <div className="flex items-center gap-3">
+                <DollarSign className="h-5 w-5 shrink-0 text-accent" />
+                <span className="font-medium text-foreground">{event.cost === 0 ? 'Free' : `$${event.cost}`}</span>
+              </div>
+            )}
           </div>
         </div>
-      )}
-    </AnimatePresence>
+
+        <div className="space-y-6">
+          <div>
+            <h3 className="mb-2 text-title-sm text-foreground">Description</h3>
+            <p className="whitespace-pre-line text-body-sm text-foreground-muted">
+              {event.shortDescription || renderDescription(event.description)}
+            </p>
+          </div>
+
+          {(event.organizerName || event.contactEmail || event.contactPhone) && (
+            <div>
+              <h3 className="mb-2 text-title-sm text-foreground">Contact Information</h3>
+              <div className="space-y-1.5 text-body-sm text-foreground-muted">
+                {event.organizerName && <p className="flex items-center gap-2"><User className="h-4 w-4" /> {event.organizerName}</p>}
+                {event.contactEmail && (
+                  <a href={`mailto:${event.contactEmail}`} className="flex items-center gap-2 hover:text-accent">
+                    <Mail className="h-4 w-4" /> {event.contactEmail}
+                  </a>
+                )}
+                {event.contactPhone && (
+                  <a href={`tel:${event.contactPhone}`} className="flex items-center gap-2 hover:text-accent">
+                    <Phone className="h-4 w-4" /> {event.contactPhone}
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
+
+          {event.tags && event.tags.length > 0 && (
+            <div>
+              <h3 className="mb-2 text-title-sm text-foreground">Tags</h3>
+              <div className="flex flex-wrap gap-2">
+                {event.tags.map((tag: string, i: number) => (
+                  <Badge key={i} variant="neutral">{tag}</Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {event.registrationRequired && (
+            <div className="rounded-lg border border-accent/20 bg-accent-subtle p-4">
+              <h3 className="mb-1.5 text-title-sm text-accent">Registration Required</h3>
+              {event.maxAttendees && <p className="mb-2 text-body-sm text-accent">Limited to {event.maxAttendees} attendees</p>}
+              {event.registrationUrl ? (
+                <LinkButton href={event.registrationUrl} target="_blank" rel="noopener noreferrer" size="sm" rightIcon={<ExternalLink className="h-3.5 w-3.5" />}>
+                  Register Now
+                </LinkButton>
+              ) : (
+                <p className="text-body-sm text-accent">Contact us for registration details</p>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </Modal>
   );
 }

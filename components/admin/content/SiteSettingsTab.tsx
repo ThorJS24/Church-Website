@@ -4,6 +4,10 @@ import { useEffect, useState } from 'react';
 import { Save } from 'lucide-react';
 import { adminFetch } from '@/lib/adminApi';
 import { LoadingState, ErrorState } from '@/components/admin/States';
+import { Card } from '@/components/ui/Card';
+import { Grid } from '@/components/ui/Grid';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
 
 const FIELDS: { key: string; label: string }[] = [
   { key: 'churchName', label: 'Church Name' },
@@ -54,31 +58,20 @@ export default function SiteSettingsTab() {
 
   return (
     <div>
-      <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Site Settings</h2>
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <h2 className="mb-4 text-title-lg text-foreground">Site Settings</h2>
+      <Card>
+        <Grid cols={2} gap={4}>
           {FIELDS.map((f) => (
-            <div key={f.key}>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{f.label}</label>
-              <input
-                value={form[f.key] ?? ''}
-                onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 dark:text-white"
-              />
-            </div>
+            <Input key={f.key} label={f.label} value={form[f.key] ?? ''} onChange={(e) => setForm({ ...form, [f.key]: e.target.value })} />
           ))}
+        </Grid>
+        <div className="mt-6 flex items-center gap-3">
+          <Button leftIcon={<Save className="h-4 w-4" />} loading={saving} onClick={save}>
+            {saving ? 'Saving...' : 'Save Changes'}
+          </Button>
+          {saved && <span className="text-body-sm text-success">Saved</span>}
         </div>
-        <div className="flex items-center gap-3 mt-6">
-          <button
-            onClick={save}
-            disabled={saving}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-          >
-            <Save className="w-4 h-4" /> {saving ? 'Saving...' : 'Save Changes'}
-          </button>
-          {saved && <span className="text-sm text-green-600 dark:text-green-400">Saved</span>}
-        </div>
-      </div>
+      </Card>
     </div>
   );
 }

@@ -5,6 +5,8 @@ import Image from 'next/image';
 import { Check, X, ShieldCheck } from 'lucide-react';
 import { adminFetch } from '@/lib/adminApi';
 import { LoadingState, EmptyState, ErrorState } from '@/components/admin/States';
+import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
 
 interface QueueItem {
   id: string;
@@ -65,51 +67,41 @@ export default function ModerationQueuePage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Moderation Queue ({items.length})</h1>
+      <h1 className="mb-6 text-headline-md text-foreground">Moderation Queue ({items.length})</h1>
 
       {items.length === 0 ? (
         <EmptyState icon={ShieldCheck} title="Nothing waiting for review" description="Prayer requests, comments, and gallery submissions will show up here as they come in." />
       ) : (
         <div className="space-y-3">
           {items.map((item) => (
-            <div key={`${item.collection}-${item.id}`} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex items-start gap-4">
+            <Card key={`${item.collection}-${item.id}`} className="flex items-start gap-4">
               {item.collection === 'galleryImages' && item.imageUrl && (
-                <div className="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700">
+                <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-surface-active">
                   <Image src={item.imageUrl} alt={item.title || 'submission'} fill className="object-cover" sizes="80px" />
                 </div>
               )}
-              <div className="flex-1 min-w-0">
-                <span className="text-xs font-semibold uppercase tracking-wide text-blue-600 dark:text-blue-400">
-                  {COLLECTION_LABEL[item.collection]}
-                </span>
-                <p className="font-medium text-gray-900 dark:text-white truncate">
+              <div className="min-w-0 flex-1">
+                <span className="text-caption font-semibold uppercase tracking-wide text-accent">{COLLECTION_LABEL[item.collection]}</span>
+                <p className="truncate text-body-sm font-medium text-foreground">
                   {item.title || item.text || item.description || item.content || 'Untitled'}
                 </p>
                 {(item.collection === 'comments' || item.collection === 'testimonials') && (item.text || item.content) && (
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">&ldquo;{item.text || item.content}&rdquo;</p>
+                  <p className="mt-1 text-body-sm text-foreground-muted">&ldquo;{item.text || item.content}&rdquo;</p>
                 )}
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <p className="mt-1 text-caption text-foreground-subtle">
                   {item.authorName || item.author || item.photographer || 'Anonymous'}
                   {item.isPrivate && ' · Private'}
                 </p>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  onClick={() => decide(item, 'approved')}
-                  disabled={busyId === item.id}
-                  className="flex items-center gap-1 px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
-                >
-                  <Check className="w-4 h-4" /> Approve
-                </button>
-                <button
-                  onClick={() => decide(item, 'rejected')}
-                  disabled={busyId === item.id}
-                  className="flex items-center gap-1 px-3 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50"
-                >
-                  <X className="w-4 h-4" /> Reject
-                </button>
+              <div className="flex shrink-0 items-center gap-2">
+                <Button size="sm" variant="primary" leftIcon={<Check className="h-4 w-4" />} disabled={busyId === item.id} onClick={() => decide(item, 'approved')}>
+                  Approve
+                </Button>
+                <Button size="sm" variant="outline" leftIcon={<X className="h-4 w-4" />} disabled={busyId === item.id} onClick={() => decide(item, 'rejected')}>
+                  Reject
+                </Button>
               </div>
-            </div>
+            </Card>
           ))}
         </div>
       )}

@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { Users, ShieldCheck, Calendar, TrendingUp, ScrollText } from 'lucide-react';
 import { adminFetch } from '@/lib/adminApi';
 import { LoadingState, ErrorState } from '@/components/admin/States';
+import { Card } from '@/components/ui/Card';
+import { Grid } from '@/components/ui/Grid';
 
 interface DashboardStats {
   totalUsers: number;
@@ -51,26 +53,26 @@ export default function AdminDashboardPage() {
   if (!stats) return null;
 
   const cards = [
-    { label: 'New Members This Week', value: stats.newUsersThisWeek, icon: Users, color: 'text-blue-600 bg-blue-50 dark:bg-blue-900/30' },
-    { label: 'Pending Moderation', value: stats.pendingModerationCount, icon: ShieldCheck, color: 'text-amber-600 bg-amber-50 dark:bg-amber-900/30', href: '/admin/moderation' },
-    { label: 'Upcoming Events', value: stats.totalEvents, icon: Calendar, color: 'text-green-600 bg-green-50 dark:bg-green-900/30' },
-    { label: 'Member Growth (mo/mo)', value: `${stats.monthlyGrowth}%`, icon: TrendingUp, color: 'text-purple-600 bg-purple-50 dark:bg-purple-900/30' },
+    { label: 'New Members This Week', value: stats.newUsersThisWeek, icon: Users, tone: 'text-info bg-info-subtle' },
+    { label: 'Pending Moderation', value: stats.pendingModerationCount, icon: ShieldCheck, tone: 'text-warning bg-warning-subtle', href: '/admin/moderation' },
+    { label: 'Upcoming Events', value: stats.totalEvents, icon: Calendar, tone: 'text-success bg-success-subtle' },
+    { label: 'Member Growth (mo/mo)', value: `${stats.monthlyGrowth}%`, icon: TrendingUp, tone: 'text-accent bg-accent-subtle' },
   ];
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Dashboard</h1>
+      <h1 className="mb-6 text-headline-md text-foreground">Dashboard</h1>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <Grid cols={4} gap={4} className="mb-8">
         {cards.map((card) => {
           const content = (
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow">
-              <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-3 ${card.color}`}>
-                <card.icon className="w-5 h-5" />
+            <Card variant="interactive" padding="md">
+              <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-lg ${card.tone}`}>
+                <card.icon className="h-5 w-5" />
               </div>
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">{card.value}</div>
-              <div className="text-sm text-gray-500 dark:text-gray-400">{card.label}</div>
-            </div>
+              <div className="text-headline-sm text-foreground">{card.value}</div>
+              <div className="text-body-sm text-foreground-muted">{card.label}</div>
+            </Card>
           );
           return card.href ? (
             <Link key={card.label} href={card.href}>{content}</Link>
@@ -78,53 +80,53 @@ export default function AdminDashboardPage() {
             <div key={card.label}>{content}</div>
           );
         })}
-      </div>
+      </Grid>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5">
-          <h2 className="font-semibold text-gray-900 dark:text-white mb-4">Membership</h2>
-          <dl className="space-y-3 text-sm">
+      <Grid cols={2} gap={6}>
+        <Card>
+          <h2 className="mb-4 text-title-md text-foreground">Membership</h2>
+          <dl className="space-y-3 text-body-sm">
             <div className="flex justify-between">
-              <dt className="text-gray-500 dark:text-gray-400">Total members</dt>
-              <dd className="font-medium text-gray-900 dark:text-white">{stats.totalUsers}</dd>
+              <dt className="text-foreground-muted">Total members</dt>
+              <dd className="font-medium text-foreground">{stats.totalUsers}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-gray-500 dark:text-gray-400">Active</dt>
-              <dd className="font-medium text-gray-900 dark:text-white">{stats.activeUsers}</dd>
+              <dt className="text-foreground-muted">Active</dt>
+              <dd className="font-medium text-foreground">{stats.activeUsers}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-gray-500 dark:text-gray-400">New this month</dt>
-              <dd className="font-medium text-gray-900 dark:text-white">{stats.newUsersThisMonth}</dd>
+              <dt className="text-foreground-muted">New this month</dt>
+              <dd className="font-medium text-foreground">{stats.newUsersThisMonth}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-gray-500 dark:text-gray-400">Prayer requests (all time)</dt>
-              <dd className="font-medium text-gray-900 dark:text-white">{stats.prayerRequests}</dd>
+              <dt className="text-foreground-muted">Prayer requests (all time)</dt>
+              <dd className="font-medium text-foreground">{stats.prayerRequests}</dd>
             </div>
           </dl>
-        </div>
+        </Card>
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-gray-900 dark:text-white">Recent Admin Actions</h2>
-            <Link href="/admin/audit-log" className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
-              <ScrollText className="w-3 h-3" /> View all
+        <Card>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-title-md text-foreground">Recent Admin Actions</h2>
+            <Link href="/admin/audit-log" className="flex items-center gap-1 text-caption text-accent hover:underline">
+              <ScrollText className="h-3 w-3" /> View all
             </Link>
           </div>
           {recentActions.length === 0 ? (
-            <p className="text-sm text-gray-500 dark:text-gray-400">No admin actions recorded yet.</p>
+            <p className="text-body-sm text-foreground-muted">No admin actions recorded yet.</p>
           ) : (
-            <ul className="space-y-3 text-sm">
+            <ul className="space-y-3 text-body-sm">
               {recentActions.slice(0, 6).map((entry) => (
-                <li key={entry.id} className="flex justify-between border-b border-gray-100 dark:border-gray-700 pb-2 last:border-0">
-                  <span className="text-gray-700 dark:text-gray-300">
-                    <span className="font-medium">{entry.actorEmail}</span> — {entry.action}
+                <li key={entry.id} className="border-b border-border pb-2 last:border-0">
+                  <span className="text-foreground-muted">
+                    <span className="font-medium text-foreground">{entry.actorEmail}</span> — {entry.action}
                   </span>
                 </li>
               ))}
             </ul>
           )}
-        </div>
-      </div>
+        </Card>
+      </Grid>
     </div>
   );
 }

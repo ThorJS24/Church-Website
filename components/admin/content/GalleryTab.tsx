@@ -7,6 +7,12 @@ import { adminFetch } from '@/lib/adminApi';
 import { getIdToken } from '@/lib/firebase';
 import { LoadingState, EmptyState, ErrorState } from '@/components/admin/States';
 import ConfirmModal from '@/components/admin/ConfirmModal';
+import { Card } from '@/components/ui/Card';
+import { Grid } from '@/components/ui/Grid';
+import { Badge, type BadgeVariant } from '@/components/ui/Badge';
+import { IconButton } from '@/components/ui/IconButton';
+import { buttonClasses } from '@/components/ui/Button';
+import { useToast } from '@/components/ui/Toast';
 
 interface GalleryItem {
   id: string;
@@ -16,10 +22,10 @@ interface GalleryItem {
   photographer?: string;
 }
 
-const STATUS_BADGE: Record<string, string> = {
-  approved: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
-  pending: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
-  rejected: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
+const STATUS_VARIANT: Record<string, BadgeVariant> = {
+  approved: 'success',
+  pending: 'warning',
+  rejected: 'danger',
 };
 
 export default function GalleryTab() {
@@ -28,6 +34,7 @@ export default function GalleryTab() {
   const [error, setError] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<GalleryItem | null>(null);
   const [uploading, setUploading] = useState(false);
+  const { toast } = useToast();
 
   const load = () => {
     setLoading(true);
@@ -62,7 +69,7 @@ export default function GalleryTab() {
       if (!response.ok) throw new Error('Upload failed');
       load();
     } catch (err: any) {
-      alert(err.message);
+      toast({ title: 'Upload failed', description: err.message, variant: 'danger' });
     } finally {
       setUploading(false);
     }
@@ -73,10 +80,10 @@ export default function GalleryTab() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Gallery ({items.length})</h2>
-        <label className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer">
-          <Upload className="w-4 h-4" /> {uploading ? 'Uploading...' : 'Upload Images'}
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-title-lg text-foreground">Gallery ({items.length})</h2>
+        <label className={buttonClasses({ className: 'cursor-pointer gap-1.5', disabled: uploading })}>
+          <Upload className="h-4 w-4" /> {uploading ? 'Uploading...' : 'Upload Images'}
           <input type="file" multiple accept="image/*" className="hidden" disabled={uploading} onChange={(e) => upload(e.target.files)} />
         </label>
       </div>
@@ -84,26 +91,24 @@ export default function GalleryTab() {
       {items.length === 0 ? (
         <EmptyState icon={ImageIcon} title="No gallery images yet" description="Upload some, or wait for public submissions in the Moderation Queue." />
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <Grid cols={4} gap={4}>
           {items.map((item) => (
-            <div key={item.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-              <div className="relative aspect-square bg-gray-100 dark:bg-gray-700">
+            <Card key={item.id} padding="none" className="overflow-hidden">
+              <div className="relative aspect-square bg-surface-active">
                 <Image src={item.imageUrl} alt={item.title} fill className="object-cover" sizes="200px" />
               </div>
               <div className="p-3">
-                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{item.title}</p>
-                <div className="flex items-center justify-between mt-2">
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${STATUS_BADGE[item.moderationStatus || 'approved']}`}>
-                    {item.moderationStatus || 'approved'}
-                  </span>
-                  <button onClick={() => setDeleteTarget(item)} className="text-red-600 hover:text-red-700">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                <p className="truncate text-body-sm font-medium text-foreground">{item.title}</p>
+                <div className="mt-2 flex items-center justify-between">
+                  <Badge variant={STATUS_VARIANT[item.moderationStatus || 'approved']}>{item.moderationStatus || 'approved'}</Badge>
+                  <IconButton label="Delete image" size="sm" onClick={() => setDeleteTarget(item)}>
+                    <Trash2 className="h-4 w-4 text-danger" />
+                  </IconButton>
                 </div>
               </div>
-            </div>
+            </Card>
           ))}
-        </div>
+        </Grid>
       )}
 
       <ConfirmModal

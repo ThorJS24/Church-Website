@@ -2,345 +2,187 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Clock, MapPin, Search, Tag, DollarSign, Star } from 'lucide-react';
+import { Calendar, Clock, MapPin, Search, Star } from 'lucide-react';
 import { getEvents as getEventsData, getServiceTimes, EventItem as Event } from '@/lib/content';
+import { EVENT_CATEGORIES, getEventCategory, expandServicesToEvents } from '@/lib/eventCategories';
 import Image from 'next/image';
 import EventModal from '@/components/EventModal';
 import InteractiveCalendar from '@/components/InteractiveCalendar';
+import { PageHero } from '@/components/ui/PageHero';
+import { Section } from '@/components/ui/Section';
+import { Card } from '@/components/ui/Card';
+import { Grid } from '@/components/ui/Grid';
+import { Input } from '@/components/ui/Input';
+import { Badge } from '@/components/ui/Badge';
+import { Button, LinkButton } from '@/components/ui/Button';
+import { LoadingState, EmptyState } from '@/components/ui/States';
+import { cn } from '@/lib/cn';
 
 const extractYouTubeId = (url: string): string | null => {
-  const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+  const regex = /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/;
   const match = url.match(regex);
   return match ? match[1] : null;
 };
 
 const getYouTubeThumbnail = (url: string): string => {
   const videoId = extractYouTubeId(url);
-  return videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : '/images/default-video.jpg';
+  return videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : '/images/default-event.jpg';
 };
 
 export default function EventsPage() {
   const [events, setEvents] = useState<Event[]>([]);
-  const [services, setServices] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilters, setSelectedFilters] = useState<string[]>(['all']);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    async function fetchEvents() {
+      setLoading(true);
+      try {
+        const [eventsData, servicesData] = await Promise.all([getEventsData(), getServiceTimes()]);
+        const recurring = expandServicesToEvents(servicesData || []);
+        setEvents([...(eventsData || []), ...(recurring as unknown as Event[])]);
+      } catch (error) {
+        console.error('Error fetching events:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
     fetchEvents();
   }, []);
 
-  const fetchEvents = async () => {
-    setLoading(true);
-    try {
-      const [eventsData, servicesData] = await Promise.all([
-        getEventsData(),
-        getServiceTimes()
-      ]);
-
-      let allEvents: Event[] = eventsData || [];
-      if (servicesData) {
-        setServices(servicesData);
-        // Convert services to recurring events
-        const serviceEvents: Event[] = [];
-        servicesData.forEach((service) => {
-          const serviceDates = getServiceDates(service.time);
-          serviceDates.forEach((date, index) => {
-            serviceEvents.push({
-              id: `service-${service.id}-${index}`,
-              title: service.title,
-              description: service.description,
-              shortDescription: service.description,
-              startDate: date,
-              location: service.location,
-              category: 'regular-service',
-              recurring: true,
-              featured: false,
-              isPublic: true,
-              cost: 0,
-              registrationRequired: false
-            });
-          });
-        });
-        allEvents = [...allEvents, ...serviceEvents];
-      }
-
-      setEvents(allEvents);
-    } catch (error) {
-      console.error('Error fetching events:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getServiceDates = (time: string, count = 8) => {
-    const dates = [];
-    const now = new Date();
-    
-    if (!time || !time.includes(':')) {
-      console.error('Invalid time format:', time);
-      return [];
-    }
-    
-    const [hours, minutes] = time.split(':').map(Number);
-    
-    if (isNaN(hours) || isNaN(minutes)) {
-      console.error('Invalid time values:', time);
-      return [];
-    }
-    
-    // Find next Sunday
-    let nextSunday = new Date(now);
-    nextSunday.setDate(now.getDate() + (7 - now.getDay()) % 7);
-    if (nextSunday.getDay() === 0 && nextSunday < now) {
-      nextSunday.setDate(nextSunday.getDate() + 7);
-    }
-    
-    // Generate multiple Sunday dates
-    for (let i = 0; i < count; i++) {
-      const serviceDate = new Date(nextSunday);
-      serviceDate.setDate(nextSunday.getDate() + (i * 7));
-      serviceDate.setHours(hours, minutes, 0, 0);
-      
-      if (!isNaN(serviceDate.getTime())) {
-        dates.push(serviceDate.toISOString());
-      }
-    }
-    
-    return dates;
-  };
-
-  const filteredEvents = events.filter(event => {
-    const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  const filteredEvents = events.filter((event) => {
+    const matchesSearch =
+      event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       event.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (event.shortDescription && event.shortDescription.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    const matchesFilters = selectedFilters.includes('all') || 
-      selectedFilters.some(filter => event.category === filter);
-    
+    const matchesFilters = selectedFilters.includes('all') || selectedFilters.some((filter) => event.category === filter);
     return matchesSearch && matchesFilters;
   });
-
-  const categories = [
-    { id: 'all', label: 'All Events', color: 'bg-gray-500' },
-    { id: 'regular-service', label: 'Regular Services', color: 'bg-blue-500' },
-    { id: 'special', label: 'Special Events', color: 'bg-purple-500' },
-    { id: 'ministry', label: 'Ministry Events', color: 'bg-green-500' },
-    { id: 'community', label: 'Community', color: 'bg-orange-500' },
-    { id: 'youth', label: 'Youth Events', color: 'bg-pink-500' },
-    { id: 'worship', label: 'Worship Events', color: 'bg-indigo-500' }
-  ];
-
-  const getCategoryColor = (category: string) => {
-    const cat = categories.find(c => c.id === category);
-    return cat?.color || 'bg-gray-500';
-  };
 
   const handleFilterChange = (categoryId: string) => {
     if (categoryId === 'all') {
       setSelectedFilters(['all']);
     } else {
-      const newFilters = selectedFilters.includes('all') 
+      const newFilters = selectedFilters.includes('all')
         ? [categoryId]
         : selectedFilters.includes(categoryId)
-          ? selectedFilters.filter(f => f !== categoryId)
-          : [...selectedFilters.filter(f => f !== 'all'), categoryId];
-      
+          ? selectedFilters.filter((f) => f !== categoryId)
+          : [...selectedFilters.filter((f) => f !== 'all'), categoryId];
       setSelectedFilters(newFilters.length === 0 ? ['all'] : newFilters);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-300">Loading events...</p>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <LoadingState label="Loading events..." />;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
-        >
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Upcoming Events</h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300">Join us for worship, fellowship, and community events</p>
-        </motion.div>
+    <div>
+      <PageHero icon={<Calendar />} eyebrow="What's Happening" title="Upcoming Events" description="Join us for worship, fellowship, and community events" />
 
-        {/* Interactive Calendar */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 text-center">Event Calendar</h2>
-          <InteractiveCalendar />
+      <Section spacing="lg">
+        <h2 className="mb-6 text-center text-headline-md text-foreground">Event Calendar</h2>
+        <InteractiveCalendar />
+      </Section>
+
+      <Section spacing="sm" className="bg-surface">
+        <div className="mb-4 flex justify-center">
+          <Input placeholder="Search events..." aria-label="Search events" leftIcon={<Search />} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="max-w-md" />
         </div>
-
-        <div className="mb-8 space-y-4">
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <div className="relative max-w-md w-full">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                aria-label="Search events"
-                placeholder="Search events..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              />
-            </div>
+        <Card>
+          <p className="mb-3 text-label text-foreground">Filter by Category</p>
+          <div className="flex flex-wrap gap-2">
+            {EVENT_CATEGORIES.map((category) => {
+              const active = selectedFilters.includes(category.id);
+              return (
+                <button
+                  key={category.id}
+                  onClick={() => handleFilterChange(category.id)}
+                  className={cn(
+                    'flex items-center gap-2 rounded-full px-3 py-1.5 text-body-sm font-medium transition-colors',
+                    active ? category.chipActiveClass : 'bg-surface-active text-foreground-muted hover:bg-surface-hover'
+                  )}
+                >
+                  <span className={cn('h-2 w-2 rounded-full', category.dotClass)} />
+                  {category.label}
+                </button>
+              );
+            })}
           </div>
-          
-          {/* Filter Checkboxes */}
-          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Filter by Category:</h3>
-            <div className="flex flex-wrap gap-3">
-              {categories.map(category => (
-                <label key={category.id} className="flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={selectedFilters.includes(category.id)}
-                    onChange={() => handleFilterChange(category.id)}
-                    className="sr-only"
-                  />
-                  <div className={`flex items-center px-3 py-2 rounded-full text-sm font-medium transition-all ${
-                    selectedFilters.includes(category.id)
-                      ? `${category.color} text-white shadow-md`
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                  }`}>
-                    <div className={`w-3 h-3 rounded-full mr-2 ${category.color}`}></div>
-                    {category.label}
-                  </div>
-                </label>
-              ))}
-            </div>
-          </div>
-        </div>
+        </Card>
+      </Section>
 
+      <Section spacing="lg">
         {filteredEvents.length === 0 ? (
-          <div className="text-center py-12">
-            <Calendar className="mx-auto w-16 h-16 text-gray-300 mb-4" />
-            <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">No events found</h3>
-            <p className="text-gray-500 dark:text-gray-400">Check back soon for new events and activities!</p>
-          </div>
+          <EmptyState icon={Calendar} title="No events found" description="Check back soon for new events and activities!" />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredEvents.map((event, index) => (
-              <motion.div
-                key={event.id}
-                initial={{ opacity: 0, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
-              >
-                <div className="relative h-48 bg-gray-200">
-                  <Image 
-                    src={event.imageUrl || getYouTubeThumbnail(event.youtubeUrl || '') || '/images/default-event.jpg'} 
-                    alt={event.title}
-                    fill
-                    className="object-cover"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = '/images/default-event.jpg';
-                    }}
-                  />
-                </div>
-                
-                <div className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                      <div className={`${getCategoryColor(event.category)} text-white px-3 py-1 rounded-full text-sm font-medium`}>
-                        {event.category === 'regular-service' ? 'Weekly' : new Date(event.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                      </div>
-                      {event.featured && (
-                        <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                      )}
+          <Grid cols={3} gap={6}>
+            {filteredEvents.map((event, index) => {
+              const category = getEventCategory(event.category);
+              return (
+                <motion.div
+                  key={event.id}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-80px' }}
+                  transition={{ delay: Math.min(index * 0.04, 0.4), duration: 0.4 }}
+                >
+                  <Card padding="none" className="h-full overflow-hidden">
+                    <div className="relative aspect-[16/10] bg-surface-active">
+                      <Image
+                        src={event.imageUrl || getYouTubeThumbnail(event.youtubeUrl || '') || '/images/default-event.jpg'}
+                        alt={event.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="object-cover"
+                      />
                     </div>
-                    {event.cost !== undefined && (
-                      <div className="flex items-center text-green-600 dark:text-green-400">
-                        <DollarSign className="w-4 h-4 mr-1" />
-                        <span className="text-sm font-medium">
-                          {event.cost === 0 ? 'Free' : `$${event.cost}`}
-                        </span>
+
+                    <div className="p-5">
+                      <div className="mb-3 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className={cn('rounded-full px-2.5 py-1 text-caption font-medium text-white', category.dotClass)}>
+                            {event.category === 'regular-service' ? 'Weekly' : new Date(event.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          </span>
+                          {event.featured && <Star className="h-4 w-4 fill-current text-warning" />}
+                        </div>
+                        {event.cost !== undefined && (
+                          <span className="text-body-sm font-medium text-success">{event.cost === 0 ? 'Free' : `$${event.cost}`}</span>
+                        )}
                       </div>
-                    )}
-                  </div>
-                  
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-1">{event.title}</h3>
-                  {event.subtitle && (
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">{event.subtitle}</p>
-                  )}
-                  
-                  <div className="space-y-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
-                    <div className="flex items-center">
-                      <Clock className="mr-2 w-4 h-4" />
-                      {new Date(event.startDate).toLocaleTimeString('en-US', { 
-                        hour: 'numeric', 
-                        minute: '2-digit',
-                        hour12: true 
-                      })}
-                      {event.endDate && (
-                        <span className="ml-1">- {new Date(event.endDate).toLocaleTimeString('en-US', { 
-                          hour: 'numeric', 
-                          minute: '2-digit',
-                          hour12: true 
-                        })}</span>
-                      )}
-                    </div>
-                    <div className="flex items-center">
-                      <MapPin className="mr-2 w-4 h-4" />
-                      {event.location}
-                    </div>
-                    {event.category && (
-                      <div className="flex items-center">
-                        <Tag className="mr-2 w-4 h-4" />
-                        <span className={`px-2 py-1 ${getCategoryColor(event.category)} text-white rounded text-xs`}>
-                          {categories.find(c => c.id === event.category)?.label || event.category}
-                        </span>
+
+                      <h3 className="text-title-md text-foreground">{event.title}</h3>
+                      {event.subtitle && <p className="mt-1 text-body-sm text-foreground-subtle">{event.subtitle}</p>}
+
+                      <div className="mt-3 space-y-1.5 text-body-sm text-foreground-muted">
+                        <p className="flex items-center gap-2">
+                          <Clock className="h-3.5 w-3.5" />
+                          {new Date(event.startDate).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
+                          {event.endDate && <span> - {new Date(event.endDate).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}</span>}
+                        </p>
+                        <p className="flex items-center gap-2"><MapPin className="h-3.5 w-3.5" /> {event.location}</p>
                       </div>
-                    )}
-                  </div>
-                  
-                  {event.shortDescription && (
-                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">
-                      {event.shortDescription}
-                    </p>
-                  )}
-                  
-                  <div className="flex gap-2 mt-4">
-                    <button 
-                      onClick={() => setSelectedEvent(event)}
-                      className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-all duration-200 transform hover:scale-105 active:scale-95 font-medium"
-                    >
-                      Learn More
-                    </button>
-                    {event.registrationRequired && event.registrationUrl && (
-                      <a
-                        href={event.registrationUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors text-sm"
-                      >
-                        Register
-                      </a>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+
+                      {event.shortDescription && <p className="mt-3 line-clamp-2 text-body-sm text-foreground-muted">{event.shortDescription}</p>}
+
+                      <div className="mt-4 flex gap-2">
+                        <Button size="sm" fullWidth onClick={() => setSelectedEvent(event)}>Learn More</Button>
+                        {event.registrationRequired && event.registrationUrl && (
+                          <LinkButton href={event.registrationUrl} target="_blank" rel="noopener noreferrer" size="sm" variant="secondary">
+                            Register
+                          </LinkButton>
+                        )}
+                      </div>
+                    </div>
+                  </Card>
+                </motion.div>
+              );
+            })}
+          </Grid>
         )}
-        
-        <EventModal 
-          event={selectedEvent}
-          isOpen={!!selectedEvent}
-          onClose={() => setSelectedEvent(null)}
-        />
-      </div>
+      </Section>
+
+      <EventModal event={selectedEvent} isOpen={!!selectedEvent} onClose={() => setSelectedEvent(null)} />
     </div>
   );
 }

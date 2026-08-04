@@ -3,6 +3,13 @@
 import { useEffect, useState, use } from 'react';
 import { CheckCircle } from 'lucide-react';
 import { FieldSchema } from '@/types/contentType';
+import { Container } from '@/components/ui/Container';
+import { Card } from '@/components/ui/Card';
+import { Input } from '@/components/ui/Input';
+import { Textarea } from '@/components/ui/Textarea';
+import { Checkbox } from '@/components/ui/Checkbox';
+import { Button } from '@/components/ui/Button';
+import { LoadingState } from '@/components/ui/States';
 
 interface PublicForm {
   id: string;
@@ -21,8 +28,8 @@ export default function PublicFormPage({ params }: { params: Promise<{ id: strin
 
   useEffect(() => {
     fetch(`/api/forms/${id}`)
-      .then(res => res.json())
-      .then(data => setForm(data.success ? data.form : null))
+      .then((res) => res.json())
+      .then((data) => setForm(data.success ? data.form : null))
       .catch(() => setForm(null));
   }, [id]);
 
@@ -49,84 +56,68 @@ export default function PublicFormPage({ params }: { params: Promise<{ id: strin
     }
   };
 
-  if (form === undefined) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600" />
-      </div>
-    );
-  }
+  if (form === undefined) return <LoadingState label="Loading form..." />;
 
   if (form === null) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4">
-        <p className="text-gray-500 dark:text-gray-400">This form doesn&apos;t exist or is no longer available.</p>
-      </div>
+      <Container size="sm" className="flex min-h-[60vh] items-center justify-center py-16 text-center">
+        <p className="text-body-md text-foreground-muted">This form doesn&apos;t exist or is no longer available.</p>
+      </Container>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-16 px-4">
-      <div className="max-w-lg mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 sm:p-8">
+    <Container size="sm" className="py-16">
+      <Card variant="raised" padding="lg">
         {submitted ? (
-          <div className="text-center py-8">
-            <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
-            <p className="text-gray-700 dark:text-gray-300">Thank you — your submission has been received.</p>
+          <div className="py-8 text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-success-subtle">
+              <CheckCircle className="h-7 w-7 text-success" />
+            </div>
+            <p className="text-body-md text-foreground-muted">Thank you — your submission has been received.</p>
           </div>
         ) : (
           <>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{form.title}</h1>
-            {form.description && <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{form.description}</p>}
+            <h1 className="text-headline-sm text-foreground">{form.title}</h1>
+            {form.description && <p className="mt-2 text-body-sm text-foreground-muted">{form.description}</p>}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {form.fields.map((f) => (
-                <div key={f.key}>
-                  <label htmlFor={`pf-${f.key}`} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    {f.label}{f.required && ' *'}
-                  </label>
-                  {f.type === 'textarea' ? (
-                    <textarea
-                      id={`pf-${f.key}`}
-                      required={f.required}
-                      rows={4}
-                      value={values[f.key] ?? ''}
-                      onChange={(e) => setValues({ ...values, [f.key]: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 dark:text-white"
-                    />
-                  ) : f.type === 'checkbox' ? (
-                    <input
-                      id={`pf-${f.key}`}
-                      type="checkbox"
-                      checked={!!values[f.key]}
-                      onChange={(e) => setValues({ ...values, [f.key]: e.target.checked })}
-                      className="w-4 h-4"
-                    />
-                  ) : (
-                    <input
-                      id={`pf-${f.key}`}
-                      type={f.type === 'datetime' ? 'datetime-local' : f.type}
-                      required={f.required}
-                      value={values[f.key] ?? ''}
-                      onChange={(e) => setValues({ ...values, [f.key]: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 dark:text-white"
-                    />
-                  )}
-                </div>
-              ))}
+            <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+              {form.fields.map((f) =>
+                f.type === 'textarea' ? (
+                  <Textarea
+                    key={f.key}
+                    label={f.label}
+                    required={f.required}
+                    rows={4}
+                    value={values[f.key] ?? ''}
+                    onChange={(e) => setValues({ ...values, [f.key]: e.target.value })}
+                  />
+                ) : f.type === 'checkbox' ? (
+                  <Checkbox
+                    key={f.key}
+                    label={`${f.label}${f.required ? ' *' : ''}`}
+                    checked={!!values[f.key]}
+                    onChange={(e) => setValues({ ...values, [f.key]: e.target.checked })}
+                  />
+                ) : (
+                  <Input
+                    key={f.key}
+                    label={f.label}
+                    type={f.type === 'datetime' ? 'datetime-local' : f.type}
+                    required={f.required}
+                    value={values[f.key] ?? ''}
+                    onChange={(e) => setValues({ ...values, [f.key]: e.target.value })}
+                  />
+                )
+              )}
 
-              {error && <p className="text-sm text-red-600">{error}</p>}
+              {error && <p className="text-body-sm text-danger">{error}</p>}
 
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full px-4 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
-              >
-                {submitting ? 'Submitting...' : 'Submit'}
-              </button>
+              <Button type="submit" fullWidth loading={submitting}>{submitting ? 'Submitting...' : 'Submit'}</Button>
             </form>
           </>
         )}
-      </div>
-    </div>
+      </Card>
+    </Container>
   );
 }

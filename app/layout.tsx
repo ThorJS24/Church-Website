@@ -1,16 +1,12 @@
 import { Inter } from 'next/font/google';
 import './globals.css';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import ClientLayout from '@/components/ClientLayout';
-import DivineAudio from '@/components/DivineAudio';
-import PWAInstallPrompt from '@/components/PWAInstallPrompt';
-import GDPRCompliance from '@/components/GDPRCompliance';
 import SkipLink from '@/components/SkipLink';
-import MobileBottomNav from '@/components/MobileBottomNav';
+import { ToastProvider } from '@/components/ui/Toast';
+import { PublicChrome } from '@/components/PublicChrome';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -85,24 +81,12 @@ export default function RootLayout({
         <ThemeProvider>
           <LanguageProvider>
             <AuthProvider>
-              <ClientLayout>
-                <SkipLink />
-                <div className="min-h-screen flex flex-col">
-                  <Navbar />
-                  <main 
-                    id="main-content"
-                    className="flex-grow pt-16 pb-16 md:pb-0"
-                    role="main"
-                  >
-                    {children}
-                  </main>
-                  <Footer />
-                </div>
-                <MobileBottomNav />
-                <DivineAudio autoPlay={false} showControls={true} />
-                <PWAInstallPrompt />
-                <GDPRCompliance />
-              </ClientLayout>
+              <ToastProvider>
+                <ClientLayout>
+                  <SkipLink />
+                  <PublicChrome>{children}</PublicChrome>
+                </ClientLayout>
+              </ToastProvider>
             </AuthProvider>
           </LanguageProvider>
         </ThemeProvider>

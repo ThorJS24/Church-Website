@@ -47,6 +47,9 @@ next-env.d.ts
 .vscode/
 .idea/
 
+# MCP server config (contains API keys)
+.mcp.json
+
 # Logs
 logs
 *.log

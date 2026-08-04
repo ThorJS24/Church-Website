@@ -11,11 +11,34 @@ test.use({ channel: 'msedge' });
 // checked. Admin pages are excluded here since they require an
 // authenticated session this test doesn't set up; they're staff-only and
 // lower-audience-risk than anything public-facing.
+//
+// Extended during the design-system rebuild's Phase 12 pass to cover every
+// other static, unauthenticated top-level route (all rebuilt onto the same
+// primitives this session). Pages requiring a signed-in session
+// (/dashboard, /profile, /settings) or a dynamic id (/sermons/[id],
+// /events/[id], /blog/[slug]) are left out — same reasoning as the admin
+// exclusion above.
 const PAGES = [
+  '/',
+  '/about',
   '/blog',
-  '/small-groups',
-  '/testimonials',
+  '/community',
+  '/contact',
+  '/events',
+  '/gallery',
+  '/give',
+  '/login',
+  '/ministries',
+  '/prayer',
+  '/privacy',
+  '/register',
   '/resources',
+  '/services',
+  '/sermons',
+  '/small-groups',
+  '/terms',
+  '/testimonials',
+  '/volunteer',
 ];
 
 test.describe('New public pages have no critical/serious axe violations', () => {
@@ -28,7 +51,7 @@ test.describe('New public pages have no critical/serious axe violations', () => 
       // — the same noise source the prior accessibility batch diagnosed.
       // Waiting for the page to settle before scanning avoids re-diagnosing
       // the same non-issue here.
-      await page.waitForTimeout(1000);
+      await page.waitForTimeout(1500);
 
       const results = await new AxeBuilder({ page }).analyze();
       const critical = results.violations.filter(v => v.impact === 'critical' || v.impact === 'serious');

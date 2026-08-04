@@ -5,14 +5,18 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Users, Baby, Music, BookOpen, Heart, Clock, MapPin } from 'lucide-react';
 import { getPageContent, getMinistries, Ministry } from '@/lib/content';
+import { PageHero } from '@/components/ui/PageHero';
+import { Section } from '@/components/ui/Section';
+import { Card } from '@/components/ui/Card';
+import { Grid } from '@/components/ui/Grid';
+import { Button, LinkButton } from '@/components/ui/Button';
+import { LoadingState, EmptyState } from '@/components/ui/States';
+import { cn } from '@/lib/cn';
 
 interface MinistriesPage {
   title: string;
   subtitle: string;
-  categories: Array<{
-    id: string;
-    label: string;
-  }>;
+  categories: Array<{ id: string; label: string }>;
 }
 
 const iconMap = {
@@ -24,6 +28,21 @@ const iconMap = {
   default: BookOpen,
 };
 
+const CATEGORIES = [
+  { id: 'all', label: 'All Ministries' },
+  { id: 'children', label: 'Children' },
+  { id: 'youth', label: 'Youth' },
+  { id: 'adults', label: 'Adults' },
+  { id: 'worship', label: 'Worship' },
+  { id: 'outreach', label: 'Outreach' },
+];
+
+const GET_INVOLVED = [
+  { icon: Users, title: 'Serve Others', description: 'Use your gifts and talents to serve our church and community through various ministry opportunities.' },
+  { icon: BookOpen, title: 'Grow in Faith', description: 'Join small groups, Bible studies, and discipleship programs to deepen your relationship with God.', href: '/contact', cta: 'Join a Group' },
+  { icon: Heart, title: 'Build Community', description: 'Connect with others through fellowship events, ministry teams, and community service projects.', href: '/contact', cta: 'Get Connected' },
+];
+
 export default function MinistriesPage() {
   const [ministriesPage, setMinistriesPage] = useState<MinistriesPage | null>(null);
   const [ministries, setMinistries] = useState<Ministry[]>([]);
@@ -32,242 +51,112 @@ export default function MinistriesPage() {
   const ministriesGridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    async function fetchData() {
+      try {
+        const [ministriesPageData, ministriesData] = await Promise.all([getPageContent<MinistriesPage>('ministries'), getMinistries()]);
+        if (ministriesPageData) setMinistriesPage(ministriesPageData);
+        setMinistries(ministriesData);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
     fetchData();
   }, []);
 
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const [ministriesPageData, ministriesData] = await Promise.all([
-        getPageContent<MinistriesPage>('ministries'),
-        getMinistries()
-      ]);
+  const handleFindMinistryClick = () => ministriesGridRef.current?.scrollIntoView({ behavior: 'smooth' });
 
-      if (ministriesPageData) setMinistriesPage(ministriesPageData);
-      setMinistries(ministriesData);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const filteredMinistries =
+    activeCategory === 'all'
+      ? ministries
+      : ministries.filter((m) => (Array.isArray(m.category) ? m.category.includes(activeCategory) : m.category === activeCategory));
 
-  const handleFindMinistryClick = () => {
-    if (ministriesGridRef.current) {
-      ministriesGridRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  const filteredMinistries = activeCategory === 'all' 
-    ? ministries 
-    : ministries.filter(ministry => 
-        Array.isArray(ministry.category) 
-          ? ministry.category.includes(activeCategory)
-          : ministry.category === activeCategory
-      );
-
-  const categories = [
-    { id: 'all', label: 'All Ministries' },
-    { id: 'children', label: 'Children' },
-    { id: 'youth', label: 'Youth' },
-    { id: 'adults', label: 'Adults' },
-    { id: 'worship', label: 'Worship' },
-    { id: 'outreach', label: 'Outreach' }
-  ];
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-300">Loading ministries...</p>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <LoadingState label="Loading ministries..." />;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-purple-700 text-white py-20">
-        <div className="container mx-auto px-4 text-center">
-          <motion.h1 
-            className="text-5xl font-bold mb-4"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            {ministriesPage?.title || 'Our Ministries'}
-          </motion.h1>
-          <motion.p 
-            className="text-xl"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
-            {ministriesPage?.subtitle || 'Find your place to serve, grow, and make a difference in our community'}
-          </motion.p>
-        </div>
-      </section>
-      {/* Category Tabs */}
-      <section className="py-8 bg-white dark:bg-gray-800" ref={ministriesGridRef}>
-        <div className="container mx-auto px-4">
-          <div className="flex flex-wrap justify-center gap-4">
-            {categories.map((category) => (
-              <button
-                key={category.id}
-                onClick={() => setActiveCategory(category.id)}
-                className={`px-6 py-3 rounded-full font-semibold transition-colors ${
-                  activeCategory === category.id
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
-              >
-                {category.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-      {/* Ministries Grid */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          {filteredMinistries.length === 0 ? (
-            <div className="text-center py-12">
-              <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h2 className="text-xl font-semibold text-gray-600 mb-2">No ministries found</h2>
-              <p className="text-gray-500">Check back soon for new ministry opportunities!</p>
-            </div>
-          ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredMinistries.map((ministry, index) => {
-                const categoryKey = Array.isArray(ministry.category) ? ministry.category[0] : ministry.category;
-                const Icon = iconMap[categoryKey as keyof typeof iconMap] || iconMap.default;
-                return (
-                  <motion.div 
-                    key={ministry.id}
-                    className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: index * 0.1 }}
-                  >
-                    <Icon className="w-16 h-16 text-blue-600 mx-auto mb-4" />
-                    <h3 className="text-2xl font-bold mb-2 text-center text-gray-900 dark:text-white">{ministry.title}</h3>
-                    {ministry.ageGroup && (
-                      <p className="text-blue-600 font-semibold text-center mb-4">{ministry.ageGroup}</p>
-                    )}
-                    <p className="text-gray-600 dark:text-gray-300 mb-6 text-center">{ministry.description}</p>
-                    <div className="space-y-2 mb-6">
-                      {ministry.meetingTime && (
-                        <div className="flex items-center justify-center text-gray-600">
-                          <Clock className="w-4 h-4 mr-2" />
-                          <span>{ministry.meetingTime}</span>
-                        </div>
-                      )}
-                      {ministry.location && (
-                        <div className="flex items-center justify-center text-gray-600">
-                          <MapPin className="w-4 h-4 mr-2" />
-                          <span>{ministry.location}</span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex gap-3">
-                      <Link
-                        href="/ministries/volunteer"
-                        className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-center">
-                        Join Ministry
-                      </Link>
-                      <Link
-                        href={`/ministries/contact?ministry=${ministry.id}`}
-                        className="flex-1 border-2 border-blue-600 text-blue-600 py-2 px-4 rounded-lg hover:bg-blue-600 hover:text-white transition-colors text-center">
-                        Learn More
-                      </Link>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </section>
-      {/* Ministry Opportunities */}
-      <section className="py-16 bg-white dark:bg-gray-800">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4 text-gray-900 dark:text-white">Get Involved</h2>
-            <p className="text-gray-600 dark:text-gray-300">There are many ways to serve and grow in our church community</p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            <motion.div 
-              className="text-center p-8 bg-gray-50 rounded-lg"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-            >
-              <Users className="w-16 h-16 text-blue-600 mx-auto mb-4" />
-              <h3 className="text-2xl font-bold mb-4">Serve Others</h3>
-              <p className="text-gray-600 mb-6">Use your gifts and talents to serve our church and community through various ministry opportunities.</p>
-              <button onClick={handleFindMinistryClick} className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                Find Your Ministry
-              </button>
-            </motion.div>
+    <div>
+      <PageHero icon={<Heart />} eyebrow="Get Involved" title={ministriesPage?.title || 'Our Ministries'} description={ministriesPage?.subtitle || 'Find your place to serve, grow, and make a difference in our community'} />
 
-            <motion.div 
-              className="text-center p-8 bg-gray-50 rounded-lg"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
+      <div ref={ministriesGridRef} className="border-b border-border bg-background py-6">
+        <div className="mx-auto flex max-w-7xl flex-wrap justify-center gap-3 px-4">
+          {CATEGORIES.map((category) => (
+            <button
+              key={category.id}
+              onClick={() => setActiveCategory(category.id)}
+              className={cn(
+                'rounded-full px-5 py-2 text-body-sm font-medium transition-colors',
+                activeCategory === category.id ? 'bg-accent text-accent-foreground' : 'bg-surface-active text-foreground-muted hover:bg-surface-hover'
+              )}
             >
-              <BookOpen className="w-16 h-16 text-blue-600 mx-auto mb-4" />
-              <h3 className="text-2xl font-bold mb-4">Grow in Faith</h3>
-              <p className="text-gray-600 mb-6">Join small groups, Bible studies, and discipleship programs to deepen your relationship with God.</p>
-              <Link href="/contact" className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors inline-block">
-                Join a Group
-              </Link>
-            </motion.div>
+              {category.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
-            <motion.div 
-              className="text-center p-8 bg-gray-50 rounded-lg"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-            >
-              <Heart className="w-16 h-16 text-blue-600 mx-auto mb-4" />
-              <h3 className="text-2xl font-bold mb-4">Build Community</h3>
-              <p className="text-gray-600 mb-6">Connect with others through fellowship events, ministry teams, and community service projects.</p>
-              <Link href="/contact" className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors inline-block">
-                Get Connected
-              </Link>
+      <Section spacing="lg">
+        {filteredMinistries.length === 0 ? (
+          <EmptyState icon={BookOpen} title="No ministries found" description="Check back soon for new ministry opportunities!" />
+        ) : (
+          <Grid cols={3} gap={6}>
+            {filteredMinistries.map((ministry, index) => {
+              const categoryKey = Array.isArray(ministry.category) ? ministry.category[0] : ministry.category;
+              const Icon = iconMap[categoryKey as keyof typeof iconMap] || iconMap.default;
+              return (
+                <motion.div key={ministry.id} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-80px' }} transition={{ delay: Math.min(index * 0.05, 0.3), duration: 0.4 }}>
+                  <Card variant="raised" padding="lg" className="h-full text-center">
+                    <Icon className="mx-auto mb-4 h-10 w-10 text-accent" aria-hidden="true" />
+                    <h3 className="text-title-lg text-foreground">{ministry.title}</h3>
+                    {ministry.ageGroup && <p className="mt-1 text-body-sm font-medium text-accent">{ministry.ageGroup}</p>}
+                    <p className="mt-3 text-body-sm text-foreground-muted">{ministry.description}</p>
+                    <div className="mt-4 space-y-1.5 text-body-sm text-foreground-subtle">
+                      {ministry.meetingTime && <p className="flex items-center justify-center gap-2"><Clock className="h-4 w-4" /> {ministry.meetingTime}</p>}
+                      {ministry.location && <p className="flex items-center justify-center gap-2"><MapPin className="h-4 w-4" /> {ministry.location}</p>}
+                    </div>
+                    <div className="mt-5 flex gap-3">
+                      <LinkButton href="/ministries/volunteer" size="sm" fullWidth>Join Ministry</LinkButton>
+                      <LinkButton href={`/ministries/contact?ministry=${ministry.id}`} variant="outline" size="sm" fullWidth>Learn More</LinkButton>
+                    </div>
+                  </Card>
+                </motion.div>
+              );
+            })}
+          </Grid>
+        )}
+      </Section>
+
+      <Section spacing="lg" className="bg-surface">
+        <div className="mb-10 text-center">
+          <h2 className="text-headline-md text-foreground">Get Involved</h2>
+          <p className="mt-2 text-body-md text-foreground-muted">There are many ways to serve and grow in our church community</p>
+        </div>
+        <Grid cols={3} gap={6}>
+          {GET_INVOLVED.map((item, index) => (
+            <motion.div key={item.title} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-80px' }} transition={{ delay: index * 0.1, duration: 0.4 }}>
+              <Card padding="lg" className="h-full text-center">
+                <item.icon className="mx-auto mb-4 h-10 w-10 text-accent" aria-hidden="true" />
+                <h3 className="text-title-lg text-foreground">{item.title}</h3>
+                <p className="mt-3 text-body-sm text-foreground-muted">{item.description}</p>
+                {item.href ? (
+                  <LinkButton href={item.href} className="mt-5">{item.cta}</LinkButton>
+                ) : (
+                  <Button className="mt-5" onClick={handleFindMinistryClick}>Find Your Ministry</Button>
+                )}
+              </Card>
             </motion.div>
-          </div>
+          ))}
+        </Grid>
+      </Section>
+
+      <Section spacing="lg" className="bg-accent text-center text-accent-foreground">
+        <h2 className="text-headline-md">Ready to Get Involved?</h2>
+        <p className="mx-auto mt-3 max-w-xl text-body-lg opacity-90">Take the next step and join a ministry that matches your passion and calling.</p>
+        <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+          <LinkButton href="/ministries/contact" variant="secondary" size="lg">Contact Ministry Leader</LinkButton>
+          <LinkButton href="/ministries/volunteer" variant="outline" size="lg" className="border-white/40 text-accent-foreground hover:bg-white/10">Volunteer Application</LinkButton>
         </div>
-      </section>
-      {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-r from-purple-600 to-blue-600 text-white text-center">
-        <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <h2 className="text-4xl font-bold mb-4">Ready to Get Involved?</h2>
-            <p className="text-xl mb-8">Take the next step and join a ministry that matches your passion and calling.</p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/ministries/contact"
-                className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
-                Contact Ministry Leader
-              </Link>
-              <Link
-                href="/ministries/volunteer"
-                className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors">
-                Volunteer Application
-              </Link>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+      </Section>
     </div>
   );
 }

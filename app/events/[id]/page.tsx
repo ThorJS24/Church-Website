@@ -1,8 +1,17 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
 import Image from 'next/image';
-import { getEventById } from '@/lib/content';
+import { Calendar, Clock, MapPin } from 'lucide-react';
+import { getEventById, getEvents } from '@/lib/content';
+import { getEventCategory } from '@/lib/eventCategories';
+import { Container } from '@/components/ui/Container';
+import { Section } from '@/components/ui/Section';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
+import { Badge } from '@/components/ui/Badge';
+import { Card } from '@/components/ui/Card';
+import { LinkButton } from '@/components/ui/Button';
+import { ShareButton } from '@/components/ShareButton';
+import { EventCountdown } from '@/components/EventCountdown';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -35,6 +44,15 @@ export default async function EventDetailPage({ params }: Props) {
   const event = await getEventById(id);
   if (!event) notFound();
 
+  const allEvents = await getEvents();
+  const relatedEvents = allEvents
+    .filter((e) => e.id !== event.id && e.category === event.category)
+    .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
+    .slice(0, 3);
+
+  const category = event.category ? getEventCategory(event.category) : null;
+  const mapQuery = encodeURIComponent(event.address || event.location);
+
   const eventJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Event',
@@ -43,58 +61,101 @@ export default async function EventDetailPage({ params }: Props) {
     endDate: event.endDate || undefined,
     eventStatus: 'https://schema.org/EventScheduled',
     eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
-    location: {
-      '@type': 'Place',
-      name: event.location,
-      address: event.address || event.location,
-    },
+    location: { '@type': 'Place', name: event.location, address: event.address || event.location },
     description: event.description || event.shortDescription || event.title,
     image: event.imageUrl || undefined,
     organizer: { '@type': 'Organization', name: 'Salem Primitive Baptist Church', url: 'https://salempbc.in' },
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div>
       <script
         type="application/ld+json"
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: JSON.stringify(eventJsonLd) }}
       />
-      <div className="py-16">
-        <div className="container mx-auto px-4 max-w-3xl">
-          <Link href="/events" className="text-sm text-blue-600 hover:underline">&larr; Back to Events</Link>
 
-          {event.category && (
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-600 dark:text-blue-400 mt-6">{event.category}</p>
-          )}
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mt-2 mb-3">{event.title}</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
-            {new Date(event.startDate).toLocaleString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
-          </p>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{event.location}</p>
+      <Section spacing="lg">
+        <Container size="md">
+          <Breadcrumbs items={[{ label: 'Events', href: '/events' }, { label: event.title }]} className="mb-6" />
+
+          {category && <Badge variant={category.badgeVariant} className="mb-3">{category.label}</Badge>}
+          <h1 className="text-display-sm text-foreground">{event.title}</h1>
+          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-body-sm text-foreground-muted">
+            <span className="flex items-center gap-1.5">
+              <Calendar className="h-4 w-4" />
+              {new Date(event.startDate).toLocaleString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+            </span>
+            <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4" /> {event.location}</span>
+          </div>
 
           {event.imageUrl && (
-            <div className="relative w-full h-64 sm:h-96 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 mb-8">
+            <div className="relative mt-8 h-64 w-full overflow-hidden rounded-xl bg-surface-active sm:h-96">
               <Image src={event.imageUrl} alt={event.title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 768px" priority />
             </div>
           )}
 
-          {(event.description || event.shortDescription) && (
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-6">{event.description || event.shortDescription}</p>
-          )}
+          <div className="mt-8 grid gap-8 md:grid-cols-3">
+            <div className="md:col-span-2">
+              {(event.description || event.shortDescription) && (
+                <p className="text-body-lg leading-relaxed text-foreground-muted">{event.description || event.shortDescription}</p>
+              )}
+              <div className="mt-6 flex flex-wrap gap-3">
+                <ShareButton title={event.title} />
+                {event.registrationRequired && event.registrationUrl && (
+                  <LinkButton href={event.registrationUrl} target="_blank" rel="noopener noreferrer">
+                    Register
+                  </LinkButton>
+                )}
+              </div>
+            </div>
+            <div className="space-y-6">
+              <EventCountdown startDate={event.startDate} />
+              <Card padding="none" className="overflow-hidden">
+                <div className="h-48">
+                  <iframe
+                    title={`Map for ${event.title}`}
+                    src={`https://maps.google.com/maps?q=${mapQuery}&hl=en&z=15&output=embed`}
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
+                </div>
+                <div className="flex items-center gap-2 p-3 text-body-sm text-foreground-muted">
+                  <Clock className="h-4 w-4 shrink-0" />
+                  {new Date(event.startDate).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+                  {event.endDate && <span> – {new Date(event.endDate).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}</span>}
+                </div>
+              </Card>
+            </div>
+          </div>
+        </Container>
+      </Section>
 
-          {event.registrationRequired && event.registrationUrl && (
-            <a
-              href={event.registrationUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Register
-            </a>
-          )}
-        </div>
-      </div>
+      {relatedEvents.length > 0 && (
+        <Section spacing="lg" className="bg-surface">
+          <Container size="md">
+            <h2 className="mb-6 text-title-lg text-foreground">Related Events</h2>
+            <div className="grid gap-4 sm:grid-cols-3">
+              {relatedEvents.map((related) => (
+                <a key={related.id} href={`/events/${related.id}`} className="block">
+                  <Card padding="none" className="h-full overflow-hidden transition-shadow hover:shadow-md">
+                    <div className="relative aspect-video bg-surface-active">
+                      {related.imageUrl && <Image src={related.imageUrl} alt={related.title} fill sizes="300px" className="object-cover" />}
+                    </div>
+                    <div className="p-4">
+                      <p className="line-clamp-2 text-body-sm font-medium text-foreground">{related.title}</p>
+                      <p className="mt-1 text-caption text-foreground-subtle">{new Date(related.startDate).toLocaleDateString()}</p>
+                    </div>
+                  </Card>
+                </a>
+              ))}
+            </div>
+          </Container>
+        </Section>
+      )}
     </div>
   );
 }

@@ -1,8 +1,16 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { Users, Clock, MapPin } from 'lucide-react';
 import { getSmallGroups, SmallGroup } from '@/lib/content';
+import { PageHero } from '@/components/ui/PageHero';
+import { Section } from '@/components/ui/Section';
+import { Card } from '@/components/ui/Card';
+import { Grid } from '@/components/ui/Grid';
+import { Badge } from '@/components/ui/Badge';
+import { LoadingState } from '@/components/ui/States';
 
 export default function SmallGroupsPage() {
   const [groups, setGroups] = useState<SmallGroup[]>([]);
@@ -12,55 +20,36 @@ export default function SmallGroupsPage() {
     getSmallGroups().then(setGroups).finally(() => setLoading(false));
   }, []);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600" />
-      </div>
-    );
-  }
+  if (loading) return <LoadingState label="Loading small groups..." />;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <section className="bg-gradient-to-r from-blue-600 to-purple-700 text-white py-16">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl sm:text-5xl font-bold mb-3">Small Groups</h1>
-          <p className="text-lg text-blue-100">Connect, grow, and study scripture together in a smaller setting</p>
-        </div>
-      </section>
+    <div>
+      <PageHero icon={<Users />} eyebrow="Grow Together" title="Small Groups" description="Connect, grow, and study scripture together in a smaller setting" />
 
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          {groups.length === 0 ? (
-            <p className="text-center text-gray-500 dark:text-gray-400">
-              No small groups are listed yet — <a href="/contact" className="text-blue-600 underline">contact us</a> to find one.
-            </p>
-          ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-              {groups.map((group) => (
-                <div key={group.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                  {group.category && (
-                    <span className="text-xs font-semibold uppercase tracking-wide text-blue-600 dark:text-blue-400">{group.category}</span>
-                  )}
-                  <h2 className="text-lg font-bold text-gray-900 dark:text-white mt-1 mb-2">{group.name}</h2>
-                  {group.description && <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">{group.description}</p>}
-                  <div className="space-y-1.5 text-sm text-gray-500 dark:text-gray-400">
-                    {group.leaderName && (
-                      <p className="flex items-center gap-2"><Users className="w-4 h-4 shrink-0" /> Led by {group.leaderName}</p>
-                    )}
-                    {group.meetingSchedule && (
-                      <p className="flex items-center gap-2"><Clock className="w-4 h-4 shrink-0" /> {group.meetingSchedule}</p>
-                    )}
-                    {group.location && (
-                      <p className="flex items-center gap-2"><MapPin className="w-4 h-4 shrink-0" /> {group.location}</p>
-                    )}
+      <Section spacing="lg">
+        {groups.length === 0 ? (
+          <p className="text-center text-body-md text-foreground-muted">
+            No small groups are listed yet — <Link href="/contact" className="text-accent underline">contact us</Link> to find one.
+          </p>
+        ) : (
+          <Grid cols={3} gap={6}>
+            {groups.map((group, index) => (
+              <motion.div key={group.id} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-80px' }} transition={{ delay: Math.min(index * 0.05, 0.3), duration: 0.4 }}>
+                <Card className="h-full">
+                  {group.category && <Badge variant="accent" className="mb-2">{group.category}</Badge>}
+                  <h2 className="text-title-lg text-foreground">{group.name}</h2>
+                  {group.description && <p className="mt-2 text-body-sm text-foreground-muted">{group.description}</p>}
+                  <div className="mt-4 space-y-1.5 text-body-sm text-foreground-subtle">
+                    {group.leaderName && <p className="flex items-center gap-2"><Users className="h-4 w-4 shrink-0" /> Led by {group.leaderName}</p>}
+                    {group.meetingSchedule && <p className="flex items-center gap-2"><Clock className="h-4 w-4 shrink-0" /> {group.meetingSchedule}</p>}
+                    {group.location && <p className="flex items-center gap-2"><MapPin className="h-4 w-4 shrink-0" /> {group.location}</p>}
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
+                </Card>
+              </motion.div>
+            ))}
+          </Grid>
+        )}
+      </Section>
     </div>
   );
 }

@@ -1,9 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
 import { Quote, Send } from 'lucide-react';
 import { getTestimonials, Testimonial } from '@/lib/content';
+import { PageHero } from '@/components/ui/PageHero';
+import { Section } from '@/components/ui/Section';
+import { Container } from '@/components/ui/Container';
+import { Card } from '@/components/ui/Card';
+import { Grid } from '@/components/ui/Grid';
+import { Input } from '@/components/ui/Input';
+import { Textarea } from '@/components/ui/Textarea';
+import { Button } from '@/components/ui/Button';
+import { Avatar } from '@/components/ui/Avatar';
+import { LoadingState } from '@/components/ui/States';
 
 export default function TestimonialsPage() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
@@ -45,98 +54,56 @@ export default function TestimonialsPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600" />
-      </div>
-    );
-  }
+  if (loading) return <LoadingState label="Loading testimonials..." />;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <section className="bg-gradient-to-r from-blue-600 to-purple-700 text-white py-16">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl sm:text-5xl font-bold mb-3">Testimonials</h1>
-          <p className="text-lg text-blue-100">Stories of faith and God&apos;s work in the lives of our church family</p>
-        </div>
-      </section>
+    <div>
+      <PageHero icon={<Quote />} eyebrow="Life Change" title="Testimonials" description="Stories of faith and God's work in the lives of our church family" />
 
-      <section className="py-16">
-        <div className="container mx-auto px-4 max-w-5xl">
+      <Section spacing="lg">
+        <Container size="md">
           {submitStatus === 'success' && (
-            <div className="mb-8 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-green-800 dark:text-green-300 text-center">
+            <div className="mb-8 rounded-lg border border-success/30 bg-success-subtle p-4 text-center text-body-sm text-success">
               Thank you — your testimony will appear here once reviewed.
             </div>
           )}
 
-          <div className="flex justify-center mb-10">
-            <button
-              onClick={() => setShowForm(v => !v)}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-            >
-              <Send className="w-4 h-4" /> Share Your Testimony
-            </button>
+          <div className="mb-10 flex justify-center">
+            <Button leftIcon={<Send className="h-4 w-4" />} onClick={() => setShowForm((v) => !v)}>
+              Share Your Testimony
+            </Button>
           </div>
 
           {showForm && (
-            <form onSubmit={handleSubmit} className="max-w-lg mx-auto mb-12 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 space-y-4">
-              <div>
-                <label htmlFor="testimonial-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Your Name *</label>
-                <input
-                  id="testimonial-name"
-                  type="text"
-                  required
-                  value={form.authorName}
-                  onChange={(e) => setForm({ ...form, authorName: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 dark:text-white"
-                />
-              </div>
-              <div>
-                <label htmlFor="testimonial-content" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Your Testimony *</label>
-                <textarea
-                  id="testimonial-content"
-                  required
-                  rows={5}
-                  value={form.content}
-                  onChange={(e) => setForm({ ...form, content: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 dark:text-white"
-                />
-              </div>
-              {submitStatus === 'error' && <p className="text-sm text-red-600">{errorMessage}</p>}
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full px-4 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
-              >
-                {submitting ? 'Submitting...' : 'Submit Testimony'}
-              </button>
-              <p className="text-xs text-gray-500 dark:text-gray-400 text-center">Submissions are reviewed before appearing publicly.</p>
-            </form>
+            <Card variant="raised" padding="lg" className="mx-auto mb-12 max-w-lg">
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <Input label="Your Name" required value={form.authorName} onChange={(e) => setForm({ ...form, authorName: e.target.value })} />
+                <Textarea label="Your Testimony" required rows={5} value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} />
+                {submitStatus === 'error' && <p className="text-body-sm text-danger">{errorMessage}</p>}
+                <Button type="submit" fullWidth loading={submitting}>{submitting ? 'Submitting...' : 'Submit Testimony'}</Button>
+                <p className="text-center text-caption text-foreground-subtle">Submissions are reviewed before appearing publicly.</p>
+              </form>
+            </Card>
           )}
 
           {testimonials.length === 0 ? (
-            <p className="text-center text-gray-500 dark:text-gray-400">No testimonials yet — be the first to share.</p>
+            <p className="text-center text-body-md text-foreground-muted">No testimonials yet — be the first to share.</p>
           ) : (
-            <div className="grid md:grid-cols-2 gap-6">
+            <Grid cols={2} gap={6}>
               {testimonials.map((t) => (
-                <div key={t.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                  <Quote className="w-6 h-6 text-blue-400 mb-3" />
-                  <p className="text-gray-700 dark:text-gray-300 mb-4 italic">&ldquo;{t.content}&rdquo;</p>
+                <Card key={t.id}>
+                  <Quote className="mb-3 h-6 w-6 text-accent/60" />
+                  <p className="mb-4 text-body-md italic text-foreground-muted">&ldquo;{t.content}&rdquo;</p>
                   <div className="flex items-center gap-3">
-                    {t.imageUrl && (
-                      <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 shrink-0">
-                        <Image src={t.imageUrl} alt={t.authorName} fill className="object-cover" sizes="40px" />
-                      </div>
-                    )}
-                    <p className="font-semibold text-gray-900 dark:text-white">{t.authorName}</p>
+                    <Avatar src={t.imageUrl} name={t.authorName} size="sm" />
+                    <p className="text-title-sm text-foreground">{t.authorName}</p>
                   </div>
-                </div>
+                </Card>
               ))}
-            </div>
+            </Grid>
           )}
-        </div>
-      </section>
+        </Container>
+      </Section>
     </div>
   );
 }
