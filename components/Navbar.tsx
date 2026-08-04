@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   Church, Menu, X, ChevronDown, User, LogOut, Sun, Moon, Search,
-  Home, Calendar, BookOpen, Users, Heart, Camera, Phone, Gift, Globe, LayoutGrid,
+  Home, Calendar, BookOpen, Users, Heart, Camera, Phone, Gift, Globe, LayoutGrid, ShieldCheck,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -70,7 +70,7 @@ export default function Navbar() {
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  const { user, logout } = useAuth();
+  const { user, logout, canAccessAdminPanel } = useAuth();
   const { theme, toggleTheme } = useTheme() || { theme: 'light', toggleTheme: () => {} };
   const { t, language, setLanguage } = useLanguage();
   const pathname = usePathname();
@@ -255,6 +255,11 @@ export default function Navbar() {
                   <DropdownItem onClick={() => (router.push('/dashboard'))}>
                     <LayoutGrid className="h-4 w-4 text-foreground-subtle" /> {t('nav.dashboard')}
                   </DropdownItem>
+                  {canAccessAdminPanel() && (
+                    <DropdownItem onClick={() => (router.push('/admin'))}>
+                      <ShieldCheck className="h-4 w-4 text-foreground-subtle" /> Admin Dashboard
+                    </DropdownItem>
+                  )}
                   <DropdownSeparator />
                   <DropdownItem destructive onClick={logout}>
                     <LogOut className="h-4 w-4" /> {t('nav.logout')}
@@ -301,6 +306,28 @@ export default function Navbar() {
                     <LinkButton href="/register" fullWidth>
                       {t('nav.register')}
                     </LinkButton>
+                  </div>
+                )}
+                {user && (
+                  <div className="mb-3 space-y-1 border-b border-border pb-3">
+                    <Link href="/profile" className="flex items-center gap-3 rounded-md px-3 py-3 text-body-md font-medium text-foreground hover:text-accent">
+                      <User className="h-5 w-5 text-foreground-subtle" aria-hidden="true" /> {t('nav.profile')}
+                    </Link>
+                    <Link href="/dashboard" className="flex items-center gap-3 rounded-md px-3 py-3 text-body-md font-medium text-foreground hover:text-accent">
+                      <LayoutGrid className="h-5 w-5 text-foreground-subtle" aria-hidden="true" /> {t('nav.dashboard')}
+                    </Link>
+                    {canAccessAdminPanel() && (
+                      <Link href="/admin" className="flex items-center gap-3 rounded-md px-3 py-3 text-body-md font-medium text-foreground hover:text-accent">
+                        <ShieldCheck className="h-5 w-5 text-foreground-subtle" aria-hidden="true" /> Admin Dashboard
+                      </Link>
+                    )}
+                    <button
+                      type="button"
+                      onClick={logout}
+                      className="flex w-full items-center gap-3 rounded-md px-3 py-3 text-body-md font-medium text-danger"
+                    >
+                      <LogOut className="h-5 w-5" aria-hidden="true" /> {t('nav.logout')}
+                    </button>
                   </div>
                 )}
                 {navigationItems.map((item) => {
