@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
 import { collection, addDoc } from 'firebase/firestore';
-import { Resend } from 'resend';
+import { getResend } from '@/lib/resend';
 import * as Sentry from '@sentry/nextjs';
 import { checkRateLimit, clientIpFrom } from '@/lib/rateLimit';
 
@@ -18,7 +18,6 @@ const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
 // route doesn't crash if that env var is ever unset (it would just fall
 // back to the sandbox-restricted sender rather than throwing).
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(request: NextRequest) {
   try {
@@ -59,7 +58,7 @@ export async function POST(request: NextRequest) {
       let error: { message?: string; name?: string } | null = null;
       try {
         const result = recipient === 'admin'
-          ? await resend.emails.send({
+          ? await getResend().emails.send({
               from: FROM_EMAIL,
               to: process.env.ADMIN_EMAIL!,
               subject: `New ${serviceTypeTitle} Service Request`,
@@ -75,7 +74,7 @@ export async function POST(request: NextRequest) {
                 <p><strong>Request ID:</strong> ${docRef.id}</p>
               `
             })
-          : await resend.emails.send({
+          : await getResend().emails.send({
               from: FROM_EMAIL,
               to: data.email,
               subject: `${serviceTypeTitle} Service Request Confirmation`,

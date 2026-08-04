@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Resend } from 'resend';
+import { getResend } from '@/lib/resend';
 import { getAdminDb } from '@/lib/firebase-admin';
 import { requireAdmin, withAudit } from '@/lib/api-auth';
 import { FieldValue } from 'firebase-admin/firestore';
 
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
-const resend = new Resend(process.env.RESEND_API_KEY);
 const CHUNK_SIZE = 10; // concurrent sends per batch — bounds load on Resend's API, not a hard vendor limit we've hit
 
 export async function GET(request: NextRequest) {
@@ -52,7 +51,7 @@ export async function POST(request: NextRequest) {
           try {
             // Resend resolves { data: null, error } on API-level failures rather
             // than throwing — checked explicitly, same as app/api/services/request.
-            const result = await resend.emails.send({
+            const result = await getResend().emails.send({
               from: FROM_EMAIL,
               to: sub.email,
               subject,

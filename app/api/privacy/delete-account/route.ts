@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Resend } from 'resend';
+import { getResend } from '@/lib/resend';
 import * as Sentry from '@sentry/nextjs';
 import { getAdminDb } from '@/lib/firebase-admin';
 import { requireAuth } from '@/lib/api-auth';
@@ -8,7 +8,6 @@ import { FieldValue } from 'firebase-admin/firestore';
 // salempbc.in is verified in Resend — see app/api/services/request/route.ts
 // for why the sandbox address remains only as a fallback default.
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Account deletion is a tracked request reviewed by staff, not an instant
 // self-service action — deleting a member's Firestore data outright could
@@ -36,7 +35,7 @@ export async function DELETE(request: NextRequest) {
       let error: { message?: string; name?: string } | null = null;
       try {
         const result = recipient === 'admin'
-          ? await resend.emails.send({
+          ? await getResend().emails.send({
               from: FROM_EMAIL,
               to: process.env.ADMIN_EMAIL!,
               subject: 'Account Deletion Request',
@@ -48,7 +47,7 @@ export async function DELETE(request: NextRequest) {
                 <p>Review this request and process the deletion manually.</p>
               `,
             })
-          : await resend.emails.send({
+          : await getResend().emails.send({
               from: FROM_EMAIL,
               to: user.email!,
               subject: 'Your account deletion request has been received',
