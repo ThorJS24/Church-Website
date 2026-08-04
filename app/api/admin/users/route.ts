@@ -55,19 +55,35 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-// Suspend/reactivate (isActive toggle) — admin and above.
+// Suspend/reactivate (isActive toggle), or mark a new member as welcomed —
+// admin and above. Two independent boolean flags on the same doc, kept in
+// one handler rather than a second route since both are "flip a small
+// status field on a user" with the same shape.
 export async function PATCH(request: NextRequest) {
   const authResult = await requireAdmin(request);
   if (!authResult.ok) return authResult.response;
 
   try {
-    const { userId, isActive, reason } = await request.json();
-    if (!userId || typeof isActive !== 'boolean') {
-      return NextResponse.json({ success: false, message: 'userId and isActive are required' }, { status: 400 });
+    const { userId, isActive, reason, welcomed } = await request.json();
+    if (!userId || (typeof isActive !== 'boolean' && typeof welcomed !== 'boolean')) {
+      return NextResponse.json({ success: false, message: 'userId and isActive or welcomed are required' }, { status: 400 });
     }
 
     const ref = getAdminDb().collection('users').doc(userId);
     const before = (await ref.get()).data();
+
+    if (typeof welcomed === 'boolean') {
+      await withAudit(
+        authResult.user,
+        request,
+        { action: 'user.welcomed', targetType: 'user', targetId: userId },
+        async () => {
+          await ref.update({ welcomed, welcomedAt: welcomed ? new Date().toISOString() : null });
+          return { before: { welcomed: before?.welcomed }, after: { welcomed }, result: null };
+        }
+      );
+      return NextResponse.json({ success: true, message: welcomed ? 'Marked as welcomed' : 'Marked as not yet welcomed' });
+    }
 
     await withAudit(
       authResult.user,

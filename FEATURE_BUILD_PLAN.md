@@ -15,14 +15,14 @@ type-check/lint/a quick manual pass, commit, check it off, move to the next.
 
 ## Admin
 
-### Batch A1 — Dashboard
-- [ ] Unified action inbox (messages + moderation + form submissions, one feed)
-- [ ] Content freshness indicator (sermons/pages untouched 30+ days)
-- [ ] Upcoming-event countdown strip
-- [ ] Role distribution chart
-- [ ] Audit activity sparkline (staff engagement over time)
-- [ ] Quick announcement composer (post to homepage banner from dashboard)
-- [ ] New-member welcome queue (recent registrations)
+### Batch A1 — Dashboard ✅
+- [x] Unified action inbox (messages + moderation + form submissions, one feed)
+- [x] Content freshness indicator (sermons/pages untouched 30+ days)
+- [x] Upcoming-event countdown strip
+- [x] Role distribution chart
+- [x] Audit activity sparkline (staff engagement over time)
+- [x] Quick announcement composer (post to homepage banner from dashboard)
+- [x] New-member welcome queue (recent registrations)
 
 ### Batch A2 — Members
 - [ ] Photo grid view toggle
