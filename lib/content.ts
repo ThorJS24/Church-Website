@@ -293,6 +293,10 @@ export interface StaffMember extends Publishable {
   position: string;
   email?: string;
   phone?: string;
+  /** Contact-form category id (spiritual/administrative/media/outreach)
+   * this staff member handles — drives the "this will be routed to"
+   * note on the contact form. Optional; not every staff member needs one. */
+  handlesCategory?: string;
 }
 
 export async function getStaffMembers(): Promise<StaffMember[]> {

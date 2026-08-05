@@ -201,12 +201,12 @@ type-check/lint/a quick manual pass, commit, check it off, move to the next.
 - [x] Family volunteer flag
 - [x] Volunteer hour log — new member-gated `/api/volunteer/hours` route + running total on the page
 
-### Batch P15 — Contact / Community
-- [ ] Department/staff routing
-- [ ] Response-time expectation display
-- [ ] Local resource directory
-- [ ] FAQ accordion
-- [ ] Community survey
+### Batch P15 — Contact / Community ✅
+- [x] Department/staff routing — staff `handlesCategory` field surfaces "this will be routed to" on the contact form
+- [x] Response-time expectation display
+- [x] Local resource directory — search added to the existing Community Resources section
+- [x] FAQ accordion
+- [x] Community survey
 
 ### Batch P16 — Forms (public render)
 - [ ] Auto-save draft

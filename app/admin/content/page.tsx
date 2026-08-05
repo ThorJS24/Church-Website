@@ -148,6 +148,7 @@ const STAFF_FIELDS: FieldSchema[] = [
   { key: 'position', label: 'Position / Role', type: 'text', required: true },
   { key: 'email', label: 'Email', type: 'text' },
   { key: 'phone', label: 'Phone', type: 'text' },
+  { key: 'handlesCategory', label: 'Handles Contact Category (spiritual, administrative, media, or outreach)', type: 'text' },
 ];
 
 const MINISTRY_FIELDS: FieldSchema[] = [

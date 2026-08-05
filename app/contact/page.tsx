@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, Phone, Mail, Clock, Send, User, MessageSquare, Calendar, Navigation, ChevronRight, ChevronLeft, Heart, Building, Video, Globe } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, Send, User, MessageSquare, Calendar, Navigation, ChevronRight, ChevronLeft, Heart, Building, Video, Globe, Timer, UserCheck } from 'lucide-react';
 import { getSiteSettings, getStaffMembers, SiteSettings, StaffMember } from '@/lib/content';
 import { PageHero } from '@/components/ui/PageHero';
 import { Section } from '@/components/ui/Section';
+import { Container } from '@/components/ui/Container';
 import { Card } from '@/components/ui/Card';
 import { Grid } from '@/components/ui/Grid';
 import { Input } from '@/components/ui/Input';
@@ -14,6 +15,7 @@ import { Textarea } from '@/components/ui/Textarea';
 import { Checkbox } from '@/components/ui/Checkbox';
 import { Button } from '@/components/ui/Button';
 import { Avatar } from '@/components/ui/Avatar';
+import { Accordion, AccordionItem } from '@/components/ui/Accordion';
 import { LoadingState } from '@/components/ui/States';
 import { cn } from '@/lib/cn';
 
@@ -22,6 +24,20 @@ const categories = [
   { id: 'administrative', name: 'Administrative & Facility', icon: Building },
   { id: 'media', name: 'Media & Communication', icon: Video },
   { id: 'outreach', name: 'Outreach & Missions', icon: Globe },
+];
+
+const RESPONSE_TIME: Record<string, string> = {
+  spiritual: 'within 1-2 business days',
+  administrative: 'within 2-3 business days',
+  media: 'within 3-5 business days',
+  outreach: 'within 3-5 business days',
+};
+
+const CONTACT_FAQ = [
+  { id: 'response-time', q: 'How quickly will I hear back?', a: 'It depends on the type of request — typically 1-5 business days. Prayer requests marked urgent or emergency are prioritized and answered as soon as possible.' },
+  { id: 'who-responds', q: 'Who will respond to my message?', a: 'Your message is routed based on the category you select, so it reaches the staff member or ministry team best equipped to help.' },
+  { id: 'urgent', q: 'What if my need is urgent?', a: 'For a pastoral emergency, please call the church office directly rather than submitting the form — phone reaches us faster than email.' },
+  { id: 'visit', q: 'Can I just stop by instead of submitting a form?', a: 'Absolutely — our office hours are listed on this page. You\'re always welcome to visit or call directly.' },
 ];
 
 const formTypes: Record<string, { id: string; name: string }[]> = {
@@ -240,14 +256,29 @@ export default function ContactPage() {
                     </div>
 
                     {formData.category && (
-                      <Select
-                        label="Specific Request"
-                        required
-                        placeholder="Select request type"
-                        value={formData.formType}
-                        onChange={(e) => setFormData({ ...formData, formType: e.target.value })}
-                        options={formTypes[formData.category]?.map((t) => ({ value: t.id, label: t.name })) ?? []}
-                      />
+                      <>
+                        <Select
+                          label="Specific Request"
+                          required
+                          placeholder="Select request type"
+                          value={formData.formType}
+                          onChange={(e) => setFormData({ ...formData, formType: e.target.value })}
+                          options={formTypes[formData.category]?.map((t) => ({ value: t.id, label: t.name })) ?? []}
+                        />
+                        <div className="space-y-2 rounded-lg bg-surface p-4">
+                          <p className="flex items-center gap-2 text-body-sm text-foreground-muted">
+                            <Timer className="h-4 w-4 text-accent shrink-0" /> Expected response time: <strong className="text-foreground">{RESPONSE_TIME[formData.category]}</strong>
+                          </p>
+                          {(() => {
+                            const routedStaff = staff.find((s) => s.handlesCategory === formData.category);
+                            return routedStaff ? (
+                              <p className="flex items-center gap-2 text-body-sm text-foreground-muted">
+                                <UserCheck className="h-4 w-4 text-accent shrink-0" /> This will be routed to <strong className="text-foreground">{routedStaff.name}</strong> ({routedStaff.position})
+                              </p>
+                            ) : null;
+                          })()}
+                        </div>
+                      </>
                     )}
                   </motion.div>
                 )}
@@ -495,6 +526,23 @@ export default function ContactPage() {
           </Grid>
         </Section>
       )}
+
+      <Section spacing="lg" className="bg-surface">
+        <Container size="sm">
+          <div className="mb-8 text-center">
+            <h2 className="text-headline-md text-foreground">Contact FAQ</h2>
+          </div>
+          <Card variant="raised" padding="lg">
+            <Accordion type="single">
+              {CONTACT_FAQ.map((item) => (
+                <AccordionItem key={item.id} id={item.id} title={item.q}>
+                  {item.a}
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </Card>
+        </Container>
+      </Section>
 
       <Section spacing="lg">
         <div className="mb-10 text-center">
