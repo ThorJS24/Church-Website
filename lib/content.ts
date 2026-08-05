@@ -424,6 +424,10 @@ export interface Testimonial {
   imageUrl?: string;
   featured?: boolean;
   moderationStatus?: 'pending' | 'approved' | 'rejected';
+  category?: string;
+  /** How authorName should be shown publicly — captured from the submitter. */
+  displayPreference?: 'full' | 'first' | 'anonymous';
+  consentGiven?: boolean;
 }
 
 export async function getTestimonials(): Promise<Testimonial[]> {

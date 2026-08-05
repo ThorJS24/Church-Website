@@ -20,16 +20,24 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { authorName, content, imageUrl } = body;
+    const { authorName, content, imageUrl, category, displayPreference, consentGiven } = body;
 
     if (!authorName || !content) {
       return NextResponse.json({ success: false, message: 'Name and testimony are required' }, { status: 400 });
     }
+    if (consentGiven !== true) {
+      return NextResponse.json({ success: false, message: 'Consent to share this testimony publicly is required' }, { status: 400 });
+    }
+
+    const ALLOWED_DISPLAY_PREFERENCES = ['full', 'first', 'anonymous'];
 
     const doc = {
       authorName: String(authorName).slice(0, 100),
       content: String(content).slice(0, 2000),
       imageUrl: imageUrl ? String(imageUrl).slice(0, 500) : null,
+      category: category ? String(category).slice(0, 50) : null,
+      displayPreference: ALLOWED_DISPLAY_PREFERENCES.includes(displayPreference) ? displayPreference : 'full',
+      consentGiven: true,
       featured: false,
       moderationStatus: 'pending',
       createdAt: new Date().toISOString(),

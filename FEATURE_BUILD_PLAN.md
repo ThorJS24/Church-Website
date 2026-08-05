@@ -166,12 +166,12 @@ type-check/lint/a quick manual pass, commit, check it off, move to the next.
 - [x] Group directory (opt-in) — `hideFromDirectory` flag for word-of-mouth groups (still reachable by direct link)
 - [x] Group resource sharing — resource links list on the detail page
 
-### Batch P10 — Testimonials
-- [ ] Category filter
-- [ ] Featured rotation
-- [ ] Anonymous/first-name display option
-- [ ] Search by keyword
-- [ ] Consent capture at submission
+### Batch P10 — Testimonials ✅
+- [x] Category filter
+- [x] Featured rotation — auto-advancing spotlight carousel for featured testimonials
+- [x] Anonymous/first-name display option — captured from the submitter, not set after the fact
+- [x] Search by keyword
+- [x] Consent capture at submission — required checkbox, server-side enforced (400 without it)
 
 ### Batch P11 — Resources
 - [ ] Type filter

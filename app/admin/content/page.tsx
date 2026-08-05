@@ -91,6 +91,8 @@ const SMALL_GROUP_FIELDS: FieldSchema[] = [
 const TESTIMONIAL_FIELDS: FieldSchema[] = [
   { key: 'authorName', label: 'Name', type: 'text', required: true },
   { key: 'content', label: 'Testimony', type: 'textarea', required: true },
+  { key: 'category', label: 'Category (e.g. Healing, Salvation, Family, Provision)', type: 'text' },
+  { key: 'displayPreference', label: 'Display Preference (full, first, or anonymous)', type: 'text' },
   { key: 'imageUrl', label: 'Photo', type: 'url', accept: 'image' },
   { key: 'featured', label: 'Featured', type: 'checkbox' },
 ];
