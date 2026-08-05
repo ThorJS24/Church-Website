@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { motion } from 'framer-motion';
-import { Calendar, Heart, Droplets, Send, Phone, Mail, User, CheckCircle2 } from 'lucide-react';
+import { Calendar, Heart, Droplets, Send, Phone, Mail, User, CheckCircle2, FileText, ArrowRight } from 'lucide-react';
 import { Container } from '@/components/ui/Container';
 import { Card } from '@/components/ui/Card';
 import { Grid } from '@/components/ui/Grid';
@@ -11,6 +12,21 @@ import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/cn';
+
+const DOCUMENT_CHECKLISTS: Record<'wedding' | 'baptism', string[]> = {
+  wedding: [
+    'Valid government-issued photo ID for both partners',
+    'Marriage license application (from your local registrar)',
+    'Completion of premarital counseling sessions with a pastor',
+    'Birth certificates, if requested during counseling',
+  ],
+  baptism: [
+    'A completed profession-of-faith conversation with a pastor',
+    'Valid government-issued photo ID',
+    'Emergency contact information (collected on this form)',
+    'No special documents required beyond the above — just come ready to testify to your faith',
+  ],
+};
 
 interface ServiceRequestForm {
   serviceType: 'wedding' | 'baptism';
@@ -31,6 +47,8 @@ export default function ServiceRequestPage() {
   const [submitted, setSubmitted] = useState(false);
   const [emailConfirmed, setEmailConfirmed] = useState(true);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submittedId, setSubmittedId] = useState<string | null>(null);
+  const [submittedEmail, setSubmittedEmail] = useState<string>('');
   const { register, handleSubmit, watch, formState: { errors } } = useForm<ServiceRequestForm>();
 
   const serviceType = watch('serviceType');
@@ -48,6 +66,8 @@ export default function ServiceRequestPage() {
 
       if (response.ok && result.success) {
         setEmailConfirmed(result.notifications?.requesterConfirmed !== false);
+        setSubmittedId(result.id);
+        setSubmittedEmail(data.email);
         setSubmitted(true);
       } else {
         setSubmitError(result.error || 'Something went wrong submitting your request. Please try again or call the church office.');
@@ -76,6 +96,14 @@ export default function ServiceRequestPage() {
               <p className="mt-4 text-body-sm text-warning">
                 Your request was saved, but we couldn&apos;t send a confirmation email right now — you&apos;ll still hear from our team directly.
               </p>
+            )}
+            {submittedId && (
+              <Link
+                href={`/services/request/status?id=${submittedId}&email=${encodeURIComponent(submittedEmail)}`}
+                className="mt-6 inline-flex items-center gap-1.5 text-body-sm font-medium text-accent hover:underline"
+              >
+                Track your request status <ArrowRight className="h-4 w-4" />
+              </Link>
             )}
           </Card>
         </motion.div>
@@ -115,6 +143,21 @@ export default function ServiceRequestPage() {
               </div>
               {errors.serviceType && <p className="mt-1.5 text-caption text-danger">{errors.serviceType.message}</p>}
             </div>
+
+            {(serviceType === 'wedding' || serviceType === 'baptism') && (
+              <div className="rounded-lg border border-border bg-surface p-4">
+                <p className="mb-2 flex items-center gap-1.5 text-label text-foreground">
+                  <FileText className="h-3.5 w-3.5" /> What to bring / prepare
+                </p>
+                <ul className="space-y-1.5">
+                  {DOCUMENT_CHECKLISTS[serviceType].map((item) => (
+                    <li key={item} className="flex items-start gap-2 text-body-sm text-foreground-muted">
+                      <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-success" /> {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             <Grid cols={2} gap={6}>
               <Input label="First Name" required leftIcon={<User />} placeholder="Enter your first name" error={errors.firstName?.message} {...register('firstName', { required: 'First name is required' })} />

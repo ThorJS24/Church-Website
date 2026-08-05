@@ -117,12 +117,12 @@ type-check/lint/a quick manual pass, commit, check it off, move to the next.
 - [x] Leadership listing
 - [x] History timeline (interactive) — already built, verified working
 
-### Batch P3 — Services + Request
-- [ ] Add-to-calendar per service
-- [ ] What-to-expect info block
-- [ ] Accessibility accommodations info per service
-- [ ] Visible request-status tracker for the requester
-- [ ] Document checklist per request type
+### Batch P3 — Services + Request ✅
+- [x] Add-to-calendar per service — already built, verified working
+- [x] What-to-expect info block — already built, verified working
+- [x] Accessibility accommodations info per service
+- [x] Visible request-status tracker for the requester
+- [x] Document checklist per request type
 
 ### Batch P4 — Sermons
 - [ ] Scripture-reference index/browse

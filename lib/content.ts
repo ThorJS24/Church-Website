@@ -149,6 +149,7 @@ export interface ServiceTime extends Publishable {
   time: string;
   location: string;
   description?: string;
+  accessibilityInfo?: string;
 }
 
 export async function getServiceTimes(): Promise<ServiceTime[]> {

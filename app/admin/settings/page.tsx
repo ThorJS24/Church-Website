@@ -21,6 +21,7 @@ const SERVICE_FIELDS: FieldSchema[] = [
   { key: 'time', label: 'Time (HH:MM, 24h)', type: 'text', required: true },
   { key: 'location', label: 'Location', type: 'text', required: true },
   { key: 'description', label: 'Description', type: 'textarea' },
+  { key: 'accessibilityInfo', label: 'Accessibility & Accommodations (e.g. wheelchair access, hearing loop, ASL interpreter)', type: 'textarea' },
 ];
 
 const FEATURE_FLAGS: { key: string; label: string; description: string }[] = [

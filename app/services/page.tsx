@@ -2,7 +2,7 @@
 
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { motion } from 'framer-motion';
-import { Sun, Moon, BookOpen, Clock, MapPin, Calendar, Video, Coffee, Baby, Users, Bell, Heart, Radio } from 'lucide-react';
+import { Sun, Moon, BookOpen, Clock, MapPin, Calendar, Video, Coffee, Baby, Users, Bell, Heart, Radio, Accessibility } from 'lucide-react';
 import { getPageContent, getServiceTimes, getSiteSettings, getLivestream } from '@/lib/content';
 import { PageHero } from '@/components/ui/PageHero';
 import { Section } from '@/components/ui/Section';
@@ -21,6 +21,7 @@ interface Service {
   time: string;
   location: string;
   description?: string;
+  accessibilityInfo?: string;
 }
 
 interface ServicesPage {
@@ -149,6 +150,12 @@ export default function ServicesPage() {
                       <MapPin className="h-4 w-4" /> {service.location}
                     </p>
                     {service.description && <p className="mt-4 text-body-sm text-foreground-muted">{service.description}</p>}
+                    {service.accessibilityInfo && (
+                      <p className="mt-4 flex items-start gap-2 rounded-lg bg-info-subtle p-3 text-left text-caption text-info">
+                        <Accessibility className="mt-0.5 h-4 w-4 shrink-0" />
+                        {service.accessibilityInfo}
+                      </p>
+                    )}
                     <Button variant="secondary" className="mt-5" leftIcon={<Calendar className="h-4 w-4" />} onClick={() => addServiceToCalendar(service)}>
                       Add to Calendar
                     </Button>
