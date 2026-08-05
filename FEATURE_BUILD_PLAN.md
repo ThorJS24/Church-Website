@@ -145,12 +145,12 @@ type-check/lint/a quick manual pass, commit, check it off, move to the next.
 - [x] Related-post recommendations — already built, verified working
 - [x] Print/PDF view
 
-### Batch P7 — Gallery
-- [ ] Photo tagging
-- [ ] Sort by most-liked/viewed
-- [ ] Album download (zip)
-- [ ] Private/family-only albums
-- [ ] Comment/reaction on photos
+### Batch P7 — Gallery ✅
+- [x] Photo tagging — filter chips in the open-album view (field already existed on `GalleryPhoto`, UI was missing)
+- [x] Sort by most-liked/viewed
+- [x] Album download (zip) — dependency-free ZIP writer (`lib/zip.ts`), server-side auth-gated for members-only albums
+- [x] Private/family-only albums — `membersOnly` flag on events, gated open + gated download route
+- [x] Comment/reaction on photos — like + comment thread in the lightbox (routes already existed, UI was missing)
 
 ### Batch P8 — Ministries
 - [ ] Ministry finder filter

@@ -46,6 +46,7 @@ const EVENT_FIELDS: FieldSchema[] = [
   { key: 'registrationUrl', label: 'Registration URL', type: 'url' },
   { key: 'featured', label: 'Featured', type: 'checkbox' },
   { key: 'isPublic', label: 'Public Event', type: 'checkbox' },
+  { key: 'membersOnly', label: 'Members-Only Photo Album (requires sign-in to view photos)', type: 'checkbox' },
 ];
 
 const PASTOR_FIELDS: FieldSchema[] = [

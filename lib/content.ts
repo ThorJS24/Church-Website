@@ -131,6 +131,9 @@ export interface EventItem extends Publishable {
   showInGallery?: boolean;
   youtubeUrl?: string;
   cancelled?: boolean;
+  /** Gallery only: photos require sign-in to view — the album card still
+   * shows in the public grid, but opening it is gated. */
+  membersOnly?: boolean;
 }
 
 export async function getEvents(): Promise<EventItem[]> {
