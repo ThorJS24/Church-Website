@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Book } from 'lucide-react';
 
@@ -12,20 +12,38 @@ interface ScriptureReferenceProps {
 
 export default function ScriptureReference({ reference, verse, version = 'NKJV' }: ScriptureReferenceProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const [isPinned, setIsPinned] = useState(false);
+  const rootRef = useRef<HTMLSpanElement>(null);
+  const expanded = isHovered || isPinned;
+
+  // Hover alone doesn't work on touch devices — tapping toggles a "pinned"
+  // open state instead, closed by tapping the reference again or tapping
+  // anywhere else on the page.
+  useEffect(() => {
+    if (!isPinned) return;
+    const onOutside = (e: MouseEvent) => {
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) setIsPinned(false);
+    };
+    document.addEventListener('mousedown', onOutside);
+    return () => document.removeEventListener('mousedown', onOutside);
+  }, [isPinned]);
 
   return (
-    <span className="relative inline-block">
+    <span ref={rootRef} className="relative inline-block">
       <button
+        type="button"
+        aria-expanded={expanded}
         className="inline-flex items-center gap-1 text-caption font-medium text-accent underline decoration-dotted underline-offset-2 transition-colors hover:text-accent-hover"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
+        onClick={() => setIsPinned((prev) => !prev)}
       >
         <Book className="h-3 w-3" />
         {reference}
       </button>
 
       <AnimatePresence>
-        {isHovered && (
+        {expanded && (
           <motion.div
             initial={{ opacity: 0, y: 10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}

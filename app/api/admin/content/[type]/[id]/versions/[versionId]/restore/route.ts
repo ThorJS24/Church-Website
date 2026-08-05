@@ -16,6 +16,7 @@ const COLLECTIONS: Record<string, string> = {
   testimonials: 'testimonials',
   redirects: 'redirects',
   resources: 'resources',
+  staffMembers: 'staffMembers',
 };
 
 export async function POST(

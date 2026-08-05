@@ -20,6 +20,7 @@ const SEARCHABLE: Record<string, { collection: string; titleField: string; match
   redirects: { collection: 'redirects', titleField: 'fromPath', matchFields: ['fromPath', 'toPath'], tab: 'redirects' },
   series: { collection: 'series', titleField: 'title', matchFields: ['title', 'description'], tab: 'series' },
   speakers: { collection: 'speakers', titleField: 'name', matchFields: ['name', 'bio'], tab: 'speakers' },
+  staffMembers: { collection: 'staffMembers', titleField: 'name', matchFields: ['name', 'position', 'email'], tab: 'staff' },
 };
 
 export async function GET(request: NextRequest) {

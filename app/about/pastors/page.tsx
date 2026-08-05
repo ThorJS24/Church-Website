@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { User, Mail, Phone, BookOpen } from 'lucide-react';
-import { getPastors, Pastor } from '@/lib/content';
+import Link from 'next/link';
+import { User, Mail, Phone, BookOpen, Users2, Play } from 'lucide-react';
+import { getPastors, getStaffMembers, getSermons, Pastor, StaffMember, Sermon } from '@/lib/content';
 import Image from 'next/image';
 import { PageHero } from '@/components/ui/PageHero';
 import { Section } from '@/components/ui/Section';
@@ -38,20 +39,28 @@ function renderBio(bio: any): string {
 
 export default function PastorsPage() {
   const [pastors, setPastors] = useState<Pastor[]>([]);
+  const [staff, setStaff] = useState<StaffMember[]>([]);
+  const [sermons, setSermons] = useState<Sermon[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPastor, setSelectedPastor] = useState<Pastor | null>(null);
 
   useEffect(() => {
-    getPastors()
-      .then((data) => {
+    Promise.all([getPastors(), getStaffMembers(), getSermons(50)])
+      .then(([data, staffData, sermonsData]) => {
         const unique = data.filter((p, i, self) => i === self.findIndex((x) => x.name === p.name && x.title === p.title));
         setPastors(
           unique.sort((a, b) => (HIERARCHY_ORDER[a.title] || 99) - (HIERARCHY_ORDER[b.title] || 99))
         );
+        setStaff(staffData);
+        setSermons(sermonsData);
       })
       .catch((error) => console.error('Error fetching pastors:', error))
       .finally(() => setLoading(false));
   }, []);
+
+  const pastorSermons = selectedPastor
+    ? sermons.filter((s) => s.speakerName === selectedPastor.name).slice(0, 3)
+    : [];
 
   if (loading) return <LoadingState label="Loading pastoral team..." />;
 
@@ -99,6 +108,37 @@ export default function PastorsPage() {
         )}
       </Section>
 
+      {staff.length > 0 && (
+        <Section spacing="lg" className="bg-surface">
+          <div className="mb-10 text-center">
+            <Users2 className="mx-auto mb-4 h-10 w-10 text-accent" aria-hidden="true" />
+            <h2 className="text-headline-md text-foreground">Staff & Leadership Team</h2>
+          </div>
+          <Grid cols={4} gap={4}>
+            {staff.map((member, index) => (
+              <motion.div
+                key={member.id}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-80px' }}
+                transition={{ delay: index * 0.04, duration: 0.4 }}
+              >
+                <Card padding="md" className="h-full text-center">
+                  <Avatar name={member.name} size="md" className="mx-auto mb-3" />
+                  <h3 className="text-title-sm text-foreground">{member.name}</h3>
+                  <p className="text-body-sm text-foreground-muted">{member.position}</p>
+                  {member.email && (
+                    <a href={`mailto:${member.email}`} className="mt-2 inline-flex items-center gap-1 text-caption text-accent hover:underline">
+                      <Mail className="h-3 w-3" /> Contact
+                    </a>
+                  )}
+                </Card>
+              </motion.div>
+            ))}
+          </Grid>
+        </Section>
+      )}
+
       <Modal isOpen={!!selectedPastor} onClose={() => setSelectedPastor(null)} title={selectedPastor?.name} size="lg">
         {selectedPastor && (
           <>
@@ -144,6 +184,27 @@ export default function PastorsPage() {
                 <div className="flex flex-wrap gap-2">
                   {selectedPastor.specialties.map((s, i) => (
                     <Badge key={i} variant="accent">{s}</Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {pastorSermons.length > 0 && (
+              <div className="mt-6 border-t border-border pt-6">
+                <h3 className="mb-3 text-title-sm text-foreground">Recent Sermons</h3>
+                <div className="space-y-2">
+                  {pastorSermons.map((sermon) => (
+                    <Link
+                      key={sermon.id}
+                      href={`/sermons/${sermon.id}`}
+                      className="flex items-center gap-3 rounded-lg border border-border p-3 transition-colors hover:bg-surface-hover"
+                    >
+                      <Play className="h-4 w-4 shrink-0 text-accent" />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-body-sm font-medium text-foreground">{sermon.title}</p>
+                        <p className="text-caption text-foreground-subtle">{new Date(sermon.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                      </div>
+                    </Link>
                   ))}
                 </div>
               </div>

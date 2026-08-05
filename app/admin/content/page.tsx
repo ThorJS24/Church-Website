@@ -117,6 +117,13 @@ const SPEAKER_FIELDS: FieldSchema[] = [
   { key: 'imageUrl', label: 'Photo', type: 'url', accept: 'image' },
 ];
 
+const STAFF_FIELDS: FieldSchema[] = [
+  { key: 'name', label: 'Name', type: 'text', required: true },
+  { key: 'position', label: 'Position / Role', type: 'text', required: true },
+  { key: 'email', label: 'Email', type: 'text' },
+  { key: 'phone', label: 'Phone', type: 'text' },
+];
+
 const MINISTRY_FIELDS: FieldSchema[] = [
   { key: 'title', label: 'Title', type: 'text', required: true },
   { key: 'description', label: 'Description', type: 'textarea', required: true },
@@ -133,6 +140,7 @@ const BUILT_IN_TABS = [
   { key: 'events', label: 'Events' },
   { key: 'gallery', label: 'Gallery' },
   { key: 'pastors', label: 'Pastors' },
+  { key: 'staff', label: 'Staff' },
   { key: 'ministries', label: 'Ministries' },
   { key: 'announcements', label: 'Announcements' },
   { key: 'blog', label: 'Blog' },
@@ -284,6 +292,12 @@ export default function ContentEditorPage() {
         <TabPanel value="gallery"><GalleryTab /></TabPanel>
         <TabPanel value="pastors">
           <GenericContentTab type="pastors" label="Pastors" fields={PASTOR_FIELDS} columns={['name', 'title', 'email']} autoOpenId={autoOpenId} onAutoOpened={() => setAutoOpenId(null)} />
+        </TabPanel>
+        <TabPanel value="staff">
+          <p className="mb-4 rounded-lg border border-accent/30 bg-accent-subtle p-3 text-body-sm text-accent">
+            Powers the department-routing list on the public Contact page and the Leadership listing on the Pastors page.
+          </p>
+          <GenericContentTab type="staffMembers" label="Staff" fields={STAFF_FIELDS} columns={['name', 'position', 'email']} autoOpenId={autoOpenId} onAutoOpened={() => setAutoOpenId(null)} />
         </TabPanel>
         <TabPanel value="ministries">
           <GenericContentTab type="ministries" label="Ministries" fields={MINISTRY_FIELDS} columns={['title', 'category', 'meetingTime']} autoOpenId={autoOpenId} onAutoOpened={() => setAutoOpenId(null)} />

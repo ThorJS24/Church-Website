@@ -18,6 +18,7 @@ const TAGGED_COLLECTIONS: Record<string, string> = {
   smallGroups: 'smallGroups',
   testimonials: 'testimonials',
   resources: 'resources',
+  staffMembers: 'staffMembers',
 };
 
 export async function GET(request: NextRequest) {

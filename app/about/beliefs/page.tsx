@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Book, Heart, Target, Eye, CheckCircle } from 'lucide-react';
+import { Book, Heart, Target, Eye, CheckCircle, HelpCircle } from 'lucide-react';
 import { getPageContent } from '@/lib/content';
 import ScriptureReference from '@/components/ScriptureReference';
 import { PageHero } from '@/components/ui/PageHero';
@@ -10,6 +10,7 @@ import { Section } from '@/components/ui/Section';
 import { Card } from '@/components/ui/Card';
 import { Grid } from '@/components/ui/Grid';
 import { LoadingState } from '@/components/ui/States';
+import { Accordion, AccordionItem } from '@/components/ui/Accordion';
 
 interface AboutPage {
   title: string;
@@ -29,7 +30,15 @@ interface AboutPage {
   }>;
   valuesSectionTitle: string;
   guidingScripture?: { verse: string; reference: string };
+  faqs?: Array<{ question: string; answer: string }>;
 }
+
+const DEFAULT_FAQS = [
+  { question: 'What should I expect when visiting for the first time?', answer: 'A warm welcome, congregational singing, prayer, and expository preaching from Scripture. Services typically run about 90 minutes, and there\'s no dress code — come as you are.' },
+  { question: 'Do you baptize infants or only believers?', answer: 'We practice believer\'s baptism by immersion, following a personal profession of faith, in keeping with our Primitive Baptist convictions.' },
+  { question: 'Is there a place for my children during the service?', answer: 'Children are welcome to worship alongside their families. Reach out to a greeter when you arrive and they\'ll point you to any age-appropriate provisions we have that day.' },
+  { question: 'How can I become a member?', answer: 'Membership follows a profession of faith and believer\'s baptism, along with meeting our pastors. Speak with one of our pastors after a service or use the Contact page to start the conversation.' },
+];
 
 function fadeUp(delay = 0) {
   return {
@@ -152,6 +161,25 @@ export default function BeliefsPage() {
             </Card>
           </motion.div>
         )}
+      </Section>
+
+      {/* FAQ */}
+      <Section spacing="lg" className="bg-surface">
+        <div className="mb-10 text-center">
+          <HelpCircle className="mx-auto mb-4 h-10 w-10 text-accent" aria-hidden="true" />
+          <h2 className="text-headline-md text-foreground">Frequently Asked Questions</h2>
+        </div>
+        <motion.div {...fadeUp()} className="mx-auto max-w-3xl">
+          <Card padding="lg">
+            <Accordion>
+              {(aboutPage?.faqs && aboutPage.faqs.length > 0 ? aboutPage.faqs : DEFAULT_FAQS).map((faq, i) => (
+                <AccordionItem key={i} id={`faq-${i}`} title={faq.question}>
+                  {faq.answer}
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </Card>
+        </motion.div>
       </Section>
     </div>
   );

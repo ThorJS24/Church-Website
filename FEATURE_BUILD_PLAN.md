@@ -110,12 +110,12 @@ type-check/lint/a quick manual pass, commit, check it off, move to the next.
 - [x] Countdown to next major event
 - [x] Social proof strip
 
-### Batch P2 — About / Beliefs / Pastors / Branches
-- [ ] Interactive doctrinal statement (expandable scripture refs)
-- [ ] Pastor bio + their recent sermons
-- [ ] FAQ accordion
-- [ ] Leadership listing
-- [ ] History timeline (interactive)
+### Batch P2 — About / Beliefs / Pastors / Branches ✅
+- [x] Interactive doctrinal statement (expandable scripture refs)
+- [x] Pastor bio + their recent sermons
+- [x] FAQ accordion
+- [x] Leadership listing
+- [x] History timeline (interactive) — already built, verified working
 
 ### Batch P3 — Services + Request
 - [ ] Add-to-calendar per service
