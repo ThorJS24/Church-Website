@@ -8,6 +8,31 @@ import { Container } from '@/components/ui/Container';
 import { Card } from '@/components/ui/Card';
 import { Grid } from '@/components/ui/Grid';
 import { LinkButton } from '@/components/ui/Button';
+import { Accordion, AccordionItem } from '@/components/ui/Accordion';
+import { PrintButton } from '@/components/PrintButton';
+import { PolicyVersionDiff, type PolicyVersion } from '@/components/PolicyVersionDiff';
+
+const POLICY_VERSIONS: PolicyVersion[] = [
+  {
+    id: 'v1.0',
+    label: 'Version 1.0',
+    date: 'Jan 1, 2023',
+    text: 'We collect your name, contact details, and prayer requests to provide pastoral care. We do not share your information with third parties.',
+  },
+  {
+    id: 'v1.1',
+    label: 'Version 1.1',
+    date: 'Jan 1, 2024',
+    text: 'We collect your name, contact details, prayer requests, and technical data such as device and browser information to provide pastoral care and improve our website. We do not sell your information, and we only share it with third parties as required by law or with your consent, in compliance with GDPR and CCPA.',
+  },
+];
+
+const PRIVACY_FAQ = [
+  { id: 'sell', q: 'Do you sell my personal information?', a: 'No. We never sell your personal information to third parties, and we never will.' },
+  { id: 'delete', q: 'How do I request my data be deleted?', a: 'Sign in and visit your account Settings page to request deletion, or email our privacy team directly — see the contact details below.' },
+  { id: 'cookies', q: 'Does this site use cookies?', a: 'We use only the minimum technical cookies needed for the site to function (like keeping you signed in) — no third-party ad-tracking cookies.' },
+  { id: 'children', q: 'Do you collect information from children?', a: 'Information about minors (e.g. for children\'s ministry registration) is collected only with parental consent and used solely for ministry purposes.' },
+];
 
 const GLANCE = [
   'We never sell your personal information',
@@ -59,9 +84,13 @@ export default function PrivacyPolicy() {
 
       <Section spacing="lg">
         <Container size="md">
+          <div className="mb-6 flex justify-end no-print">
+            <PrintButton label="Print / Save as PDF" />
+          </div>
+
           <Card className="mb-10 border-l-4 border-l-accent">
             <h2 className="mb-3 flex items-center gap-2 text-title-lg text-foreground">
-              <ShieldCheck className="h-5 w-5 text-accent" /> Privacy at a Glance
+              <ShieldCheck className="h-5 w-5 text-accent" /> Privacy at a Glance (Plain-Language Summary)
             </h2>
             <ul className="space-y-2">
               {GLANCE.map((item) => (
@@ -127,6 +156,19 @@ export default function PrivacyPolicy() {
                   );
                 })}
               </Grid>
+            </Card>
+          </div>
+
+          <PolicyVersionDiff versions={POLICY_VERSIONS} clauseLabel="Information We Collect" />
+
+          <div className="mb-10">
+            <h2 className="mb-6 text-headline-sm text-foreground">Privacy FAQ</h2>
+            <Card className="bg-surface">
+              <Accordion type="single">
+                {PRIVACY_FAQ.map((item) => (
+                  <AccordionItem key={item.id} id={item.id} title={item.q}>{item.a}</AccordionItem>
+                ))}
+              </Accordion>
             </Card>
           </div>
 

@@ -5,6 +5,31 @@ import { Container } from '@/components/ui/Container';
 import { Card } from '@/components/ui/Card';
 import { Grid } from '@/components/ui/Grid';
 import { LinkButton } from '@/components/ui/Button';
+import { Accordion, AccordionItem } from '@/components/ui/Accordion';
+import { PrintButton } from '@/components/PrintButton';
+import { PolicyVersionDiff, type PolicyVersion } from '@/components/PolicyVersionDiff';
+
+const POLICY_VERSIONS: PolicyVersion[] = [
+  {
+    id: 'v1.0',
+    label: 'Version 1.0',
+    date: 'Jan 1, 2023',
+    text: 'Donations made through this site are voluntary and go toward supporting our ministry.',
+  },
+  {
+    id: 'v1.1',
+    label: 'Version 1.1',
+    date: 'Jan 1, 2024',
+    text: 'Donations made through this site are voluntary, non-refundable, and go toward supporting our ministry and community outreach. Tax-deductible receipts are provided upon request.',
+  },
+];
+
+const TERMS_FAQ = [
+  { id: 'refund', q: 'Are donations refundable?', a: 'Donations are voluntary and generally non-refundable. If you believe a donation was made in error, please contact us and we\'ll review it.' },
+  { id: 'account', q: 'What happens if I violate these terms?', a: 'Violations may result in a warning, content removal, or in serious cases, account suspension, at the discretion of church staff.' },
+  { id: 'content', q: 'Who owns content I post (prayer requests, testimonies)?', a: 'You retain ownership of what you post. By posting publicly, you grant us permission to display it on the site as part of the relevant feature (e.g. the public prayer wall).' },
+  { id: 'changes', q: 'Will I be notified if these terms change?', a: 'The "Last updated" date at the top of this page reflects the most recent revision. Material changes will also be announced through our regular communication channels.' },
+];
 
 const SUMMARY = [
   'Respectful, Christian community standards',
@@ -49,9 +74,13 @@ export default function TermsOfService() {
 
       <Section spacing="lg">
         <Container size="md">
+          <div className="mb-6 flex justify-end no-print">
+            <PrintButton label="Print / Save as PDF" />
+          </div>
+
           <Card className="mb-10 border-l-4 border-l-accent">
             <h2 className="mb-3 flex items-center gap-2 text-title-lg text-foreground">
-              <Info className="h-5 w-5 text-accent" /> Terms Summary
+              <Info className="h-5 w-5 text-accent" /> Terms Summary (Plain-Language)
             </h2>
             <ul className="space-y-2">
               {SUMMARY.map((item) => (
@@ -110,6 +139,19 @@ export default function TermsOfService() {
                   );
                 })}
               </Grid>
+            </Card>
+          </div>
+
+          <PolicyVersionDiff versions={POLICY_VERSIONS} clauseLabel="Donations" />
+
+          <div className="mb-10">
+            <h2 className="mb-6 text-headline-sm text-foreground">Terms FAQ</h2>
+            <Card className="bg-surface">
+              <Accordion type="single">
+                {TERMS_FAQ.map((item) => (
+                  <AccordionItem key={item.id} id={item.id} title={item.q}>{item.a}</AccordionItem>
+                ))}
+              </Accordion>
             </Card>
           </div>
 

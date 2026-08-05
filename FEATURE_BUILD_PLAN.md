@@ -229,11 +229,11 @@ type-check/lint/a quick manual pass, commit, check it off, move to the next.
 - [x] Password strength meter
 - [x] Membership self-declaration at signup — the backend already supported `membershipStatus`, it just was never collected at signup
 
-### Batch P19 — Privacy / Terms
-- [ ] Plain-language summary alongside legal text
-- [ ] Change comparison view (diff between versions)
-- [ ] Print/PDF download
-- [ ] Policy FAQ
+### Batch P19 — Privacy / Terms ✅
+- [x] Plain-language summary alongside legal text — both pages already had an "at a glance" summary card; relabeled explicitly as plain-language
+- [x] Change comparison view (diff between versions) — new hand-rolled word-level diff (`lib/diff.ts`, no diff library exists/may be added), `PolicyVersionDiff` component reused on both pages
+- [x] Print/PDF download — reused the existing `PrintButton` component
+- [x] Policy FAQ
 
 ---
 
