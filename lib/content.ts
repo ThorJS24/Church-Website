@@ -362,6 +362,17 @@ export interface SiteSettings {
     educationMinistry?: string;
     youthPrograms?: string;
   };
+  /** Giving > Transparency Report — a rough where-the-money-goes breakdown.
+   * Flat fields (not nested) so they fit the admin Site Settings tab's
+   * simple key/value form without new form machinery. Percent fields are
+   * free-text (e.g. "60") rather than numbers so an admin can leave any of
+   * them blank without a stray 0 rendering as a real data point. */
+  givingTransparencyMinistryPercent?: string;
+  givingTransparencyOperationsPercent?: string;
+  givingTransparencyMissionsPercent?: string;
+  givingTransparencyBuildingPercent?: string;
+  givingTransparencyReportUrl?: string;
+  givingTransparencyNote?: string;
 }
 
 export async function getSiteSettings(): Promise<SiteSettings | null> {

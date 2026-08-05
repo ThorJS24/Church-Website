@@ -180,11 +180,11 @@ type-check/lint/a quick manual pass, commit, check it off, move to the next.
 - [x] Resource request form
 - [x] Rating/review from members — new member-gated `/api/resources/rate` route, admin-SDK-backed (no firestore.rules changes)
 
-### Batch P12 — Give (no payment integration yet)
-- [ ] Fund/designation informational selector
-- [ ] Giving FAQ
-- [ ] Transparency report
-- [ ] Legacy/planned-giving info page
+### Batch P12 — Give (no payment integration yet) ✅
+- [x] Fund/designation informational selector — click a fund to see what to mention when giving
+- [x] Giving FAQ
+- [x] Transparency report — admin-editable ministry/operations/missions/building % breakdown + annual report link
+- [x] Legacy/planned-giving info page — new `/give/legacy`
 
 ### Batch P13 — Prayer
 - [ ] Status tracking (praying/answered/ongoing)

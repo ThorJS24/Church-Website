@@ -20,6 +20,12 @@ const FIELDS: { key: string; label: string }[] = [
   { key: 'instagramUrl', label: 'Instagram URL' },
   { key: 'whatsappGroupUrl', label: 'WhatsApp Group URL' },
   { key: 'googleMapsUrl', label: 'Google Maps URL' },
+  { key: 'givingTransparencyMinistryPercent', label: 'Giving Transparency: Ministry %' },
+  { key: 'givingTransparencyOperationsPercent', label: 'Giving Transparency: Operations %' },
+  { key: 'givingTransparencyMissionsPercent', label: 'Giving Transparency: Missions %' },
+  { key: 'givingTransparencyBuildingPercent', label: 'Giving Transparency: Building %' },
+  { key: 'givingTransparencyReportUrl', label: 'Giving Transparency: Annual Report URL' },
+  { key: 'givingTransparencyNote', label: 'Giving Transparency: Note' },
 ];
 
 export default function SiteSettingsTab() {
