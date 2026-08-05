@@ -208,12 +208,12 @@ type-check/lint/a quick manual pass, commit, check it off, move to the next.
 - [x] FAQ accordion
 - [x] Community survey
 
-### Batch P16 — Forms (public render)
-- [ ] Auto-save draft
-- [ ] Progress indicator (multi-step)
-- [ ] Improved inline validation messaging
-- [ ] Confirmation email with a copy of answers
-- [ ] Duplicate-submission warning
+### Batch P16 — Forms (public render) ✅
+- [x] Auto-save draft — localStorage, debounced, restore banner with a Clear option
+- [x] Progress indicator (multi-step) — auto-chunks forms with >4 fields into steps
+- [x] Improved inline validation messaging — per-field errors, not just HTML5 `required`
+- [x] Confirmation email with a copy of answers — new submitter-facing email, separate from the existing admin `notifyEmail`
+- [x] Duplicate-submission warning — backend already enforced this; the frontend now renders it as a distinct info notice instead of a generic red error
 
 ### Batch P17 — Member Area
 - [ ] Saved sermons/posts library

@@ -103,14 +103,27 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       ip,
     });
 
+    const summary = fields.map((f) => `${f.label}: ${data[f.key] ?? '—'}`).join('\n');
+
     if (formData.notifyEmail) {
-      const summary = fields.map((f) => `${f.label}: ${data[f.key] ?? '—'}`).join('\n');
       getResend().emails.send({
         from: FROM_EMAIL,
         to: formData.notifyEmail,
         subject: `New submission: ${formData.title || id}`,
         text: summary,
       }).catch((err) => console.error(`Form notification email failed for ${id}:`, err));
+    }
+
+    // Confirmation copy to the submitter themselves, if the form has an
+    // email field — separate from notifyEmail above, which goes to
+    // whoever owns the form, not the person who filled it out.
+    if (emailFieldValue) {
+      getResend().emails.send({
+        from: FROM_EMAIL,
+        to: emailFieldValue,
+        subject: `We received your submission: ${formData.title || 'Form'}`,
+        text: `Thank you for your submission. Here's a copy of your answers:\n\n${summary}`,
+      }).catch((err) => console.error(`Submitter confirmation email failed for ${id}:`, err));
     }
 
     return NextResponse.json({ success: true });
