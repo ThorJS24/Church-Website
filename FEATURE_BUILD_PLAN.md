@@ -34,14 +34,14 @@ type-check/lint/a quick manual pass, commit, check it off, move to the next.
 - [x] Bulk email to a filtered segment (via Resend)
 - [x] Household/family grouping
 
-### Batch A3 — Content
-- [ ] Shared content calendar view
-- [ ] Cross-type search
-- [ ] Bulk publish/unpublish (extend existing bulk-select)
-- [ ] Duplicate-as-new
-- [ ] Tag taxonomy manager
-- [ ] SEO fields (meta description, share image) with preview
-- [ ] Sermon series builder
+### Batch A3 — Content ✅
+- [x] Shared content calendar view
+- [x] Cross-type search
+- [x] Bulk publish/unpublish (extend existing bulk-select)
+- [x] Duplicate-as-new
+- [x] Tag taxonomy manager
+- [x] SEO fields (meta description, share image) with preview
+- [x] Sermon series builder
 
 ### Batch A4 — Messages
 - [ ] Reply from inbox (via Resend)

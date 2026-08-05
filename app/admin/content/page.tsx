@@ -1,13 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Search, CalendarDays, Tag as TagIcon } from 'lucide-react';
 import GenericContentTab, { FieldSchema } from '@/components/admin/content/GenericContentTab';
 import GalleryTab from '@/components/admin/content/GalleryTab';
 import SiteSettingsTab from '@/components/admin/content/SiteSettingsTab';
 import ContentTypesTab from '@/components/admin/content/ContentTypesTab';
+import ContentCalendarTab from '@/components/admin/content/ContentCalendarTab';
+import TagsTab from '@/components/admin/content/TagsTab';
 import { adminFetch } from '@/lib/adminApi';
 import { ContentTypeDefinition } from '@/types/contentType';
 import { Tabs, TabList, Tab, TabPanel } from '@/components/ui/Tabs';
+import { Input } from '@/components/ui/Input';
 
 const SERMON_FIELDS: FieldSchema[] = [
   { key: 'title', label: 'Title', type: 'text', required: true },
@@ -101,6 +105,18 @@ const ANNOUNCEMENT_FIELDS: FieldSchema[] = [
   { key: 'expiresAt', label: 'Expires At (stops showing publicly after this, even if still Published)', type: 'datetime' },
 ];
 
+const SERIES_FIELDS: FieldSchema[] = [
+  { key: 'title', label: 'Series Title', type: 'text', required: true },
+  { key: 'description', label: 'Description', type: 'textarea' },
+  { key: 'imageUrl', label: 'Cover Image', type: 'url', accept: 'image' },
+];
+
+const SPEAKER_FIELDS: FieldSchema[] = [
+  { key: 'name', label: 'Name', type: 'text', required: true },
+  { key: 'bio', label: 'Bio', type: 'textarea' },
+  { key: 'imageUrl', label: 'Photo', type: 'url', accept: 'image' },
+];
+
 const MINISTRY_FIELDS: FieldSchema[] = [
   { key: 'title', label: 'Title', type: 'text', required: true },
   { key: 'description', label: 'Description', type: 'textarea', required: true },
@@ -112,6 +128,8 @@ const MINISTRY_FIELDS: FieldSchema[] = [
 
 const BUILT_IN_TABS = [
   { key: 'sermons', label: 'Sermons' },
+  { key: 'series', label: 'Series' },
+  { key: 'speakers', label: 'Speakers' },
   { key: 'events', label: 'Events' },
   { key: 'gallery', label: 'Gallery' },
   { key: 'pastors', label: 'Pastors' },
@@ -122,6 +140,8 @@ const BUILT_IN_TABS = [
   { key: 'testimonials', label: 'Testimonials' },
   { key: 'resources', label: 'Resources' },
   { key: 'redirects', label: 'Redirects' },
+  { key: 'calendar', label: 'Calendar' },
+  { key: 'tags', label: 'Tags' },
   { key: 'settings', label: 'Site Settings' },
   { key: 'content-types', label: 'Content Types' },
 ] as const;
@@ -129,9 +149,18 @@ const BUILT_IN_TABS = [
 type BuiltInTabKey = typeof BUILT_IN_TABS[number]['key'];
 type TabKey = BuiltInTabKey | `custom:${string}`;
 
+interface SearchResult { id: string; type: string; tab: string; title: string; snippet: string }
+
 export default function ContentEditorPage() {
   const [tab, setTab] = useState<TabKey>('sermons');
   const [customTypes, setCustomTypes] = useState<ContentTypeDefinition[]>([]);
+  const [autoOpenId, setAutoOpenId] = useState<string | null>(null);
+
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [showResults, setShowResults] = useState(false);
+  const searchBoxRef = useRef<HTMLDivElement>(null);
 
   const loadCustomTypes = () => {
     adminFetch('/api/admin/content-types')
@@ -141,18 +170,93 @@ export default function ContentEditorPage() {
 
   useEffect(() => { loadCustomTypes(); }, []);
 
+  useEffect(() => {
+    if (query.trim().length < 2) { setResults([]); return; }
+    setSearching(true);
+    const handle = setTimeout(() => {
+      adminFetch(`/api/admin/content-search?q=${encodeURIComponent(query.trim())}`)
+        .then((data) => setResults(data.results))
+        .catch(() => setResults([]))
+        .finally(() => setSearching(false));
+    }, 300);
+    return () => clearTimeout(handle);
+  }, [query]);
+
+  useEffect(() => {
+    const onClickOutside = (e: MouseEvent) => {
+      if (searchBoxRef.current && !searchBoxRef.current.contains(e.target as Node)) setShowResults(false);
+    };
+    document.addEventListener('mousedown', onClickOutside);
+    return () => document.removeEventListener('mousedown', onClickOutside);
+  }, []);
+
+  const openSearchResult = (result: SearchResult) => {
+    setTab(result.tab as TabKey);
+    setAutoOpenId(result.id);
+    setShowResults(false);
+    setQuery('');
+  };
+
+  const openCalendarItem = (calendarTab: string, id: string) => {
+    setTab(calendarTab as TabKey);
+    setAutoOpenId(id);
+  };
+
   const activeCustomType = tab.startsWith('custom:')
     ? customTypes.find(t => t.id === tab.slice('custom:'.length))
     : null;
 
   return (
     <div>
-      <h1 className="mb-6 text-headline-md text-foreground">Content</h1>
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+        <h1 className="text-headline-md text-foreground">Content</h1>
+        <div ref={searchBoxRef} className="relative w-full max-w-xs">
+          <Input
+            leftIcon={<Search className="h-4 w-4" />}
+            placeholder="Search all content..."
+            value={query}
+            onChange={(e) => { setQuery(e.target.value); setShowResults(true); }}
+            onFocus={() => setShowResults(true)}
+          />
+          {showResults && query.trim().length >= 2 && (
+            <div className="absolute right-0 top-full z-20 mt-1 max-h-80 w-96 max-w-[90vw] overflow-y-auto rounded-lg border border-border bg-surface shadow-lg">
+              {searching ? (
+                <p className="p-3 text-body-sm text-foreground-subtle">Searching...</p>
+              ) : results.length === 0 ? (
+                <p className="p-3 text-body-sm text-foreground-subtle">No matches across content types.</p>
+              ) : (
+                <ul className="divide-y divide-border">
+                  {results.map((r) => (
+                    <li key={`${r.type}-${r.id}`}>
+                      <button
+                        onClick={() => openSearchResult(r)}
+                        className="block w-full px-3 py-2 text-left hover:bg-surface-hover"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="truncate text-body-sm font-medium text-foreground">{r.title}</span>
+                          <span className="shrink-0 rounded-full bg-accent-subtle px-2 py-0.5 text-caption text-accent">
+                            {BUILT_IN_TABS.find((t) => t.key === r.tab)?.label ?? r.type}
+                          </span>
+                        </div>
+                        {r.snippet && <p className="truncate text-caption text-foreground-subtle">{r.snippet}</p>}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
 
       <Tabs value={tab} onChange={(v) => setTab(v as TabKey)} className="mb-6">
         <TabList className="flex-wrap">
           {BUILT_IN_TABS.map((t) => (
-            <Tab key={t.key} value={t.key}>{t.label}</Tab>
+            <Tab key={t.key} value={t.key}>
+              {t.key === 'calendar' && <CalendarDays className="mr-1 inline h-3.5 w-3.5" />}
+              {t.key === 'tags' && <TagIcon className="mr-1 inline h-3.5 w-3.5" />}
+              {t.label}
+            </Tab>
           ))}
           {customTypes.map((ct) => (
             <Tab key={ct.id} value={`custom:${ct.id}`}>{ct.pluralLabel}</Tab>
@@ -160,38 +264,56 @@ export default function ContentEditorPage() {
         </TabList>
 
         <TabPanel value="sermons">
-          <GenericContentTab type="sermons" label="Sermons" fields={SERMON_FIELDS} columns={['title', 'speakerName', 'date']} />
+          <GenericContentTab type="sermons" label="Sermons" fields={SERMON_FIELDS} columns={['title', 'speakerName', 'date']} autoOpenId={autoOpenId} onAutoOpened={() => setAutoOpenId(null)} />
+        </TabPanel>
+        <TabPanel value="series">
+          <p className="mb-4 rounded-lg border border-accent/30 bg-accent-subtle p-3 text-body-sm text-accent">
+            Series titles here power the &quot;Series&quot; filter dropdown on the public Sermons page — a sermon joins a series when its Series field matches one of these titles exactly.
+          </p>
+          <GenericContentTab type="series" label="Series" fields={SERIES_FIELDS} columns={['title']} autoOpenId={autoOpenId} onAutoOpened={() => setAutoOpenId(null)} />
+        </TabPanel>
+        <TabPanel value="speakers">
+          <p className="mb-4 rounded-lg border border-accent/30 bg-accent-subtle p-3 text-body-sm text-accent">
+            Speaker names here power the &quot;Speaker&quot; filter dropdown on the public Sermons page — a sermon is attributed when its Speaker field matches one of these names exactly.
+          </p>
+          <GenericContentTab type="speakers" label="Speakers" fields={SPEAKER_FIELDS} columns={['name']} autoOpenId={autoOpenId} onAutoOpened={() => setAutoOpenId(null)} />
         </TabPanel>
         <TabPanel value="events">
-          <GenericContentTab type="events" label="Events" fields={EVENT_FIELDS} columns={['title', 'startDate', 'location']} />
+          <GenericContentTab type="events" label="Events" fields={EVENT_FIELDS} columns={['title', 'startDate', 'location']} autoOpenId={autoOpenId} onAutoOpened={() => setAutoOpenId(null)} />
         </TabPanel>
         <TabPanel value="gallery"><GalleryTab /></TabPanel>
         <TabPanel value="pastors">
-          <GenericContentTab type="pastors" label="Pastors" fields={PASTOR_FIELDS} columns={['name', 'title', 'email']} />
+          <GenericContentTab type="pastors" label="Pastors" fields={PASTOR_FIELDS} columns={['name', 'title', 'email']} autoOpenId={autoOpenId} onAutoOpened={() => setAutoOpenId(null)} />
         </TabPanel>
         <TabPanel value="ministries">
-          <GenericContentTab type="ministries" label="Ministries" fields={MINISTRY_FIELDS} columns={['title', 'category', 'meetingTime']} />
+          <GenericContentTab type="ministries" label="Ministries" fields={MINISTRY_FIELDS} columns={['title', 'category', 'meetingTime']} autoOpenId={autoOpenId} onAutoOpened={() => setAutoOpenId(null)} />
         </TabPanel>
         <TabPanel value="announcements">
-          <GenericContentTab type="announcements" label="Announcements" fields={ANNOUNCEMENT_FIELDS} columns={['title', 'date']} />
+          <GenericContentTab type="announcements" label="Announcements" fields={ANNOUNCEMENT_FIELDS} columns={['title', 'date']} autoOpenId={autoOpenId} onAutoOpened={() => setAutoOpenId(null)} />
         </TabPanel>
         <TabPanel value="blog">
-          <GenericContentTab type="blog" label="Blog Posts" fields={BLOG_FIELDS} columns={['title', 'authorName', 'category']} apiBase="/api/admin" />
+          <GenericContentTab type="blog" label="Blog Posts" fields={BLOG_FIELDS} columns={['title', 'authorName', 'category']} apiBase="/api/admin" autoOpenId={autoOpenId} onAutoOpened={() => setAutoOpenId(null)} />
         </TabPanel>
         <TabPanel value="small-groups">
-          <GenericContentTab type="smallGroups" label="Small Groups" fields={SMALL_GROUP_FIELDS} columns={['name', 'leaderName', 'meetingSchedule']} />
+          <GenericContentTab type="smallGroups" label="Small Groups" fields={SMALL_GROUP_FIELDS} columns={['name', 'leaderName', 'meetingSchedule']} autoOpenId={autoOpenId} onAutoOpened={() => setAutoOpenId(null)} />
         </TabPanel>
         <TabPanel value="testimonials">
-          <GenericContentTab type="testimonials" label="Testimonials" fields={TESTIMONIAL_FIELDS} columns={['authorName', 'content']} />
+          <GenericContentTab type="testimonials" label="Testimonials" fields={TESTIMONIAL_FIELDS} columns={['authorName', 'content']} autoOpenId={autoOpenId} onAutoOpened={() => setAutoOpenId(null)} />
         </TabPanel>
         <TabPanel value="resources">
-          <GenericContentTab type="resources" label="Resources" fields={RESOURCE_FIELDS} columns={['title', 'category']} />
+          <GenericContentTab type="resources" label="Resources" fields={RESOURCE_FIELDS} columns={['title', 'category']} autoOpenId={autoOpenId} onAutoOpened={() => setAutoOpenId(null)} />
         </TabPanel>
         <TabPanel value="redirects">
           <p className="mb-4 rounded-lg border border-warning/30 bg-warning-subtle p-3 text-body-sm text-warning">
             Redirects take effect on the next deploy, not immediately — they&apos;re resolved at build time, not on every request.
           </p>
           <GenericContentTab type="redirects" label="Redirects" fields={REDIRECT_FIELDS} columns={['fromPath', 'toPath', 'statusCode']} supportsVersions={false} />
+        </TabPanel>
+        <TabPanel value="calendar">
+          <ContentCalendarTab onOpenItem={openCalendarItem} />
+        </TabPanel>
+        <TabPanel value="tags">
+          <TagsTab />
         </TabPanel>
         <TabPanel value="settings"><SiteSettingsTab /></TabPanel>
         <TabPanel value="content-types"><ContentTypesTab onChange={loadCustomTypes} /></TabPanel>

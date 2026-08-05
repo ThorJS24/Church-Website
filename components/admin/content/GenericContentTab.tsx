@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import Papa from 'papaparse';
-import { Plus, Pencil, Trash2, FileText, History, Image as ImageIcon, Download, Upload } from 'lucide-react';
+import { Plus, Pencil, Trash2, FileText, History, Image as ImageIcon, Download, Upload, Copy } from 'lucide-react';
 import { adminFetch } from '@/lib/adminApi';
 import { LoadingState, EmptyState, ErrorState } from '@/components/admin/States';
 import ConfirmModal from '@/components/admin/ConfirmModal';
@@ -31,6 +31,10 @@ interface GenericContentTabProps {
   apiBase?: string;
   /** Custom types support versioning too (same underlying route shape) — default true. */
   supportsVersions?: boolean;
+  /** Jump straight into editing this item once it loads — used by cross-type
+   * search and the content calendar to deep-link into a specific tab+item. */
+  autoOpenId?: string | null;
+  onAutoOpened?: () => void;
 }
 
 type Item = Record<string, any> & { id: string };
@@ -43,7 +47,7 @@ interface Version {
 }
 
 function emptyForm(fields: FieldSchema[]): Record<string, any> {
-  const form: Record<string, any> = { status: 'published', publishAt: '' };
+  const form: Record<string, any> = { status: 'published', publishAt: '', tags: '', metaDescription: '', shareImageUrl: '' };
   fields.forEach(f => { form[f.key] = f.type === 'checkbox' ? false : ''; });
   return form;
 }
@@ -61,6 +65,8 @@ export default function GenericContentTab({
   columns,
   apiBase = '/api/admin/content',
   supportsVersions = true,
+  autoOpenId = null,
+  onAutoOpened,
 }: GenericContentTabProps) {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
@@ -87,6 +93,16 @@ export default function GenericContentTab({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type, apiBase]);
 
+  useEffect(() => {
+    if (!autoOpenId || loading) return;
+    const match = items.find((i) => i.id === autoOpenId);
+    if (match) {
+      openEdit(match);
+      onAutoOpened?.();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoOpenId, loading, items]);
+
   function load() {
     setLoading(true);
     setError(null);
@@ -108,6 +124,9 @@ export default function GenericContentTab({
     fields.forEach(f => { if (item[f.key] !== undefined) next[f.key] = item[f.key]; });
     next.status = item.status ?? 'published';
     next.publishAt = item.publishAt ?? '';
+    next.tags = Array.isArray(item.tags) ? item.tags.join(', ') : (item.tags ?? '');
+    next.metaDescription = item.metaDescription ?? '';
+    next.shareImageUrl = item.shareImageUrl ?? '';
     setForm(next);
     setShowForm(true);
   };
@@ -117,6 +136,9 @@ export default function GenericContentTab({
     try {
       const payload = { ...form };
       if (payload.status !== 'draft') payload.publishAt = payload.publishAt || null;
+      payload.tags = typeof payload.tags === 'string'
+        ? payload.tags.split(',').map((t: string) => t.trim()).filter(Boolean)
+        : [];
       if (editing) {
         await adminFetch(`${apiBase}/${type}/${editing.id}`, { method: 'PUT', body: JSON.stringify(payload) });
       } else {
@@ -143,6 +165,37 @@ export default function GenericContentTab({
       await adminFetch(`${apiBase}/${type}/${id}`, { method: 'DELETE' });
     }
     load();
+  };
+
+  const bulkSetStatus = async (ids: string[], status: 'published' | 'draft', clearSelection: () => void) => {
+    try {
+      for (const id of ids) {
+        await adminFetch(`${apiBase}/${type}/${id}`, { method: 'PUT', body: JSON.stringify({ status, ...(status === 'draft' ? {} : { publishAt: null }) }) });
+      }
+      toast({ title: `${ids.length} ${ids.length === 1 ? 'item' : 'items'} ${status === 'published' ? 'published' : 'unpublished'}`, variant: 'success' });
+      clearSelection();
+      load();
+    } catch (err: any) {
+      toast({ title: 'Bulk update failed', description: err.message, variant: 'danger' });
+    }
+  };
+
+  const duplicate = async (item: Item) => {
+    try {
+      const payload: Record<string, any> = { ...item };
+      delete payload.id;
+      delete payload.createdAt;
+      delete payload.updatedAt;
+      const titleKey = 'title' in payload ? 'title' : 'name' in payload ? 'name' : null;
+      if (titleKey) payload[titleKey] = `Copy of ${payload[titleKey]}`;
+      payload.status = 'draft';
+      payload.publishAt = null;
+      await adminFetch(`${apiBase}/${type}`, { method: 'POST', body: JSON.stringify(payload) });
+      toast({ title: 'Duplicated as a new draft', variant: 'success' });
+      load();
+    } catch (err: any) {
+      toast({ title: 'Failed to duplicate', description: err.message, variant: 'danger' });
+    }
   };
 
   const openHistory = async (item: Item) => {
@@ -284,16 +337,21 @@ export default function GenericContentTab({
           columns={tableColumns}
           getRowId={(item) => item.id}
           selectable
-          searchKeys={(item) => columns.map((c) => String(item[c] ?? '')).join(' ')}
+          searchKeys={(item) => [...columns.map((c) => String(item[c] ?? '')), (Array.isArray(item.tags) ? item.tags.join(' ') : '')].join(' ')}
           searchPlaceholder={`Search ${label.toLowerCase()}...`}
           exportFilename={`${type}-view.csv`}
           bulkActions={(ids, clear) => (
-            <button
-              onClick={() => { setBulkDeleteIds(ids); }}
-              className="font-medium text-danger hover:underline"
-            >
-              Delete selected
-            </button>
+            <>
+              <button onClick={() => bulkSetStatus(ids, 'published', clear)} className="font-medium text-success hover:underline">
+                Publish selected
+              </button>
+              <button onClick={() => bulkSetStatus(ids, 'draft', clear)} className="font-medium text-foreground-muted hover:underline">
+                Unpublish selected
+              </button>
+              <button onClick={() => { setBulkDeleteIds(ids); }} className="font-medium text-danger hover:underline">
+                Delete selected
+              </button>
+            </>
           )}
           rowActions={(item) => (
             <div className="flex items-center justify-end gap-1">
@@ -302,6 +360,9 @@ export default function GenericContentTab({
                   <History className="h-3.5 w-3.5" />
                 </IconButton>
               )}
+              <IconButton label="Duplicate" size="sm" onClick={() => duplicate(item)}>
+                <Copy className="h-3.5 w-3.5" />
+              </IconButton>
               <IconButton label="Edit" size="sm" onClick={() => openEdit(item)}>
                 <Pencil className="h-3.5 w-3.5" />
               </IconButton>
@@ -392,6 +453,60 @@ export default function GenericContentTab({
                 value={form.publishAt ?? ''}
                 onChange={(e) => setForm({ ...form, publishAt: e.target.value })}
               />
+            )}
+          </div>
+
+          <div className="space-y-4 border-t border-border pt-4">
+            <Input
+              label="Tags"
+              hint="Comma-separated — searchable here and manageable from the Tags tab"
+              value={form.tags ?? ''}
+              onChange={(e) => setForm({ ...form, tags: e.target.value })}
+              placeholder="e.g. youth, outreach, spring-2026"
+            />
+            <Textarea
+              label="Meta description (SEO)"
+              hint={`${(form.metaDescription ?? '').length}/160 characters — shown in search results`}
+              value={form.metaDescription ?? ''}
+              onChange={(e) => setForm({ ...form, metaDescription: e.target.value })}
+              rows={2}
+              maxLength={160}
+            />
+            <div>
+              <label className="mb-1.5 block text-label text-foreground">Share image (social preview)</label>
+              <div className="flex gap-2">
+                <Input
+                  type="url"
+                  value={form.shareImageUrl ?? ''}
+                  onChange={(e) => setForm({ ...form, shareImageUrl: e.target.value })}
+                  className="flex-1"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  leftIcon={<ImageIcon className="h-4 w-4" />}
+                  onClick={() => setMediaPickerField({ key: 'shareImageUrl', accept: 'image' })}
+                >
+                  Browse
+                </Button>
+              </div>
+            </div>
+            {(form.metaDescription || form.shareImageUrl || form.title || form.name) && (
+              <div className="overflow-hidden rounded-lg border border-border">
+                {form.shareImageUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={form.shareImageUrl} alt="" className="h-32 w-full object-cover" />
+                )}
+                <div className="p-3">
+                  <p className="truncate text-body-sm font-medium text-accent">
+                    {form.title || form.name || `${label.replace(/s$/, '')}`}
+                  </p>
+                  <p className="text-caption text-success">salempbc.in</p>
+                  <p className="line-clamp-2 text-caption text-foreground-subtle">
+                    {form.metaDescription || 'No meta description set — search engines will generate one automatically.'}
+                  </p>
+                </div>
+              </div>
             )}
           </div>
         </div>
