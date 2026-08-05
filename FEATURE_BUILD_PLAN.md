@@ -69,12 +69,12 @@ type-check/lint/a quick manual pass, commit, check it off, move to the next.
 - [x] Custom thank-you page per form
 - [x] Bulk submission actions
 
-### Batch A7 — Newsletter
-- [ ] Subscriber segmentation by tag
-- [ ] Digest auto-compiler (pull recent content into a draft)
-- [ ] Preference center
-- [ ] Campaign public archive view
-- [ ] Basic rich-text campaign editor
+### Batch A7 — Newsletter ✅
+- [x] Subscriber segmentation by tag
+- [x] Digest auto-compiler (pull recent content into a draft)
+- [x] Preference center
+- [x] Campaign public archive view
+- [x] Basic rich-text campaign editor
 
 ### Batch A8 — Moderation Queue
 - [ ] Bulk approve/reject

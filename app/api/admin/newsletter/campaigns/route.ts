@@ -26,14 +26,21 @@ export async function POST(request: NextRequest) {
   if (!authResult.ok) return authResult.response;
 
   try {
-    const { subject, body } = await request.json();
+    const { subject, body, segmentTag } = await request.json();
     if (!subject || !body) {
       return NextResponse.json({ success: false, message: 'Subject and body are required.' }, { status: 400 });
     }
 
     const db = getAdminDb();
     const subscribersSnap = await db.collection('newsletterSubscribers').where('status', '==', 'subscribed').get();
-    const subscribers = subscribersSnap.docs.map(d => ({ email: d.data().email as string, token: d.data().unsubscribeToken as string }));
+    let subscribers = subscribersSnap.docs.map(d => ({
+      email: d.data().email as string,
+      token: d.data().unsubscribeToken as string,
+      tags: (d.data().tags as string[]) ?? [],
+    }));
+    if (segmentTag) {
+      subscribers = subscribers.filter((s) => s.tags.includes(segmentTag));
+    }
 
     if (subscribers.length === 0) {
       return NextResponse.json({ success: false, message: 'No subscribers to send to.' }, { status: 400 });
@@ -48,6 +55,7 @@ export async function POST(request: NextRequest) {
       const results = await Promise.all(
         chunk.map(async (sub) => {
           const unsubscribeUrl = `${baseUrl}/api/newsletter/unsubscribe?token=${sub.token}`;
+          const preferencesUrl = `${baseUrl}/newsletter/preferences?token=${sub.token}`;
           try {
             // Resend resolves { data: null, error } on API-level failures rather
             // than throwing — checked explicitly, same as app/api/services/request.
@@ -55,7 +63,7 @@ export async function POST(request: NextRequest) {
               from: FROM_EMAIL,
               to: sub.email,
               subject,
-              html: `${body}<hr/><p style="font-size:12px;color:#888;"><a href="${unsubscribeUrl}">Unsubscribe</a></p>`,
+              html: `${body}<hr/><p style="font-size:12px;color:#888;"><a href="${preferencesUrl}">Manage preferences</a> · <a href="${unsubscribeUrl}">Unsubscribe</a></p>`,
             });
             if (result.error) return { ok: false, email: sub.email, message: result.error.message };
             return { ok: true };
@@ -73,6 +81,7 @@ export async function POST(request: NextRequest) {
     const campaign = {
       subject,
       body,
+      segmentTag: segmentTag || null,
       recipientCount: subscribers.length,
       sentCount: sent,
       failedCount: failures.length,
