@@ -16,12 +16,20 @@ interface PublicForm {
   title: string;
   description?: string;
   fields: FieldSchema[];
+  thankYouUrl?: string;
+}
+
+function fieldVisible(field: FieldSchema, values: Record<string, any>): boolean {
+  if (!field.showIf) return true;
+  const actual = values[field.showIf.fieldKey];
+  return actual === field.showIf.equals || String(actual) === String(field.showIf.equals);
 }
 
 export default function PublicFormPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const [form, setForm] = useState<PublicForm | null | undefined>(undefined);
   const [values, setValues] = useState<Record<string, any>>({});
+  const [files, setFiles] = useState<Record<string, File | null>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
@@ -38,14 +46,36 @@ export default function PublicFormPage({ params }: { params: Promise<{ id: strin
     setSubmitting(true);
     setError('');
     try {
-      const response = await fetch(`/api/forms/${id}/submit`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values),
-      });
+      const hasFileField = form?.fields.some((f) => f.type === 'file');
+      let body: string | FormData;
+      let headers: Record<string, string> | undefined;
+      if (hasFileField) {
+        const fd = new FormData();
+        form?.fields.forEach((f) => {
+          if (!fieldVisible(f, values)) return;
+          if (f.type === 'file') {
+            const file = files[f.key];
+            if (file) fd.append(f.key, file);
+          } else if (values[f.key] !== undefined) {
+            fd.append(f.key, String(values[f.key]));
+          }
+        });
+        body = fd;
+      } else {
+        const visibleValues: Record<string, any> = {};
+        form?.fields.forEach((f) => { if (fieldVisible(f, values)) visibleValues[f.key] = values[f.key]; });
+        body = JSON.stringify(visibleValues);
+        headers = { 'Content-Type': 'application/json' };
+      }
+
+      const response = await fetch(`/api/forms/${id}/submit`, { method: 'POST', headers, body });
       const data = await response.json();
       if (data.success) {
-        setSubmitted(true);
+        if (form?.thankYouUrl) {
+          window.location.href = form.thankYouUrl;
+        } else {
+          setSubmitted(true);
+        }
       } else {
         setError(data.message || 'Failed to submit. Please try again.');
       }
@@ -82,7 +112,7 @@ export default function PublicFormPage({ params }: { params: Promise<{ id: strin
             {form.description && <p className="mt-2 text-body-sm text-foreground-muted">{form.description}</p>}
 
             <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-              {form.fields.map((f) =>
+              {form.fields.filter((f) => fieldVisible(f, values)).map((f) =>
                 f.type === 'textarea' ? (
                   <Textarea
                     key={f.key}
@@ -99,6 +129,18 @@ export default function PublicFormPage({ params }: { params: Promise<{ id: strin
                     checked={!!values[f.key]}
                     onChange={(e) => setValues({ ...values, [f.key]: e.target.checked })}
                   />
+                ) : f.type === 'file' ? (
+                  <div key={f.key}>
+                    <label className="mb-1.5 block text-label text-foreground">
+                      {f.label}{f.required && <span className="ml-0.5 text-danger">*</span>}
+                    </label>
+                    <input
+                      type="file"
+                      required={f.required}
+                      onChange={(e) => setFiles({ ...files, [f.key]: e.target.files?.[0] ?? null })}
+                      className="block w-full rounded-md border border-border bg-background px-3.5 py-2.5 text-body-sm text-foreground file:mr-3 file:rounded file:border-0 file:bg-accent-subtle file:px-3 file:py-1.5 file:text-accent"
+                    />
+                  </div>
                 ) : (
                   <Input
                     key={f.key}

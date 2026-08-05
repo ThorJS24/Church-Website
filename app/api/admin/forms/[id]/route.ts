@@ -3,7 +3,7 @@ import { getAdminDb } from '@/lib/firebase-admin';
 import { requireAdmin, withAudit } from '@/lib/api-auth';
 import { FieldSchema } from '@/types/contentType';
 
-const VALID_FIELD_TYPES = new Set(['text', 'textarea', 'date', 'datetime', 'number', 'checkbox', 'url', 'email']);
+const VALID_FIELD_TYPES = new Set(['text', 'textarea', 'date', 'datetime', 'number', 'checkbox', 'url', 'email', 'file']);
 
 function validateFields(fields: unknown): fields is FieldSchema[] {
   if (!Array.isArray(fields) || fields.length === 0) return false;
@@ -32,6 +32,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const title = String(body.title || '').trim();
     const description = body.description ? String(body.description) : '';
     const successMessage = body.successMessage ? String(body.successMessage) : before.successMessage;
+    const thankYouUrl = body.thankYouUrl !== undefined ? String(body.thankYouUrl) : (before.thankYouUrl ?? '');
+    const notifyEmail = body.notifyEmail !== undefined ? String(body.notifyEmail) : (before.notifyEmail ?? '');
     const fields = body.fields;
 
     if (!title) {
@@ -41,7 +43,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ success: false, message: 'At least one valid field is required.' }, { status: 400 });
     }
 
-    const updates = { title, description, successMessage, fields };
+    const updates = { title, description, successMessage, thankYouUrl, notifyEmail, fields };
 
     await withAudit(
       authResult.user,

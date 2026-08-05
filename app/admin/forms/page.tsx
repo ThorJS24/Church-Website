@@ -18,7 +18,7 @@ import { Checkbox } from '@/components/ui/Checkbox';
 import { DataTable, type DataTableColumn } from '@/components/ui/DataTable';
 import { useToast } from '@/components/ui/Toast';
 
-const FIELD_TYPES: FieldType[] = ['text', 'email', 'textarea', 'date', 'datetime', 'number', 'checkbox', 'url'];
+const FIELD_TYPES: FieldType[] = ['text', 'email', 'textarea', 'date', 'datetime', 'number', 'checkbox', 'url', 'file'];
 
 function slugify(label: string): string {
   return label.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 50);
@@ -50,6 +50,8 @@ export default function FormsBuilderPage() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [thankYouUrl, setThankYouUrl] = useState('');
+  const [notifyEmail, setNotifyEmail] = useState('');
   const [fields, setFields] = useState<FieldSchema[]>([emptyField()]);
 
   const [submissionsTarget, setSubmissionsTarget] = useState<FormDefinition | null>(null);
@@ -74,6 +76,8 @@ export default function FormsBuilderPage() {
     setTitle('');
     setDescription('');
     setSuccessMessage('');
+    setThankYouUrl('');
+    setNotifyEmail('');
     setFields([emptyField()]);
     setSaveError(null);
     setShowForm(true);
@@ -86,6 +90,8 @@ export default function FormsBuilderPage() {
     setTitle(form.title);
     setDescription(form.description || '');
     setSuccessMessage(form.successMessage || '');
+    setThankYouUrl(form.thankYouUrl || '');
+    setNotifyEmail(form.notifyEmail || '');
     setFields(form.fields);
     setSaveError(null);
     setShowForm(true);
@@ -114,7 +120,7 @@ export default function FormsBuilderPage() {
 
     setSaving(true);
     try {
-      const body = { id: slug, title, description, successMessage, fields: cleanFields };
+      const body = { id: slug, title, description, successMessage, thankYouUrl, notifyEmail, fields: cleanFields };
       if (editing) {
         await adminFetch(`/api/admin/forms/${editing.id}`, { method: 'PUT', body: JSON.stringify(body) });
       } else {
@@ -262,11 +268,28 @@ export default function FormsBuilderPage() {
         </div>
 
         <Textarea label="Description" value={description} onChange={(e) => setDescription(e.target.value)} rows={2} className="mb-4" />
+        <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Input
+            label="Success Message"
+            value={successMessage}
+            onChange={(e) => setSuccessMessage(e.target.value)}
+            placeholder="Thank you — we'll be in touch."
+          />
+          <Input
+            label="Thank-You Page URL (optional)"
+            hint="Redirects here instead of showing the success message"
+            value={thankYouUrl}
+            onChange={(e) => setThankYouUrl(e.target.value)}
+            placeholder="/thank-you"
+          />
+        </div>
         <Input
-          label="Success Message"
-          value={successMessage}
-          onChange={(e) => setSuccessMessage(e.target.value)}
-          placeholder="Thank you — we'll be in touch."
+          label="Notify Staff Email (optional)"
+          hint="Sends an email summary of each new submission to this address"
+          type="email"
+          value={notifyEmail}
+          onChange={(e) => setNotifyEmail(e.target.value)}
+          placeholder="staff@salempbc.in"
           className="mb-4"
         />
 
@@ -278,36 +301,79 @@ export default function FormsBuilderPage() {
         </div>
 
         <div className="mb-4 space-y-2">
-          {fields.map((f, i) => (
-            <div key={i} className="flex flex-wrap items-center gap-2 rounded-lg bg-surface p-2">
-              <input
-                type="text"
-                value={f.key}
-                onChange={(e) => updateField(i, { key: e.target.value.replace(/[^a-zA-Z0-9]/g, '') })}
-                placeholder="fieldKey"
-                aria-label="Field key"
-                className="w-28 rounded-md border border-border bg-background px-2 py-1.5 font-mono text-body-sm text-foreground"
-              />
-              <input
-                type="text"
-                value={f.label}
-                onChange={(e) => updateField(i, { label: e.target.value })}
-                placeholder="Field Label"
-                aria-label="Field label"
-                className="flex-1 rounded-md border border-border bg-background px-2 py-1.5 text-body-sm text-foreground"
-              />
-              <Select
-                aria-label="Field type"
-                value={f.type}
-                onChange={(e) => updateField(i, { type: e.target.value as FieldType })}
-                options={FIELD_TYPES.map(t => ({ value: t, label: t }))}
-                size="sm"
-                className="w-auto"
-              />
-              <Checkbox label="Req." checked={!!f.required} onChange={(e) => updateField(i, { required: e.target.checked })} />
-              <IconButton label="Remove field" size="sm" onClick={() => removeField(i)}><X className="h-4 w-4" /></IconButton>
-            </div>
-          ))}
+          {fields.map((f, i) => {
+            const otherFields = fields.filter((_, j) => j !== i && fields[j].key);
+            const triggerField = otherFields.find((of) => of.key === f.showIf?.fieldKey);
+            return (
+              <div key={i} className="rounded-lg bg-surface p-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <input
+                    type="text"
+                    value={f.key}
+                    onChange={(e) => updateField(i, { key: e.target.value.replace(/[^a-zA-Z0-9]/g, '') })}
+                    placeholder="fieldKey"
+                    aria-label="Field key"
+                    className="w-28 rounded-md border border-border bg-background px-2 py-1.5 font-mono text-body-sm text-foreground"
+                  />
+                  <input
+                    type="text"
+                    value={f.label}
+                    onChange={(e) => updateField(i, { label: e.target.value })}
+                    placeholder="Field Label"
+                    aria-label="Field label"
+                    className="flex-1 rounded-md border border-border bg-background px-2 py-1.5 text-body-sm text-foreground"
+                  />
+                  <Select
+                    aria-label="Field type"
+                    value={f.type}
+                    onChange={(e) => updateField(i, { type: e.target.value as FieldType })}
+                    options={FIELD_TYPES.map(t => ({ value: t, label: t }))}
+                    size="sm"
+                    className="w-auto"
+                  />
+                  <Checkbox label="Req." checked={!!f.required} onChange={(e) => updateField(i, { required: e.target.checked })} />
+                  <IconButton label="Remove field" size="sm" onClick={() => removeField(i)}><X className="h-4 w-4" /></IconButton>
+                </div>
+                {otherFields.length > 0 && (
+                  <div className="mt-2 flex flex-wrap items-center gap-2 border-t border-border pt-2 text-caption text-foreground-subtle">
+                    <span>Show only if</span>
+                    <Select
+                      aria-label="Conditional field"
+                      size="sm"
+                      className="w-auto"
+                      value={f.showIf?.fieldKey || ''}
+                      onChange={(e) => updateField(i, e.target.value ? { showIf: { fieldKey: e.target.value, equals: true } } : { showIf: undefined })}
+                      options={[{ value: '', label: 'Always shown' }, ...otherFields.map((of) => ({ value: of.key, label: of.label || of.key }))]}
+                    />
+                    {f.showIf && (
+                      <>
+                        <span>equals</span>
+                        {triggerField?.type === 'checkbox' ? (
+                          <Select
+                            aria-label="Conditional value"
+                            size="sm"
+                            className="w-auto"
+                            value={String(f.showIf.equals)}
+                            onChange={(e) => updateField(i, { showIf: { fieldKey: f.showIf!.fieldKey, equals: e.target.value === 'true' } })}
+                            options={[{ value: 'true', label: 'Yes / Checked' }, { value: 'false', label: 'No / Unchecked' }]}
+                          />
+                        ) : (
+                          <input
+                            type="text"
+                            value={String(f.showIf.equals)}
+                            onChange={(e) => updateField(i, { showIf: { fieldKey: f.showIf!.fieldKey, equals: e.target.value } })}
+                            placeholder="value"
+                            aria-label="Conditional value"
+                            className="w-32 rounded-md border border-border bg-background px-2 py-1 text-caption text-foreground"
+                          />
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
 
         {saveError && <p className="mb-3 text-body-sm text-danger">{saveError}</p>}
@@ -329,7 +395,29 @@ export default function FormsBuilderPage() {
         ) : submissions.length === 0 ? (
           <EmptyState icon={ClipboardList} title="No submissions yet" />
         ) : (
-          <DataTable data={submissions} columns={submissionColumns} getRowId={(s) => s.id} exportFilename={`${submissionsTarget?.id}-submissions.csv`} />
+          <DataTable
+            data={submissions}
+            columns={submissionColumns}
+            getRowId={(s) => s.id}
+            exportFilename={`${submissionsTarget?.id}-submissions.csv`}
+            selectable
+            bulkActions={(ids, clear) => (
+              <button
+                onClick={async () => {
+                  if (!submissionsTarget) return;
+                  for (const sid of ids) {
+                    await adminFetch(`/api/admin/forms/${submissionsTarget.id}/submissions/${sid}`, { method: 'DELETE' });
+                  }
+                  setSubmissions((prev) => prev.filter((s) => !ids.includes(s.id)));
+                  toast({ title: `Deleted ${ids.length} submission(s)`, variant: 'success' });
+                  clear();
+                }}
+                className="font-medium text-danger hover:underline"
+              >
+                Delete selected
+              </button>
+            )}
+          />
         )}
       </Modal>
 

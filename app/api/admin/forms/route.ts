@@ -4,7 +4,7 @@ import { requireAdmin, withAudit } from '@/lib/api-auth';
 import { FORM_SLUG_PATTERN, FormDefinition } from '@/types/formSchema';
 import { FieldSchema } from '@/types/contentType';
 
-const VALID_FIELD_TYPES = new Set(['text', 'textarea', 'date', 'datetime', 'number', 'checkbox', 'url', 'email']);
+const VALID_FIELD_TYPES = new Set(['text', 'textarea', 'date', 'datetime', 'number', 'checkbox', 'url', 'email', 'file']);
 
 function validateFields(fields: unknown): fields is FieldSchema[] {
   if (!Array.isArray(fields) || fields.length === 0) return false;
@@ -40,6 +40,8 @@ export async function POST(request: NextRequest) {
     const title = String(body.title || '').trim();
     const description = body.description ? String(body.description) : '';
     const successMessage = body.successMessage ? String(body.successMessage) : 'Thank you — your submission has been received.';
+    const thankYouUrl = body.thankYouUrl ? String(body.thankYouUrl) : '';
+    const notifyEmail = body.notifyEmail ? String(body.notifyEmail) : '';
     const fields = body.fields;
 
     if (!FORM_SLUG_PATTERN.test(slug)) {
@@ -61,6 +63,8 @@ export async function POST(request: NextRequest) {
       title,
       description,
       successMessage,
+      thankYouUrl,
+      notifyEmail,
       fields,
       createdBy: authResult.user.uid,
       createdByEmail: authResult.user.email,

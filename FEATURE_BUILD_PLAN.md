@@ -61,13 +61,13 @@ type-check/lint/a quick manual pass, commit, check it off, move to the next.
 - [x] Copyright/license field
 - [x] Usage tracker (where is this image referenced)
 
-### Batch A6 — Forms
-- [ ] Conditional field logic
-- [ ] File upload field type
-- [ ] Notification routing (per-form staff email)
-- [ ] Duplicate-submission prevention
-- [ ] Custom thank-you page per form
-- [ ] Bulk submission actions
+### Batch A6 — Forms ✅
+- [x] Conditional field logic
+- [x] File upload field type
+- [x] Notification routing (per-form staff email)
+- [x] Duplicate-submission prevention
+- [x] Custom thank-you page per form
+- [x] Bulk submission actions
 
 ### Batch A7 — Newsletter
 - [ ] Subscriber segmentation by tag

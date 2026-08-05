@@ -13,8 +13,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     if (!doc.exists) {
       return NextResponse.json({ success: false, message: 'Form not found' }, { status: 404 });
     }
-    const { title, description, fields } = doc.data() as any;
-    return NextResponse.json({ success: true, form: { id, title, description, fields } });
+    const { title, description, fields, thankYouUrl } = doc.data() as any;
+    return NextResponse.json({ success: true, form: { id, title, description, fields, thankYouUrl } });
   } catch (error) {
     console.error(`Error fetching form ${id}:`, error);
     return NextResponse.json({ success: false, message: 'Failed to load form' }, { status: 500 });
