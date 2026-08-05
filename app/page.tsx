@@ -10,8 +10,8 @@ import {
 } from 'lucide-react';
 import {
   getAnnouncements, getSiteSettings, getServiceTimes, getSermons, getEvents,
-  getBlogPosts, getEventGalleries, getLivestream,
-  Announcement, SiteSettings, ServiceTime, Sermon, EventItem, BlogPost, GalleryPhoto, Livestream,
+  getBlogPosts, getEventGalleries, getLivestream, getTestimonials,
+  Announcement, SiteSettings, ServiceTime, Sermon, EventItem, BlogPost, GalleryPhoto, Livestream, Testimonial,
 } from '@/lib/content';
 import { useAuth } from '@/contexts/AuthContext';
 import { Section } from '@/components/ui/Section';
@@ -23,6 +23,11 @@ import { Button, LinkButton } from '@/components/ui/Button';
 import DynamicLiveStream from '@/components/DynamicLiveStream';
 import BibleVerse from '@/components/BibleVerse';
 import NewsletterSignup from '@/components/NewsletterSignup';
+import WelcomeBackBanner from '@/components/home/WelcomeBackBanner';
+import WeekAtAGlance from '@/components/home/WeekAtAGlance';
+import EventCountdown from '@/components/home/EventCountdown';
+import SermonCarousel from '@/components/home/SermonCarousel';
+import SocialProofStrip from '@/components/home/SocialProofStrip';
 
 const quickActions = [
   { href: '/services', icon: Church, title: 'Join Us Sunday', description: 'Worship with us every Sunday at 9:30 AM' },
@@ -44,11 +49,12 @@ export default function Home() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
   const [services, setServices] = useState<ServiceTime[]>([]);
-  const [featuredSermon, setFeaturedSermon] = useState<Sermon | null>(null);
+  const [recentSermons, setRecentSermons] = useState<Sermon[]>([]);
   const [upcomingEvents, setUpcomingEvents] = useState<EventItem[]>([]);
   const [latestPosts, setLatestPosts] = useState<BlogPost[]>([]);
   const [galleryPreview, setGalleryPreview] = useState<GalleryPhoto[]>([]);
   const [livestream, setLivestream] = useState<Livestream | null>(null);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [showLiveStream, setShowLiveStream] = useState(false);
   const { user } = useAuth();
 
@@ -57,7 +63,7 @@ export default function Home() {
       try {
         const [
           announcementsData, siteSettingsData, servicesData, sermonsData,
-          eventsData, blogData, galleriesData, livestreamData,
+          eventsData, blogData, galleriesData, livestreamData, testimonialsData,
         ] = await Promise.all([
           getAnnouncements(3),
           getSiteSettings(),
@@ -67,12 +73,13 @@ export default function Home() {
           getBlogPosts(3),
           getEventGalleries(),
           getLivestream(),
+          getTestimonials(),
         ]);
 
         setAnnouncements(announcementsData);
         setSiteSettings(siteSettingsData);
         setServices(servicesData);
-        setFeaturedSermon(sermonsData.find((s) => s.featured) ?? sermonsData[0] ?? null);
+        setRecentSermons(sermonsData.slice(0, 6));
         setUpcomingEvents(
           eventsData
             .filter((e) => new Date(e.startDate).getTime() >= Date.now())
@@ -82,6 +89,9 @@ export default function Home() {
         setLatestPosts(blogData);
         setGalleryPreview(galleriesData.flatMap((g) => g.photos).slice(0, 6));
         setLivestream(livestreamData);
+        setTestimonials(
+          [...testimonialsData].sort((a, b) => Number(b.featured) - Number(a.featured)).slice(0, 3)
+        );
       } catch (error) {
         console.error('Failed to fetch homepage data:', error);
       }
@@ -92,9 +102,13 @@ export default function Home() {
 
   const nextService = services[0];
   const isLive = !!livestream?.isLive;
+  const weekEvents = upcomingEvents.filter((e) => new Date(e.startDate).getTime() - Date.now() < 7 * 86_400_000);
+  const nextMajorEvent = upcomingEvents.find((e) => e.featured) ?? upcomingEvents[0] ?? null;
 
   return (
     <div>
+      <WelcomeBackBanner />
+
       {/* Hero */}
       <section className="relative overflow-hidden bg-zinc-950 py-24 text-white sm:py-32">
         <div
@@ -181,9 +195,15 @@ export default function Home() {
         </Grid>
       </Section>
 
+      {/* This week at a glance */}
+      <Section spacing="md">
+        <h2 className="mb-6 text-headline-sm text-foreground">This Week at a Glance</h2>
+        <WeekAtAGlance nextService={nextService ?? null} weekEvents={weekEvents} latestAnnouncement={announcements[0] ?? null} />
+      </Section>
+
       {/* Announcements */}
       {announcements.length > 0 && (
-        <Section spacing="md" className="bg-surface">
+        <Section spacing="md" className="bg-surface" id="announcements">
           <h2 className="mb-8 text-center text-headline-md text-foreground">Latest Announcements</h2>
           <div className="mx-auto max-w-3xl space-y-4">
             {announcements.map((announcement, index) => (
@@ -227,44 +247,20 @@ export default function Home() {
         </Grid>
       </Section>
 
-      {/* Featured sermon */}
-      {featuredSermon && (
+      {/* Recent sermons */}
+      {recentSermons.length > 0 && (
         <Section spacing="lg" className="bg-surface">
           <div className="mb-8 flex items-center justify-between">
-            <h2 className="text-headline-md text-foreground">Featured Sermon</h2>
+            <h2 className="text-headline-md text-foreground">Recent Sermons</h2>
             <Link href="/sermons" className="text-body-sm font-medium text-accent hover:text-accent-hover">
               Browse all sermons →
             </Link>
           </div>
-          <Card variant="raised" padding="none" className="overflow-hidden">
-            <div className="grid md:grid-cols-2">
-              <div className="relative aspect-video bg-zinc-900 md:aspect-auto">
-                {featuredSermon.imageUrl ? (
-                  <Image src={featuredSermon.imageUrl} alt={featuredSermon.title} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center">
-                    <BookOpen className="h-12 w-12 text-white/30" />
-                  </div>
-                )}
-              </div>
-              <div className="flex flex-col justify-center p-8">
-                {featuredSermon.seriesTitle && <Badge variant="accent" className="mb-3 w-fit">{featuredSermon.seriesTitle}</Badge>}
-                <h3 className="text-headline-sm text-foreground">{featuredSermon.title}</h3>
-                <p className="mt-2 text-body-sm text-foreground-muted">
-                  {featuredSermon.speakerName}
-                  {featuredSermon.scripture ? ` · ${featuredSermon.scripture}` : ''}
-                </p>
-                {featuredSermon.description && (
-                  <p className="mt-4 line-clamp-3 text-body-sm text-foreground-muted">{featuredSermon.description}</p>
-                )}
-                <LinkButton href={`/sermons/${featuredSermon.id}`} className="mt-6 w-fit" leftIcon={<Play className="h-4 w-4" />}>
-                  Watch now
-                </LinkButton>
-              </div>
-            </div>
-          </Card>
+          <SermonCarousel sermons={recentSermons} />
         </Section>
       )}
+
+      <EventCountdown event={nextMajorEvent} />
 
       {/* Upcoming events */}
       {upcomingEvents.length > 0 && (
@@ -325,6 +321,14 @@ export default function Home() {
           ))}
         </Grid>
       </Section>
+
+      {/* Social proof */}
+      {testimonials.length > 0 && (
+        <Section spacing="lg">
+          <h2 className="mb-8 text-center text-headline-md text-foreground">What Our Church Family Says</h2>
+          <SocialProofStrip testimonials={testimonials} />
+        </Section>
+      )}
 
       {/* Latest blog */}
       {latestPosts.length > 0 && (

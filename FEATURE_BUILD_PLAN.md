@@ -103,12 +103,12 @@ type-check/lint/a quick manual pass, commit, check it off, move to the next.
 
 ## Public
 
-### Batch P1 — Home
-- [ ] Welcome-back state for logged-in members
-- [ ] Recent-sermon auto-carousel
-- [ ] "This week at a glance" digest block
-- [ ] Countdown to next major event
-- [ ] Social proof strip
+### Batch P1 — Home ✅
+- [x] Welcome-back state for logged-in members
+- [x] Recent-sermon auto-carousel
+- [x] "This week at a glance" digest block
+- [x] Countdown to next major event
+- [x] Social proof strip
 
 ### Batch P2 — About / Beliefs / Pastors / Branches
 - [ ] Interactive doctrinal statement (expandable scripture refs)
