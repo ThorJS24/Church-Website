@@ -17,7 +17,7 @@ export function ReadingProgressBar() {
   }, []);
 
   return (
-    <div className="fixed left-0 right-0 top-16 z-30 h-0.5 bg-transparent">
+    <div className="fixed left-0 right-0 top-16 z-30 h-0.5 bg-transparent no-print">
       <motion.div className="h-full bg-accent" style={{ width: `${progress}%` }} transition={{ duration: 0.1 }} />
     </div>
   );

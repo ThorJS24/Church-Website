@@ -13,6 +13,7 @@ import { Card } from '@/components/ui/Card';
 import { Avatar } from '@/components/ui/Avatar';
 import { ShareButton } from '@/components/ShareButton';
 import { ReadingProgressBar } from '@/components/ReadingProgressBar';
+import { PrintButton } from '@/components/PrintButton';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -77,21 +78,32 @@ export default async function BlogPostPage({ params }: Props) {
 
       <Section spacing="lg">
         <Container size="md">
-          <Breadcrumbs items={[{ label: 'Blog', href: '/blog' }, { label: post.title }]} className="mb-6" />
+          <Breadcrumbs items={[{ label: 'Blog', href: '/blog' }, { label: post.title }]} className="mb-6 no-print" />
 
-          {post.category && <Badge variant="accent" className="mb-3">{post.category}</Badge>}
+          {post.category && (
+            <Link href={`/blog/category/${encodeURIComponent(post.category)}`}>
+              <Badge variant="accent" className="mb-3">{post.category}</Badge>
+            </Link>
+          )}
           <h1 className="text-display-sm text-foreground">{post.title}</h1>
 
           <div className="mt-5 flex items-center gap-4">
             {post.authorName && <Avatar name={post.authorName} size="sm" />}
             <div className="text-body-sm text-foreground-muted">
-              {post.authorName && <p className="font-medium text-foreground">{post.authorName}</p>}
+              {post.authorName && (
+                <Link href={`/blog/author/${encodeURIComponent(post.authorName)}`} className="font-medium text-foreground hover:text-accent hover:underline">
+                  {post.authorName}
+                </Link>
+              )}
               <p className="flex items-center gap-3 text-caption text-foreground-subtle">
                 <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" /> {new Date(post.date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</span>
                 <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {readingTime} min read</span>
               </p>
             </div>
-            <ShareButton title={post.title} className="ml-auto" />
+            <div className="ml-auto flex items-center gap-2 no-print">
+              <PrintButton />
+              <ShareButton title={post.title} />
+            </div>
           </div>
 
           {post.imageUrl && (
@@ -116,7 +128,7 @@ export default async function BlogPostPage({ params }: Props) {
             </article>
 
             {headings.length >= 2 && (
-              <aside className="hidden md:block">
+              <aside className="hidden no-print md:block">
                 <div className="sticky top-24 rounded-xl border border-border bg-surface p-5">
                   <p className="mb-3 text-label uppercase tracking-wide text-foreground-subtle">On this page</p>
                   <nav className="space-y-2">
@@ -134,7 +146,7 @@ export default async function BlogPostPage({ params }: Props) {
       </Section>
 
       {relatedPosts.length > 0 && (
-        <Section spacing="lg" className="bg-surface">
+        <Section spacing="lg" className="bg-surface no-print">
           <Container size="md">
             <h2 className="mb-6 text-title-lg text-foreground">Related Posts</h2>
             <div className="grid gap-4 sm:grid-cols-3">

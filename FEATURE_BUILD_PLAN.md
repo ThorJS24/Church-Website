@@ -138,12 +138,12 @@ type-check/lint/a quick manual pass, commit, check it off, move to the next.
 - [x] Cancellation broadcast to registrants
 - [x] Post-event photo gallery auto-link
 
-### Batch P6 — Blog
-- [ ] Author profile pages
-- [ ] Category landing pages
-- [ ] RSS feed
-- [ ] Related-post recommendations
-- [ ] Print/PDF view
+### Batch P6 — Blog ✅
+- [x] Author profile pages
+- [x] Category landing pages
+- [x] RSS feed
+- [x] Related-post recommendations — already built, verified working
+- [x] Print/PDF view
 
 ### Batch P7 — Gallery
 - [ ] Photo tagging
