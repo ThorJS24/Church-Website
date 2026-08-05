@@ -117,6 +117,32 @@ async function main() {
   console.log('Seeding livestream placeholder (offline by default)...');
   await seedDoc('livestream', 'current', { title: 'Sunday Service', isLive: false, streamType: 'youtube', chatEnabled: false });
 
+  // Volunteer opportunities aren't a first-class collection (no
+  // firestore.rules entry) — they live in the app's existing "custom
+  // content type" system instead (see types/contentType.ts), which is
+  // specifically built so a new type is publicly readable immediately with
+  // no rules deploy. This registers the schema so admins can manage
+  // opportunities from Content > Volunteer Opportunities without having to
+  // define the type by hand first.
+  console.log('Registering the "Volunteer Opportunities" custom content type...');
+  await seedDoc('contentTypes', 'volunteer-opportunities', {
+    label: 'Volunteer Opportunity',
+    pluralLabel: 'Volunteer Opportunities',
+    fields: [
+      { key: 'title', label: 'Title', type: 'text', required: true },
+      { key: 'description', label: 'Description', type: 'textarea', required: true },
+      { key: 'area', label: 'Area/Ministry', type: 'text' },
+      { key: 'spotsNeeded', label: 'Spots Needed', type: 'number' },
+      { key: 'location', label: 'Location', type: 'text' },
+      { key: 'shiftDate', label: 'Shift Date', type: 'date' },
+      { key: 'shiftTime', label: 'Shift Time (e.g. "9:00 AM - 12:00 PM")', type: 'text' },
+    ],
+    columns: ['title', 'area', 'shiftDate'],
+    createdBy: 'seed-script',
+    createdByEmail: null,
+    createdAt: new Date().toISOString(),
+  });
+
   console.log('\nDone. Everything else (sermons, events, gallery, pastors, ministries,\n' +
     'announcements, history) is intentionally left empty — add real content\n' +
     'through the admin panel once Phase 2 is built, or write directly to\n' +

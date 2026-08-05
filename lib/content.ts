@@ -501,3 +501,18 @@ export async function getCustomContent<T = Record<string, any>>(
   const snap = await getDocs(query(collection(db, 'customContent'), where('contentType', '==', typeSlug)));
   return snap.docs.map(d => withId<T & { id: string }>(d)).filter(isEffectivelyPublished);
 }
+
+export interface VolunteerOpportunity {
+  id: string;
+  title: string;
+  description: string;
+  area?: string;
+  spotsNeeded?: number;
+  location?: string;
+  shiftDate?: string;
+  shiftTime?: string;
+}
+
+export async function getVolunteerOpportunities(): Promise<VolunteerOpportunity[]> {
+  return getCustomContent<VolunteerOpportunity>('volunteer-opportunities');
+}

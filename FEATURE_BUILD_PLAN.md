@@ -194,12 +194,12 @@ type-check/lint/a quick manual pass, commit, check it off, move to the next.
 - [x] Answered-prayer archive — separate wall/archive toggle
 - [x] Follow-up check-in prompt — opt-in email capture, staff-visible via the admin tab (no automated email send — out of scope)
 
-### Batch P14 — Volunteer
-- [ ] Opportunity board
-- [ ] Shift sign-up calendar
-- [ ] Skills inventory intake
-- [ ] Family volunteer flag
-- [ ] Volunteer hour log
+### Batch P14 — Volunteer ✅
+- [x] Opportunity board — new "Volunteer Opportunities" custom content type (admin-manageable, no firestore.rules deploy needed)
+- [x] Shift sign-up calendar — opportunities carry a shift date/time; "Sign Up for This" deep-links into the application form
+- [x] Skills inventory intake — separate skills checklist from the existing areas-of-interest list
+- [x] Family volunteer flag
+- [x] Volunteer hour log — new member-gated `/api/volunteer/hours` route + running total on the page
 
 ### Batch P15 — Contact / Community
 - [ ] Department/staff routing
