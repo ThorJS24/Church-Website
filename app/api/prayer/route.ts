@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
-import { collection, addDoc, getDocs, query, where, orderBy } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
 import { checkRateLimit, clientIpFrom } from '@/lib/rateLimit';
 
 // 5/hour: matches the gallery-submission threshold — a public form feeding
@@ -21,11 +21,17 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { title, description, category, isPrivate, isAnonymous, authorName } = body;
+    const { title, description, category, isPrivate, isAnonymous, authorName, email, followUpRequested } = body;
 
     if (!title || !description) {
       return NextResponse.json(
         { success: false, message: 'Title and description are required' },
+        { status: 400 }
+      );
+    }
+    if (followUpRequested && !email) {
+      return NextResponse.json(
+        { success: false, message: 'An email is required to request a follow-up check-in' },
         { status: 400 }
       );
     }
@@ -37,7 +43,13 @@ export async function POST(request: NextRequest) {
       isPrivate: isPrivate || false,
       isAnonymous: isAnonymous || false,
       authorName: isAnonymous ? 'Anonymous' : (authorName || 'Anonymous'),
-      status: 'active',
+      // 'praying' (default) / 'ongoing' (still needed, longer-term) /
+      // 'answered' — set by a moderator via the admin Prayer Requests tab,
+      // not something a submitter can set for themselves.
+      status: 'praying',
+      prayerTally: 0,
+      followUpRequested: !!followUpRequested,
+      email: followUpRequested ? String(email).slice(0, 200) : null,
       moderationStatus: 'pending',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -63,19 +75,28 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   try {
     const prayerRequestsRef = collection(db, 'prayerRequests');
+    // No orderBy here deliberately — combined with the two equality
+    // filters below it would need a composite index this environment can't
+    // create (see FEATURE_BUILD_PLAN.md's established fix pattern from
+    // earlier batches). Sorted in JS after fetching instead. Status is no
+    // longer filtered server-side (unlike the original 'active'-only
+    // query) since the public page now needs both the active wall and the
+    // answered-prayer archive from one response.
     const q = query(
       prayerRequestsRef,
       where('isPrivate', '==', false),
-      where('status', '==', 'active'),
       where('moderationStatus', '==', 'approved'),
-      orderBy('createdAt', 'desc')
     );
 
     const querySnapshot = await getDocs(q);
-    const requests = querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    const requests = querySnapshot.docs
+      .map(doc => {
+        // email is captured only for a private staff follow-up — never
+        // send it to the public wall response.
+        const { email, ...rest } = doc.data();
+        return { id: doc.id, ...rest };
+      })
+      .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
     return NextResponse.json({
       success: true,

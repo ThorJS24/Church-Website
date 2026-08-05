@@ -186,13 +186,13 @@ type-check/lint/a quick manual pass, commit, check it off, move to the next.
 - [x] Transparency report — admin-editable ministry/operations/missions/building % breakdown + annual report link
 - [x] Legacy/planned-giving info page — new `/give/legacy`
 
-### Batch P13 — Prayer
-- [ ] Status tracking (praying/answered/ongoing)
-- [ ] "I'm praying for this" tally
-- [ ] Public/private toggle
-- [ ] Category selection
-- [ ] Answered-prayer archive
-- [ ] Follow-up check-in prompt
+### Batch P13 — Prayer ✅
+- [x] Status tracking (praying/answered/ongoing) — new admin Prayer Requests tab
+- [x] "I'm praying for this" tally — new `/api/prayer/pray` route
+- [x] Public/private toggle — the wall itself didn't render before this batch; now wired up end-to-end
+- [x] Category selection — filter buttons now actually filter a real list
+- [x] Answered-prayer archive — separate wall/archive toggle
+- [x] Follow-up check-in prompt — opt-in email capture, staff-visible via the admin tab (no automated email send — out of scope)
 
 ### Batch P14 — Volunteer
 - [ ] Opportunity board

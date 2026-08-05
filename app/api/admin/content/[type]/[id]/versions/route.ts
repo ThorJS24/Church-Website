@@ -18,6 +18,7 @@ const COLLECTIONS: Record<string, string> = {
   redirects: 'redirects',
   resources: 'resources',
   staffMembers: 'staffMembers',
+  prayerRequests: 'prayerRequests',
 };
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ type: string; id: string }> }) {

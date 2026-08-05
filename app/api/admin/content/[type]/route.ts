@@ -21,6 +21,7 @@ const COLLECTIONS: Record<string, string> = {
   redirects: 'redirects',
   resources: 'resources',
   staffMembers: 'staffMembers',
+  prayerRequests: 'prayerRequests',
 };
 
 function resolveCollection(type: string): string | null {
@@ -64,7 +65,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     // the public form (app/api/testimonials/submit) — pre-approve them,
     // matching the same convention app/api/gallery/upload uses for
     // admin-uploaded (vs. publicly-submitted) gallery images.
-    const extra = collectionName === 'testimonials' ? { moderationStatus: 'approved' } : {};
+    const extra = collectionName === 'testimonials' || collectionName === 'prayerRequests' ? { moderationStatus: 'approved' } : {};
     const data = { ...body, ...extra, createdAt: now, updatedAt: now };
 
     // Pre-generate the doc ref so its real ID is known before the audit

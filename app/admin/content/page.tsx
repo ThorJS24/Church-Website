@@ -97,6 +97,18 @@ const TESTIMONIAL_FIELDS: FieldSchema[] = [
   { key: 'featured', label: 'Featured', type: 'checkbox' },
 ];
 
+const PRAYER_FIELDS: FieldSchema[] = [
+  { key: 'title', label: 'Title', type: 'text', required: true },
+  { key: 'description', label: 'Request', type: 'textarea', required: true },
+  { key: 'category', label: 'Category', type: 'text' },
+  { key: 'authorName', label: 'Author Name', type: 'text' },
+  { key: 'isPrivate', label: 'Private (pastors only)', type: 'checkbox' },
+  { key: 'isAnonymous', label: 'Anonymous', type: 'checkbox' },
+  { key: 'status', label: 'Status (praying, ongoing, or answered)', type: 'text' },
+  { key: 'answeredNote', label: 'Answered Note (shown on the public answered-prayer archive)', type: 'textarea' },
+  { key: 'followUpRequested', label: 'Follow-Up Requested (submitter asked for a private check-in)', type: 'checkbox' },
+];
+
 const REDIRECT_FIELDS: FieldSchema[] = [
   { key: 'fromPath', label: 'From Path (e.g. /old-page)', type: 'text', required: true },
   { key: 'toPath', label: 'To Path or URL', type: 'text', required: true },
@@ -171,6 +183,7 @@ const BUILT_IN_TABS = [
   { key: 'small-groups', label: 'Small Groups' },
   { key: 'testimonials', label: 'Testimonials' },
   { key: 'resources', label: 'Resources' },
+  { key: 'prayer-requests', label: 'Prayer Requests' },
   { key: 'redirects', label: 'Redirects' },
   { key: 'calendar', label: 'Calendar' },
   { key: 'tags', label: 'Tags' },
@@ -353,6 +366,12 @@ export default function ContentEditorPage() {
         </TabPanel>
         <TabPanel value="resources">
           <GenericContentTab type="resources" label="Resources" fields={RESOURCE_FIELDS} columns={['title', 'category']} autoOpenId={autoOpenId} onAutoOpened={() => setAutoOpenId(null)} />
+        </TabPanel>
+        <TabPanel value="prayer-requests">
+          <p className="mb-4 rounded-lg border border-info/30 bg-info-subtle p-3 text-body-sm text-info">
+            New public submissions land in the Moderation Queue first. Once approved, manage their status (praying/ongoing/answered) here.
+          </p>
+          <GenericContentTab type="prayerRequests" label="Prayer Requests" fields={PRAYER_FIELDS} columns={['title', 'category', 'status', 'followUpRequested']} autoOpenId={autoOpenId} onAutoOpened={() => setAutoOpenId(null)} />
         </TabPanel>
         <TabPanel value="redirects">
           <p className="mb-4 rounded-lg border border-warning/30 bg-warning-subtle p-3 text-body-sm text-warning">

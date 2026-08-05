@@ -17,6 +17,7 @@ const COLLECTIONS: Record<string, string> = {
   redirects: 'redirects',
   resources: 'resources',
   staffMembers: 'staffMembers',
+  prayerRequests: 'prayerRequests',
 };
 
 function resolveCollection(type: string): string | null {

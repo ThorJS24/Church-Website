@@ -17,6 +17,7 @@ const COLLECTIONS: Record<string, string> = {
   redirects: 'redirects',
   resources: 'resources',
   staffMembers: 'staffMembers',
+  prayerRequests: 'prayerRequests',
 };
 
 export async function POST(

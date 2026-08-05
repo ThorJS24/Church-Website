@@ -1,27 +1,47 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Plus, Heart, Users, Sparkles } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Plus, Heart, Users, Sparkles, HandHeart, CheckCircle2, Archive } from 'lucide-react';
 import { PageHero } from '@/components/ui/PageHero';
 import { Section } from '@/components/ui/Section';
 import { Container } from '@/components/ui/Container';
 import { Card } from '@/components/ui/Card';
 import { Grid } from '@/components/ui/Grid';
+import { Badge } from '@/components/ui/Badge';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
 import { Checkbox } from '@/components/ui/Checkbox';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
+import { LoadingState, EmptyState } from '@/components/ui/States';
 import { useToast } from '@/components/ui/Toast';
+import { cn } from '@/lib/cn';
 
 const CATEGORIES = ['all', 'healing', 'guidance', 'thanksgiving', 'family', 'work'];
 
+interface PrayerRequest {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  isAnonymous: boolean;
+  authorName: string;
+  status: 'praying' | 'ongoing' | 'answered';
+  prayerTally?: number;
+  answeredNote?: string;
+  createdAt: string;
+}
+
 export default function PrayerPage() {
+  const [prayers, setPrayers] = useState<PrayerRequest[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [view, setView] = useState<'wall' | 'answered'>('wall');
   const [activeFilter, setActiveFilter] = useState('all');
   const [showModal, setShowModal] = useState(false);
   const [prayerStats, setPrayerStats] = useState({ requests: 0, people: 0, prayers: 0 });
+  const [prayedIds, setPrayedIds] = useState<Set<string>>(new Set());
   const [formData, setFormData] = useState({
     title: '',
     category: 'general',
@@ -29,11 +49,19 @@ export default function PrayerPage() {
     isPrivate: false,
     isAnonymous: false,
     authorName: '',
+    email: '',
+    followUpRequested: false,
   });
   const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
+    fetch('/api/prayer')
+      .then((res) => res.json())
+      .then((data) => { if (data.success) setPrayers(data.prayerRequests); })
+      .catch((error) => console.error('Error fetching prayer requests:', error))
+      .finally(() => setLoading(false));
+
     async function fetchPrayerStats() {
       try {
         const { getSiteSettings } = await import('@/lib/content');
@@ -52,8 +80,40 @@ export default function PrayerPage() {
     fetchPrayerStats();
   }, []);
 
+  const activePrayers = useMemo(() => prayers.filter((p) => p.status !== 'answered'), [prayers]);
+  const answeredPrayers = useMemo(() => prayers.filter((p) => p.status === 'answered'), [prayers]);
+
+  const visiblePrayers = (view === 'wall' ? activePrayers : answeredPrayers).filter(
+    (p) => activeFilter === 'all' || p.category === activeFilter
+  );
+
+  const handlePray = async (id: string) => {
+    if (prayedIds.has(id)) return;
+    setPrayedIds((prev) => new Set(prev).add(id));
+    setPrayers((prev) => prev.map((p) => (p.id === id ? { ...p, prayerTally: (p.prayerTally ?? 0) + 1 } : p)));
+    try {
+      const res = await fetch('/api/prayer/pray', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestId: id }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setPrayers((prev) => prev.map((p) => (p.id === id ? { ...p, prayerTally: data.prayerTally } : p)));
+      }
+    } catch {
+      // optimistic count stands even if the network call failed silently —
+      // a missed increment on a "someone is praying for you" tally isn't
+      // worth surfacing an error toast over.
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (formData.followUpRequested && !formData.email) {
+      toast({ title: 'Email needed', description: 'Please add an email so we can follow up with you.', variant: 'danger' });
+      return;
+    }
     setSubmitting(true);
     try {
       const response = await fetch('/api/prayer', {
@@ -64,7 +124,7 @@ export default function PrayerPage() {
       const data = await response.json();
       if (data.success) {
         setShowModal(false);
-        setFormData({ title: '', category: 'general', description: '', isPrivate: false, isAnonymous: false, authorName: '' });
+        setFormData({ title: '', category: 'general', description: '', isPrivate: false, isAnonymous: false, authorName: '', email: '', followUpRequested: false });
         toast({ title: 'Prayer request submitted', description: 'Thank you — our community will be lifting you up.', variant: 'success' });
       } else {
         toast({ title: 'Something went wrong', description: data.message || 'Failed to submit prayer request', variant: 'danger' });
@@ -87,6 +147,20 @@ export default function PrayerPage() {
       />
 
       <div className="border-b border-border bg-background py-6">
+        <div className="mx-auto mb-4 flex max-w-7xl justify-center gap-2 px-4">
+          <button
+            onClick={() => setView('wall')}
+            className={cn('flex items-center gap-1.5 rounded-full px-5 py-2 text-body-sm font-medium transition-colors', view === 'wall' ? 'bg-warm text-warm-foreground' : 'bg-surface-active text-foreground-muted hover:bg-surface-hover')}
+          >
+            <HandHeart className="h-4 w-4" /> Prayer Wall
+          </button>
+          <button
+            onClick={() => setView('answered')}
+            className={cn('flex items-center gap-1.5 rounded-full px-5 py-2 text-body-sm font-medium transition-colors', view === 'answered' ? 'bg-warm text-warm-foreground' : 'bg-surface-active text-foreground-muted hover:bg-surface-hover')}
+          >
+            <Archive className="h-4 w-4" /> Answered Prayers {answeredPrayers.length > 0 && `(${answeredPrayers.length})`}
+          </button>
+        </div>
         <div className="mx-auto flex max-w-7xl flex-wrap justify-center gap-3 px-4">
           {CATEGORIES.map((category) => (
             <button
@@ -103,13 +177,63 @@ export default function PrayerPage() {
       </div>
 
       <Section spacing="lg">
-        <Card variant="raised" padding="lg" className="mx-auto max-w-2xl text-center">
-          <motion.div animate={{ scale: [1, 1.08, 1] }} transition={{ duration: 3, repeat: Infinity }}>
-            <Heart className="mx-auto mb-4 h-12 w-12 text-warm" />
-          </motion.div>
-          <h2 className="text-title-lg text-foreground">Prayer requests will appear here</h2>
-          <p className="mt-2 text-body-sm text-foreground-muted">Submit a prayer request to get started</p>
-        </Card>
+        {loading ? (
+          <LoadingState label="Loading prayer requests..." />
+        ) : visiblePrayers.length === 0 ? (
+          <Card variant="raised" padding="lg" className="mx-auto max-w-2xl text-center">
+            <motion.div animate={{ scale: [1, 1.08, 1] }} transition={{ duration: 3, repeat: Infinity }}>
+              <Heart className="mx-auto mb-4 h-12 w-12 text-warm" />
+            </motion.div>
+            <h2 className="text-title-lg text-foreground">
+              {view === 'answered' ? 'No answered prayers yet' : 'No prayer requests yet'}
+            </h2>
+            <p className="mt-2 text-body-sm text-foreground-muted">
+              {view === 'answered' ? 'Check back soon to celebrate what God has done.' : 'Submit a prayer request to get started'}
+            </p>
+          </Card>
+        ) : (
+          <Grid cols={2} gap={6}>
+            <AnimatePresence>
+              {visiblePrayers.map((prayer) => (
+                <motion.div key={prayer.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} layout>
+                  <Card variant="raised" padding="lg" className="h-full">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge variant="accent" className="capitalize">{prayer.category}</Badge>
+                      {prayer.status === 'ongoing' && <Badge variant="info">Ongoing</Badge>}
+                      {prayer.status === 'answered' && <Badge variant="success"><CheckCircle2 className="h-3 w-3" /> Answered</Badge>}
+                    </div>
+                    <h3 className="mt-3 text-title-md text-foreground">{prayer.title}</h3>
+                    <p className="mt-2 text-body-sm text-foreground-muted">{prayer.description}</p>
+                    {prayer.status === 'answered' && prayer.answeredNote && (
+                      <div className="mt-3 rounded-lg border border-success/30 bg-success-subtle p-3 text-body-sm text-success">
+                        {prayer.answeredNote}
+                      </div>
+                    )}
+                    <div className="mt-4 flex items-center justify-between">
+                      <span className="text-body-sm text-foreground-subtle">— {prayer.isAnonymous ? 'Anonymous' : prayer.authorName}</span>
+                      {prayer.status !== 'answered' ? (
+                        <button
+                          onClick={() => handlePray(prayer.id)}
+                          disabled={prayedIds.has(prayer.id)}
+                          className={cn(
+                            'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-body-sm font-medium transition-colors',
+                            prayedIds.has(prayer.id) ? 'bg-warm text-warm-foreground' : 'bg-surface-active text-foreground-muted hover:bg-warm-subtle hover:text-warm'
+                          )}
+                        >
+                          <HandHeart className="h-4 w-4" /> {prayedIds.has(prayer.id) ? "I'm Praying" : 'Pray for This'} ({prayer.prayerTally ?? 0})
+                        </button>
+                      ) : (
+                        <span className="flex items-center gap-1.5 text-body-sm text-foreground-subtle">
+                          <HandHeart className="h-4 w-4" /> {prayer.prayerTally ?? 0} prayed
+                        </span>
+                      )}
+                    </div>
+                  </Card>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </Grid>
+        )}
       </Section>
 
       <Section spacing="lg" className="bg-warm text-warm-foreground">
@@ -152,6 +276,20 @@ export default function PrayerPage() {
               <Input placeholder="Your name (optional)" value={formData.authorName} onChange={(e) => setFormData({ ...formData, authorName: e.target.value })} />
             )}
             <Checkbox label="Keep this prayer private (only pastors will see it)" checked={formData.isPrivate} onChange={(e) => setFormData({ ...formData, isPrivate: e.target.checked })} />
+            <Checkbox
+              label="Request a private follow-up check-in in about a week"
+              checked={formData.followUpRequested}
+              onChange={(e) => setFormData({ ...formData, followUpRequested: e.target.checked })}
+            />
+            {formData.followUpRequested && (
+              <Input
+                type="email"
+                required
+                placeholder="Your email for the follow-up"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              />
+            )}
           </div>
 
           <div className="flex gap-3 pt-2">
