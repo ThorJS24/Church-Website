@@ -327,6 +327,9 @@ export interface SiteSettings {
   whatsappGroupUrl?: string;
   zoomMeetingUrl?: string;
   officeHours?: string[];
+  /** Hex color (e.g. "#4F46E5") overriding the default indigo accent —
+   * derived into the full shade set client-side, see lib/colorTheme.ts. */
+  themeAccentColor?: string;
   prayerStats?: { totalRequests?: number; totalPeople?: number; totalPrayers?: number };
   givingImpact?: {
     communityOutreach?: string;

@@ -7,6 +7,7 @@ import ClientLayout from '@/components/ClientLayout';
 import SkipLink from '@/components/SkipLink';
 import { ToastProvider } from '@/components/ui/Toast';
 import { PublicChrome } from '@/components/PublicChrome';
+import { ThemeAccentInjector } from '@/components/ThemeAccentInjector';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -82,6 +83,7 @@ export default function RootLayout({
           <LanguageProvider>
             <AuthProvider>
               <ToastProvider>
+                <ThemeAccentInjector />
                 <ClientLayout>
                   <SkipLink />
                   <PublicChrome>{children}</PublicChrome>

@@ -92,12 +92,12 @@ type-check/lint/a quick manual pass, commit, check it off, move to the next.
 - [x] CSV export
 - [x] Free-text search across payloads
 
-### Batch A10 — Settings
-- [ ] Theme customizer (accent color override)
-- [ ] Role-permission matrix (read-only view first)
-- [ ] 404/broken-link report
-- [ ] Backup restore tool
-- [ ] System health page
+### Batch A10 — Settings ✅
+- [x] Theme customizer (accent color override)
+- [x] Role-permission matrix (read-only view first)
+- [x] 404/broken-link report
+- [x] Backup restore tool
+- [x] System health page
 
 ---
 
