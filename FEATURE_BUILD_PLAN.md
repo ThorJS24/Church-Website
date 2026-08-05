@@ -43,14 +43,14 @@ type-check/lint/a quick manual pass, commit, check it off, move to the next.
 - [x] SEO fields (meta description, share image) with preview
 - [x] Sermon series builder
 
-### Batch A4 — Messages
-- [ ] Reply from inbox (via Resend)
-- [ ] Canned response templates
-- [ ] Priority flagging
-- [ ] Internal staff-only comment thread
-- [ ] Assign to staff member
-- [ ] Linked member lookup (match sender email to a member)
-- [ ] Full-field search
+### Batch A4 — Messages ✅
+- [x] Reply from inbox (via Resend)
+- [x] Canned response templates
+- [x] Priority flagging
+- [x] Internal staff-only comment thread
+- [x] Assign to staff member
+- [x] Linked member lookup (match sender email to a member)
+- [x] Full-field search
 
 ### Batch A5 — Media Library
 - [ ] Folder/album organization

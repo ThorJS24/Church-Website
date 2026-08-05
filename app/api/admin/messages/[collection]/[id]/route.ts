@@ -14,9 +14,12 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   }
 
   try {
-    const { status, notes } = await request.json();
-    if (!status) {
-      return NextResponse.json({ success: false, message: 'status is required' }, { status: 400 });
+    const { status, notes, priority, assignedTo } = await request.json();
+    const hasStatus = typeof status === 'string';
+    const hasPriority = typeof priority === 'string';
+    const hasAssignment = assignedTo !== undefined;
+    if (!hasStatus && !hasPriority && !hasAssignment) {
+      return NextResponse.json({ success: false, message: 'status, priority, or assignedTo is required' }, { status: 400 });
     }
 
     const ref = getAdminDb().collection(collection).doc(id);
@@ -25,16 +28,29 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       return NextResponse.json({ success: false, message: 'Not found' }, { status: 404 });
     }
 
-    const updates: Record<string, unknown> = { status, updatedAt: new Date().toISOString() };
+    const updates: Record<string, unknown> = { updatedAt: new Date().toISOString() };
+    if (hasStatus) updates.status = status;
     if (notes !== undefined) updates.notes = notes;
+    if (hasPriority) updates.priority = priority;
+    if (hasAssignment) updates.assignedTo = assignedTo;
+
+    const action = hasAssignment ? 'message.assign' : hasPriority && !hasStatus ? 'message.priority_change' : 'message.update';
 
     await withAudit(
       authResult.user,
       request,
-      { action: 'message.update', targetType: collection, targetId: id },
+      { action, targetType: collection, targetId: id },
       async () => {
         await ref.update(updates);
-        return { before: { status: before.status }, after: { status, notes }, result: null };
+        return {
+          before: { status: before.status ?? null, priority: before.priority ?? null, assignedTo: before.assignedTo ?? null },
+          after: {
+            status: (updates.status ?? before.status) ?? null,
+            priority: (updates.priority ?? before.priority) ?? null,
+            assignedTo: (hasAssignment ? assignedTo : before.assignedTo) ?? null,
+          },
+          result: null,
+        };
       }
     );
 
