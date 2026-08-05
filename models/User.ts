@@ -25,6 +25,9 @@ export interface User {
     email?: boolean;
     events?: boolean;
     prayers?: boolean;
+    newsletter?: boolean;
+    sermons?: boolean;
+    volunteerOpportunities?: boolean;
   };
   privacyPreferences?: {
     profileVisible?: boolean;

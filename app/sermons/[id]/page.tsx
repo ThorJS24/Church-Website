@@ -12,6 +12,7 @@ import { Card } from '@/components/ui/Card';
 import { LinkButton } from '@/components/ui/Button';
 import { ShareButton } from '@/components/ShareButton';
 import { PrintButton } from '@/components/PrintButton';
+import { SaveButton } from '@/components/SaveButton';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -107,6 +108,7 @@ export default async function SermonDetailPage({ params }: Props) {
 
           <div className="mt-8 flex flex-wrap gap-3 no-print">
             <ShareButton title={sermon.title} />
+            <SaveButton itemType="sermon" itemId={sermon.id} title={sermon.title} url={`/sermons/${sermon.id}`} />
             {sermon.audioUrl && (
               <LinkButton href={sermon.audioUrl} variant="secondary" leftIcon={<Download className="h-4 w-4" />}>
                 Download Audio

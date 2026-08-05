@@ -2,31 +2,83 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAdminDb } from '@/lib/firebase-admin';
 import { requireAuth } from '@/lib/api-auth';
 
+interface ActivityEntry {
+  type: string;
+  title: string;
+  date: string;
+}
+
+// Departments on the /api/contact route that represent a member reaching
+// out about getting involved with a ministry or small group — used to
+// build the "ministry involvement" summary from data that already exists
+// rather than introducing a new membership-tracking model.
+const MINISTRY_DEPARTMENTS = new Set(['volunteer', 'ministry-volunteer', 'ministry-contact', 'small-group-join']);
+
 export async function GET(request: NextRequest) {
   const authResult = await requireAuth(request);
   if (!authResult.ok) return authResult.response;
 
   try {
-    const prayerRequestsSnapshot = await getAdminDb()
-      .collection('prayerRequests')
-      .where('requestedBy', '==', authResult.user.uid)
-      .get();
+    const { uid, email } = authResult.user;
+    const db = getAdminDb();
 
-    // NOTE: attendance/donation aggregation is not implemented yet — there is
+    const [prayerSnap, hoursSnap, ratingsSnap, savedSnap, contactsSnap] = await Promise.all([
+      db.collection('prayerRequests').where('requestedBy', '==', uid).get(),
+      db.collection('volunteerHours').where('uid', '==', uid).get(),
+      db.collection('resourceRatings').where('uid', '==', uid).get(),
+      db.collection('savedItems').where('uid', '==', uid).get(),
+      email ? db.collection('contacts').where('email', '==', email).get() : Promise.resolve(null),
+    ]);
+
+    const activity: ActivityEntry[] = [];
+    prayerSnap.docs.forEach((d) => {
+      const data = d.data();
+      activity.push({ type: 'prayer', title: `Submitted a prayer request: "${data.title}"`, date: data.createdAt });
+    });
+    hoursSnap.docs.forEach((d) => {
+      const data = d.data();
+      activity.push({ type: 'volunteer', title: `Logged ${data.hours} volunteer hour${data.hours === 1 ? '' : 's'}${data.area ? ` — ${data.area}` : ''}`, date: data.createdAt });
+    });
+    ratingsSnap.docs.forEach((d) => {
+      const data = d.data();
+      activity.push({ type: 'rating', title: 'Rated a resource', date: data.updatedAt });
+    });
+    savedSnap.docs.forEach((d) => {
+      const data = d.data();
+      activity.push({ type: 'saved', title: `Saved ${data.itemType === 'sermon' ? 'a sermon' : 'a blog post'}: "${data.title}"`, date: data.savedAt });
+    });
+
+    const ministryInvolvement: { area: string; department: string; date: string }[] = [];
+    if (contactsSnap) {
+      contactsSnap.docs.forEach((d) => {
+        const data = d.data();
+        if (!MINISTRY_DEPARTMENTS.has(data.department)) return;
+        const area = data.details?.ministry || data.details?.smallGroup || data.subject || 'General';
+        ministryInvolvement.push({ area, department: data.department, date: data.createdAt });
+        activity.push({ type: 'ministry', title: `Reached out about getting involved: ${area}`, date: data.createdAt });
+      });
+    }
+
+    activity.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    // NOTE: attendance/donation aggregation is not implemented — there is
     // no attendance or donation collection to query. Flagging rather than
     // faking: these two numbers are placeholders until that data model
     // exists (tracked for Phase 3 analytics work).
     const stats = {
       attendanceCount: 0,
-      prayerRequests: prayerRequestsSnapshot.size,
+      prayerRequests: prayerSnap.size,
       donationTotal: 0,
-      upcomingEvents: 0
+      upcomingEvents: 0,
+      volunteerHours: hoursSnap.docs.reduce((sum, d) => sum + (d.data().hours || 0), 0),
+      savedItems: savedSnap.size,
     };
 
     return NextResponse.json({
       success: true,
       stats,
-      recentActivity: []
+      recentActivity: activity.slice(0, 15),
+      ministryInvolvement,
     });
   } catch (error) {
     console.error('Dashboard API error:', error);

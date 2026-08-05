@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Heart, Users, Sparkles, HandHeart, CheckCircle2, Archive } from 'lucide-react';
+import { getIdToken } from '@/lib/firebase';
 import { PageHero } from '@/components/ui/PageHero';
 import { Section } from '@/components/ui/Section';
 import { Container } from '@/components/ui/Container';
@@ -116,9 +117,10 @@ export default function PrayerPage() {
     }
     setSubmitting(true);
     try {
+      const token = await getIdToken();
       const response = await fetch('/api/prayer', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify(formData),
       });
       const data = await response.json();

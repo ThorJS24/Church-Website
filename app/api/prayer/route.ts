@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
 import { checkRateLimit, clientIpFrom } from '@/lib/rateLimit';
+import { requireAuth } from '@/lib/api-auth';
 
 // 5/hour: matches the gallery-submission threshold — a public form feeding
 // the moderation queue, where legitimate use is "a handful of requests",
@@ -36,6 +37,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Best-effort, optional — prayer requests stay submittable while
+    // signed out (matches the existing anonymous-friendly design). When a
+    // valid session IS present, attaching requestedBy lets the member's
+    // dashboard activity timeline surface their own request, which was
+    // previously impossible since this field was never set at all.
+    let requestedBy: string | null = null;
+    if (request.headers.get('authorization')?.startsWith('Bearer ')) {
+      const auth = await requireAuth(request);
+      if (auth.ok) requestedBy = auth.user.uid;
+    }
+
     const newPrayerRequest = {
       title,
       description,
@@ -43,6 +55,7 @@ export async function POST(request: NextRequest) {
       isPrivate: isPrivate || false,
       isAnonymous: isAnonymous || false,
       authorName: isAnonymous ? 'Anonymous' : (authorName || 'Anonymous'),
+      requestedBy,
       // 'praying' (default) / 'ongoing' (still needed, longer-term) /
       // 'answered' — set by a moderator via the admin Prayer Requests tab,
       // not something a submitter can set for themselves.

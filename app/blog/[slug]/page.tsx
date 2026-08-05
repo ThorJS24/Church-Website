@@ -14,6 +14,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { ShareButton } from '@/components/ShareButton';
 import { ReadingProgressBar } from '@/components/ReadingProgressBar';
 import { PrintButton } from '@/components/PrintButton';
+import { SaveButton } from '@/components/SaveButton';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -103,6 +104,7 @@ export default async function BlogPostPage({ params }: Props) {
             <div className="ml-auto flex items-center gap-2 no-print">
               <PrintButton />
               <ShareButton title={post.title} />
+              <SaveButton itemType="blog" itemId={post.id} title={post.title} url={`/blog/${post.slug}`} />
             </div>
           </div>
 

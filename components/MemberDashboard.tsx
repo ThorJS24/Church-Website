@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { User, Calendar, Heart, DollarSign, Book, Users, Bell, Settings, Download } from 'lucide-react';
+import Link from 'next/link';
+import { User, Calendar, Heart, DollarSign, Book, Users, Bell, Settings, Download, Bookmark, Star, HandHeart } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { getIdToken } from '@/lib/firebase';
@@ -17,6 +18,20 @@ interface DashboardStats {
   prayerRequests: number;
   donationTotal: number;
   upcomingEvents: number;
+  volunteerHours?: number;
+  savedItems?: number;
+}
+
+interface ActivityEntry {
+  type: string;
+  title: string;
+  date: string;
+}
+
+interface MinistryInvolvement {
+  area: string;
+  department: string;
+  date: string;
 }
 
 const STAT_CARDS = [
@@ -31,15 +46,38 @@ const QUICK_ACTIONS = [
   { icon: Heart, label: 'Prayer Requests', href: '/prayer' },
   { icon: DollarSign, label: 'Give Online', href: '/give' },
   { icon: Book, label: 'Sermons', href: '/sermons' },
-  { icon: Users, label: 'Small Groups', href: '/ministries' },
+  { icon: Users, label: 'Small Groups', href: '/small-groups' },
+  { icon: HandHeart, label: 'Volunteer', href: '/volunteer' },
+  { icon: Bookmark, label: 'My Library', href: '#saved' },
   { icon: Settings, label: 'Settings', href: '/settings' },
 ];
+
+const ACTIVITY_ICONS: Record<string, typeof Calendar> = {
+  prayer: Heart,
+  volunteer: HandHeart,
+  rating: Star,
+  saved: Bookmark,
+  ministry: Users,
+};
+
+function timeAgo(dateStr: string): string {
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return '';
+  const days = Math.floor((Date.now() - date.getTime()) / 86_400_000);
+  if (days <= 0) return 'Today';
+  if (days === 1) return 'Yesterday';
+  if (days < 7) return `${days} days ago`;
+  if (days < 30) return `${Math.floor(days / 7)} week${Math.floor(days / 7) === 1 ? '' : 's'} ago`;
+  return date.toLocaleDateString();
+}
 
 export default function MemberDashboard() {
   const { user } = useAuth();
   const router = useRouter();
   const [stats, setStats] = useState<DashboardStats>({ attendanceCount: 0, prayerRequests: 0, donationTotal: 0, upcomingEvents: 0 });
-  const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [recentActivity, setRecentActivity] = useState<ActivityEntry[]>([]);
+  const [ministryInvolvement, setMinistryInvolvement] = useState<MinistryInvolvement[]>([]);
+  const [savedItems, setSavedItems] = useState<{ id: string; itemType: string; title: string; url: string }[]>([]);
   const [downloadingData, setDownloadingData] = useState(false);
   const [downloadError, setDownloadError] = useState('');
 
@@ -48,12 +86,19 @@ export default function MemberDashboard() {
     async function fetchDashboardData() {
       try {
         const token = await getIdToken();
-        const response = await fetch('/api/member/dashboard', { headers: token ? { Authorization: `Bearer ${token}` } : {} });
-        const data = await response.json();
+        const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
+        const [dashRes, savedRes] = await Promise.all([
+          fetch('/api/member/dashboard', { headers }),
+          fetch('/api/member/saved', { headers }),
+        ]);
+        const data = await dashRes.json();
         if (data.success) {
           setStats(data.stats);
           setRecentActivity(data.recentActivity);
+          setMinistryInvolvement(data.ministryInvolvement);
         }
+        const savedData = await savedRes.json();
+        if (savedData.success) setSavedItems(savedData.items);
       } catch (error) {
         console.error('Dashboard data fetch error:', error);
       }
@@ -136,24 +181,47 @@ export default function MemberDashboard() {
           </Grid>
 
           <div className="mt-8">
-            <h2 className="mb-4 text-title-lg text-foreground">Recent Activity</h2>
+            <h2 className="mb-4 text-title-lg text-foreground">Activity Timeline</h2>
             <Card padding="none">
               {recentActivity.length > 0 ? (
                 <div className="divide-y divide-border">
-                  {recentActivity.map((activity, index) => (
-                    <div key={index} className="flex items-center gap-4 p-4">
+                  {recentActivity.map((activity, index) => {
+                    const Icon = ACTIVITY_ICONS[activity.type] ?? Calendar;
+                    return (
+                      <div key={index} className="flex items-center gap-4 p-4">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent-subtle">
+                          <Icon className="h-4 w-4 text-accent" />
+                        </div>
+                        <div>
+                          <p className="text-body-sm font-medium text-foreground">{activity.title}</p>
+                          <p className="text-caption text-foreground-subtle">{timeAgo(activity.date)}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <EmptyState icon={Calendar} title="No recent activity" description="Activity like prayer requests, volunteer hours, and saved sermons will show up here." />
+              )}
+            </Card>
+          </div>
+
+          <div id="saved" className="mt-8 scroll-mt-6">
+            <h2 className="mb-4 text-title-lg text-foreground">My Library</h2>
+            <Card padding="none">
+              {savedItems.length > 0 ? (
+                <div className="divide-y divide-border">
+                  {savedItems.map((item) => (
+                    <a key={item.id} href={item.url} className="flex items-center gap-4 p-4 transition-colors hover:bg-surface-hover">
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent-subtle">
-                        <Calendar className="h-4 w-4 text-accent" />
+                        {item.itemType === 'sermon' ? <Book className="h-4 w-4 text-accent" /> : <Bookmark className="h-4 w-4 text-accent" />}
                       </div>
-                      <div>
-                        <p className="text-body-sm font-medium text-foreground">{activity.title}</p>
-                        <p className="text-caption text-foreground-subtle">{activity.date}</p>
-                      </div>
-                    </div>
+                      <p className="text-body-sm font-medium text-foreground">{item.title}</p>
+                    </a>
                   ))}
                 </div>
               ) : (
-                <EmptyState icon={Calendar} title="No recent activity" />
+                <EmptyState icon={Bookmark} title="Nothing saved yet" description="Save sermons and blog posts to find them here later." />
               )}
             </Card>
           </div>
@@ -188,6 +256,29 @@ export default function MemberDashboard() {
               </button>
             </div>
           </Card>
+
+          <div className="mt-6">
+            <h2 className="mb-4 text-title-lg text-foreground">Ministry Involvement</h2>
+            <Card>
+              {ministryInvolvement.length > 0 ? (
+                <ul className="space-y-3">
+                  {ministryInvolvement.map((item, index) => (
+                    <li key={index} className="flex items-start gap-3">
+                      <Users className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+                      <div>
+                        <p className="text-body-sm font-medium text-foreground">{item.area}</p>
+                        <p className="text-caption text-foreground-subtle">{timeAgo(item.date)}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-body-sm text-foreground-muted">
+                  You haven&apos;t reached out about a ministry or small group yet — <Link href="/ministries" className="text-accent underline">browse ministries</Link> to get started.
+                </p>
+              )}
+            </Card>
+          </div>
         </div>
       </div>
     </Container>

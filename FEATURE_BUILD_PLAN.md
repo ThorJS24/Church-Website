@@ -215,12 +215,12 @@ type-check/lint/a quick manual pass, commit, check it off, move to the next.
 - [x] Confirmation email with a copy of answers — new submitter-facing email, separate from the existing admin `notifyEmail`
 - [x] Duplicate-submission warning — backend already enforced this; the frontend now renders it as a distinct info notice instead of a generic red error
 
-### Batch P17 — Member Area
-- [ ] Saved sermons/posts library
-- [ ] Ministry involvement summary
-- [ ] Communication preference center
-- [ ] Activity timeline
-- [ ] Quick-actions widget
+### Batch P17 — Member Area ✅
+- [x] Saved sermons/posts library — new "My Library" (member-gated, new `/api/member/saved` route), Save buttons on sermon/blog detail pages
+- [x] Ministry involvement summary — derived from existing contact-form submissions (no new membership model)
+- [x] Communication preference center — expanded notification preferences from 3 to 6 categories
+- [x] Activity timeline — `recentActivity` was previously hardcoded to always return `[]`; now a real aggregation across prayer/volunteer/ratings/saved/ministry activity
+- [x] Quick-actions widget — already existed; fixed a mislabeled "Small Groups" link that actually pointed to `/ministries`, added Volunteer + My Library
 
 ### Batch P18 — Login / Register
 - [ ] Progressive registration

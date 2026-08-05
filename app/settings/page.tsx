@@ -14,14 +14,14 @@ import { Button } from '@/components/ui/Button';
 import { Switch } from '@/components/ui/Switch';
 import { LoadingState } from '@/components/ui/States';
 
-type Notifications = { email: boolean; events: boolean; prayers: boolean };
+type Notifications = { email: boolean; events: boolean; prayers: boolean; newsletter: boolean; sermons: boolean; volunteerOpportunities: boolean };
 type Privacy = { profileVisible: boolean; contactVisible: boolean };
 
 export default function SettingsPage() {
   const { user, isLoading, updateUser, changePassword } = useAuth();
   const router = useRouter();
 
-  const [notifications, setNotifications] = useState<Notifications>({ email: true, events: true, prayers: true });
+  const [notifications, setNotifications] = useState<Notifications>({ email: true, events: true, prayers: true, newsletter: true, sermons: false, volunteerOpportunities: false });
   const [privacy, setPrivacy] = useState<Privacy>({ profileVisible: true, contactVisible: false });
   const [saving, setSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
@@ -48,6 +48,9 @@ export default function SettingsPage() {
         email: user.notificationPreferences?.email ?? true,
         events: user.notificationPreferences?.events ?? true,
         prayers: user.notificationPreferences?.prayers ?? true,
+        newsletter: user.notificationPreferences?.newsletter ?? true,
+        sermons: user.notificationPreferences?.sermons ?? false,
+        volunteerOpportunities: user.notificationPreferences?.volunteerOpportunities ?? false,
       });
       setPrivacy({
         profileVisible: user.privacyPreferences?.profileVisible ?? true,
@@ -122,10 +125,11 @@ export default function SettingsPage() {
 
           <div className="space-y-8 p-6">
             <div>
-              <div className="mb-4 flex items-center gap-2">
+              <div className="mb-1 flex items-center gap-2">
                 <Bell className="h-5 w-5 text-foreground-muted" />
-                <h3 className="text-title-md text-foreground">Notifications</h3>
+                <h3 className="text-title-md text-foreground">Communication Preferences</h3>
               </div>
+              <p className="ml-7 mb-4 text-body-sm text-foreground-muted">Choose what you&apos;d like to hear from us about.</p>
               <div className="ml-7 space-y-3">
                 {(Object.entries(notifications) as [keyof Notifications, boolean][]).map(([key, value]) => (
                   <div key={key} className="flex items-center justify-between">
