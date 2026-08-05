@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { LinkButton } from '@/components/ui/Button';
 import { ShareButton } from '@/components/ShareButton';
+import { PrintButton } from '@/components/PrintButton';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -78,7 +79,7 @@ export default async function SermonDetailPage({ params }: Props) {
 
       <Section spacing="lg">
         <Container size="md">
-          <Breadcrumbs items={[{ label: 'Sermons', href: '/sermons' }, { label: sermon.title }]} className="mb-6" />
+          <Breadcrumbs items={[{ label: 'Sermons', href: '/sermons' }, { label: sermon.title }]} className="mb-6 no-print" />
 
           {sermon.seriesTitle && <Badge variant="accent" className="mb-3">{sermon.seriesTitle}</Badge>}
           <h1 className="text-display-sm text-foreground">{sermon.title}</h1>
@@ -91,7 +92,7 @@ export default async function SermonDetailPage({ params }: Props) {
           </p>
 
           {embedUrl && (
-            <div className="relative mt-8 aspect-video w-full overflow-hidden rounded-xl bg-black">
+            <div className="relative mt-8 aspect-video w-full overflow-hidden rounded-xl bg-black no-print">
               <iframe
                 src={embedUrl}
                 title={sermon.title}
@@ -104,7 +105,7 @@ export default async function SermonDetailPage({ params }: Props) {
 
           {sermon.description && <p className="mt-8 text-body-lg leading-relaxed text-foreground-muted">{sermon.description}</p>}
 
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-8 flex flex-wrap gap-3 no-print">
             <ShareButton title={sermon.title} />
             {sermon.audioUrl && (
               <LinkButton href={sermon.audioUrl} variant="secondary" leftIcon={<Download className="h-4 w-4" />}>
@@ -112,11 +113,25 @@ export default async function SermonDetailPage({ params }: Props) {
               </LinkButton>
             )}
           </div>
+
+          {sermon.transcript && (
+            <div className="mt-12 border-t border-border pt-8">
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-title-lg text-foreground">Transcript</h2>
+                <div className="no-print">
+                  <PrintButton label="Print Transcript" />
+                </div>
+              </div>
+              <div className="whitespace-pre-line text-body-md leading-relaxed text-foreground-muted">
+                {sermon.transcript}
+              </div>
+            </div>
+          )}
         </Container>
       </Section>
 
       {relatedSermons.length > 0 && (
-        <Section spacing="lg" className="bg-surface">
+        <Section spacing="lg" className="bg-surface no-print">
           <Container size="md">
             <h2 className="mb-6 text-title-lg text-foreground">Related Sermons</h2>
             <div className="grid gap-4 sm:grid-cols-3">

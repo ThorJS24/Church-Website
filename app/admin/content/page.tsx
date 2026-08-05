@@ -21,6 +21,7 @@ const SERMON_FIELDS: FieldSchema[] = [
   { key: 'date', label: 'Date', type: 'date', required: true },
   { key: 'scripture', label: 'Scripture', type: 'text' },
   { key: 'description', label: 'Description', type: 'textarea' },
+  { key: 'transcript', label: 'Transcript (enables the print-friendly transcript view)', type: 'textarea' },
   { key: 'youtubeUrl', label: 'YouTube URL', type: 'url' },
   { key: 'audioUrl', label: 'Audio File URL (MP3 — enables this sermon in the podcast feed)', type: 'url' },
   { key: 'imageUrl', label: 'Image', type: 'url', accept: 'image' },

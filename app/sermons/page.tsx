@@ -2,7 +2,7 @@
 
 import { useState, useEffect, lazy, Suspense, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Play, Calendar, User, Clock, Search, BookOpen, Video, Radio, History } from 'lucide-react';
+import { Play, Calendar, User, Clock, Search, BookOpen, Video, Radio, History, Bookmark, BookmarkCheck } from 'lucide-react';
 import { getSermons, getSeriesList, getSpeakersList, getLivestream, Sermon } from '@/lib/content';
 import { extractYouTubeId, getYouTubeEmbedUrl } from '@/lib/utils';
 import Image from 'next/image';
@@ -13,7 +13,9 @@ import { Grid } from '@/components/ui/Grid';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
+import { IconButton } from '@/components/ui/IconButton';
 import { Badge } from '@/components/ui/Badge';
+import { Avatar } from '@/components/ui/Avatar';
 import { Modal } from '@/components/ui/Modal';
 import { LoadingState, EmptyState } from '@/components/ui/States';
 import { cn } from '@/lib/cn';
@@ -21,6 +23,30 @@ import { cn } from '@/lib/cn';
 const DynamicLiveStream = lazy(() => import('@/components/DynamicLiveStream'));
 
 const RECENT_KEY = 'salempbc:recentlyWatchedSermons';
+const QUEUE_KEY = 'salempbc:sermonQueue';
+
+function getQueue(): string[] {
+  try {
+    const raw = localStorage.getItem(QUEUE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function toggleQueue(id: string): string[] {
+  const current = getQueue();
+  const next = current.includes(id) ? current.filter((x) => x !== id) : [...current, id];
+  try { localStorage.setItem(QUEUE_KEY, JSON.stringify(next)); } catch { /* ignore */ }
+  return next;
+}
+
+// A sermon's `scripture` field is freeform ("John 3:16-21", "1 Corinthians
+// 13"), so "book" isn't a stored field — it's derived by stripping the
+// trailing chapter:verse numbers off the reference.
+function scriptureBook(reference: string): string {
+  return reference.replace(/\s+\d.*$/, '').trim();
+}
 
 function recordWatched(sermon: Sermon) {
   try {
@@ -55,6 +81,9 @@ export default function SermonsPage() {
   const [showLiveStream, setShowLiveStream] = useState(false);
   const [hasLiveStream, setHasLiveStream] = useState(false);
   const [recentlyWatched, setRecentlyWatched] = useState<Array<{ id: string; title: string; watchedAt: number }>>([]);
+  const [queue, setQueue] = useState<string[]>([]);
+  const [queueOnly, setQueueOnly] = useState(false);
+  const [selectedBook, setSelectedBook] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -77,16 +106,31 @@ export default function SermonsPage() {
     }
     fetchData();
     setRecentlyWatched(getRecentlyWatched());
+    setQueue(getQueue());
   }, []);
 
   const featuredSermon = sermons[0] || null;
+
+  const scriptureBooks = useMemo(
+    () => Array.from(new Set(sermons.filter((s) => s.scripture).map((s) => scriptureBook(s.scripture!)))).sort(),
+    [sermons]
+  );
+
+  const selectedSpeakerBio = selectedSpeaker !== 'All Speakers' ? speakers.find((s) => s.name === selectedSpeaker) : null;
 
   const filteredSermons = sermons.filter((sermon) => {
     const matchesSearch = sermon.title.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesSeries = selectedSeries === 'All Series' || sermon.seriesTitle === selectedSeries;
     const matchesSpeaker = selectedSpeaker === 'All Speakers' || sermon.speakerName === selectedSpeaker;
-    return matchesSearch && matchesSeries && matchesSpeaker;
+    const matchesBook = !selectedBook || (sermon.scripture && scriptureBook(sermon.scripture) === selectedBook);
+    const matchesQueue = !queueOnly || queue.includes(sermon.id);
+    return matchesSearch && matchesSeries && matchesSpeaker && matchesBook && matchesQueue;
   });
+
+  const onToggleQueue = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    setQueue(toggleQueue(id));
+  };
 
   const groupedSermons = useMemo(() => {
     const groups: Record<string, { monthName: string; sermons: Sermon[] }> = {};
@@ -241,8 +285,46 @@ export default function SermonsPage() {
                 </button>
               ))}
             </div>
+            <button
+              onClick={() => setQueueOnly((v) => !v)}
+              className={cn(
+                'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-body-sm transition-colors',
+                queueOnly ? 'bg-accent text-accent-foreground' : 'bg-surface-active text-foreground-muted hover:text-foreground'
+              )}
+            >
+              {queueOnly ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
+              My Queue {queue.length > 0 && `(${queue.length})`}
+            </button>
           </div>
         </div>
+
+        {scriptureBooks.length > 0 && (
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+            <span className="text-caption text-foreground-subtle">Browse by book:</span>
+            {scriptureBooks.map((book) => (
+              <button
+                key={book}
+                onClick={() => setSelectedBook(selectedBook === book ? null : book)}
+                className={cn(
+                  'rounded-full px-3 py-1 text-caption font-medium transition-colors',
+                  selectedBook === book ? 'bg-accent text-accent-foreground' : 'bg-surface-active text-foreground-muted hover:text-foreground'
+                )}
+              >
+                {book}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {selectedSpeakerBio && (
+          <Card className="mx-auto mt-6 flex max-w-2xl items-start gap-4">
+            <Avatar src={selectedSpeakerBio.imageUrl} name={selectedSpeakerBio.name} size="lg" />
+            <div>
+              <h3 className="text-title-md text-foreground">{selectedSpeakerBio.name}</h3>
+              {selectedSpeakerBio.bio && <p className="mt-1 text-body-sm text-foreground-muted">{selectedSpeakerBio.bio}</p>}
+            </div>
+          </Card>
+        )}
       </Section>
 
       <Section spacing="lg">
@@ -272,6 +354,13 @@ export default function SermonsPage() {
                           <p className="text-body-sm text-foreground-muted">{sermon.speakerName} · {new Date(sermon.date).toLocaleDateString()}</p>
                           {sermon.scripture && <p className="text-caption text-warm">📖 {sermon.scripture}</p>}
                         </div>
+                        <IconButton
+                          label={queue.includes(sermon.id) ? 'Remove from queue' : 'Save for later'}
+                          size="sm"
+                          onClick={(e) => onToggleQueue(e, sermon.id)}
+                        >
+                          {queue.includes(sermon.id) ? <BookmarkCheck className="h-4 w-4 text-accent" /> : <Bookmark className="h-4 w-4" />}
+                        </IconButton>
                         {sermon.youtubeUrl && extractYouTubeId(sermon.youtubeUrl) && (
                           <Button size="sm" onClick={() => watchSermon(sermon)}>Watch</Button>
                         )}
@@ -319,6 +408,14 @@ export default function SermonsPage() {
                     </div>
                     {sermon.duration && <Badge variant="neutral" className="absolute bottom-2 right-2 bg-background/90">{sermon.duration}min</Badge>}
                     {sermon.featured && <Badge variant="warning" className="absolute top-2 left-2">Featured</Badge>}
+                    <IconButton
+                      label={queue.includes(sermon.id) ? 'Remove from queue' : 'Save for later'}
+                      size="sm"
+                      className="absolute top-2 right-2 bg-background/90"
+                      onClick={(e) => onToggleQueue(e, sermon.id)}
+                    >
+                      {queue.includes(sermon.id) ? <BookmarkCheck className="h-4 w-4 text-accent" /> : <Bookmark className="h-4 w-4" />}
+                    </IconButton>
                   </div>
 
                   <div className="p-5">

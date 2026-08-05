@@ -53,6 +53,7 @@ export interface Sermon extends Publishable {
   duration?: number;
   scripture?: string;
   description?: string;
+  transcript?: string;
   featured?: boolean;
 }
 
@@ -74,14 +75,14 @@ export async function getSermonById(id: string): Promise<Sermon | null> {
   return isEffectivelyPublished(sermon) ? sermon : null;
 }
 
-export async function getSeriesList(): Promise<{ id: string; title: string }[]> {
+export async function getSeriesList(): Promise<{ id: string; title: string; description?: string; imageUrl?: string }[]> {
   const snap = await getDocs(collection(db, 'series'));
-  return snap.docs.map(d => withId<{ id: string; title: string } & Publishable>(d)).filter(isEffectivelyPublished);
+  return snap.docs.map(d => withId<{ id: string; title: string; description?: string; imageUrl?: string } & Publishable>(d)).filter(isEffectivelyPublished);
 }
 
-export async function getSpeakersList(): Promise<{ id: string; name: string }[]> {
+export async function getSpeakersList(): Promise<{ id: string; name: string; bio?: string; imageUrl?: string }[]> {
   const snap = await getDocs(collection(db, 'speakers'));
-  return snap.docs.map(d => withId<{ id: string; name: string } & Publishable>(d)).filter(isEffectivelyPublished);
+  return snap.docs.map(d => withId<{ id: string; name: string; bio?: string; imageUrl?: string } & Publishable>(d)).filter(isEffectivelyPublished);
 }
 
 export interface Pastor extends Publishable {

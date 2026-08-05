@@ -124,12 +124,12 @@ type-check/lint/a quick manual pass, commit, check it off, move to the next.
 - [x] Visible request-status tracker for the requester
 - [x] Document checklist per request type
 
-### Batch P4 — Sermons
-- [ ] Scripture-reference index/browse
-- [ ] Speaker filter with bio card
-- [ ] Related-sermon recommendations (topic/scripture)
-- [ ] Listen-later queue (member feature)
-- [ ] Print-friendly transcript view
+### Batch P4 — Sermons ✅
+- [x] Scripture-reference index/browse
+- [x] Speaker filter with bio card
+- [x] Related-sermon recommendations (topic/scripture) — already built, verified working
+- [x] Listen-later queue (member feature)
+- [x] Print-friendly transcript view
 
 ### Batch P5 — Events
 - [ ] RSVP with headcount

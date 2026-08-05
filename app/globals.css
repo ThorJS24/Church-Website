@@ -237,3 +237,17 @@ video {
     scroll-behavior: auto !important;
   }
 }
+
+/* ==========================================================================
+   Print
+   ========================================================================== */
+
+/* Site chrome and anything explicitly marked .no-print never belongs on a
+   printed page (e.g. a sermon transcript) — everything else prints as-is. */
+@media print {
+  nav,
+  footer,
+  .no-print {
+    display: none !important;
+  }
+}
