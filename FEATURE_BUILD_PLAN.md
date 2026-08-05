@@ -76,13 +76,13 @@ type-check/lint/a quick manual pass, commit, check it off, move to the next.
 - [x] Campaign public archive view
 - [x] Basic rich-text campaign editor
 
-### Batch A8 — Moderation Queue
-- [ ] Bulk approve/reject
-- [ ] Rejection-reason templates
-- [ ] Preview-in-context
-- [ ] Batch image review grid
-- [ ] Side-by-side before/after for edits
-- [ ] Queue SLA display (time pending)
+### Batch A8 — Moderation Queue ✅
+- [x] Bulk approve/reject
+- [x] Rejection-reason templates
+- [x] Preview-in-context
+- [x] Batch image review grid
+- [x] Side-by-side before/after for edits
+- [x] Queue SLA display (time pending)
 
 ### Batch A9 — Audit Log
 - [ ] Advanced filter builder (actor + action + date range + target combined)
