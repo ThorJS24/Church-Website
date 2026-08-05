@@ -222,12 +222,12 @@ type-check/lint/a quick manual pass, commit, check it off, move to the next.
 - [x] Activity timeline — `recentActivity` was previously hardcoded to always return `[]`; now a real aggregation across prayer/volunteer/ratings/saved/ministry activity
 - [x] Quick-actions widget — already existed; fixed a mislabeled "Small Groups" link that actually pointed to `/ministries`, added Volunteer + My Library
 
-### Batch P18 — Login / Register
-- [ ] Progressive registration
-- [ ] Referral field
-- [ ] Welcome tour on first login
-- [ ] Password strength meter
-- [ ] Membership self-declaration at signup
+### Batch P18 — Login / Register ✅
+- [x] Progressive registration — required account fields first, optional profile details as a skippable second step
+- [x] Referral field — "How did you hear about us?"
+- [x] Welcome tour on first login — one-time paginated modal, tracked via `hasSeenWelcomeTour` on the user profile
+- [x] Password strength meter
+- [x] Membership self-declaration at signup — the backend already supported `membershipStatus`, it just was never collected at signup
 
 ### Batch P19 — Privacy / Terms
 - [ ] Plain-language summary alongside legal text

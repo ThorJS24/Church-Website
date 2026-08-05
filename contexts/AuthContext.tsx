@@ -19,6 +19,8 @@ interface RegisterInput {
   name: string;
   email: string;
   password: string;
+  membershipStatus?: User['membershipStatus'];
+  referralSource?: string;
 }
 
 interface AuthContextType {
@@ -74,7 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const register = async ({ name, email, password }: RegisterInput): Promise<boolean> => {
+  const register = async ({ name, email, password, membershipStatus, referralSource }: RegisterInput): Promise<boolean> => {
     try {
       const credential = await createUser(email, password);
       const [firstName, ...rest] = name.trim().split(' ');
@@ -85,6 +87,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         firstName,
         lastName,
         role: 'member',
+        membershipStatus,
+        referralSource,
       });
       setUser(profile);
       return true;

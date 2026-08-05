@@ -33,6 +33,11 @@ export interface User {
     profileVisible?: boolean;
     contactVisible?: boolean;
   };
+  /** "How did you hear about us?" — captured once at signup. */
+  referralSource?: string;
+  /** Set true after the member dismisses/completes the one-time welcome
+   * tour shown on their first dashboard visit. */
+  hasSeenWelcomeTour?: boolean;
 }
 
 export interface CreateUserData {
@@ -46,4 +51,5 @@ export interface CreateUserData {
   interests?: string[];
   role?: User['role'];
   membershipStatus?: User['membershipStatus'];
+  referralSource?: string;
 }

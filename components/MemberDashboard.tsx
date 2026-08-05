@@ -12,6 +12,7 @@ import { Card } from '@/components/ui/Card';
 import { Grid } from '@/components/ui/Grid';
 import { Avatar } from '@/components/ui/Avatar';
 import { EmptyState } from '@/components/ui/States';
+import { WelcomeTourModal } from '@/components/WelcomeTourModal';
 
 interface DashboardStats {
   attendanceCount: number;
@@ -80,6 +81,11 @@ export default function MemberDashboard() {
   const [savedItems, setSavedItems] = useState<{ id: string; itemType: string; title: string; url: string }[]>([]);
   const [downloadingData, setDownloadingData] = useState(false);
   const [downloadError, setDownloadError] = useState('');
+  const [showWelcomeTour, setShowWelcomeTour] = useState(false);
+
+  useEffect(() => {
+    if (user && !user.hasSeenWelcomeTour) setShowWelcomeTour(true);
+  }, [user]);
 
   useEffect(() => {
     if (!user) return;
@@ -281,6 +287,8 @@ export default function MemberDashboard() {
           </div>
         </div>
       </div>
+
+      {showWelcomeTour && <WelcomeTourModal onClose={() => setShowWelcomeTour(false)} />}
     </Container>
   );
 }

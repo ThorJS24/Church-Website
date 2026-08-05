@@ -82,6 +82,7 @@ export const createUserProfile = async (firebaseUser: FirebaseUser, additionalDa
       interests: additionalData.interests || [],
       role: additionalData.role || 'member',
       membershipStatus: additionalData.membershipStatus || 'visitor',
+      referralSource: additionalData.referralSource || '',
       joinDate: new Date().toISOString(),
       createdAt: new Date().toISOString(),
       isActive: true
