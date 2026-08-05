@@ -5,15 +5,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, Users, Building, Award, Heart, Search, Play, Pause, Star } from 'lucide-react';
 import { getHistoryTimeline, TimelineEvent } from '@/lib/content';
 import Image from 'next/image';
-import { PageHero } from '@/components/ui/PageHero';
-import { Section } from '@/components/ui/Section';
-import { Card } from '@/components/ui/Card';
-import { Grid } from '@/components/ui/Grid';
-import { Input } from '@/components/ui/Input';
-import { Select } from '@/components/ui/Select';
-import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
-import { LoadingState, EmptyState } from '@/components/ui/States';
+import { PageHero } from '@/components/ui-legacy/PageHero';
+import { Section } from '@/components/ui-legacy/Section';
+import { Card } from '@/components/ui-legacy/Card';
+import { Grid } from '@/components/ui-legacy/Grid';
+import { Input } from '@/components/ui-legacy/Input';
+import { Select } from '@/components/ui-legacy/Select';
+import { Button } from '@/components/ui-legacy/Button';
+import { Badge } from '@/components/ui-legacy/Badge';
+import { LoadingState, EmptyState } from '@/components/ui-legacy/States';
 
 const CATEGORY_ICONS: Record<string, typeof Clock> = {
   foundation: Building,

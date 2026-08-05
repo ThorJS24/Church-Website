@@ -5,16 +5,16 @@ import Image from 'next/image';
 import { Check, X, ShieldCheck, Eye, Clock, Settings2, Trash2, Grid3x3, List as ListIcon } from 'lucide-react';
 import { adminFetch } from '@/lib/adminApi';
 import { LoadingState, EmptyState, ErrorState } from '@/components/admin/States';
-import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
-import { IconButton } from '@/components/ui/IconButton';
-import { Checkbox } from '@/components/ui/Checkbox';
-import { Badge, type BadgeVariant } from '@/components/ui/Badge';
-import { Modal } from '@/components/ui/Modal';
-import { Select } from '@/components/ui/Select';
-import { Textarea } from '@/components/ui/Textarea';
-import { Input } from '@/components/ui/Input';
-import { useToast } from '@/components/ui/Toast';
+import { Card } from '@/components/ui-legacy/Card';
+import { Button } from '@/components/ui-legacy/Button';
+import { IconButton } from '@/components/ui-legacy/IconButton';
+import { Checkbox } from '@/components/ui-legacy/Checkbox';
+import { Badge, type BadgeVariant } from '@/components/ui-legacy/Badge';
+import { Modal } from '@/components/ui-legacy/Modal';
+import { Select } from '@/components/ui-legacy/Select';
+import { Textarea } from '@/components/ui-legacy/Textarea';
+import { Input } from '@/components/ui-legacy/Input';
+import { useToast } from '@/components/ui-legacy/Toast';
 import { cn } from '@/lib/cn';
 
 interface QueueItem {

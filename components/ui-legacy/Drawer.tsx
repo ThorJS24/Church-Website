@@ -50,7 +50,7 @@ export function Drawer({ isOpen, onClose, title, children, side = 'right', class
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.18 }}
-            className="absolute inset-0 bg-zinc-950/50 backdrop-blur-sm"
+            className="absolute inset-0 bg-zinc-950/50 backdrop-blur-xs"
             onClick={onClose}
             aria-hidden="true"
           />

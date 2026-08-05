@@ -3,9 +3,9 @@
 import { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import { Container } from '@/components/ui/Container';
-import { Card } from '@/components/ui/Card';
-import { LoadingState } from '@/components/ui/States';
+import { Container } from '@/components/ui-legacy/Container';
+import { Card } from '@/components/ui-legacy/Card';
+import { LoadingState } from '@/components/ui-legacy/States';
 
 interface CampaignDetail {
   id: string;

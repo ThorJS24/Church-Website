@@ -48,7 +48,7 @@ const NotificationSystem = ({ notifications, onRemove }: NotificationSystemProps
             className={`p-4 rounded-lg border shadow-lg ${getColors(notification.type)}`}
           >
             <div className="flex items-start">
-              <div className="flex-shrink-0 mr-3">
+              <div className="shrink-0 mr-3">
                 {getIcon(notification.type)}
               </div>
               <div className="flex-1">
@@ -57,7 +57,7 @@ const NotificationSystem = ({ notifications, onRemove }: NotificationSystemProps
               </div>
               <button
                 onClick={() => onRemove(notification.id)}
-                className="flex-shrink-0 ml-2 text-gray-400 hover:text-gray-600"
+                className="shrink-0 ml-2 text-gray-400 hover:text-gray-600"
               >
                 <X className="w-4 h-4" />
               </button>

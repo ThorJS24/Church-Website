@@ -11,18 +11,18 @@ import Image from 'next/image';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { useMounted } from '@/hooks/useMounted';
 import { createPortal } from 'react-dom';
-import { PageHero } from '@/components/ui/PageHero';
-import { Section } from '@/components/ui/Section';
-import { Card } from '@/components/ui/Card';
-import { Grid } from '@/components/ui/Grid';
-import { Input } from '@/components/ui/Input';
-import { Select } from '@/components/ui/Select';
-import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
-import { IconButton } from '@/components/ui/IconButton';
-import { Modal } from '@/components/ui/Modal';
-import { LoadingState, EmptyState } from '@/components/ui/States';
-import { useToast } from '@/components/ui/Toast';
+import { PageHero } from '@/components/ui-legacy/PageHero';
+import { Section } from '@/components/ui-legacy/Section';
+import { Card } from '@/components/ui-legacy/Card';
+import { Grid } from '@/components/ui-legacy/Grid';
+import { Input } from '@/components/ui-legacy/Input';
+import { Select } from '@/components/ui-legacy/Select';
+import { Badge } from '@/components/ui-legacy/Badge';
+import { Button } from '@/components/ui-legacy/Button';
+import { IconButton } from '@/components/ui-legacy/IconButton';
+import { Modal } from '@/components/ui-legacy/Modal';
+import { LoadingState, EmptyState } from '@/components/ui-legacy/States';
+import { useToast } from '@/components/ui-legacy/Toast';
 
 const MAX_SUBMIT_BYTES = 4 * 1024 * 1024; // matches app/api/gallery/submit/route.ts
 const ALLOWED_SUBMIT_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
@@ -152,14 +152,14 @@ function PhotoLightbox({
                 value={commentAuthor}
                 onChange={(e) => setCommentAuthor(e.target.value)}
                 placeholder="Your name (optional)"
-                className="w-full rounded-md border border-white/15 bg-white/5 px-3 py-2 text-body-sm text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/30"
+                className="w-full rounded-md border border-white/15 bg-white/5 px-3 py-2 text-body-sm text-white placeholder-white/40 focus:outline-hidden focus:ring-2 focus:ring-white/30"
               />
               <div className="flex gap-2">
                 <input
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
                   placeholder="Add a comment..."
-                  className="flex-1 rounded-md border border-white/15 bg-white/5 px-3 py-2 text-body-sm text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/30"
+                  className="flex-1 rounded-md border border-white/15 bg-white/5 px-3 py-2 text-body-sm text-white placeholder-white/40 focus:outline-hidden focus:ring-2 focus:ring-white/30"
                 />
                 <IconButton label="Post comment" type="submit" disabled={posting || !commentText.trim()} className="bg-white/10 text-white hover:bg-white/20">
                   <Send className="h-4 w-4" />
@@ -182,7 +182,7 @@ function PhotoLightbox({
           </div>
         )}
 
-        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black to-transparent p-4 text-white">
+        <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black to-transparent p-4 text-white">
           <h3 className="text-title-md">{photo.title}</h3>
           {photo.description && <p className="mt-1 text-body-sm opacity-80">{photo.description}</p>}
           {photo.tags && photo.tags.length > 0 && (
@@ -542,7 +542,7 @@ function GalleryPageInner() {
                 <Card padding="none" className="h-full cursor-pointer overflow-hidden" onClick={() => openEvent(event)}>
                   <div className="relative aspect-video bg-surface-active">
                     {(event.imageUrl || event.photos[0]) ? (
-                      <Image src={event.imageUrl || event.photos[0].imageUrl} alt={event.title} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className={`object-cover ${event.membersOnly && !user ? 'blur-sm' : ''}`} />
+                      <Image src={event.imageUrl || event.photos[0].imageUrl} alt={event.title} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className={`object-cover ${event.membersOnly && !user ? 'blur-xs' : ''}`} />
                     ) : (
                       <div className="flex h-full items-center justify-center">
                         <Camera className="h-10 w-10 text-foreground-subtle" />

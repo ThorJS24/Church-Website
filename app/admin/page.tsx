@@ -8,13 +8,13 @@ import {
 } from 'lucide-react';
 import { adminFetch } from '@/lib/adminApi';
 import { LoadingState, ErrorState } from '@/components/admin/States';
-import { Card } from '@/components/ui/Card';
-import { Grid } from '@/components/ui/Grid';
-import { Button } from '@/components/ui/Button';
-import { Modal } from '@/components/ui/Modal';
-import { Input } from '@/components/ui/Input';
-import { Textarea } from '@/components/ui/Textarea';
-import { useToast } from '@/components/ui/Toast';
+import { Card } from '@/components/ui-legacy/Card';
+import { Grid } from '@/components/ui-legacy/Grid';
+import { Button } from '@/components/ui-legacy/Button';
+import { Modal } from '@/components/ui-legacy/Modal';
+import { Input } from '@/components/ui-legacy/Input';
+import { Textarea } from '@/components/ui-legacy/Textarea';
+import { useToast } from '@/components/ui-legacy/Toast';
 
 interface DashboardStats {
   totalUsers: number;

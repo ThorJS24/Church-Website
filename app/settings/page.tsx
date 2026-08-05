@@ -7,12 +7,12 @@ import { Settings, Bell, Shield, User as UserIcon, Eye, EyeOff } from 'lucide-re
 import { useAuth } from '@/contexts/AuthContext';
 import { getIdToken } from '@/lib/firebase';
 import ConfirmModal from '@/components/admin/ConfirmModal';
-import { Container } from '@/components/ui/Container';
-import { Card } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
-import { Switch } from '@/components/ui/Switch';
-import { LoadingState } from '@/components/ui/States';
+import { Container } from '@/components/ui-legacy/Container';
+import { Card } from '@/components/ui-legacy/Card';
+import { Input } from '@/components/ui-legacy/Input';
+import { Button } from '@/components/ui-legacy/Button';
+import { Switch } from '@/components/ui-legacy/Switch';
+import { LoadingState } from '@/components/ui-legacy/States';
 
 type Notifications = { email: boolean; events: boolean; prayers: boolean; newsletter: boolean; sermons: boolean; volunteerOpportunities: boolean };
 type Privacy = { profileVisible: boolean; contactVisible: boolean };

@@ -8,15 +8,15 @@ import { LoadingState, EmptyState, ErrorState } from '@/components/admin/States'
 import ConfirmModal from '@/components/admin/ConfirmModal';
 import { FieldSchema, FieldType } from '@/types/contentType';
 import { FORM_SLUG_PATTERN, FormDefinition } from '@/types/formSchema';
-import { Modal } from '@/components/ui/Modal';
-import { Button } from '@/components/ui/Button';
-import { IconButton } from '@/components/ui/IconButton';
-import { Input } from '@/components/ui/Input';
-import { Textarea } from '@/components/ui/Textarea';
-import { Select } from '@/components/ui/Select';
-import { Checkbox } from '@/components/ui/Checkbox';
-import { DataTable, type DataTableColumn } from '@/components/ui/DataTable';
-import { useToast } from '@/components/ui/Toast';
+import { Modal } from '@/components/ui-legacy/Modal';
+import { Button } from '@/components/ui-legacy/Button';
+import { IconButton } from '@/components/ui-legacy/IconButton';
+import { Input } from '@/components/ui-legacy/Input';
+import { Textarea } from '@/components/ui-legacy/Textarea';
+import { Select } from '@/components/ui-legacy/Select';
+import { Checkbox } from '@/components/ui-legacy/Checkbox';
+import { DataTable, type DataTableColumn } from '@/components/ui-legacy/DataTable';
+import { useToast } from '@/components/ui-legacy/Toast';
 
 const FIELD_TYPES: FieldType[] = ['text', 'email', 'textarea', 'date', 'datetime', 'number', 'checkbox', 'url', 'file'];
 

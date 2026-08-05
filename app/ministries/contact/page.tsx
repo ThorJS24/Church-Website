@@ -5,13 +5,13 @@ import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { CheckCircle2 } from 'lucide-react';
 import { getMinistries } from '@/lib/content';
-import { Container } from '@/components/ui/Container';
-import { Card } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
-import { Select } from '@/components/ui/Select';
-import { Textarea } from '@/components/ui/Textarea';
-import { Button } from '@/components/ui/Button';
-import { LoadingState } from '@/components/ui/States';
+import { Container } from '@/components/ui-legacy/Container';
+import { Card } from '@/components/ui-legacy/Card';
+import { Input } from '@/components/ui-legacy/Input';
+import { Select } from '@/components/ui-legacy/Select';
+import { Textarea } from '@/components/ui-legacy/Textarea';
+import { Button } from '@/components/ui-legacy/Button';
+import { LoadingState } from '@/components/ui-legacy/States';
 
 interface Ministry {
   id: string;

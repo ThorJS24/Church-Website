@@ -3,8 +3,8 @@
 import { Quote } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Testimonial } from '@/lib/content';
-import { Grid } from '@/components/ui/Grid';
-import { Card } from '@/components/ui/Card';
+import { Grid } from '@/components/ui-legacy/Grid';
+import { Card } from '@/components/ui-legacy/Card';
 
 export default function SocialProofStrip({ testimonials }: { testimonials: Testimonial[] }) {
   if (testimonials.length === 0) return null;

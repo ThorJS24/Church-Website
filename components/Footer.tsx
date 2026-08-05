@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { Church } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { getSiteSettings, SiteSettings } from '@/lib/content'
-import { Container } from '@/components/ui/Container'
+import { Container } from '@/components/ui-legacy/Container'
 import PrivacyDialog from './PrivacyDialog'
 import NewsletterSignup from './NewsletterSignup'
 

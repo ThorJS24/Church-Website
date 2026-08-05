@@ -6,15 +6,15 @@ import Link from 'next/link';
 import { User, Mail, Phone, BookOpen, Users2, Play } from 'lucide-react';
 import { getPastors, getStaffMembers, getSermons, Pastor, StaffMember, Sermon } from '@/lib/content';
 import Image from 'next/image';
-import { PageHero } from '@/components/ui/PageHero';
-import { Section } from '@/components/ui/Section';
-import { Card } from '@/components/ui/Card';
-import { Grid } from '@/components/ui/Grid';
-import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
-import { Avatar } from '@/components/ui/Avatar';
-import { Modal } from '@/components/ui/Modal';
-import { LoadingState, EmptyState } from '@/components/ui/States';
+import { PageHero } from '@/components/ui-legacy/PageHero';
+import { Section } from '@/components/ui-legacy/Section';
+import { Card } from '@/components/ui-legacy/Card';
+import { Grid } from '@/components/ui-legacy/Grid';
+import { Badge } from '@/components/ui-legacy/Badge';
+import { Button } from '@/components/ui-legacy/Button';
+import { Avatar } from '@/components/ui-legacy/Avatar';
+import { Modal } from '@/components/ui-legacy/Modal';
+import { LoadingState, EmptyState } from '@/components/ui-legacy/States';
 
 const HIERARCHY_ORDER: Record<string, number> = {
   'Senior Pastor': 1,

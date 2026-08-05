@@ -52,7 +52,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             className={cn(
               'w-full appearance-none rounded-md border bg-background text-foreground',
               'transition-colors duration-fast ease-standard',
-              'focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent',
+              'focus:outline-hidden focus:ring-2 focus:ring-accent/40 focus:border-accent',
               'disabled:opacity-50 disabled:cursor-not-allowed',
               error ? 'border-danger' : 'border-border',
               SIZE_CLASSES[size],

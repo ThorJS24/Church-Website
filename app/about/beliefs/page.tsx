@@ -5,12 +5,12 @@ import { motion } from 'framer-motion';
 import { Book, Heart, Target, Eye, CheckCircle, HelpCircle } from 'lucide-react';
 import { getPageContent } from '@/lib/content';
 import ScriptureReference from '@/components/ScriptureReference';
-import { PageHero } from '@/components/ui/PageHero';
-import { Section } from '@/components/ui/Section';
-import { Card } from '@/components/ui/Card';
-import { Grid } from '@/components/ui/Grid';
-import { LoadingState } from '@/components/ui/States';
-import { Accordion, AccordionItem } from '@/components/ui/Accordion';
+import { PageHero } from '@/components/ui-legacy/PageHero';
+import { Section } from '@/components/ui-legacy/Section';
+import { Card } from '@/components/ui-legacy/Card';
+import { Grid } from '@/components/ui-legacy/Grid';
+import { LoadingState } from '@/components/ui-legacy/States';
+import { Accordion, AccordionItem } from '@/components/ui-legacy/Accordion';
 
 interface AboutPage {
   title: string;

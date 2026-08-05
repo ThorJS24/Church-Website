@@ -1,17 +1,51 @@
-import { Inter } from 'next/font/google';
+import { Fraunces, Figtree, Noto_Sans_Tamil, Noto_Serif_Tamil } from 'next/font/google';
+import { MotionConfig } from 'motion/react';
 import './globals.css';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import ClientLayout from '@/components/ClientLayout';
 import SkipLink from '@/components/SkipLink';
-import { ToastProvider } from '@/components/ui/Toast';
+import { ToastProvider } from '@/components/ui-legacy/Toast';
 import { PublicChrome } from '@/components/PublicChrome';
 import { ThemeAccentInjector } from '@/components/ThemeAccentInjector';
+import { cn } from '@/lib/utils';
 
-const inter = Inter({
+// Warm & traditional-modern pairing: Fraunces (serif, display/headings —
+// used deliberately in italic for Scripture references / pull-quotes) +
+// Figtree (sans, body/UI — reads warmer than Inter, which the first
+// rebuild used and is part of why it read "corporate"). Static weights
+// only (not the full variable axis range) to control font payload.
+const fraunces = Fraunces({
   subsets: ['latin'],
-  variable: '--font-inter',
+  weight: ['500', '600', '700'],
+  style: ['normal', 'italic'],
+  variable: '--font-fraunces',
+  display: 'swap',
+});
+
+const figtree = Figtree({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-figtree',
+  display: 'swap',
+});
+
+// Real next/font/google loaders for what were previously dead
+// fontFamily.tamil/tamil-serif config entries (the CSS vars they
+// referenced were never defined anywhere) — matches the weights the old
+// manual @font-face/CSS @import used (400/500/600).
+const notoSansTamil = Noto_Sans_Tamil({
+  subsets: ['tamil'],
+  weight: ['400', '500', '600'],
+  variable: '--font-noto-sans-tamil',
+  display: 'swap',
+});
+
+const notoSerifTamil = Noto_Serif_Tamil({
+  subsets: ['tamil'],
+  weight: ['400', '500', '600'],
+  variable: '--font-noto-serif-tamil',
   display: 'swap',
 });
 
@@ -72,26 +106,32 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="en" className={inter.variable} suppressHydrationWarning>
-      <body className={`${inter.className} antialiased`}>
+    <html
+      lang="en"
+      className={cn(fraunces.variable, figtree.variable, notoSansTamil.variable, notoSerifTamil.variable)}
+      suppressHydrationWarning
+    >
+      <body className="font-sans antialiased">
         <script
           type="application/ld+json"
           // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
         />
-        <ThemeProvider>
-          <LanguageProvider>
-            <AuthProvider>
-              <ToastProvider>
-                <ThemeAccentInjector />
-                <ClientLayout>
-                  <SkipLink />
-                  <PublicChrome>{children}</PublicChrome>
-                </ClientLayout>
-              </ToastProvider>
-            </AuthProvider>
-          </LanguageProvider>
-        </ThemeProvider>
+        <MotionConfig reducedMotion="user">
+          <ThemeProvider>
+            <LanguageProvider>
+              <AuthProvider>
+                <ToastProvider>
+                  <ThemeAccentInjector />
+                  <ClientLayout>
+                    <SkipLink />
+                    <PublicChrome>{children}</PublicChrome>
+                  </ClientLayout>
+                </ToastProvider>
+              </AuthProvider>
+            </LanguageProvider>
+          </ThemeProvider>
+        </MotionConfig>
       </body>
     </html>
   );

@@ -11,9 +11,9 @@ import TagsTab from '@/components/admin/content/TagsTab';
 import EventRegistrationsModal from '@/components/admin/content/EventRegistrationsModal';
 import { adminFetch } from '@/lib/adminApi';
 import { ContentTypeDefinition } from '@/types/contentType';
-import { Tabs, TabList, Tab, TabPanel } from '@/components/ui/Tabs';
-import { Input } from '@/components/ui/Input';
-import { IconButton } from '@/components/ui/IconButton';
+import { Tabs, TabList, Tab, TabPanel } from '@/components/ui-legacy/Tabs';
+import { Input } from '@/components/ui-legacy/Input';
+import { IconButton } from '@/components/ui-legacy/IconButton';
 
 const SERMON_FIELDS: FieldSchema[] = [
   { key: 'title', label: 'Title', type: 'text', required: true },

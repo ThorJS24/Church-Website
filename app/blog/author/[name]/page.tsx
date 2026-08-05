@@ -3,12 +3,12 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { User } from 'lucide-react';
 import { getBlogPosts } from '@/lib/content';
-import { PageHero } from '@/components/ui/PageHero';
-import { Section } from '@/components/ui/Section';
-import { Card } from '@/components/ui/Card';
-import { Grid } from '@/components/ui/Grid';
-import { Avatar } from '@/components/ui/Avatar';
-import { EmptyState } from '@/components/ui/States';
+import { PageHero } from '@/components/ui-legacy/PageHero';
+import { Section } from '@/components/ui-legacy/Section';
+import { Card } from '@/components/ui-legacy/Card';
+import { Grid } from '@/components/ui-legacy/Grid';
+import { Avatar } from '@/components/ui-legacy/Avatar';
+import { EmptyState } from '@/components/ui-legacy/States';
 
 interface Props {
   params: Promise<{ name: string }>;
@@ -44,7 +44,7 @@ export default async function AuthorPage({ params }: Props) {
               <Link key={post.id} href={`/blog/${post.slug}`} className="block h-full">
                 <Card variant="interactive" padding="none" className="h-full overflow-hidden">
                   {post.imageUrl && (
-                    <div className="relative aspect-[16/10] bg-surface-active">
+                    <div className="relative aspect-16/10 bg-surface-active">
                       <Image src={post.imageUrl} alt={post.title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 33vw" />
                     </div>
                   )}

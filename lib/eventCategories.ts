@@ -1,4 +1,4 @@
-import type { BadgeVariant } from '@/components/ui/Badge';
+import type { BadgeVariant } from '@/components/ui-legacy/Badge';
 
 export interface EventCategory {
   id: string;

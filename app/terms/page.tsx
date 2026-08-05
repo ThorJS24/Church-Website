@@ -1,11 +1,11 @@
 import { FileText, Info, Check, X, ShieldCheck, HandHeart, Gavel, Scale, Mail } from 'lucide-react';
-import { PageHero } from '@/components/ui/PageHero';
-import { Section } from '@/components/ui/Section';
-import { Container } from '@/components/ui/Container';
-import { Card } from '@/components/ui/Card';
-import { Grid } from '@/components/ui/Grid';
-import { LinkButton } from '@/components/ui/Button';
-import { Accordion, AccordionItem } from '@/components/ui/Accordion';
+import { PageHero } from '@/components/ui-legacy/PageHero';
+import { Section } from '@/components/ui-legacy/Section';
+import { Container } from '@/components/ui-legacy/Container';
+import { Card } from '@/components/ui-legacy/Card';
+import { Grid } from '@/components/ui-legacy/Grid';
+import { LinkButton } from '@/components/ui-legacy/Button';
+import { Accordion, AccordionItem } from '@/components/ui-legacy/Accordion';
 import { PrintButton } from '@/components/PrintButton';
 import { PolicyVersionDiff, type PolicyVersion } from '@/components/PolicyVersionDiff';
 

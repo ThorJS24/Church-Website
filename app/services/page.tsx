@@ -4,14 +4,14 @@ import { useState, useEffect, lazy, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { Sun, Moon, BookOpen, Clock, MapPin, Calendar, Video, Coffee, Baby, Users, Bell, Heart, Radio, Accessibility } from 'lucide-react';
 import { getPageContent, getServiceTimes, getSiteSettings, getLivestream } from '@/lib/content';
-import { PageHero } from '@/components/ui/PageHero';
-import { Section } from '@/components/ui/Section';
-import { Card } from '@/components/ui/Card';
-import { Grid } from '@/components/ui/Grid';
-import { Button, LinkButton } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
-import { Modal } from '@/components/ui/Modal';
-import { LoadingState, EmptyState } from '@/components/ui/States';
+import { PageHero } from '@/components/ui-legacy/PageHero';
+import { Section } from '@/components/ui-legacy/Section';
+import { Card } from '@/components/ui-legacy/Card';
+import { Grid } from '@/components/ui-legacy/Grid';
+import { Button, LinkButton } from '@/components/ui-legacy/Button';
+import { Badge } from '@/components/ui-legacy/Badge';
+import { Modal } from '@/components/ui-legacy/Modal';
+import { LoadingState, EmptyState } from '@/components/ui-legacy/States';
 
 const DynamicLiveStream = lazy(() => import('@/components/DynamicLiveStream'));
 

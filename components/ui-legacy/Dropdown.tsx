@@ -93,7 +93,7 @@ export function DropdownMenu({ children, className }: { children: ReactNode; cla
           exit={{ opacity: 0, y: -4, scale: 0.98 }}
           transition={{ duration: 0.14, ease: [0.4, 0, 0.2, 1] }}
           className={cn(
-            'absolute z-40 mt-2 min-w-[12rem] overflow-hidden rounded-lg border border-border bg-background p-1 shadow-lg',
+            'absolute z-40 mt-2 min-w-48 overflow-hidden rounded-lg border border-border bg-background p-1 shadow-lg',
             align === 'right' ? 'right-0' : 'left-0',
             className
           )}

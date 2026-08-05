@@ -7,15 +7,15 @@ import { adminFetch } from '@/lib/adminApi';
 import { getIdToken } from '@/lib/firebase';
 import { LoadingState, EmptyState, ErrorState } from '@/components/admin/States';
 import ConfirmModal from '@/components/admin/ConfirmModal';
-import { Card } from '@/components/ui/Card';
-import { Grid } from '@/components/ui/Grid';
-import { Input } from '@/components/ui/Input';
-import { IconButton } from '@/components/ui/IconButton';
-import { Button, buttonClasses } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
-import { Checkbox } from '@/components/ui/Checkbox';
-import { Modal } from '@/components/ui/Modal';
-import { useToast } from '@/components/ui/Toast';
+import { Card } from '@/components/ui-legacy/Card';
+import { Grid } from '@/components/ui-legacy/Grid';
+import { Input } from '@/components/ui-legacy/Input';
+import { IconButton } from '@/components/ui-legacy/IconButton';
+import { Button, buttonClasses } from '@/components/ui-legacy/Button';
+import { Badge } from '@/components/ui-legacy/Badge';
+import { Checkbox } from '@/components/ui-legacy/Checkbox';
+import { Modal } from '@/components/ui-legacy/Modal';
+import { useToast } from '@/components/ui-legacy/Toast';
 import { cn } from '@/lib/cn';
 
 interface MediaItem {

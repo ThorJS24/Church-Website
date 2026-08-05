@@ -3,8 +3,8 @@
 import { useState, useMemo } from 'react';
 import { History } from 'lucide-react';
 import { wordDiff } from '@/lib/diff';
-import { Card } from '@/components/ui/Card';
-import { Select } from '@/components/ui/Select';
+import { Card } from '@/components/ui-legacy/Card';
+import { Select } from '@/components/ui-legacy/Select';
 import { cn } from '@/lib/cn';
 
 export interface PolicyVersion {

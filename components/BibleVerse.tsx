@@ -146,7 +146,7 @@ export default function BibleVerse() {
                 }
               }
             }}
-            className="rounded-full border-none bg-background/70 px-2 py-1 text-caption font-medium text-foreground-muted outline-none"
+            className="rounded-full border-none bg-background/70 px-2 py-1 text-caption font-medium text-foreground-muted outline-hidden"
           >
             {bibleVersions.map(version => (
               <option key={version.code} value={version.code}>

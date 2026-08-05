@@ -53,7 +53,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             className={cn(
               'w-full rounded-md border bg-background text-foreground placeholder:text-foreground-subtle',
               'transition-colors duration-fast ease-standard',
-              'focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent',
+              'focus:outline-hidden focus:ring-2 focus:ring-accent/40 focus:border-accent',
               'disabled:opacity-50 disabled:cursor-not-allowed',
               error ? 'border-danger' : 'border-border',
               SIZE_CLASSES[size],

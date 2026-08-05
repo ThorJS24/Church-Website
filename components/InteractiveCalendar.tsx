@@ -5,8 +5,8 @@ import { motion } from 'framer-motion';
 import { Clock, MapPin } from 'lucide-react';
 import { getEvents, getServiceTimes, EventItem } from '@/lib/content';
 import { getEventCategory, expandServicesToEvents } from '@/lib/eventCategories';
-import { IconButton } from '@/components/ui/IconButton';
-import { Modal } from '@/components/ui/Modal';
+import { IconButton } from '@/components/ui-legacy/IconButton';
+import { Modal } from '@/components/ui-legacy/Modal';
 import { cn } from '@/lib/cn';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import EventModal from '@/components/EventModal';
@@ -121,7 +121,7 @@ export default function InteractiveCalendar() {
               // not be a <button> (an empty disabled button has no
               // accessible name and fails WCAG 4.1.2 / axe's button-name
               // check).
-              return <div key={index} className="min-h-[5rem] rounded-lg border border-transparent" aria-hidden="true" />;
+              return <div key={index} className="min-h-20 rounded-lg border border-transparent" aria-hidden="true" />;
             }
 
             const dayEvents = getEventsForDay(day);
@@ -141,7 +141,7 @@ export default function InteractiveCalendar() {
                 animate={{ opacity: 1 }}
                 transition={{ delay: Math.min(index * 0.005, 0.2) }}
                 className={cn(
-                  'flex min-h-[5rem] flex-col rounded-lg border p-1.5 text-left transition-shadow',
+                  'flex min-h-20 flex-col rounded-lg border p-1.5 text-left transition-shadow',
                   !isToday && 'border-border bg-background hover:shadow-sm',
                   isToday && 'border-accent bg-accent text-accent-foreground'
                 )}

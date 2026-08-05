@@ -4,15 +4,15 @@ import { useEffect, useMemo, useState } from 'react';
 import { Mail, Flag, Reply, MessageSquare, Users2, Settings2, Trash2, Send } from 'lucide-react';
 import { adminFetch } from '@/lib/adminApi';
 import { LoadingState, EmptyState, ErrorState } from '@/components/admin/States';
-import { Card } from '@/components/ui/Card';
-import { Badge, type BadgeVariant } from '@/components/ui/Badge';
-import { Select } from '@/components/ui/Select';
-import { Input } from '@/components/ui/Input';
-import { Textarea } from '@/components/ui/Textarea';
-import { Button } from '@/components/ui/Button';
-import { IconButton } from '@/components/ui/IconButton';
-import { Modal } from '@/components/ui/Modal';
-import { useToast } from '@/components/ui/Toast';
+import { Card } from '@/components/ui-legacy/Card';
+import { Badge, type BadgeVariant } from '@/components/ui-legacy/Badge';
+import { Select } from '@/components/ui-legacy/Select';
+import { Input } from '@/components/ui-legacy/Input';
+import { Textarea } from '@/components/ui-legacy/Textarea';
+import { Button } from '@/components/ui-legacy/Button';
+import { IconButton } from '@/components/ui-legacy/IconButton';
+import { Modal } from '@/components/ui-legacy/Modal';
+import { useToast } from '@/components/ui-legacy/Toast';
 import { cn } from '@/lib/cn';
 
 interface Reply { subject: string; body: string; sentBy: string; sentAt: string }
@@ -287,7 +287,7 @@ function MessageDetail({
         {fields.map(([label, value]) => (
           <div key={label}>
             <dt className="capitalize text-foreground-subtle">{label}</dt>
-            <dd className="break-words text-foreground">{Array.isArray(value) ? value.join(', ') : String(value)}</dd>
+            <dd className="wrap-break-word text-foreground">{Array.isArray(value) ? value.join(', ') : String(value)}</dd>
           </div>
         ))}
       </dl>

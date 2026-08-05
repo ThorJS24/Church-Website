@@ -6,10 +6,10 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Church, Eye, EyeOff, Mail, Lock } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
-import { Card } from '@/components/ui/Card'
-import { Input } from '@/components/ui/Input'
-import { Button } from '@/components/ui/Button'
-import { IconButton } from '@/components/ui/IconButton'
+import { Card } from '@/components/ui-legacy/Card'
+import { Input } from '@/components/ui-legacy/Input'
+import { Button } from '@/components/ui-legacy/Button'
+import { IconButton } from '@/components/ui-legacy/IconButton'
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)

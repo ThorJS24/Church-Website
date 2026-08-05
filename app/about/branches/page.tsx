@@ -5,15 +5,15 @@ import { motion } from 'framer-motion';
 import { MapPin, Calendar, Users, Phone, Mail, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getPageContent } from '@/lib/content';
 import Image from 'next/image';
-import { PageHero } from '@/components/ui/PageHero';
-import { Section } from '@/components/ui/Section';
-import { Card } from '@/components/ui/Card';
-import { Grid } from '@/components/ui/Grid';
-import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
-import { IconButton } from '@/components/ui/IconButton';
-import { Modal } from '@/components/ui/Modal';
-import { LoadingState } from '@/components/ui/States';
+import { PageHero } from '@/components/ui-legacy/PageHero';
+import { Section } from '@/components/ui-legacy/Section';
+import { Card } from '@/components/ui-legacy/Card';
+import { Grid } from '@/components/ui-legacy/Grid';
+import { Badge } from '@/components/ui-legacy/Badge';
+import { Button } from '@/components/ui-legacy/Button';
+import { IconButton } from '@/components/ui-legacy/IconButton';
+import { Modal } from '@/components/ui-legacy/Modal';
+import { LoadingState } from '@/components/ui-legacy/States';
 
 interface Branch {
   id: string;
@@ -73,7 +73,7 @@ export default function BranchesPage() {
               transition={{ delay: index * 0.05, duration: 0.4 }}
             >
               <Card padding="none" className="h-full overflow-hidden">
-                <div className="relative aspect-[4/3] bg-surface-active">
+                <div className="relative aspect-4/3 bg-surface-active">
                   {branch.images?.[0]?.url ? (
                     <Image
                       src={branch.images[0].url}

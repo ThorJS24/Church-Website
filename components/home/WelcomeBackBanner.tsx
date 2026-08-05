@@ -3,8 +3,8 @@
 import Link from 'next/link';
 import { Sparkles } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Container } from '@/components/ui/Container';
-import { LinkButton } from '@/components/ui/Button';
+import { Container } from '@/components/ui-legacy/Container';
+import { LinkButton } from '@/components/ui-legacy/Button';
 
 export default function WelcomeBackBanner() {
   const { user } = useAuth();

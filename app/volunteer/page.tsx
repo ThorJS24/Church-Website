@@ -6,16 +6,16 @@ import { Send, CheckCircle, Heart, Calendar, MapPin, Users, PlusCircle } from 'l
 import { getVolunteerOpportunities, VolunteerOpportunity } from '@/lib/content';
 import { useAuth } from '@/contexts/AuthContext';
 import { getIdToken } from '@/lib/firebase';
-import { PageHero } from '@/components/ui/PageHero';
-import { Section } from '@/components/ui/Section';
-import { Container } from '@/components/ui/Container';
-import { Card } from '@/components/ui/Card';
-import { Grid } from '@/components/ui/Grid';
-import { Input } from '@/components/ui/Input';
-import { Textarea } from '@/components/ui/Textarea';
-import { Checkbox } from '@/components/ui/Checkbox';
-import { Button } from '@/components/ui/Button';
-import { useToast } from '@/components/ui/Toast';
+import { PageHero } from '@/components/ui-legacy/PageHero';
+import { Section } from '@/components/ui-legacy/Section';
+import { Container } from '@/components/ui-legacy/Container';
+import { Card } from '@/components/ui-legacy/Card';
+import { Grid } from '@/components/ui-legacy/Grid';
+import { Input } from '@/components/ui-legacy/Input';
+import { Textarea } from '@/components/ui-legacy/Textarea';
+import { Checkbox } from '@/components/ui-legacy/Checkbox';
+import { Button } from '@/components/ui-legacy/Button';
+import { useToast } from '@/components/ui-legacy/Toast';
 
 const VOLUNTEER_AREAS = [
   "Children's Ministry",

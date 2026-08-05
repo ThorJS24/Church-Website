@@ -3,13 +3,13 @@
 import { useEffect, useState, useMemo, use } from 'react';
 import { CheckCircle, Info, ChevronLeft, ChevronRight } from 'lucide-react';
 import { FieldSchema } from '@/types/contentType';
-import { Container } from '@/components/ui/Container';
-import { Card } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
-import { Textarea } from '@/components/ui/Textarea';
-import { Checkbox } from '@/components/ui/Checkbox';
-import { Button } from '@/components/ui/Button';
-import { LoadingState } from '@/components/ui/States';
+import { Container } from '@/components/ui-legacy/Container';
+import { Card } from '@/components/ui-legacy/Card';
+import { Input } from '@/components/ui-legacy/Input';
+import { Textarea } from '@/components/ui-legacy/Textarea';
+import { Checkbox } from '@/components/ui-legacy/Checkbox';
+import { Button } from '@/components/ui-legacy/Button';
+import { LoadingState } from '@/components/ui-legacy/States';
 import { cn } from '@/lib/cn';
 
 interface PublicForm {

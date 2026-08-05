@@ -97,7 +97,7 @@ export default function DynamicLiveStream() {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
       {streamData.isLive && (
-        <div className="bg-gradient-to-r from-red-600 to-red-700 text-white p-4">
+        <div className="bg-linear-to-r from-red-600 to-red-700 text-white p-4">
           <div className="flex items-center space-x-2">
             <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
             <span className="text-sm font-medium">LIVE</span>

@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { WifiOff, RefreshCw } from 'lucide-react';
-import { Container } from '@/components/ui/Container';
-import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
+import { Container } from '@/components/ui-legacy/Container';
+import { Card } from '@/components/ui-legacy/Card';
+import { Button } from '@/components/ui-legacy/Button';
 
 export default function OfflinePage() {
   const [isOnline, setIsOnline] = useState(false);

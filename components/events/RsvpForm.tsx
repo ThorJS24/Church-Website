@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import { CheckCircle2, Clock3, Download, X } from 'lucide-react';
-import { Card } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
-import { LinkButton } from '@/components/ui/Button';
+import { Card } from '@/components/ui-legacy/Card';
+import { Input } from '@/components/ui-legacy/Input';
+import { Button } from '@/components/ui-legacy/Button';
+import { LinkButton } from '@/components/ui-legacy/Button';
 
 export function RsvpForm({ eventId, maxAttendees }: { eventId: string; maxAttendees?: number }) {
   const [name, setName] = useState('');

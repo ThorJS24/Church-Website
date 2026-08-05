@@ -8,17 +8,17 @@ import { useAuth } from '@/contexts/AuthContext';
 import { UserRole } from '@/lib/permissions';
 import { LoadingState, ErrorState } from '@/components/admin/States';
 import ConfirmModal from '@/components/admin/ConfirmModal';
-import { DataTable, type DataTableColumn } from '@/components/ui/DataTable';
-import { Select } from '@/components/ui/Select';
-import { Badge } from '@/components/ui/Badge';
-import { Avatar } from '@/components/ui/Avatar';
-import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
-import { IconButton } from '@/components/ui/IconButton';
-import { Modal } from '@/components/ui/Modal';
-import { Input } from '@/components/ui/Input';
-import { Textarea } from '@/components/ui/Textarea';
-import { useToast } from '@/components/ui/Toast';
+import { DataTable, type DataTableColumn } from '@/components/ui-legacy/DataTable';
+import { Select } from '@/components/ui-legacy/Select';
+import { Badge } from '@/components/ui-legacy/Badge';
+import { Avatar } from '@/components/ui-legacy/Avatar';
+import { Card } from '@/components/ui-legacy/Card';
+import { Button } from '@/components/ui-legacy/Button';
+import { IconButton } from '@/components/ui-legacy/IconButton';
+import { Modal } from '@/components/ui-legacy/Modal';
+import { Input } from '@/components/ui-legacy/Input';
+import { Textarea } from '@/components/ui-legacy/Textarea';
+import { useToast } from '@/components/ui-legacy/Toast';
 
 interface AdminUser {
   id: string;

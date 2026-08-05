@@ -1,12 +1,13 @@
 import { forwardRef, type InputHTMLAttributes, useId } from 'react';
+import { Check } from 'lucide-react';
 import { cn } from '@/lib/cn';
 
-export interface RadioProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
+export interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
   label?: string;
   description?: string;
 }
 
-export const Radio = forwardRef<HTMLInputElement, RadioProps>(
+export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
   ({ label, description, id, className, ...props }, ref) => {
     const generatedId = useId();
     const inputId = id ?? generatedId;
@@ -16,18 +17,19 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(
         <div className="relative flex h-5 w-5 shrink-0 items-center justify-center">
           <input
             ref={ref}
-            type="radio"
+            type="checkbox"
             id={inputId}
             className={cn(
-              'peer h-5 w-5 shrink-0 appearance-none rounded-full border border-border bg-background',
-              'checked:border-[5px] checked:border-accent',
-              'transition-all duration-fast ease-standard cursor-pointer',
-              'focus:outline-none focus:ring-2 focus:ring-accent/40',
+              'peer h-5 w-5 shrink-0 appearance-none rounded border border-border bg-background',
+              'checked:bg-accent checked:border-accent',
+              'transition-colors duration-fast ease-standard cursor-pointer',
+              'focus:outline-hidden focus:ring-2 focus:ring-accent/40',
               'disabled:opacity-50 disabled:cursor-not-allowed',
               className
             )}
             {...props}
           />
+          <Check className="pointer-events-none absolute h-3.5 w-3.5 text-accent-foreground opacity-0 peer-checked:opacity-100" />
         </div>
         {(label || description) && (
           <label htmlFor={inputId} className="cursor-pointer select-none">
@@ -41,4 +43,4 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(
     );
   }
 );
-Radio.displayName = 'Radio';
+Checkbox.displayName = 'Checkbox';

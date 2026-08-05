@@ -5,15 +5,15 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Users, Clock, MapPin, Search } from 'lucide-react';
 import { getSmallGroups, SmallGroup } from '@/lib/content';
-import { PageHero } from '@/components/ui/PageHero';
-import { Section } from '@/components/ui/Section';
-import { Card } from '@/components/ui/Card';
-import { Grid } from '@/components/ui/Grid';
-import { Badge } from '@/components/ui/Badge';
-import { Input } from '@/components/ui/Input';
-import { Select } from '@/components/ui/Select';
-import { LinkButton } from '@/components/ui/Button';
-import { LoadingState } from '@/components/ui/States';
+import { PageHero } from '@/components/ui-legacy/PageHero';
+import { Section } from '@/components/ui-legacy/Section';
+import { Card } from '@/components/ui-legacy/Card';
+import { Grid } from '@/components/ui-legacy/Grid';
+import { Badge } from '@/components/ui-legacy/Badge';
+import { Input } from '@/components/ui-legacy/Input';
+import { Select } from '@/components/ui-legacy/Select';
+import { LinkButton } from '@/components/ui-legacy/Button';
+import { LoadingState } from '@/components/ui-legacy/States';
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 

@@ -5,12 +5,12 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { motion } from 'framer-motion';
 import { Calendar, Heart, Droplets, Send, Phone, Mail, User, CheckCircle2, FileText, ArrowRight } from 'lucide-react';
-import { Container } from '@/components/ui/Container';
-import { Card } from '@/components/ui/Card';
-import { Grid } from '@/components/ui/Grid';
-import { Input } from '@/components/ui/Input';
-import { Textarea } from '@/components/ui/Textarea';
-import { Button } from '@/components/ui/Button';
+import { Container } from '@/components/ui-legacy/Container';
+import { Card } from '@/components/ui-legacy/Card';
+import { Grid } from '@/components/ui-legacy/Grid';
+import { Input } from '@/components/ui-legacy/Input';
+import { Textarea } from '@/components/ui-legacy/Textarea';
+import { Button } from '@/components/ui-legacy/Button';
 import { cn } from '@/lib/cn';
 
 const DOCUMENT_CHECKLISTS: Record<'wedding' | 'baptism', string[]> = {

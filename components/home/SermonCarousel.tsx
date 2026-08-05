@@ -6,9 +6,9 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BookOpen, Play, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Sermon } from '@/lib/content';
-import { Card } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
-import { LinkButton } from '@/components/ui/Button';
+import { Card } from '@/components/ui-legacy/Card';
+import { Badge } from '@/components/ui-legacy/Badge';
+import { LinkButton } from '@/components/ui-legacy/Button';
 
 const AUTO_ADVANCE_MS = 7000;
 
@@ -56,14 +56,14 @@ export default function SermonCarousel({ sermons }: { sermons: Sermon[] }) {
                 <button
                   aria-label="Previous sermon"
                   onClick={() => go(-1)}
-                  className="absolute left-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm hover:bg-black/60"
+                  className="absolute left-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-xs hover:bg-black/60"
                 >
                   <ChevronLeft className="h-5 w-5" />
                 </button>
                 <button
                   aria-label="Next sermon"
                   onClick={() => go(1)}
-                  className="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm hover:bg-black/60"
+                  className="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-xs hover:bg-black/60"
                 >
                   <ChevronRight className="h-5 w-5" />
                 </button>

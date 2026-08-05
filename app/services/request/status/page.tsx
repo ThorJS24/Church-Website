@@ -3,11 +3,11 @@
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Check, Clock, Heart, Droplets } from 'lucide-react';
-import { Container } from '@/components/ui/Container';
-import { Card } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
-import { LoadingState } from '@/components/ui/States';
+import { Container } from '@/components/ui-legacy/Container';
+import { Card } from '@/components/ui-legacy/Card';
+import { Input } from '@/components/ui-legacy/Input';
+import { Button } from '@/components/ui-legacy/Button';
+import { LoadingState } from '@/components/ui-legacy/States';
 import { cn } from '@/lib/cn';
 
 interface RequestStatus {

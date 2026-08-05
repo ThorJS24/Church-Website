@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Bookmark, BookmarkCheck } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getIdToken } from '@/lib/firebase';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui-legacy/Button';
 
 interface SaveButtonProps {
   itemType: 'sermon' | 'blog';

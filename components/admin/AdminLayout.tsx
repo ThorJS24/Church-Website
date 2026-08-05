@@ -10,10 +10,10 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { UserRole, roleAtLeast } from '@/lib/permissions';
 import { cn } from '@/lib/cn';
-import { Avatar } from '@/components/ui/Avatar';
-import { Badge, type BadgeVariant } from '@/components/ui/Badge';
-import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
-import { LoadingState } from '@/components/ui/States';
+import { Avatar } from '@/components/ui-legacy/Avatar';
+import { Badge, type BadgeVariant } from '@/components/ui-legacy/Badge';
+import { Breadcrumbs } from '@/components/ui-legacy/Breadcrumbs';
+import { LoadingState } from '@/components/ui-legacy/States';
 import CommandPalette from '@/components/CommandPalette';
 
 interface NavItem {

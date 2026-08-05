@@ -7,11 +7,11 @@ import { User, Calendar, Heart, DollarSign, Book, Users, Bell, Settings, Downloa
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { getIdToken } from '@/lib/firebase';
-import { Container } from '@/components/ui/Container';
-import { Card } from '@/components/ui/Card';
-import { Grid } from '@/components/ui/Grid';
-import { Avatar } from '@/components/ui/Avatar';
-import { EmptyState } from '@/components/ui/States';
+import { Container } from '@/components/ui-legacy/Container';
+import { Card } from '@/components/ui-legacy/Card';
+import { Grid } from '@/components/ui-legacy/Grid';
+import { Avatar } from '@/components/ui-legacy/Avatar';
+import { EmptyState } from '@/components/ui-legacy/States';
 import { WelcomeTourModal } from '@/components/WelcomeTourModal';
 
 interface DashboardStats {

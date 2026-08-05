@@ -3,11 +3,11 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { CheckCircle } from 'lucide-react';
-import { Container } from '@/components/ui/Container';
-import { Card } from '@/components/ui/Card';
-import { Checkbox } from '@/components/ui/Checkbox';
-import { Button } from '@/components/ui/Button';
-import { LoadingState } from '@/components/ui/States';
+import { Container } from '@/components/ui-legacy/Container';
+import { Card } from '@/components/ui-legacy/Card';
+import { Checkbox } from '@/components/ui-legacy/Checkbox';
+import { Button } from '@/components/ui-legacy/Button';
+import { LoadingState } from '@/components/ui-legacy/States';
 
 // The topic list an admin can segment campaigns by — kept as a fixed set
 // here (rather than free-text tagging like the admin side) since visitors

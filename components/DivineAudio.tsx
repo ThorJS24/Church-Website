@@ -84,7 +84,7 @@ export default function DivineAudio({ showControls = true }: DivineAudioProps) {
     <motion.div
       role="region"
       aria-label="Ambient audio controls"
-      className="fixed bottom-4 right-4 z-50 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full p-3 border border-yellow-200/50 dark:border-yellow-700/50 shadow-lg"
+      className="fixed bottom-4 right-4 z-50 bg-white/90 dark:bg-gray-800/90 backdrop-blur-xs rounded-full p-3 border border-yellow-200/50 dark:border-yellow-700/50 shadow-lg"
       initial={{ opacity: 0, scale: 0 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: 1, duration: 0.5 }}

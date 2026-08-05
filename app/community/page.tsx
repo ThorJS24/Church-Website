@@ -4,17 +4,17 @@ import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Heart, Globe, Users, MessageCircle, Calendar, MapPin, Phone, Search, CheckCircle2, ClipboardList } from 'lucide-react';
 import { getPageContent } from '@/lib/content';
-import { PageHero } from '@/components/ui/PageHero';
-import { Section } from '@/components/ui/Section';
-import { Container } from '@/components/ui/Container';
-import { Card } from '@/components/ui/Card';
-import { Grid } from '@/components/ui/Grid';
-import { Input } from '@/components/ui/Input';
-import { Checkbox } from '@/components/ui/Checkbox';
-import { Textarea } from '@/components/ui/Textarea';
-import { Button } from '@/components/ui/Button';
-import { LoadingState } from '@/components/ui/States';
-import { useToast } from '@/components/ui/Toast';
+import { PageHero } from '@/components/ui-legacy/PageHero';
+import { Section } from '@/components/ui-legacy/Section';
+import { Container } from '@/components/ui-legacy/Container';
+import { Card } from '@/components/ui-legacy/Card';
+import { Grid } from '@/components/ui-legacy/Grid';
+import { Input } from '@/components/ui-legacy/Input';
+import { Checkbox } from '@/components/ui-legacy/Checkbox';
+import { Textarea } from '@/components/ui-legacy/Textarea';
+import { Button } from '@/components/ui-legacy/Button';
+import { LoadingState } from '@/components/ui-legacy/States';
+import { useToast } from '@/components/ui-legacy/Toast';
 
 const SURVEY_INTERESTS = [
   'Small Groups', 'Volunteer Opportunities', 'Youth Programs', 'Community Outreach', 'Counseling/Support', 'Special Events',

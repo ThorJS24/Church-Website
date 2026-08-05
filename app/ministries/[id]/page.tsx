@@ -5,12 +5,12 @@ import { useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Mail, Phone, Clock, MapPin, Users, Quote, ArrowLeft } from 'lucide-react';
 import { getMinistryById, Ministry } from '@/lib/content';
-import { PageHero } from '@/components/ui/PageHero';
-import { Section } from '@/components/ui/Section';
-import { Card } from '@/components/ui/Card';
-import { Grid } from '@/components/ui/Grid';
-import { LinkButton } from '@/components/ui/Button';
-import { LoadingState, EmptyState } from '@/components/ui/States';
+import { PageHero } from '@/components/ui-legacy/PageHero';
+import { Section } from '@/components/ui-legacy/Section';
+import { Card } from '@/components/ui-legacy/Card';
+import { Grid } from '@/components/ui-legacy/Grid';
+import { LinkButton } from '@/components/ui-legacy/Button';
+import { LoadingState, EmptyState } from '@/components/ui-legacy/States';
 import Image from 'next/image';
 
 function parseVolunteerNeeds(raw?: string): string[] {

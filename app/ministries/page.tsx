@@ -5,13 +5,13 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Users, Baby, Music, BookOpen, Heart, Clock, MapPin, Search } from 'lucide-react';
 import { getPageContent, getMinistries, Ministry } from '@/lib/content';
-import { PageHero } from '@/components/ui/PageHero';
-import { Section } from '@/components/ui/Section';
-import { Card } from '@/components/ui/Card';
-import { Grid } from '@/components/ui/Grid';
-import { Input } from '@/components/ui/Input';
-import { Button, LinkButton } from '@/components/ui/Button';
-import { LoadingState, EmptyState } from '@/components/ui/States';
+import { PageHero } from '@/components/ui-legacy/PageHero';
+import { Section } from '@/components/ui-legacy/Section';
+import { Card } from '@/components/ui-legacy/Card';
+import { Grid } from '@/components/ui-legacy/Grid';
+import { Input } from '@/components/ui-legacy/Input';
+import { Button, LinkButton } from '@/components/ui-legacy/Button';
+import { LoadingState, EmptyState } from '@/components/ui-legacy/States';
 import { cn } from '@/lib/cn';
 
 interface MinistriesPage {

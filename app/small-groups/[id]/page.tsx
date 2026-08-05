@@ -5,14 +5,14 @@ import { useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Users, Clock, MapPin, Link as LinkIcon, ArrowLeft, CheckCircle2, Mail } from 'lucide-react';
 import { getSmallGroupById, SmallGroup } from '@/lib/content';
-import { PageHero } from '@/components/ui/PageHero';
-import { Section } from '@/components/ui/Section';
-import { Card } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
-import { Input } from '@/components/ui/Input';
-import { Textarea } from '@/components/ui/Textarea';
-import { Button, LinkButton } from '@/components/ui/Button';
-import { LoadingState, EmptyState } from '@/components/ui/States';
+import { PageHero } from '@/components/ui-legacy/PageHero';
+import { Section } from '@/components/ui-legacy/Section';
+import { Card } from '@/components/ui-legacy/Card';
+import { Badge } from '@/components/ui-legacy/Badge';
+import { Input } from '@/components/ui-legacy/Input';
+import { Textarea } from '@/components/ui-legacy/Textarea';
+import { Button, LinkButton } from '@/components/ui-legacy/Button';
+import { LoadingState, EmptyState } from '@/components/ui-legacy/States';
 
 function parseResourceLinks(raw?: string): { title: string; url: string }[] {
   return (raw ?? '')

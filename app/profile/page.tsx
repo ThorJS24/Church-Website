@@ -5,15 +5,15 @@ import { motion } from 'framer-motion';
 import { User, Mail, Phone, MapPin, Calendar, Edit, Save, X, LogOut } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { Container } from '@/components/ui/Container';
-import { Card } from '@/components/ui/Card';
-import { Grid } from '@/components/ui/Grid';
-import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
-import { Avatar } from '@/components/ui/Avatar';
-import { Badge } from '@/components/ui/Badge';
-import { LoadingState } from '@/components/ui/States';
-import { useToast } from '@/components/ui/Toast';
+import { Container } from '@/components/ui-legacy/Container';
+import { Card } from '@/components/ui-legacy/Card';
+import { Grid } from '@/components/ui-legacy/Grid';
+import { Input } from '@/components/ui-legacy/Input';
+import { Button } from '@/components/ui-legacy/Button';
+import { Avatar } from '@/components/ui-legacy/Avatar';
+import { Badge } from '@/components/ui-legacy/Badge';
+import { LoadingState } from '@/components/ui-legacy/States';
+import { useToast } from '@/components/ui-legacy/Toast';
 
 export default function ProfilePage() {
   const { user, isLoading, updateUser, logout } = useAuth();

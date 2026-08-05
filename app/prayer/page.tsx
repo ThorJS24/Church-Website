@@ -4,20 +4,20 @@ import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Heart, Users, Sparkles, HandHeart, CheckCircle2, Archive } from 'lucide-react';
 import { getIdToken } from '@/lib/firebase';
-import { PageHero } from '@/components/ui/PageHero';
-import { Section } from '@/components/ui/Section';
-import { Container } from '@/components/ui/Container';
-import { Card } from '@/components/ui/Card';
-import { Grid } from '@/components/ui/Grid';
-import { Badge } from '@/components/ui/Badge';
-import { Input } from '@/components/ui/Input';
-import { Select } from '@/components/ui/Select';
-import { Textarea } from '@/components/ui/Textarea';
-import { Checkbox } from '@/components/ui/Checkbox';
-import { Button } from '@/components/ui/Button';
-import { Modal } from '@/components/ui/Modal';
-import { LoadingState, EmptyState } from '@/components/ui/States';
-import { useToast } from '@/components/ui/Toast';
+import { PageHero } from '@/components/ui-legacy/PageHero';
+import { Section } from '@/components/ui-legacy/Section';
+import { Container } from '@/components/ui-legacy/Container';
+import { Card } from '@/components/ui-legacy/Card';
+import { Grid } from '@/components/ui-legacy/Grid';
+import { Badge } from '@/components/ui-legacy/Badge';
+import { Input } from '@/components/ui-legacy/Input';
+import { Select } from '@/components/ui-legacy/Select';
+import { Textarea } from '@/components/ui-legacy/Textarea';
+import { Checkbox } from '@/components/ui-legacy/Checkbox';
+import { Button } from '@/components/ui-legacy/Button';
+import { Modal } from '@/components/ui-legacy/Modal';
+import { LoadingState, EmptyState } from '@/components/ui-legacy/States';
+import { useToast } from '@/components/ui-legacy/Toast';
 import { cn } from '@/lib/cn';
 
 const CATEGORIES = ['all', 'healing', 'guidance', 'thanksgiving', 'family', 'work'];
@@ -245,7 +245,7 @@ export default function PrayerPage() {
             { icon: Users, value: prayerStats.people > 0 ? `${prayerStats.people}+` : '∞', label: 'People Praying' },
             { icon: Heart, value: prayerStats.prayers > 0 ? `${prayerStats.prayers}+` : '∞', label: 'Prayers Offered' },
           ].map((stat) => (
-            <div key={stat.label} className="rounded-2xl border border-white/20 bg-white/10 p-6 backdrop-blur-sm">
+            <div key={stat.label} className="rounded-2xl border border-white/20 bg-white/10 p-6 backdrop-blur-xs">
               <stat.icon className="mx-auto mb-4 h-10 w-10 opacity-90" />
               <div className="text-display-sm">{stat.value}</div>
               <div className="mt-1 text-body-sm">{stat.label}</div>

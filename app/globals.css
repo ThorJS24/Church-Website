@@ -1,88 +1,313 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
-/* ==========================================================================
-   Fonts
-   ========================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;500;600&display=swap')
+layer(utilities);
 
-@font-face {
-  font-family: 'Noto Sans Tamil';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url('https://fonts.gstatic.com/s/notosanstamil/v27/ieVc2YdFI3GCY6SyQy1KfStzYKZgzN1z4LKDbeZce-0429tBManUktuex7vGo70RqKDt_EvT.woff2') format('woff2');
-  unicode-range: U+0964-0965,U+0B82-0BFA,U+200C-200D,U+20B9,U+25CC;
+@plugin '@tailwindcss/forms';
+
+@custom-variant dark (&:is(.dark *));
+
+/* shadcn/ui component compatibility layer, see --color-primary etc below
+   inside @theme. shadcn-generated components (Dialog, DropdownMenu,
+   Select, etc) are authored against a fixed Tailwind vocabulary such as
+   bg-primary, bg-muted, and text-destructive. Those entries below are
+   NAME aliases onto this app real tokens, not new colors, deliberately
+   NOT a 1 to 1 rename, because shadcn own "accent" means a subtle neutral
+   hover wash (a DropdownMenuItem on hover for example), which differs
+   completely from this app --accent, the vivid brand color used for
+   primary buttons and links. Mapped by MEANING, shadcn to this app:
+     primary     brand action color   maps to  accent
+     accent      subtle hover wash    maps to  surface-hover
+     secondary   neutral button       maps to  surface
+     muted       subdued bg or text   maps to  surface plus foreground-muted
+     destructive danger               maps to  danger
+     card popover raised surfaces     maps to  surface plus background
+     ring        focus ring           maps to  accent, matching focus-visible below
+   chart and sidebar tokens intentionally omitted, unused until a phase
+   that actually needs them.
+
+   OPERATIONAL NOTE. a CSS variable rename alone cannot resolve the accent
+   collision. shadcn-generated tsx source files contain the literal
+   className bg-accent and text-accent-foreground, that is how their
+   menu item hover highlight is styled, and Tailwind only cares about the
+   class string matching a color name var. So after every shadcn add
+   command, grep the new files for dash accent and rename those specific
+   class references to dash shadcn-accent, the distinct utility defined
+   below, before the component is used anywhere. Do not let a generated
+   component keep the bare accent class, or its hover state renders as
+   brand navy instead of a subtle wash. Only menu item shaped primitives
+   use it, DropdownMenuItem, SelectItem, cmdk Command items, and so on,
+   most shadcn components do not reference accent at all. */
+
+@theme {
+  --font-sans:
+    var(--font-figtree), ui-sans-serif, system-ui, sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-serif:
+    var(--font-fraunces), ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+  --font-tamil:
+    var(--font-noto-sans-tamil), var(--font-figtree), ui-sans-serif, system-ui,
+    sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Noto Color Emoji';
+  --font-tamil-serif:
+    var(--font-noto-serif-tamil), var(--font-noto-sans-tamil), ui-serif,
+    Georgia, Cambria, 'Times New Roman', Times, serif;
+
+  --breakpoint-xs: 360px;
+  --breakpoint-3xl: 1792px;
+
+  --spacing-section-sm: var(--space-section-sm);
+  --spacing-section-md: var(--space-section-md);
+  --spacing-section-lg: var(--space-section-lg);
+
+  --min-height-touch: 44px;
+
+  --min-width-touch: 44px;
+
+  --leading-tamil: 1.75;
+
+  --background-image-gradient-radial: radial-gradient(var(--tw-gradient-stops));
+
+  --color-background: rgb(var(--background));
+
+  --color-surface: rgb(var(--surface));
+  --color-surface-hover: rgb(var(--surface-hover));
+  --color-surface-active: rgb(var(--surface-active));
+
+  --color-border: rgb(var(--border));
+  --color-border-strong: rgb(var(--border-strong));
+
+  --color-foreground: rgb(var(--foreground));
+  --color-foreground-muted: rgb(var(--foreground-muted));
+  --color-foreground-subtle: rgb(var(--foreground-subtle));
+
+  --color-accent: rgb(var(--accent));
+  --color-accent-hover: rgb(var(--accent-hover));
+  --color-accent-active: rgb(var(--accent-active));
+  --color-accent-foreground: rgb(var(--accent-foreground));
+  --color-accent-subtle: rgb(var(--accent-subtle));
+
+  --color-warm: rgb(var(--accent-warm));
+  --color-warm-foreground: rgb(var(--accent-warm-foreground));
+  --color-warm-subtle: rgb(var(--accent-warm-subtle));
+
+  --color-success: rgb(var(--success));
+  --color-success-subtle: rgb(var(--success-subtle));
+
+  --color-warning: rgb(var(--warning));
+  --color-warning-subtle: rgb(var(--warning-subtle));
+
+  --color-danger: rgb(var(--danger));
+  --color-danger-subtle: rgb(var(--danger-subtle));
+
+  --color-info: rgb(var(--info));
+  --color-info-subtle: rgb(var(--info-subtle));
+
+  /* shadcn compatibility layer — see the explanatory comment above @theme */
+  --color-primary: rgb(var(--accent));
+  --color-primary-foreground: rgb(var(--accent-foreground));
+  --color-secondary: rgb(var(--surface));
+  --color-secondary-foreground: rgb(var(--foreground));
+  --color-shadcn-accent: rgb(var(--surface-hover));
+  --color-shadcn-accent-foreground: rgb(var(--foreground));
+  --color-muted: rgb(var(--surface));
+  --color-muted-foreground: rgb(var(--foreground-muted));
+  --color-destructive: rgb(var(--danger));
+  --color-destructive-foreground: #fff;
+  --color-card: rgb(var(--surface));
+  --color-card-foreground: rgb(var(--foreground));
+  --color-popover: rgb(var(--background));
+  --color-popover-foreground: rgb(var(--foreground));
+  --color-input: rgb(var(--border));
+  --color-ring: rgb(var(--accent));
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-2xl: var(--radius-2xl);
+  --radius-full: var(--radius-full);
+
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-xl: var(--shadow-xl);
+
+  --transition-duration-fast: var(--duration-fast);
+  --transition-duration-base: var(--duration-base);
+  --transition-duration-slow: var(--duration-slow);
+  --transition-duration-slower: var(--duration-slower);
+
+  --ease-standard: var(--ease-standard);
+  --ease-decelerate: var(--ease-decelerate);
+  --ease-accelerate: var(--ease-accelerate);
+
+  --text-display-lg: 3.5rem;
+  --text-display-lg--line-height: 1.1;
+  --text-display-lg--letter-spacing: -0.02em;
+  --text-display-lg--font-weight: 600;
+  --text-display-md: 3rem;
+  --text-display-md--line-height: 1.12;
+  --text-display-md--letter-spacing: -0.02em;
+  --text-display-md--font-weight: 600;
+  --text-display-sm: 2.5rem;
+  --text-display-sm--line-height: 1.15;
+  --text-display-sm--letter-spacing: -0.015em;
+  --text-display-sm--font-weight: 600;
+  --text-headline-lg: 2rem;
+  --text-headline-lg--line-height: 1.2;
+  --text-headline-lg--letter-spacing: -0.01em;
+  --text-headline-lg--font-weight: 600;
+  --text-headline-md: 1.75rem;
+  --text-headline-md--line-height: 1.25;
+  --text-headline-md--letter-spacing: -0.01em;
+  --text-headline-md--font-weight: 600;
+  --text-headline-sm: 1.5rem;
+  --text-headline-sm--line-height: 1.3;
+  --text-headline-sm--letter-spacing: -0.005em;
+  --text-headline-sm--font-weight: 600;
+  --text-title-lg: 1.25rem;
+  --text-title-lg--line-height: 1.4;
+  --text-title-lg--font-weight: 600;
+  --text-title-md: 1.125rem;
+  --text-title-md--line-height: 1.4;
+  --text-title-md--font-weight: 600;
+  --text-title-sm: 1rem;
+  --text-title-sm--line-height: 1.5;
+  --text-title-sm--font-weight: 600;
+  --text-body-lg: 1.125rem;
+  --text-body-lg--line-height: 1.6;
+  --text-body-lg--font-weight: 400;
+  --text-body-md: 1rem;
+  --text-body-md--line-height: 1.6;
+  --text-body-md--font-weight: 400;
+  --text-body-sm: 0.875rem;
+  --text-body-sm--line-height: 1.55;
+  --text-body-sm--font-weight: 400;
+  --text-label: 0.875rem;
+  --text-label--line-height: 1.4;
+  --text-label--font-weight: 500;
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1.4;
+  --text-caption--font-weight: 500;
+  --text-caption--letter-spacing: 0.01em;
+
+  --animate-fade-in: fadeIn var(--duration-slow) var(--ease-decelerate);
+  --animate-slide-up: slideUp var(--duration-slow) var(--ease-decelerate);
+  --animate-scale-in: scaleIn var(--duration-base) var(--ease-decelerate);
+
+  @keyframes fadeIn {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+  @keyframes slideUp {
+    0% {
+      transform: translateY(8px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  @keyframes scaleIn {
+    0% {
+      transform: scale(0.97);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;500;600&family=Noto+Sans+Tamil:wght@400;500;600&display=swap');
+/* Tailwind v4 changed the unset border-color default to currentcolor —
+   not needed here, this app already sets its own global default below
+   (`* { border-color: rgb(var(--border)); }`), which is unlayered and so
+   always wins over anything in @layer base regardless of source order. */
 
 /* ==========================================================================
-   Design tokens
-   Consumed by tailwind.config.js — color tokens are raw "R G B" triplets so
-   Tailwind's `rgb(var(--x) / <alpha-value>)` pattern keeps opacity modifiers
-   (bg-surface/50, etc.) working. Shadow tokens are full CSS values.
+   Design tokens — Warm and traditional-modern direction.
+   Consumed by the @theme block above. Color tokens are raw R G B
+   triplets so the rgb(var(--x)) pattern, and v4 color-mix opacity output
+   such as bg-surface slash 50, keep working. Shadow tokens are full CSS
+   values.
    ========================================================================== */
 
 :root {
   color-scheme: light;
 
-  /* Neutral surfaces (zinc scale) */
-  --background: 255 255 255;
-  --surface: 250 250 250;
-  --surface-hover: 244 244 245;
-  --surface-active: 228 228 231;
-  --border: 228 228 231;
-  --border-strong: 212 212 216;
+  /* Warm neutral surfaces — ivory/espresso, not zinc. The single highest-
+     leverage fix for the "cold/corporate" complaint about the first
+     rebuild. */
+  --background: 251 247 240;
+  --surface: 246 240 229;
+  --surface-hover: 240 231 214;
+  --surface-active: 227 213 188;
+  --border: 231 221 202;
+  --border-strong: 209 191 159;
 
-  /* Foreground */
-  --foreground: 24 24 27;
-  --foreground-muted: 82 82 91;
-  --foreground-subtle: 113 113 122;
+  /* Foreground — warm espresso, not cool zinc-900 */
+  --foreground: 42 33 24;
+  --foreground-muted: 90 76 61;
+  --foreground-subtle: 130 113 94; /* ~4.6-4.7:1 against --background, verified */
 
-  /* Accent — single interactive accent (indigo) */
-  --accent: 79 70 229;
-  --accent-hover: 67 56 202;
-  --accent-active: 55 48 163;
+  /* Primary — deep navy, admin-overridable via ThemeAccentInjector,
+     siteSettings themeAccentColor. Hover, active, subtle, and foreground
+     were generated by actually running lib colorTheme deriveAccentShades
+     against this hex rather than hand-picked, per plan. Its light-mode
+     subtle shade lands as a mid-tone wash, not a pale pastel, because
+     this base sits much darker at roughly 23 percent lightness than the
+     old indigo at roughly 59 percent. That reads as jewel-tone and
+     traditional here, not as a mistake. */
+  --accent: 29 53 87; /* #1D3557 */
+  --accent-hover: 16 30 49;
+  --accent-active: 6 11 18;
   --accent-foreground: 255 255 255;
-  --accent-subtle: 238 242 255;
+  --accent-subtle: 113 152 208;
 
-  /* Warm accent — sparse use only (verse-of-the-day, prayer CTA).
-     amber-800, not amber-600: amber-600 with white foreground text only
-     hits 3.18:1 contrast (fails WCAG AA's 4.5:1). amber-700 clears 4.5:1
-     against a solid amber-700 background (~5:1) but several call sites
-     layer a translucent bg-white/10 "glass card" or opacity-90 text on
-     top, which lightens the effective background and drops that back
-     under 4.5:1 (measured 4.21:1). amber-800 keeps ~5.7-6:1 even through
-     those overlays while still reading as warm/amber. */
-  --accent-warm: 146 64 14;
+  /* Secondary — fixed warm gold, never admin-overridden. Deliberately a
+     deep antique gold rather than bright yellow-amber: the first rebuild
+     amber needed a late fix, amber-600 to amber-800, because white text
+     on a bright gold failed WCAG AA, especially once layered under a
+     translucent glass-card background. Started dark enough here to skip
+     rediscovering that. */
+  --accent-warm: 138 94 24; /* #8A5E18 */
   --accent-warm-foreground: 255 255 255;
-  --accent-warm-subtle: 255 251 235;
+  --accent-warm-subtle: 250 240 217;
 
-  /* Semantic */
-  --success: 22 163 74;
-  --success-subtle: 240 253 244;
-  --warning: 217 119 6;
-  --warning-subtle: 255 251 235;
-  --danger: 220 38 38;
-  --danger-subtle: 254 242 242;
-  --info: 37 99 235;
-  --info-subtle: 239 246 255;
+  /* Semantic — distinct hues from both brand colors, so a draft badge
+     never visually reads as brand gold. */
+  --success: 47 107 58; /* deep forest green, not stock green-600 */
+  --success-subtle: 228 239 227;
+  --warning: 194 84 11; /* burnt orange, distinct from the accent-warm yellow-leaning gold */
+  --warning-subtle: 247 232 217;
+  --danger: 155 34 38; /* deep burgundy, not stock red-600 */
+  --danger-subtle: 247 227 226;
+  --info: 46 111 149; /* blue-teal, distinct enough from navy --accent */
+  --info-subtle: 225 235 240;
 
-  /* Radius */
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-  --radius-2xl: 24px;
+  /* Radius — nudged rounder and friendlier than the first rebuild tighter scale */
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-2xl: 28px;
   --radius-full: 9999px;
 
-  /* Shadow / elevation */
-  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.04);
-  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.06);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.06);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.09), 0 8px 10px -6px rgb(0 0 0 / 0.06);
+  /* Shadow / elevation — warmed from pure black to a warm dark brown tint */
+  --shadow-xs: 0 1px 2px 0 rgb(40 28 16 / 0.05);
+  --shadow-sm: 0 1px 3px 0 rgb(40 28 16 / 0.07), 0 1px 2px -1px rgb(40 28 16 / 0.07);
+  --shadow-md: 0 4px 6px -1px rgb(40 28 16 / 0.08), 0 2px 4px -2px rgb(40 28 16 / 0.07);
+  --shadow-lg: 0 10px 15px -3px rgb(40 28 16 / 0.09), 0 4px 6px -4px rgb(40 28 16 / 0.07);
+  --shadow-xl: 0 20px 25px -5px rgb(40 28 16 / 0.1), 0 8px 10px -6px rgb(40 28 16 / 0.07);
 
   /* Motion */
   --duration-fast: 120ms;
@@ -102,35 +327,44 @@
 .dark {
   color-scheme: dark;
 
-  --background: 9 9 11;
-  --surface: 24 24 27;
-  --surface-hover: 39 39 42;
-  --surface-active: 63 63 70;
-  --border: 39 39 42;
-  --border-strong: 63 63 70;
+  /* Warm near-black brown, not blue-black */
+  --background: 23 19 15;
+  --surface: 34 28 22;
+  --surface-hover: 46 38 30;
+  --surface-active: 64 52 40;
+  --border: 46 38 30;
+  --border-strong: 74 61 47;
 
-  --foreground: 250 250 250;
-  --foreground-muted: 161 161 170;
-  --foreground-subtle: 113 113 122;
+  --foreground: 245 239 229;
+  --foreground-muted: 191 175 154;
+  --foreground-subtle: 150 133 112;
 
-  --accent: 129 140 248;
-  --accent-hover: 165 180 252;
-  --accent-active: 199 210 254;
-  --accent-foreground: 24 24 27;
-  --accent-subtle: 30 27 75;
+  /* Primary — a brightened steel-blue variant of the light-mode navy,
+     hex 477ac2, same 215 degree hue, lightness raised from roughly 23
+     percent to roughly 52 percent for dark-background legibility, run
+     through deriveAccentShades for the hover, active, subtle, and
+     foreground set. The base navy itself does not change between themes
+     in the shared derivation formula, so a separate brighter dark-mode
+     base was chosen by hand first, matching how the original indigo was
+     hand-brightened for dark mode too. */
+  --accent: 71 122 194;
+  --accent-hover: 117 155 209;
+  --accent-active: 148 177 219;
+  --accent-foreground: 255 255 255;
+  --accent-subtle: 22 40 65;
 
-  --accent-warm: 245 158 11;
-  --accent-warm-foreground: 24 24 27;
-  --accent-warm-subtle: 69 44 7;
+  --accent-warm: 217 169 74; /* #D9A94A */
+  --accent-warm-foreground: 26 22 16; /* #1A1610 */
+  --accent-warm-subtle: 58 45 20;
 
-  --success: 34 197 94;
-  --success-subtle: 5 46 22;
-  --warning: 245 158 11;
-  --warning-subtle: 69 44 7;
-  --danger: 239 68 68;
-  --danger-subtle: 69 10 10;
-  --info: 59 130 246;
-  --info-subtle: 23 37 84;
+  --success: 79 157 94;
+  --success-subtle: 20 38 26;
+  --warning: 232 130 61;
+  --warning-subtle: 58 39 18;
+  --danger: 214 85 91;
+  --danger-subtle: 58 22 20;
+  --info: 79 159 199;
+  --info-subtle: 20 38 49;
 
   /* Shadows barely read on dark backgrounds — lean on a hairline border glow instead */
   --shadow-xs: 0 0 0 1px rgb(255 255 255 / 0.04);
@@ -161,7 +395,6 @@ body {
 body {
   color: rgb(var(--foreground));
   background: rgb(var(--background));
-  font-family: var(--font-inter), 'Noto Sans Tamil', sans-serif;
   transition: background-color var(--duration-base) var(--ease-standard),
     color var(--duration-base) var(--ease-standard);
 }
@@ -190,7 +423,10 @@ video {
 
 .tamil-text,
 .font-tamil {
-  font-family: 'Noto Sans Tamil', sans-serif;
+  /* next/font/google generates a hashed actual font-family name, not the
+     literal string "Noto Sans Tamil" — go through its CSS variable
+     (populated on <html>, see app/layout.tsx) instead. */
+  font-family: var(--font-noto-sans-tamil), sans-serif;
   line-height: 1.75;
 }
 

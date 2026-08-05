@@ -8,14 +8,14 @@ import { EVENT_CATEGORIES, getEventCategory, expandServicesToEvents } from '@/li
 import Image from 'next/image';
 import EventModal from '@/components/EventModal';
 import InteractiveCalendar from '@/components/InteractiveCalendar';
-import { PageHero } from '@/components/ui/PageHero';
-import { Section } from '@/components/ui/Section';
-import { Card } from '@/components/ui/Card';
-import { Grid } from '@/components/ui/Grid';
-import { Input } from '@/components/ui/Input';
-import { Badge } from '@/components/ui/Badge';
-import { Button, LinkButton } from '@/components/ui/Button';
-import { LoadingState, EmptyState } from '@/components/ui/States';
+import { PageHero } from '@/components/ui-legacy/PageHero';
+import { Section } from '@/components/ui-legacy/Section';
+import { Card } from '@/components/ui-legacy/Card';
+import { Grid } from '@/components/ui-legacy/Grid';
+import { Input } from '@/components/ui-legacy/Input';
+import { Badge } from '@/components/ui-legacy/Badge';
+import { Button, LinkButton } from '@/components/ui-legacy/Button';
+import { LoadingState, EmptyState } from '@/components/ui-legacy/States';
 import { cn } from '@/lib/cn';
 
 const extractYouTubeId = (url: string): string | null => {
@@ -128,7 +128,7 @@ export default function EventsPage() {
                   transition={{ delay: Math.min(index * 0.04, 0.4), duration: 0.4 }}
                 >
                   <Card padding="none" className="h-full overflow-hidden">
-                    <div className="relative aspect-[16/10] bg-surface-active">
+                    <div className="relative aspect-16/10 bg-surface-active">
                       <Image
                         src={event.imageUrl || getYouTubeThumbnail(event.youtubeUrl || '') || '/images/default-event.jpg'}
                         alt={event.title}

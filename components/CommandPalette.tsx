@@ -174,13 +174,13 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
   return createPortal(
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[60] flex items-start justify-center px-4 pt-[12vh]">
+        <div className="fixed inset-0 z-60 flex items-start justify-center px-4 pt-[12vh]">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="absolute inset-0 bg-zinc-950/50 backdrop-blur-sm"
+            className="absolute inset-0 bg-zinc-950/50 backdrop-blur-xs"
             onClick={onClose}
             aria-hidden="true"
           />
@@ -208,7 +208,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Search sermons, events, blog, forms…"
-                className="h-14 w-full bg-transparent text-body-md text-foreground placeholder:text-foreground-subtle focus:outline-none"
+                className="h-14 w-full bg-transparent text-body-md text-foreground placeholder:text-foreground-subtle focus:outline-hidden"
                 role="combobox"
                 aria-expanded={items.length > 0}
                 aria-controls="command-palette-list"

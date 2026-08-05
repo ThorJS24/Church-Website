@@ -5,11 +5,11 @@ import Papa from 'papaparse';
 import { ScrollText, Download, ChevronDown, ChevronRight, History, Bookmark, X } from 'lucide-react';
 import { adminFetch } from '@/lib/adminApi';
 import { LoadingState, EmptyState, ErrorState } from '@/components/admin/States';
-import { Select } from '@/components/ui/Select';
-import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
-import { IconButton } from '@/components/ui/IconButton';
-import { Modal } from '@/components/ui/Modal';
+import { Select } from '@/components/ui-legacy/Select';
+import { Input } from '@/components/ui-legacy/Input';
+import { Button } from '@/components/ui-legacy/Button';
+import { IconButton } from '@/components/ui-legacy/IconButton';
+import { Modal } from '@/components/ui-legacy/Modal';
 import { cn } from '@/lib/cn';
 
 interface AuditEntry {

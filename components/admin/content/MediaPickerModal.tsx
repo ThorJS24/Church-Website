@@ -6,10 +6,10 @@ import { Search, Upload, Image as ImageIcon, FileText } from 'lucide-react';
 import { adminFetch } from '@/lib/adminApi';
 import { getIdToken } from '@/lib/firebase';
 import { LoadingState, EmptyState } from '@/components/admin/States';
-import { Modal } from '@/components/ui/Modal';
-import { Input } from '@/components/ui/Input';
-import { buttonClasses } from '@/components/ui/Button';
-import { useToast } from '@/components/ui/Toast';
+import { Modal } from '@/components/ui-legacy/Modal';
+import { Input } from '@/components/ui-legacy/Input';
+import { buttonClasses } from '@/components/ui-legacy/Button';
+import { useToast } from '@/components/ui-legacy/Toast';
 
 interface MediaItem {
   id: string;
@@ -108,7 +108,7 @@ export default function MediaPickerModal({ isOpen, onSelect, onClose, accept = '
               <button
                 key={item.id}
                 onClick={() => { onSelect(item.url); onClose(); }}
-                className="relative aspect-square overflow-hidden rounded-lg border-2 border-transparent bg-surface-active transition-colors hover:border-accent focus:border-accent focus:outline-none"
+                className="relative aspect-square overflow-hidden rounded-lg border-2 border-transparent bg-surface-active transition-colors hover:border-accent focus:border-accent focus:outline-hidden"
                 title={item.fileName}
               >
                 {isImage ? (

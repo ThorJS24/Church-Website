@@ -6,14 +6,14 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Search, BookOpen, Rss } from 'lucide-react';
 import { getBlogPosts, BlogPost } from '@/lib/content';
-import { PageHero } from '@/components/ui/PageHero';
-import { Section } from '@/components/ui/Section';
-import { Card } from '@/components/ui/Card';
-import { Grid } from '@/components/ui/Grid';
-import { Input } from '@/components/ui/Input';
-import { Select } from '@/components/ui/Select';
-import { Badge } from '@/components/ui/Badge';
-import { LoadingState, EmptyState } from '@/components/ui/States';
+import { PageHero } from '@/components/ui-legacy/PageHero';
+import { Section } from '@/components/ui-legacy/Section';
+import { Card } from '@/components/ui-legacy/Card';
+import { Grid } from '@/components/ui-legacy/Grid';
+import { Input } from '@/components/ui-legacy/Input';
+import { Select } from '@/components/ui-legacy/Select';
+import { Badge } from '@/components/ui-legacy/Badge';
+import { LoadingState, EmptyState } from '@/components/ui-legacy/States';
 
 export default function BlogPage() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -117,7 +117,7 @@ export default function BlogPage() {
                 >
                   <Card variant="interactive" padding="none" className="h-full overflow-hidden">
                     {post.imageUrl && (
-                      <Link href={`/blog/${post.slug}`} className="relative block aspect-[16/10] bg-surface-active">
+                      <Link href={`/blog/${post.slug}`} className="relative block aspect-16/10 bg-surface-active">
                         <Image src={post.imageUrl} alt={post.title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 33vw" />
                       </Link>
                     )}

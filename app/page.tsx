@@ -14,12 +14,12 @@ import {
   Announcement, SiteSettings, ServiceTime, Sermon, EventItem, BlogPost, GalleryPhoto, Livestream, Testimonial,
 } from '@/lib/content';
 import { useAuth } from '@/contexts/AuthContext';
-import { Section } from '@/components/ui/Section';
-import { Container } from '@/components/ui/Container';
-import { Grid } from '@/components/ui/Grid';
-import { Card } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
-import { Button, LinkButton } from '@/components/ui/Button';
+import { Section } from '@/components/ui-legacy/Section';
+import { Container } from '@/components/ui-legacy/Container';
+import { Grid } from '@/components/ui-legacy/Grid';
+import { Card } from '@/components/ui-legacy/Card';
+import { Badge } from '@/components/ui-legacy/Badge';
+import { Button, LinkButton } from '@/components/ui-legacy/Button';
 import DynamicLiveStream from '@/components/DynamicLiveStream';
 import BibleVerse from '@/components/BibleVerse';
 import NewsletterSignup from '@/components/NewsletterSignup';
@@ -115,7 +115,7 @@ export default function Home() {
           className="absolute inset-0 opacity-40"
           style={{ backgroundImage: 'url(/images/hero-bg.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/60 via-zinc-950/70 to-zinc-950" />
+        <div className="absolute inset-0 bg-linear-to-b from-zinc-950/60 via-zinc-950/70 to-zinc-950" />
 
         <Container className="relative z-10 text-center">
           {isLive && (
@@ -276,7 +276,7 @@ export default function Home() {
               <motion.div key={event.id} {...fadeUp(index * 0.05)}>
                 <Link href={`/events/${event.id}`} className="block h-full">
                   <Card variant="interactive" padding="none" className="h-full overflow-hidden">
-                    <div className="relative aspect-[16/10] bg-surface-active">
+                    <div className="relative aspect-16/10 bg-surface-active">
                       {event.imageUrl ? (
                         <Image src={event.imageUrl} alt={event.title} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover" />
                       ) : (
@@ -344,7 +344,7 @@ export default function Home() {
               <motion.div key={post.id} {...fadeUp(index * 0.05)}>
                 <Link href={`/blog/${post.slug}`} className="block h-full">
                   <Card variant="interactive" padding="none" className="h-full overflow-hidden">
-                    <div className="relative aspect-[16/10] bg-surface-active">
+                    <div className="relative aspect-16/10 bg-surface-active">
                       {post.imageUrl ? (
                         <Image src={post.imageUrl} alt={post.title} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover" />
                       ) : (

@@ -12,10 +12,10 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/cn';
-import { IconButton } from '@/components/ui/IconButton';
-import { Button, LinkButton } from '@/components/ui/Button';
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, DropdownSeparator } from '@/components/ui/Dropdown';
-import { Avatar } from '@/components/ui/Avatar';
+import { IconButton } from '@/components/ui-legacy/IconButton';
+import { Button, LinkButton } from '@/components/ui-legacy/Button';
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, DropdownSeparator } from '@/components/ui-legacy/Dropdown';
+import { Avatar } from '@/components/ui-legacy/Avatar';
 import CommandPalette from '@/components/CommandPalette';
 import EnhancedLoginModal from './EnhancedLoginModal';
 

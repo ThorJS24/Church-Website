@@ -8,16 +8,16 @@ import { LoadingState, EmptyState, ErrorState } from '@/components/admin/States'
 import ConfirmModal from '@/components/admin/ConfirmModal';
 import MediaPickerModal from '@/components/admin/content/MediaPickerModal';
 import { FieldSchema } from '@/types/contentType';
-import { DataTable, type DataTableColumn } from '@/components/ui/DataTable';
-import { Modal } from '@/components/ui/Modal';
-import { Button, buttonClasses } from '@/components/ui/Button';
-import { IconButton } from '@/components/ui/IconButton';
-import { Input } from '@/components/ui/Input';
-import { Textarea } from '@/components/ui/Textarea';
-import { Checkbox } from '@/components/ui/Checkbox';
-import { Select } from '@/components/ui/Select';
-import { Badge } from '@/components/ui/Badge';
-import { useToast } from '@/components/ui/Toast';
+import { DataTable, type DataTableColumn } from '@/components/ui-legacy/DataTable';
+import { Modal } from '@/components/ui-legacy/Modal';
+import { Button, buttonClasses } from '@/components/ui-legacy/Button';
+import { IconButton } from '@/components/ui-legacy/IconButton';
+import { Input } from '@/components/ui-legacy/Input';
+import { Textarea } from '@/components/ui-legacy/Textarea';
+import { Checkbox } from '@/components/ui-legacy/Checkbox';
+import { Select } from '@/components/ui-legacy/Select';
+import { Badge } from '@/components/ui-legacy/Badge';
+import { useToast } from '@/components/ui-legacy/Toast';
 
 export type { FieldSchema } from '@/types/contentType';
 

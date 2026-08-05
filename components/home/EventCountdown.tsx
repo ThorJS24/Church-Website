@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { CalendarClock } from 'lucide-react';
 import { EventItem } from '@/lib/content';
-import { Section } from '@/components/ui/Section';
-import { Container } from '@/components/ui/Container';
-import { LinkButton } from '@/components/ui/Button';
+import { Section } from '@/components/ui-legacy/Section';
+import { Container } from '@/components/ui-legacy/Container';
+import { LinkButton } from '@/components/ui-legacy/Button';
 
 function timeParts(ms: number) {
   const clamped = Math.max(0, ms);
