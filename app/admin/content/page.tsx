@@ -75,11 +75,17 @@ const SMALL_GROUP_FIELDS: FieldSchema[] = [
   { key: 'name', label: 'Group Name', type: 'text', required: true },
   { key: 'description', label: 'Description', type: 'textarea' },
   { key: 'leaderName', label: 'Leader', type: 'text' },
-  { key: 'meetingSchedule', label: 'Meeting Schedule', type: 'text' },
+  { key: 'leaderEmail', label: 'Leader Email', type: 'email' },
+  { key: 'meetingSchedule', label: 'Meeting Schedule (e.g. "Wednesdays at 7pm")', type: 'text' },
+  { key: 'dayOfWeek', label: 'Day of Week (Sunday–Saturday)', type: 'text' },
+  { key: 'lifeStage', label: 'Life Stage (e.g. Young Adults, Families, Seniors)', type: 'text' },
   { key: 'location', label: 'Location', type: 'text' },
   { key: 'capacity', label: 'Capacity', type: 'number' },
+  { key: 'currentMembers', label: 'Current Members', type: 'number' },
   { key: 'category', label: 'Category', type: 'text' },
   { key: 'imageUrl', label: 'Image', type: 'url', accept: 'image' },
+  { key: 'hideFromDirectory', label: 'Hide from Public Directory (still reachable by direct link)', type: 'checkbox' },
+  { key: 'resourceLinks', label: 'Group Resources (one per line: Title|URL)', type: 'textarea' },
 ];
 
 const TESTIMONIAL_FIELDS: FieldSchema[] = [

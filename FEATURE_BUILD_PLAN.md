@@ -159,12 +159,12 @@ type-check/lint/a quick manual pass, commit, check it off, move to the next.
 - [x] Testimonial spotlight per ministry
 - [x] Team photo roster — avatar grid on the new ministry detail page
 
-### Batch P9 — Small Groups
-- [ ] Finder by location/day/stage
-- [ ] Capacity indicator
-- [ ] Join-request workflow
-- [ ] Group directory (opt-in)
-- [ ] Group resource sharing
+### Batch P9 — Small Groups ✅
+- [x] Finder by location/day/stage
+- [x] Capacity indicator — progress bar + spots-left/full badges
+- [x] Join-request workflow — capacity-aware form (waitlists automatically when full), new small-group detail page
+- [x] Group directory (opt-in) — `hideFromDirectory` flag for word-of-mouth groups (still reachable by direct link)
+- [x] Group resource sharing — resource links list on the detail page
 
 ### Batch P10 — Testimonials
 - [ ] Category filter

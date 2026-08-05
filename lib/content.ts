@@ -388,16 +388,33 @@ export interface SmallGroup extends Publishable {
   name: string;
   description?: string;
   leaderName?: string;
+  leaderEmail?: string;
   meetingSchedule?: string;
+  dayOfWeek?: string;
+  lifeStage?: string;
   location?: string;
   capacity?: number;
+  currentMembers?: number;
   category?: string;
   imageUrl?: string;
+  /** For word-of-mouth groups (e.g. recovery, support) that should stay
+   * reachable by direct link but not appear in the public /small-groups
+   * browse grid. */
+  hideFromDirectory?: boolean;
+  /** One resource per line: "Title|URL". */
+  resourceLinks?: string;
 }
 
 export async function getSmallGroups(): Promise<SmallGroup[]> {
   const snap = await getDocs(collection(db, 'smallGroups'));
-  return snap.docs.map(d => withId<SmallGroup>(d)).filter(isEffectivelyPublished);
+  return snap.docs.map(d => withId<SmallGroup>(d)).filter(isEffectivelyPublished).filter(g => !g.hideFromDirectory);
+}
+
+export async function getSmallGroupById(id: string): Promise<SmallGroup | null> {
+  const snap = await getDoc(doc(db, 'smallGroups', id));
+  if (!snap.exists()) return null;
+  const group = withId<SmallGroup>(snap);
+  return isEffectivelyPublished(group) ? group : null;
 }
 
 export interface Testimonial {
