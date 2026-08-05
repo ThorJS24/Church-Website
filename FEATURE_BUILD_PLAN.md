@@ -84,13 +84,13 @@ type-check/lint/a quick manual pass, commit, check it off, move to the next.
 - [x] Side-by-side before/after for edits
 - [x] Queue SLA display (time pending)
 
-### Batch A9 — Audit Log
-- [ ] Advanced filter builder (actor + action + date range + target combined)
-- [ ] Saved filter presets
-- [ ] Grouped bulk-op view
-- [ ] Target history view (all changes to one record)
-- [ ] CSV export
-- [ ] Free-text search across payloads
+### Batch A9 — Audit Log ✅
+- [x] Advanced filter builder (actor + action + date range + target combined)
+- [x] Saved filter presets
+- [x] Grouped bulk-op view
+- [x] Target history view (all changes to one record)
+- [x] CSV export
+- [x] Free-text search across payloads
 
 ### Batch A10 — Settings
 - [ ] Theme customizer (accent color override)
