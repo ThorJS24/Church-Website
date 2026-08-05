@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, MapPin, Clock, ArrowLeft, Eye, X, ChevronLeft, ChevronRight, Camera, Upload, Search } from 'lucide-react';
 import { getEventGalleries, EventGallery, GalleryPhoto } from '@/lib/content';
@@ -104,7 +105,8 @@ function PhotoLightbox({
   );
 }
 
-export default function GalleryPage() {
+function GalleryPageInner() {
+  const searchParams = useSearchParams();
   const [events, setEvents] = useState<EventGallery[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<EventGallery | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
@@ -123,9 +125,20 @@ export default function GalleryPage() {
 
   useEffect(() => {
     getEventGalleries()
-      .then(setEvents)
+      .then((data) => {
+        setEvents(data);
+        // Deep link from an event's own page ("Photos from this event")
+        // lands here with ?event=<id> — auto-open that event's gallery
+        // instead of making the visitor find it again in the grid.
+        const eventId = searchParams.get('event');
+        if (eventId) {
+          const match = data.find((e) => e.id === eventId);
+          if (match) setSelectedEvent(match);
+        }
+      })
       .catch((error) => console.error('Error fetching event galleries:', error))
       .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -365,5 +378,13 @@ export default function GalleryPage() {
         </form>
       </Modal>
     </div>
+  );
+}
+
+export default function GalleryPage() {
+  return (
+    <Suspense fallback={<LoadingState label="Loading gallery..." />}>
+      <GalleryPageInner />
+    </Suspense>
   );
 }

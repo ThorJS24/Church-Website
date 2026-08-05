@@ -1,17 +1,19 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Search, CalendarDays, Tag as TagIcon } from 'lucide-react';
+import { Search, CalendarDays, Tag as TagIcon, Users2 } from 'lucide-react';
 import GenericContentTab, { FieldSchema } from '@/components/admin/content/GenericContentTab';
 import GalleryTab from '@/components/admin/content/GalleryTab';
 import SiteSettingsTab from '@/components/admin/content/SiteSettingsTab';
 import ContentTypesTab from '@/components/admin/content/ContentTypesTab';
 import ContentCalendarTab from '@/components/admin/content/ContentCalendarTab';
 import TagsTab from '@/components/admin/content/TagsTab';
+import EventRegistrationsModal from '@/components/admin/content/EventRegistrationsModal';
 import { adminFetch } from '@/lib/adminApi';
 import { ContentTypeDefinition } from '@/types/contentType';
 import { Tabs, TabList, Tab, TabPanel } from '@/components/ui/Tabs';
 import { Input } from '@/components/ui/Input';
+import { IconButton } from '@/components/ui/IconButton';
 
 const SERMON_FIELDS: FieldSchema[] = [
   { key: 'title', label: 'Title', type: 'text', required: true },
@@ -164,6 +166,7 @@ export default function ContentEditorPage() {
   const [tab, setTab] = useState<TabKey>('sermons');
   const [customTypes, setCustomTypes] = useState<ContentTypeDefinition[]>([]);
   const [autoOpenId, setAutoOpenId] = useState<string | null>(null);
+  const [registrationsTarget, setRegistrationsTarget] = useState<{ id: string; title: string } | null>(null);
 
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -288,7 +291,19 @@ export default function ContentEditorPage() {
           <GenericContentTab type="speakers" label="Speakers" fields={SPEAKER_FIELDS} columns={['name']} autoOpenId={autoOpenId} onAutoOpened={() => setAutoOpenId(null)} />
         </TabPanel>
         <TabPanel value="events">
-          <GenericContentTab type="events" label="Events" fields={EVENT_FIELDS} columns={['title', 'startDate', 'location']} autoOpenId={autoOpenId} onAutoOpened={() => setAutoOpenId(null)} />
+          <GenericContentTab
+            type="events"
+            label="Events"
+            fields={EVENT_FIELDS}
+            columns={['title', 'startDate', 'location']}
+            autoOpenId={autoOpenId}
+            onAutoOpened={() => setAutoOpenId(null)}
+            extraRowAction={(item) => (
+              <IconButton label="Registrations" size="sm" onClick={() => setRegistrationsTarget({ id: item.id, title: item.title })}>
+                <Users2 className="h-3.5 w-3.5" />
+              </IconButton>
+            )}
+          />
         </TabPanel>
         <TabPanel value="gallery"><GalleryTab /></TabPanel>
         <TabPanel value="pastors">
@@ -345,6 +360,13 @@ export default function ContentEditorPage() {
           </TabPanel>
         )}
       </Tabs>
+
+      <EventRegistrationsModal
+        eventId={registrationsTarget?.id ?? null}
+        eventTitle={registrationsTarget?.title}
+        isOpen={!!registrationsTarget}
+        onClose={() => setRegistrationsTarget(null)}
+      />
     </div>
   );
 }

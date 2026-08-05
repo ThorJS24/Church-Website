@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, type ReactNode } from 'react';
 import Papa from 'papaparse';
 import { Plus, Pencil, Trash2, FileText, History, Image as ImageIcon, Download, Upload, Copy } from 'lucide-react';
 import { adminFetch } from '@/lib/adminApi';
@@ -35,6 +35,10 @@ interface GenericContentTabProps {
    * search and the content calendar to deep-link into a specific tab+item. */
   autoOpenId?: string | null;
   onAutoOpened?: () => void;
+  /** Extra per-row action rendered alongside History/Duplicate/Edit/Delete —
+   * an escape hatch for type-specific actions (e.g. Events' registrations
+   * view) without forking this component per content type. */
+  extraRowAction?: (item: Item) => ReactNode;
 }
 
 type Item = Record<string, any> & { id: string };
@@ -67,6 +71,7 @@ export default function GenericContentTab({
   supportsVersions = true,
   autoOpenId = null,
   onAutoOpened,
+  extraRowAction,
 }: GenericContentTabProps) {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
@@ -355,6 +360,7 @@ export default function GenericContentTab({
           )}
           rowActions={(item) => (
             <div className="flex items-center justify-end gap-1">
+              {extraRowAction?.(item)}
               {supportsVersions && (
                 <IconButton label="History" size="sm" onClick={() => openHistory(item)}>
                   <History className="h-3.5 w-3.5" />

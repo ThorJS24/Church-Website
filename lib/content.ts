@@ -130,6 +130,7 @@ export interface EventItem extends Publishable {
   isPublic?: boolean;
   showInGallery?: boolean;
   youtubeUrl?: string;
+  cancelled?: boolean;
 }
 
 export async function getEvents(): Promise<EventItem[]> {

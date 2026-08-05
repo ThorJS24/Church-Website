@@ -131,12 +131,12 @@ type-check/lint/a quick manual pass, commit, check it off, move to the next.
 - [x] Listen-later queue (member feature)
 - [x] Print-friendly transcript view
 
-### Batch P5 — Events
-- [ ] RSVP with headcount
-- [ ] Waitlist at capacity
-- [ ] Personal iCal export (filtered)
-- [ ] Cancellation broadcast to registrants
-- [ ] Post-event photo gallery auto-link
+### Batch P5 — Events ✅
+- [x] RSVP with headcount
+- [x] Waitlist at capacity
+- [x] Personal iCal export (filtered)
+- [x] Cancellation broadcast to registrants
+- [x] Post-event photo gallery auto-link
 
 ### Batch P6 — Blog
 - [ ] Author profile pages

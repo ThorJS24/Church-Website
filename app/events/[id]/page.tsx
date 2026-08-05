@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
-import { Calendar, Clock, MapPin } from 'lucide-react';
-import { getEventById, getEvents } from '@/lib/content';
+import Link from 'next/link';
+import { Calendar, Clock, MapPin, Camera } from 'lucide-react';
+import { getEventById, getEvents, getEventGalleries } from '@/lib/content';
 import { getEventCategory } from '@/lib/eventCategories';
 import { Container } from '@/components/ui/Container';
 import { Section } from '@/components/ui/Section';
@@ -12,6 +13,8 @@ import { Card } from '@/components/ui/Card';
 import { LinkButton } from '@/components/ui/Button';
 import { ShareButton } from '@/components/ShareButton';
 import { EventCountdown } from '@/components/EventCountdown';
+import { RsvpForm } from '@/components/events/RsvpForm';
+import { AlertTriangle } from 'lucide-react';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -50,6 +53,10 @@ export default async function EventDetailPage({ params }: Props) {
     .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
     .slice(0, 3);
 
+  const isPastEvent = new Date(event.startDate).getTime() < Date.now();
+  const eventGalleries = isPastEvent ? await getEventGalleries() : [];
+  const eventPhotos = eventGalleries.find((g) => g.id === event.id)?.photos ?? [];
+
   const category = event.category ? getEventCategory(event.category) : null;
   const mapQuery = encodeURIComponent(event.address || event.location);
 
@@ -79,6 +86,12 @@ export default async function EventDetailPage({ params }: Props) {
         <Container size="md">
           <Breadcrumbs items={[{ label: 'Events', href: '/events' }, { label: event.title }]} className="mb-6" />
 
+          {event.cancelled && (
+            <div className="mb-4 flex items-center gap-2 rounded-lg border border-danger/30 bg-danger-subtle p-3 text-body-sm text-danger">
+              <AlertTriangle className="h-4 w-4 shrink-0" /> This event has been cancelled.
+            </div>
+          )}
+
           {category && <Badge variant={category.badgeVariant} className="mb-3">{category.label}</Badge>}
           <h1 className="text-display-sm text-foreground">{event.title}</h1>
           <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-body-sm text-foreground-muted">
@@ -102,7 +115,7 @@ export default async function EventDetailPage({ params }: Props) {
               )}
               <div className="mt-6 flex flex-wrap gap-3">
                 <ShareButton title={event.title} />
-                {event.registrationRequired && event.registrationUrl && (
+                {!event.cancelled && event.registrationRequired && event.registrationUrl && (
                   <LinkButton href={event.registrationUrl} target="_blank" rel="noopener noreferrer">
                     Register
                   </LinkButton>
@@ -110,7 +123,10 @@ export default async function EventDetailPage({ params }: Props) {
               </div>
             </div>
             <div className="space-y-6">
-              <EventCountdown startDate={event.startDate} />
+              {!event.cancelled && <EventCountdown startDate={event.startDate} />}
+              {!event.cancelled && event.registrationRequired && !event.registrationUrl && (
+                <RsvpForm eventId={event.id} maxAttendees={event.maxAttendees} />
+              )}
               <Card padding="none" className="overflow-hidden">
                 <div className="h-48">
                   <iframe
@@ -133,6 +149,28 @@ export default async function EventDetailPage({ params }: Props) {
           </div>
         </Container>
       </Section>
+
+      {eventPhotos.length > 0 && (
+        <Section spacing="lg" className="bg-surface">
+          <Container size="md">
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="flex items-center gap-2 text-title-lg text-foreground">
+                <Camera className="h-5 w-5 text-accent" /> Photos from this event
+              </h2>
+              <Link href={`/gallery?event=${event.id}`} className="text-body-sm font-medium text-accent hover:text-accent-hover">
+                View all {eventPhotos.length} photos →
+              </Link>
+            </div>
+            <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
+              {eventPhotos.slice(0, 6).map((photo) => (
+                <Link key={photo.id} href={`/gallery?event=${event.id}`} className="relative block aspect-square overflow-hidden rounded-lg bg-surface-active">
+                  <Image src={photo.imageUrl} alt={photo.title || 'Event photo'} fill sizes="200px" className="object-cover transition-transform duration-slow hover:scale-105" />
+                </Link>
+              ))}
+            </div>
+          </Container>
+        </Section>
+      )}
 
       {relatedEvents.length > 0 && (
         <Section spacing="lg" className="bg-surface">
