@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createHash } from 'crypto';
 import { getAdminDb } from '@/lib/firebase-admin';
 import { requireAdmin, withAudit } from '@/lib/api-auth';
 import { FieldValue } from 'firebase-admin/firestore';
@@ -28,11 +29,23 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const files = formData.getAll('files') as File[];
     const tagsRaw = (formData.get('tags') as string) || '';
+    const folderRaw = (formData.get('folder') as string) || '';
     const tags = tagsRaw.split(',').map(t => t.trim()).filter(Boolean);
+    const folder = folderRaw.trim() || null;
 
     if (files.length === 0) {
       return NextResponse.json({ success: false, message: 'No files provided' }, { status: 400 });
     }
+
+    // Existing content hashes, fetched once up front, so every file in this
+    // batch can be checked for a duplicate-of-an-existing-asset without a
+    // query per file — the library is small enough for one full scan.
+    const existingSnap = await getAdminDb().collection('mediaLibrary').select('contentHash', 'fileName').get();
+    const hashToExisting = new Map<string, { id: string; fileName: string }>();
+    existingSnap.docs.forEach((d) => {
+      const hash = d.data().contentHash;
+      if (hash) hashToExisting.set(hash, { id: d.id, fileName: d.data().fileName });
+    });
 
     const uploaded = await withAudit(
       authResult.user,
@@ -42,6 +55,8 @@ export async function POST(request: NextRequest) {
         const results = await Promise.all(
           files.map(async (file) => {
             const bytes = Buffer.from(await file.arrayBuffer());
+            const contentHash = createHash('sha256').update(bytes).digest('hex');
+            const duplicateOf = hashToExisting.get(contentHash) ?? null;
             const dataUri = `data:${file.type};base64,${bytes.toString('base64')}`;
             // 'auto' rather than the default 'image' — the library also
             // holds PDFs/docs for the Resources section, which Cloudinary
@@ -56,12 +71,18 @@ export async function POST(request: NextRequest) {
               mimeType: file.type,
               size: file.size,
               tags,
+              folder,
+              contentHash,
+              duplicateOfId: duplicateOf?.id ?? null,
+              altText: '',
+              copyright: '',
+              deletedAt: null,
               uploadedBy: authResult.user.uid,
               uploadedByEmail: authResult.user.email,
               uploadedAt: FieldValue.serverTimestamp(),
             });
 
-            return { id: docRef.id, url: asset.secure_url };
+            return { id: docRef.id, url: asset.secure_url, duplicateOfFileName: duplicateOf?.fileName ?? null };
           })
         );
         return { after: { count: results.length, ids: results.map(r => r.id) }, result: results };

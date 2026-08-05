@@ -52,14 +52,14 @@ type-check/lint/a quick manual pass, commit, check it off, move to the next.
 - [x] Linked member lookup (match sender email to a member)
 - [x] Full-field search
 
-### Batch A5 — Media Library
-- [ ] Folder/album organization
-- [ ] Bulk tagging and search-by-tag
-- [ ] Trash/restore window (soft delete)
-- [ ] Duplicate-file detection
-- [ ] Alt-text enforcement
-- [ ] Copyright/license field
-- [ ] Usage tracker (where is this image referenced)
+### Batch A5 — Media Library ✅
+- [x] Folder/album organization
+- [x] Bulk tagging and search-by-tag
+- [x] Trash/restore window (soft delete)
+- [x] Duplicate-file detection
+- [x] Alt-text enforcement
+- [x] Copyright/license field
+- [x] Usage tracker (where is this image referenced)
 
 ### Batch A6 — Forms
 - [ ] Conditional field logic
