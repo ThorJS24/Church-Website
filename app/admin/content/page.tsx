@@ -135,6 +135,16 @@ const MINISTRY_FIELDS: FieldSchema[] = [
   { key: 'ageGroup', label: 'Age Group', type: 'text' },
   { key: 'meetingTime', label: 'Meeting Time', type: 'text' },
   { key: 'location', label: 'Location', type: 'text' },
+  { key: 'imageUrl', label: 'Ministry Photo', type: 'url', accept: 'image' },
+  { key: 'leaderName', label: 'Leader Name', type: 'text' },
+  { key: 'leaderTitle', label: 'Leader Title', type: 'text' },
+  { key: 'leaderEmail', label: 'Leader Email', type: 'email' },
+  { key: 'leaderPhone', label: 'Leader Phone', type: 'text' },
+  { key: 'leaderImageUrl', label: 'Leader Photo', type: 'url', accept: 'image' },
+  { key: 'testimonialQuote', label: 'Testimonial Quote', type: 'textarea' },
+  { key: 'testimonialAuthor', label: 'Testimonial Author', type: 'text' },
+  { key: 'volunteerNeeds', label: 'Volunteer Opportunities (one per line)', type: 'textarea' },
+  { key: 'teamPhotos', label: 'Team Photos (one per line: Name|ImageURL)', type: 'textarea' },
 ];
 
 const BUILT_IN_TABS = [

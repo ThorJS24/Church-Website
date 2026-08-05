@@ -246,11 +246,30 @@ export interface Ministry extends Publishable {
   ageGroup?: string;
   meetingTime?: string;
   location?: string;
+  imageUrl?: string;
+  leaderName?: string;
+  leaderTitle?: string;
+  leaderEmail?: string;
+  leaderPhone?: string;
+  leaderImageUrl?: string;
+  testimonialQuote?: string;
+  testimonialAuthor?: string;
+  /** One open role per line, e.g. "Nursery Helper (Sundays 9am)". */
+  volunteerNeeds?: string;
+  /** One team member per line: "Name|imageUrl". */
+  teamPhotos?: string;
 }
 
 export async function getMinistries(): Promise<Ministry[]> {
   const snap = await getDocs(collection(db, 'ministries'));
   return snap.docs.map(d => withId<Ministry>(d)).filter(isEffectivelyPublished);
+}
+
+export async function getMinistryById(id: string): Promise<Ministry | null> {
+  const snap = await getDoc(doc(db, 'ministries', id));
+  if (!snap.exists()) return null;
+  const ministry = withId<Ministry>(snap);
+  return isEffectivelyPublished(ministry) ? ministry : null;
 }
 
 export interface TimelineEvent extends Publishable {

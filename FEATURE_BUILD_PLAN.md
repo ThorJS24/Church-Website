@@ -152,12 +152,12 @@ type-check/lint/a quick manual pass, commit, check it off, move to the next.
 - [x] Private/family-only albums — `membersOnly` flag on events, gated open + gated download route
 - [x] Comment/reaction on photos — like + comment thread in the lightbox (routes already existed, UI was missing)
 
-### Batch P8 — Ministries
-- [ ] Ministry finder filter
-- [ ] Leader contact card
-- [ ] Volunteer opportunity board
-- [ ] Testimonial spotlight per ministry
-- [ ] Team photo roster
+### Batch P8 — Ministries ✅
+- [x] Ministry finder filter — added a search box alongside the existing category filter
+- [x] Leader contact card — new leader fields + card with mailto:/tel: links on a new ministry detail page
+- [x] Volunteer opportunity board — per-ministry open-roles list with deep links into the volunteer application
+- [x] Testimonial spotlight per ministry
+- [x] Team photo roster — avatar grid on the new ministry detail page
 
 ### Batch P9 — Small Groups
 - [ ] Finder by location/day/stage

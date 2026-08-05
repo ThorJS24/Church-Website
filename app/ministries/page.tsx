@@ -3,12 +3,13 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Users, Baby, Music, BookOpen, Heart, Clock, MapPin } from 'lucide-react';
+import { Users, Baby, Music, BookOpen, Heart, Clock, MapPin, Search } from 'lucide-react';
 import { getPageContent, getMinistries, Ministry } from '@/lib/content';
 import { PageHero } from '@/components/ui/PageHero';
 import { Section } from '@/components/ui/Section';
 import { Card } from '@/components/ui/Card';
 import { Grid } from '@/components/ui/Grid';
+import { Input } from '@/components/ui/Input';
 import { Button, LinkButton } from '@/components/ui/Button';
 import { LoadingState, EmptyState } from '@/components/ui/States';
 import { cn } from '@/lib/cn';
@@ -47,6 +48,7 @@ export default function MinistriesPage() {
   const [ministriesPage, setMinistriesPage] = useState<MinistriesPage | null>(null);
   const [ministries, setMinistries] = useState<Ministry[]>([]);
   const [activeCategory, setActiveCategory] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const ministriesGridRef = useRef<HTMLDivElement>(null);
 
@@ -67,10 +69,13 @@ export default function MinistriesPage() {
 
   const handleFindMinistryClick = () => ministriesGridRef.current?.scrollIntoView({ behavior: 'smooth' });
 
-  const filteredMinistries =
-    activeCategory === 'all'
-      ? ministries
-      : ministries.filter((m) => (Array.isArray(m.category) ? m.category.includes(activeCategory) : m.category === activeCategory));
+  const filteredMinistries = ministries
+    .filter((m) => activeCategory === 'all' || (Array.isArray(m.category) ? m.category.includes(activeCategory) : m.category === activeCategory))
+    .filter((m) => {
+      if (!searchTerm) return true;
+      const haystack = `${m.title} ${m.description} ${m.ageGroup ?? ''}`.toLowerCase();
+      return haystack.includes(searchTerm.toLowerCase());
+    });
 
   if (loading) return <LoadingState label="Loading ministries..." />;
 
@@ -79,6 +84,9 @@ export default function MinistriesPage() {
       <PageHero icon={<Heart />} eyebrow="Get Involved" title={ministriesPage?.title || 'Our Ministries'} description={ministriesPage?.subtitle || 'Find your place to serve, grow, and make a difference in our community'} />
 
       <div ref={ministriesGridRef} className="border-b border-border bg-background py-6">
+        <div className="mx-auto mb-4 flex max-w-md justify-center px-4">
+          <Input placeholder="Search ministries..." aria-label="Search ministries" leftIcon={<Search />} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+        </div>
         <div className="mx-auto flex max-w-7xl flex-wrap justify-center gap-3 px-4">
           {CATEGORIES.map((category) => (
             <button
@@ -115,8 +123,8 @@ export default function MinistriesPage() {
                       {ministry.location && <p className="flex items-center justify-center gap-2"><MapPin className="h-4 w-4" /> {ministry.location}</p>}
                     </div>
                     <div className="mt-5 flex gap-3">
-                      <LinkButton href="/ministries/volunteer" size="sm" fullWidth>Join Ministry</LinkButton>
-                      <LinkButton href={`/ministries/contact?ministry=${ministry.id}`} variant="outline" size="sm" fullWidth>Learn More</LinkButton>
+                      <LinkButton href={`/ministries/volunteer?ministry=${ministry.id}`} size="sm" fullWidth>Join Ministry</LinkButton>
+                      <LinkButton href={`/ministries/${ministry.id}`} variant="outline" size="sm" fullWidth>Learn More</LinkButton>
                     </div>
                   </Card>
                 </motion.div>

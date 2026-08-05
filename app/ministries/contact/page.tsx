@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { CheckCircle2 } from 'lucide-react';
 import { getMinistries } from '@/lib/content';
@@ -10,13 +11,15 @@ import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
 import { Button } from '@/components/ui/Button';
+import { LoadingState } from '@/components/ui/States';
 
 interface Ministry {
   id: string;
   title: string;
 }
 
-export default function ContactMinistryLeaderPage() {
+function ContactMinistryLeaderPageInner() {
+  const searchParams = useSearchParams();
   const [ministries, setMinistries] = useState<Ministry[]>([]);
   const [loadingMinistries, setLoadingMinistries] = useState(true);
 
@@ -30,7 +33,9 @@ export default function ContactMinistryLeaderPage() {
         const ministriesData = await getMinistries();
         const list = ministriesData.map((m) => ({ id: m.id, title: m.title }));
         setMinistries(list);
-        if (list.length > 0) setFormData((prev) => ({ ...prev, ministry: prev.ministry || list[0].id }));
+        const requestedId = searchParams.get('ministry');
+        const preselected = requestedId && list.some((m) => m.id === requestedId) ? requestedId : list[0]?.id;
+        if (preselected) setFormData((prev) => ({ ...prev, ministry: prev.ministry || preselected }));
       } catch (error) {
         console.error('Error fetching ministries:', error);
       } finally {
@@ -38,6 +43,7 @@ export default function ContactMinistryLeaderPage() {
       }
     }
     fetchMinistries();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -126,5 +132,13 @@ export default function ContactMinistryLeaderPage() {
         </Card>
       </motion.div>
     </Container>
+  );
+}
+
+export default function ContactMinistryLeaderPage() {
+  return (
+    <Suspense fallback={<LoadingState label="Loading..." />}>
+      <ContactMinistryLeaderPageInner />
+    </Suspense>
   );
 }
