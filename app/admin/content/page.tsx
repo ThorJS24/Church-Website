@@ -108,6 +108,8 @@ const RESOURCE_FIELDS: FieldSchema[] = [
   { key: 'description', label: 'Description', type: 'textarea' },
   { key: 'fileUrl', label: 'File', type: 'url', accept: 'file', required: true },
   { key: 'category', label: 'Category', type: 'text' },
+  { key: 'resourceType', label: 'Type (PDF, Video, Audio, Link)', type: 'text' },
+  { key: 'ageGroup', label: 'Age Group (Children, Youth, Adults, All Ages)', type: 'text' },
 ];
 
 const ANNOUNCEMENT_FIELDS: FieldSchema[] = [

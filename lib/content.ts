@@ -441,6 +441,10 @@ export interface Resource extends Publishable {
   description?: string;
   fileUrl: string;
   category?: string;
+  /** e.g. "PDF", "Video", "Audio", "Link" — free text, admin-set. */
+  resourceType?: string;
+  /** e.g. "Children", "Youth", "Adults", "All Ages" — free text, admin-set. */
+  ageGroup?: string;
 }
 
 export async function getResources(): Promise<Resource[]> {

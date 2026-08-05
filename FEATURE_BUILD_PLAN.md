@@ -173,12 +173,12 @@ type-check/lint/a quick manual pass, commit, check it off, move to the next.
 - [x] Search by keyword
 - [x] Consent capture at submission — required checkbox, server-side enforced (400 without it)
 
-### Batch P11 — Resources
-- [ ] Type filter
-- [ ] Personal library/bookmark
-- [ ] Age-appropriate filtering
-- [ ] Resource request form
-- [ ] Rating/review from members
+### Batch P11 — Resources ✅
+- [x] Type filter
+- [x] Personal library/bookmark — localStorage-based "My Library" (no account needed)
+- [x] Age-appropriate filtering
+- [x] Resource request form
+- [x] Rating/review from members — new member-gated `/api/resources/rate` route, admin-SDK-backed (no firestore.rules changes)
 
 ### Batch P12 — Give (no payment integration yet)
 - [ ] Fund/designation informational selector
