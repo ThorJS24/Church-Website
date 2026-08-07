@@ -6,6 +6,7 @@ import { Sun, Moon, BookOpen, Clock, MapPin, Calendar, Video, Coffee, Baby, User
 import { getPageContent, getServiceTimes, getSiteSettings, getLivestream } from '@/lib/content';
 import { PageHero } from '@/components/ui/page-hero';
 import { Section } from '@/components/ui/section';
+import { SectionNav } from '@/components/ui/section-nav';
 import { Card } from '@/components/ui/card';
 import { Grid } from '@/components/ui/grid';
 import { Button, LinkButton } from '@/components/ui/button';
@@ -127,8 +128,18 @@ export default function ServicesPage() {
         }
       />
 
+      <SectionNav
+        items={[
+          ...(services.length > 0 ? [{ id: 'service-times', label: 'Service Times' }] : []),
+          ...(servicesPage.whatToExpect?.length > 0 ? [{ id: 'what-to-expect', label: 'What to Expect' }] : []),
+          ...(servicesPage.specialEvents?.length > 0 ? [{ id: 'special-events', label: 'Special Events' }] : []),
+          { id: 'online-services', label: 'Online Services' },
+          { id: 'plan-your-visit', label: 'Plan Your Visit' },
+        ]}
+      />
+
       {services.length > 0 && (
-        <Section spacing="lg">
+        <Section id="service-times" spacing="lg">
           <Grid cols={3} gap={6}>
             {services.map((service, index) => {
               const Icon = iconMap[service.title] || BookOpen;
@@ -168,7 +179,7 @@ export default function ServicesPage() {
       )}
 
       {servicesPage.whatToExpect?.length > 0 && (
-        <Section spacing="lg" className="bg-surface">
+        <Section id="what-to-expect" spacing="lg" className="bg-surface">
           <div className="mb-10 text-center">
             <h2 className="text-headline-md text-foreground">{servicesPage.whatToExpectSectionTitle}</h2>
             <p className="mt-2 text-body-md text-foreground-muted">Your first visit made easy — here&apos;s what you can expect when you join us</p>
@@ -196,7 +207,7 @@ export default function ServicesPage() {
       )}
 
       {servicesPage.specialEvents?.length > 0 && (
-        <Section spacing="lg">
+        <Section id="special-events" spacing="lg">
           <div className="mb-10 text-center">
             <h2 className="text-headline-md text-foreground">{servicesPage.specialEventsSectionTitle}</h2>
             <p className="mt-2 text-body-md text-foreground-muted">Join us for these special worship experiences throughout the year</p>
@@ -221,7 +232,7 @@ export default function ServicesPage() {
         </Section>
       )}
 
-      <Section spacing="lg" className="bg-surface">
+      <Section id="online-services" spacing="lg" className="bg-surface">
         <Grid cols={2} gap={12} className="items-center">
           <div>
             <h2 className="text-headline-md text-foreground">{servicesPage.onlineServicesTitle}</h2>
@@ -254,7 +265,7 @@ export default function ServicesPage() {
         </Grid>
       </Section>
 
-      <Section spacing="lg" className="bg-accent text-accent-foreground">
+      <Section id="plan-your-visit" spacing="lg" className="bg-accent text-accent-foreground">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-headline-md">{servicesPage.planYourVisitTitle}</h2>
           <p className="mt-3 text-body-lg opacity-90">{servicesPage.planYourVisitDescription}</p>

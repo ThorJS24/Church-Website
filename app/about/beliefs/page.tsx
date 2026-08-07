@@ -7,6 +7,7 @@ import { getPageContent } from '@/lib/content';
 import ScriptureReference from '@/components/ScriptureReference';
 import { PageHero } from '@/components/ui/page-hero';
 import { Section } from '@/components/ui/section';
+import { SectionNav } from '@/components/ui/section-nav';
 import { Card } from '@/components/ui/card';
 import { Grid } from '@/components/ui/grid';
 import { LoadingState } from '@/components/ui/states';
@@ -72,8 +73,17 @@ export default function BeliefsPage() {
         breadcrumbs={[{ label: 'About', href: '/about' }, { label: 'Beliefs' }]}
       />
 
+      <SectionNav
+        items={[
+          { id: 'mission-vision', label: 'Mission & Vision' },
+          ...(aboutPage?.values && aboutPage.values.length > 0 ? [{ id: 'core-values', label: 'Core Values' }] : []),
+          { id: 'what-we-believe', label: 'What We Believe' },
+          { id: 'faq', label: 'FAQ' },
+        ]}
+      />
+
       {/* Mission & Vision */}
-      <Section spacing="lg">
+      <Section id="mission-vision" spacing="lg">
         <Grid cols={2} gap={8}>
           <motion.div {...fadeUp()}>
             <Card variant="raised" padding="lg" className="h-full text-center">
@@ -98,7 +108,7 @@ export default function BeliefsPage() {
 
       {/* Core Values */}
       {aboutPage?.values && aboutPage.values.length > 0 && (
-        <Section spacing="lg" className="bg-surface">
+        <Section id="core-values" spacing="lg" className="bg-surface">
           <h2 className="mb-10 text-center text-headline-md text-foreground">
             {aboutPage.valuesSectionTitle || 'Core Values'}
           </h2>
@@ -124,7 +134,7 @@ export default function BeliefsPage() {
       )}
 
       {/* What We Believe */}
-      <Section spacing="lg">
+      <Section id="what-we-believe" spacing="lg">
         <div className="mb-10 text-center">
           <Book className="mx-auto mb-4 h-10 w-10 text-accent" aria-hidden="true" />
           <h2 className="text-headline-md text-foreground">{aboutPage?.beliefsSectionTitle || 'What We Believe'}</h2>
@@ -165,7 +175,7 @@ export default function BeliefsPage() {
       </Section>
 
       {/* FAQ */}
-      <Section spacing="lg" className="bg-surface">
+      <Section id="faq" spacing="lg" className="bg-surface">
         <div className="mb-10 text-center">
           <HelpCircle className="mx-auto mb-4 h-10 w-10 text-accent" aria-hidden="true" />
           <h2 className="text-headline-md text-foreground">Frequently Asked Questions</h2>

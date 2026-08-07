@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { getLivestream } from '@/lib/content';
 import { cn } from '@/lib/utils';
 import { IconButton } from '@/components/ui/icon-button';
 import { Button, LinkButton } from '@/components/ui/button';
@@ -74,6 +75,7 @@ export default function Navbar() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isLive, setIsLive] = useState(false);
 
   const { user, logout, canAccessAdminPanel } = useAuth();
   const { theme, toggleTheme } = useTheme() || { theme: 'light', toggleTheme: () => {} };
@@ -87,6 +89,16 @@ export default function Navbar() {
     handleScroll();
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Persistent "live now" indicator — the homepage already shows a live
+  // banner, but that's invisible from every other page. Light polling is
+  // enough here; this isn't a real-time chat feed.
+  useEffect(() => {
+    const checkLive = () => getLivestream().then((ls) => setIsLive(!!ls?.isLive)).catch(() => {});
+    checkLive();
+    const interval = setInterval(checkLive, 60_000);
+    return () => clearInterval(interval);
   }, []);
 
   // Ctrl/Cmd+K opens the command palette from anywhere on the site.
@@ -130,15 +142,26 @@ export default function Navbar() {
       >
         <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent">
-              <Church className="h-5 w-5 text-accent-foreground" aria-hidden="true" />
-            </div>
-            <div className="hidden leading-tight sm:block">
-              <p className="font-serif text-title-sm text-foreground">Salem PBC</p>
-              <p className="text-caption text-foreground-subtle">{t('nav.tagline')}</p>
-            </div>
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link href="/" className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent">
+                <Church className="h-5 w-5 text-accent-foreground" aria-hidden="true" />
+              </div>
+              <div className="hidden leading-tight sm:block">
+                <p className="font-serif text-title-sm text-foreground">Salem PBC</p>
+                <p className="text-caption text-foreground-subtle">{t('nav.tagline')}</p>
+              </div>
+            </Link>
+            {isLive && (
+              <Link
+                href="/"
+                className="flex items-center gap-1.5 rounded-full border border-danger/40 bg-danger/15 px-2.5 py-1 text-caption font-medium text-danger transition-colors hover:bg-danger/25"
+              >
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-danger" />
+                Live
+              </Link>
+            )}
+          </div>
 
           {/* Desktop navigation */}
           <div className="hidden items-center gap-1 lg:flex">

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Search, Home, Calendar, BookOpen, Users, Heart, Camera, Phone, Gift,
-  FileText, ClipboardList, Image as ImageIcon, Megaphone, ShieldCheck, Loader2,
+  FileText, ClipboardList, Image as ImageIcon, Megaphone, ShieldCheck, Loader2, Clock, Sparkles,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -22,6 +22,37 @@ interface ResultItem {
   excerpt?: string;
   url: string;
   icon: typeof Search;
+}
+
+const QUICK_ACTIONS: Omit<ResultItem, 'excerpt'>[] = [
+  { id: 'action-prayer', type: 'link', title: 'Submit a prayer request', url: '/prayer', icon: Sparkles },
+  { id: 'action-events', type: 'link', title: "See this week's events", url: '/events', icon: Calendar },
+  { id: 'action-give', type: 'link', title: 'Give online', url: '/give', icon: Gift },
+];
+
+const RECENT_SEARCHES_KEY = 'command-palette-recent';
+const MAX_RECENTS = 5;
+
+function loadRecents(): ResultItem[] {
+  try {
+    const raw = localStorage.getItem(RECENT_SEARCHES_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as Omit<ResultItem, 'icon'>[];
+    return parsed.map((r) => ({ ...r, icon: Clock }));
+  } catch {
+    return [];
+  }
+}
+
+function saveRecent(item: ResultItem) {
+  try {
+    const existing = loadRecents().filter((r) => r.id !== item.id);
+    const { icon, ...rest } = item;
+    const next = [rest, ...existing.map(({ icon, ...r }) => r)].slice(0, MAX_RECENTS);
+    localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(next));
+  } catch {
+    // localStorage unavailable — recents just won't persist, not worth surfacing an error for
+  }
 }
 
 const STATIC_LINKS: Omit<ResultItem, 'excerpt'>[] = [
@@ -51,6 +82,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<ResultItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [recents, setRecents] = useState<ResultItem[]>([]);
   const router = useRouter();
   const { canAccessAdminPanel } = useAuth();
   const { t } = useLanguage();
@@ -59,6 +91,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     if (isOpen) {
       setQuery('');
       setResults([]);
+      setRecents(loadRecents());
     }
   }, [isOpen]);
 
@@ -90,6 +123,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
   }, [canAccessAdminPanel]);
 
   const navigate = (item: ResultItem) => {
+    if (item.type !== 'link') saveRecent(item);
     router.push(item.url);
     onClose();
   };
@@ -103,7 +137,14 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
             <Loader2 className="h-4 w-4 animate-spin" /> Searching…
           </div>
         )}
-        {!loading && <CommandEmpty>{query.trim() ? 'No results found' : 'Type to search, or jump straight to a page'}</CommandEmpty>}
+        {!loading && query.trim() && results.length === 0 && (
+          <CommandEmpty>
+            No results for &ldquo;{query}&rdquo; — try &ldquo;sermons&rdquo;, &ldquo;events&rdquo;, or &ldquo;prayer&rdquo;
+          </CommandEmpty>
+        )}
+        {!loading && !query.trim() && recents.length === 0 && (
+          <CommandEmpty>Type to search, or jump straight to a page</CommandEmpty>
+        )}
         {results.length > 0 && (
           <CommandGroup heading="Results">
             {results.map((item) => {
@@ -115,6 +156,32 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                     <span className="block truncate">{item.title}</span>
                     {item.excerpt && <span className="block truncate text-caption text-foreground-subtle">{item.excerpt}</span>}
                   </span>
+                </CommandItem>
+              );
+            })}
+          </CommandGroup>
+        )}
+        {!query.trim() && recents.length > 0 && (
+          <CommandGroup heading="Recent">
+            {recents.map((item) => {
+              const Icon = item.icon;
+              return (
+                <CommandItem key={item.id} value={item.id} onSelect={() => navigate(item)}>
+                  <Icon className="text-foreground-subtle" aria-hidden="true" />
+                  <span className="truncate">{item.title}</span>
+                </CommandItem>
+              );
+            })}
+          </CommandGroup>
+        )}
+        {!query.trim() && (
+          <CommandGroup heading="Quick actions">
+            {QUICK_ACTIONS.map((item) => {
+              const Icon = item.icon;
+              return (
+                <CommandItem key={item.id} value={item.id} onSelect={() => navigate(item as ResultItem)}>
+                  <Icon className="text-foreground-subtle" aria-hidden="true" />
+                  {item.title}
                 </CommandItem>
               );
             })}
