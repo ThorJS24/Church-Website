@@ -45,6 +45,18 @@ function fadeUp(delay = 0) {
   };
 }
 
+// Hero content is visible on first paint, not scrolled into view, so it
+// animates via `animate` rather than `whileInView` — an IntersectionObserver
+// that never fires (slow mount, blocked API, etc) would otherwise leave the
+// page's most important content stuck invisible with no fallback.
+function fadeUpImmediate(delay = 0) {
+  return {
+    initial: { opacity: 0, y: 16 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.4, delay, ease: [0.4, 0, 0.2, 1] as const },
+  };
+}
+
 export default function Home() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
@@ -120,7 +132,7 @@ export default function Home() {
         <Container className="relative z-10 text-center">
           {isLive && (
             <motion.button
-              {...fadeUp()}
+              {...fadeUpImmediate()}
               onClick={() => setShowLiveStream(true)}
               className="mb-6 inline-flex items-center gap-2 rounded-full border border-danger/40 bg-danger/15 px-3 py-1 text-caption font-medium text-danger-subtle"
             >
@@ -129,18 +141,18 @@ export default function Home() {
             </motion.button>
           )}
           <motion.h1
-            {...fadeUp(0.05)}
+            {...fadeUpImmediate(0.05)}
             className="mx-auto max-w-3xl font-serif text-display-sm text-white sm:text-display-md"
           >
             {siteSettings?.churchName || 'Salem Primitive Baptist Church'}
           </motion.h1>
           <motion.p
-            {...fadeUp(0.1)}
+            {...fadeUpImmediate(0.1)}
             className="mx-auto mt-5 max-w-xl font-serif text-body-lg italic text-white/70"
           >
             {siteSettings?.tagline || 'A place where faith meets community, and hope comes alive.'}
           </motion.p>
-          <motion.div {...fadeUp(0.15)} className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <motion.div {...fadeUpImmediate(0.15)} className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <LinkButton href="/services" size="lg">
               Join Us Sunday 9:30 AM
             </LinkButton>

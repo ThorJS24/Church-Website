@@ -240,6 +240,28 @@ layer(utilities);
    (`* { border-color: rgb(var(--border)); }`), which is unlayered and so
    always wins over anything in @layer base regardless of source order. */
 
+/* Tailwind's own preflight (@layer base) resets padding and margin with
+   `padding: 0` / `margin: 0` on every element. In this app's build, that
+   declaration keeps winning against ANY later, higher-layer utility that
+   sets padding/margin on the same edge — regardless of whether the utility
+   uses the physical or logical property name, with or without calc()/var(),
+   confirmed via CDP matched-styles inspection on a real, rendered element.
+   Root cause not fully isolated (behaves like a Chromium cascade-layers
+   regression rather than anything in this stylesheet), so rather than try
+   to out-prioritize it, this removes the competing declaration outright:
+   `revert-layer` rolls padding/margin back to whatever an earlier layer
+   (or the normal cascade) would have set, so later utilities in
+   @layer utilities have nothing left to lose to. Same selector, same
+   property names, same "base" layer as Tailwind's own preflight — this
+   wins over it purely via source order, the one cascade mechanism that
+   held up reliably through testing. */
+@layer base {
+  *, ::after, ::before, ::backdrop, ::file-selector-button {
+    padding: revert-layer;
+    margin: revert-layer;
+  }
+}
+
 /* ==========================================================================
    Design tokens — Warm and traditional-modern direction.
    Consumed by the @theme block above. Color tokens are raw R G B
