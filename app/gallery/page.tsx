@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { Calendar, MapPin, Clock, ArrowLeft, Eye, X, ChevronLeft, ChevronRight, Camera, Upload, Search, Lock, Heart, MessageCircle, Download, Tag as TagIcon, Send } from 'lucide-react';
 import { getEventGalleries, EventGallery, GalleryPhoto } from '@/lib/content';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,18 +11,18 @@ import Image from 'next/image';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { useMounted } from '@/hooks/useMounted';
 import { createPortal } from 'react-dom';
-import { PageHero } from '@/components/ui-legacy/PageHero';
-import { Section } from '@/components/ui-legacy/Section';
-import { Card } from '@/components/ui-legacy/Card';
-import { Grid } from '@/components/ui-legacy/Grid';
-import { Input } from '@/components/ui-legacy/Input';
-import { Select } from '@/components/ui-legacy/Select';
-import { Badge } from '@/components/ui-legacy/Badge';
-import { Button } from '@/components/ui-legacy/Button';
-import { IconButton } from '@/components/ui-legacy/IconButton';
-import { Modal } from '@/components/ui-legacy/Modal';
-import { LoadingState, EmptyState } from '@/components/ui-legacy/States';
-import { useToast } from '@/components/ui-legacy/Toast';
+import { PageHero } from '@/components/ui/page-hero';
+import { Section } from '@/components/ui/section';
+import { Card } from '@/components/ui/card';
+import { Grid } from '@/components/ui/grid';
+import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { IconButton } from '@/components/ui/icon-button';
+import { Modal } from '@/components/ui/modal';
+import { LoadingState, EmptyState } from '@/components/ui/states';
+import { useToast } from '@/lib/toast';
 
 const MAX_SUBMIT_BYTES = 4 * 1024 * 1024; // matches app/api/gallery/submit/route.ts
 const ALLOWED_SUBMIT_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
@@ -145,7 +145,7 @@ function PhotoLightbox({
         </div>
 
         {showComments && (
-          <div className="absolute inset-y-0 right-0 z-10 w-full max-w-sm overflow-y-auto bg-zinc-950/95 p-5 text-white sm:border-l sm:border-white/10">
+          <div className="absolute inset-y-0 right-0 z-10 w-full max-w-sm overflow-y-auto bg-[#17130F]/95 p-5 text-white sm:border-l sm:border-white/10">
             <p className="mb-4 text-title-sm">Comments</p>
             <form onSubmit={postComment} className="mb-4 space-y-2">
               <input
