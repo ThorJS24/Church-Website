@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import CommandPalette from '@/components/CommandPalette';
+import { AccessibilityMenu } from '@/components/AccessibilityMenu';
 import EnhancedLoginModal from './EnhancedLoginModal';
 
 interface NavItem {
@@ -217,6 +218,8 @@ export default function Navbar() {
             <IconButton label={t('nav.toggleTheme')} onClick={toggleTheme}>
               {theme === 'light' ? <Moon /> : <Sun />}
             </IconButton>
+
+            <AccessibilityMenu />
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

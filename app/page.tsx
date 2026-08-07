@@ -127,9 +127,13 @@ export default function Home() {
 
       {/* Hero */}
       <section className="relative overflow-hidden bg-[#17130F] py-24 text-white sm:py-32">
-        <div
-          className="absolute inset-0 opacity-40"
-          style={{ backgroundImage: 'url(/images/hero-bg.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}
+        <Image
+          src="/images/hero-bg.jpg"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover opacity-40"
         />
         <div className="absolute inset-0 bg-linear-to-b from-[#17130F]/60 via-[#17130F]/75 to-[#17130F]" />
 

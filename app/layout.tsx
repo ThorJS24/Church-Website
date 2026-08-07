@@ -2,6 +2,7 @@ import { Fraunces, Figtree, Noto_Sans_Tamil, Noto_Serif_Tamil } from 'next/font/
 import { MotionConfig } from 'motion/react';
 import './globals.css';
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import { AccessibilityProvider } from '@/contexts/AccessibilityContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import ClientLayout from '@/components/ClientLayout';
@@ -130,18 +131,20 @@ export default function RootLayout({
         />
         <MotionConfig reducedMotion="user">
           <ThemeProvider>
-            <LanguageProvider>
-              <AuthProvider>
-                <TooltipProvider>
-                  <ThemeAccentInjector />
-                  <ClientLayout>
-                    <SkipLink />
-                    <PublicChrome>{children}</PublicChrome>
-                  </ClientLayout>
-                  <Toaster />
-                </TooltipProvider>
-              </AuthProvider>
-            </LanguageProvider>
+            <AccessibilityProvider>
+              <LanguageProvider>
+                <AuthProvider>
+                  <TooltipProvider>
+                    <ThemeAccentInjector />
+                    <ClientLayout>
+                      <SkipLink />
+                      <PublicChrome>{children}</PublicChrome>
+                    </ClientLayout>
+                    <Toaster />
+                  </TooltipProvider>
+                </AuthProvider>
+              </LanguageProvider>
+            </AccessibilityProvider>
           </ThemeProvider>
         </MotionConfig>
       </body>

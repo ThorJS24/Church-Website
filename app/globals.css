@@ -417,6 +417,45 @@ layer(utilities);
   --shadow-xl-value: 0 24px 32px -8px rgb(0 0 0 / 0.45), 0 0 0 1px rgb(255 255 255 / 0.07);
 }
 
+/* Accessibility: persistent text-size preference (contexts/AccessibilityContext.tsx).
+   Scales the root font-size so every rem-based type-scale token grows with
+   it, rather than touching each token individually. */
+:root[data-text-size='large'] {
+  font-size: 112.5%;
+}
+:root[data-text-size='larger'] {
+  font-size: 125%;
+}
+
+/* Accessibility: high-contrast mode — pushes text/background toward pure
+   black/white and thickens borders, for low-vision users beyond what the
+   normal light/dark themes target. Same unlayered, later-source-order
+   pattern as :root/.dark above, so it wins over both without needing
+   !important. Semantic/accent hues are kept (only lightness/border
+   strength change) so meaning still reads the same, just starker. */
+.high-contrast:not(.dark) {
+  --background: 255 255 255;
+  --surface: 255 255 255;
+  --surface-hover: 235 235 235;
+  --surface-active: 215 215 215;
+  --border: 0 0 0;
+  --border-strong: 0 0 0;
+  --foreground: 0 0 0;
+  --foreground-muted: 30 30 30;
+  --foreground-subtle: 60 60 60;
+}
+.dark.high-contrast {
+  --background: 0 0 0;
+  --surface: 0 0 0;
+  --surface-hover: 30 30 30;
+  --surface-active: 50 50 50;
+  --border: 255 255 255;
+  --border-strong: 255 255 255;
+  --foreground: 255 255 255;
+  --foreground-muted: 225 225 225;
+  --foreground-subtle: 195 195 195;
+}
+
 /* ==========================================================================
    Base
    ========================================================================== */

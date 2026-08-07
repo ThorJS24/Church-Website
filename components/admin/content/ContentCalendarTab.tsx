@@ -8,6 +8,7 @@ import {
 import { ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react';
 import { adminFetch } from '@/lib/adminApi';
 import { LoadingState, ErrorState } from '@/components/admin/States';
+import { Modal } from '@/components/ui/modal';
 import { cn } from '@/lib/utils';
 
 interface CalendarItem {
@@ -120,32 +121,36 @@ export default function ContentCalendarTab({ onOpenItem }: { onOpenItem: (tab: s
         })}
       </div>
 
-      {selectedDay && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setSelectedDay(null)}>
-          <div className="w-full max-w-sm rounded-xl border border-border bg-surface p-4 shadow-xl" onClick={(e) => e.stopPropagation()}>
-            <h3 className="mb-3 flex items-center gap-2 text-title-sm text-foreground">
+      <Modal
+        isOpen={!!selectedDay}
+        onClose={() => setSelectedDay(null)}
+        size="sm"
+        title={
+          selectedDay && (
+            <span className="flex items-center gap-2">
               <CalendarDays className="h-4 w-4 text-foreground-subtle" /> {format(selectedDay, 'MMMM d, yyyy')}
-            </h3>
-            <ul className="space-y-2">
-              {selectedItems.map((item) => {
-                const source = SOURCES.find((s) => s.type === item.type)!;
-                return (
-                  <li key={item.id}>
-                    <button
-                      onClick={() => { onOpenItem(item.tab, item.id); setSelectedDay(null); }}
-                      className="flex w-full items-center gap-2 rounded-md p-2 text-left text-body-sm hover:bg-surface-hover"
-                    >
-                      <span className={cn('h-2 w-2 shrink-0 rounded-full', source.dotClass)} />
-                      <span className="flex-1 truncate text-foreground">{item.title}</span>
-                      <span className="text-caption text-foreground-subtle">{source.label}</span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        </div>
-      )}
+            </span>
+          )
+        }
+      >
+        <ul className="space-y-2">
+          {selectedItems.map((item) => {
+            const source = SOURCES.find((s) => s.type === item.type)!;
+            return (
+              <li key={item.id}>
+                <button
+                  onClick={() => { onOpenItem(item.tab, item.id); setSelectedDay(null); }}
+                  className="flex w-full items-center gap-2 rounded-md p-2 text-left text-body-sm hover:bg-surface-hover"
+                >
+                  <span className={cn('h-2 w-2 shrink-0 rounded-full', source.dotClass)} />
+                  <span className="flex-1 truncate text-foreground">{item.title}</span>
+                  <span className="text-caption text-foreground-subtle">{source.label}</span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </Modal>
     </div>
   );
 }
