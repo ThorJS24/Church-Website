@@ -92,7 +92,7 @@ export default async function BlogPostPage({ params }: Props) {
             {post.authorName && <Avatar name={post.authorName} size="sm" />}
             <div className="text-body-sm text-foreground-muted">
               {post.authorName && (
-                <Link href={`/blog/author/${encodeURIComponent(post.authorName)}`} className="font-medium text-foreground hover:text-accent hover:underline">
+                <Link href={`/blog/author/${encodeURIComponent(post.authorName)}`} className="font-medium text-foreground hover:text-accent hover:underline dark:text-accent-hover">
                   {post.authorName}
                 </Link>
               )}
@@ -154,7 +154,7 @@ export default async function BlogPostPage({ params }: Props) {
             <div className="grid gap-4 sm:grid-cols-3">
               {relatedPosts.map((related) => (
                 <Link key={related.id} href={`/blog/${related.slug}`} className="block">
-                  <Card padding="none" className="h-full overflow-hidden transition-shadow hover:shadow-md">
+                  <Card variant="interactive" padding="none" className="h-full overflow-hidden">
                     {related.imageUrl && (
                       <div className="relative aspect-video bg-surface-active">
                         <Image src={related.imageUrl} alt={related.title} fill sizes="300px" className="object-cover" />

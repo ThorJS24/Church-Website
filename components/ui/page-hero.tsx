@@ -4,6 +4,7 @@ import { type ReactNode } from 'react';
 import { motion } from 'motion/react';
 import { cn } from '@/lib/cn';
 import { Section } from './section';
+import { Breadcrumbs, type BreadcrumbItem } from './breadcrumbs';
 
 export interface PageHeroProps {
   eyebrow?: string;
@@ -13,11 +14,18 @@ export interface PageHeroProps {
   align?: 'center' | 'left';
   actions?: ReactNode;
   className?: string;
+  breadcrumbs?: BreadcrumbItem[];
 }
 
-export function PageHero({ eyebrow, title, description, icon, align = 'center', actions, className }: PageHeroProps) {
+export function PageHero({ eyebrow, title, description, icon, align = 'center', actions, className, breadcrumbs }: PageHeroProps) {
   return (
     <Section spacing="md" className={cn('border-b border-border bg-surface', className)}>
+      {breadcrumbs && (
+        <Breadcrumbs
+          items={breadcrumbs}
+          className={cn('mb-6', align === 'center' && 'justify-center')}
+        />
+      )}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}

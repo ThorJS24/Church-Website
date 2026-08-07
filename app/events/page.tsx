@@ -8,6 +8,7 @@ import { EVENT_CATEGORIES, getEventCategory, expandServicesToEvents } from '@/li
 import Image from 'next/image';
 import EventModal from '@/components/EventModal';
 import InteractiveCalendar from '@/components/InteractiveCalendar';
+import { AttendeeCount } from '@/components/events/AttendeeCount';
 import { PageHero } from '@/components/ui/page-hero';
 import { Section } from '@/components/ui/section';
 import { Card } from '@/components/ui/card';
@@ -161,6 +162,9 @@ export default function EventsPage() {
                           {event.endDate && <span> - {new Date(event.endDate).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}</span>}
                         </p>
                         <p className="flex items-center gap-2"><MapPin className="h-3.5 w-3.5" /> {event.location}</p>
+                        {event.registrationRequired && !event.registrationUrl && (
+                          <AttendeeCount eventId={event.id} className="flex items-center gap-2" />
+                        )}
                       </div>
 
                       {event.shortDescription && <p className="mt-3 line-clamp-2 text-body-sm text-foreground-muted">{event.shortDescription}</p>}

@@ -94,14 +94,14 @@ export default function GivePage() {
               <Building className="mb-4 h-9 w-9 text-accent" />
               <h3 className="text-title-md text-foreground">In Person</h3>
               <p className="mt-2 text-body-sm text-foreground-muted">Give during any of our worship services — see our current service times for when to join us.</p>
-              <Link href="/services" className="mt-3 inline-block text-body-sm font-semibold text-accent hover:underline">View Service Times →</Link>
+              <Link href="/services" className="mt-3 inline-block text-body-sm font-semibold text-accent hover:underline dark:text-accent-hover">View Service Times →</Link>
             </Card>
 
             <Card variant="raised" padding="lg">
               <Mail className="mb-4 h-9 w-9 text-accent" />
               <h3 className="text-title-md text-foreground">Questions?</h3>
               <p className="mt-2 text-body-sm text-foreground-muted">Reach out about recurring gifts, planned/legacy giving, or designating a gift to a specific fund below.</p>
-              <Link href="/contact" className="mt-3 inline-block text-body-sm font-semibold text-accent hover:underline">Contact Us →</Link>
+              <Link href="/contact" className="mt-3 inline-block text-body-sm font-semibold text-accent hover:underline dark:text-accent-hover">Contact Us →</Link>
             </Card>
           </Grid>
 

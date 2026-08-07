@@ -215,7 +215,7 @@ export default function ContentTypesTab({ onChange }: ContentTypesTabProps) {
 
         <div className="mb-2 flex items-center justify-between">
           <span className="text-label text-foreground">Fields</span>
-          <button type="button" onClick={() => setFields(prev => [...prev, emptyField()])} className="inline-flex items-center gap-1 text-caption text-accent hover:underline">
+          <button type="button" onClick={() => setFields(prev => [...prev, emptyField()])} className="inline-flex items-center gap-1 text-caption text-accent hover:underline dark:text-accent-hover">
             <Plus className="h-3 w-3" /> Add Field
           </button>
         </div>

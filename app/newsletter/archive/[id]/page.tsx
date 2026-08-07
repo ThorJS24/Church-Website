@@ -37,7 +37,7 @@ export default function NewsletterArchiveDetailPage({ params }: { params: Promis
 
   return (
     <Container size="sm" className="py-16">
-      <Link href="/newsletter/archive" className="mb-6 inline-flex items-center gap-1 text-body-sm text-accent hover:underline">
+      <Link href="/newsletter/archive" className="mb-6 inline-flex items-center gap-1 text-body-sm text-accent hover:underline dark:text-accent-hover">
         <ArrowLeft className="h-4 w-4" /> Back to archive
       </Link>
       <Card variant="raised" padding="lg">

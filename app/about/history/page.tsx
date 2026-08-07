@@ -79,6 +79,7 @@ export default function HistoryPage() {
         eyebrow="Our Story"
         title="Our History"
         description="A legacy of faith and service to our community"
+        breadcrumbs={[{ label: 'About', href: '/about' }, { label: 'History' }]}
         actions={
           <Grid cols={4} gap={3} className="mx-auto mt-2 max-w-lg text-center">
             {[

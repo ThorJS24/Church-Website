@@ -46,7 +46,7 @@ export default function BlogPage() {
         title="Blog"
         description="Reflections, updates, and stories from our church family"
         actions={
-          <a href="/blog/feed.xml" className="inline-flex items-center gap-1.5 text-body-sm font-medium text-accent hover:underline">
+          <a href="/blog/feed.xml" className="inline-flex items-center gap-1.5 text-body-sm font-medium text-accent hover:underline dark:text-accent-hover">
             <Rss className="h-4 w-4" /> RSS Feed
           </a>
         }
@@ -94,7 +94,7 @@ export default function BlogPage() {
                     {featuredPost.excerpt && <p className="mt-3 line-clamp-3 text-body-md text-foreground-muted">{featuredPost.excerpt}</p>}
                     <p className="mt-4 text-caption text-foreground-subtle">
                       {featuredPost.authorName ? (
-                        <Link href={`/blog/author/${encodeURIComponent(featuredPost.authorName)}`} className="hover:text-accent hover:underline">
+                        <Link href={`/blog/author/${encodeURIComponent(featuredPost.authorName)}`} className="hover:text-accent hover:underline dark:text-accent-hover">
                           {featuredPost.authorName}
                         </Link>
                       ) : null}
@@ -123,7 +123,7 @@ export default function BlogPage() {
                     )}
                     <div className="p-5">
                       {post.category && (
-                        <Link href={`/blog/category/${encodeURIComponent(post.category)}`} className="text-caption font-semibold uppercase tracking-wide text-accent hover:underline">
+                        <Link href={`/blog/category/${encodeURIComponent(post.category)}`} className="text-caption font-semibold uppercase tracking-wide text-accent hover:underline dark:text-accent-hover">
                           {post.category}
                         </Link>
                       )}
@@ -133,7 +133,7 @@ export default function BlogPage() {
                       {post.excerpt && <p className="mt-2 line-clamp-3 text-body-sm text-foreground-muted">{post.excerpt}</p>}
                       <p className="mt-3 text-caption text-foreground-subtle">
                         {post.authorName ? (
-                          <Link href={`/blog/author/${encodeURIComponent(post.authorName)}`} className="hover:text-accent hover:underline">
+                          <Link href={`/blog/author/${encodeURIComponent(post.authorName)}`} className="hover:text-accent hover:underline dark:text-accent-hover">
                             {post.authorName}
                           </Link>
                         ) : null}

@@ -12,8 +12,10 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { LinkButton } from '@/components/ui/button';
 import { ShareButton } from '@/components/ShareButton';
+import { AddToCalendarButton } from '@/components/AddToCalendarButton';
 import { EventCountdown } from '@/components/EventCountdown';
 import { RsvpForm } from '@/components/events/RsvpForm';
+import { AttendeeCount } from '@/components/events/AttendeeCount';
 import { AlertTriangle } from 'lucide-react';
 
 interface Props {
@@ -115,6 +117,15 @@ export default async function EventDetailPage({ params }: Props) {
               )}
               <div className="mt-6 flex flex-wrap gap-3">
                 <ShareButton title={event.title} />
+                {!event.cancelled && (
+                  <AddToCalendarButton
+                    title={event.title}
+                    description={event.shortDescription || event.description}
+                    location={event.location}
+                    startDate={event.startDate}
+                    endDate={event.endDate}
+                  />
+                )}
                 {!event.cancelled && event.registrationRequired && event.registrationUrl && (
                   <LinkButton href={event.registrationUrl} target="_blank" rel="noopener noreferrer">
                     Register
@@ -125,7 +136,10 @@ export default async function EventDetailPage({ params }: Props) {
             <div className="space-y-6">
               {!event.cancelled && <EventCountdown startDate={event.startDate} />}
               {!event.cancelled && event.registrationRequired && !event.registrationUrl && (
-                <RsvpForm eventId={event.id} maxAttendees={event.maxAttendees} />
+                <>
+                  <AttendeeCount eventId={event.id} className="flex items-center gap-2 text-body-sm text-foreground-muted" />
+                  <RsvpForm eventId={event.id} maxAttendees={event.maxAttendees} />
+                </>
               )}
               <Card padding="none" className="overflow-hidden">
                 <div className="h-48">

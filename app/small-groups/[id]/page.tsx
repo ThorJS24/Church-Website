@@ -101,6 +101,7 @@ export default function SmallGroupDetailPage() {
         eyebrow={group.lifeStage || group.category || 'Small Group'}
         title={group.name}
         description={group.description}
+        breadcrumbs={[{ label: 'Small Groups', href: '/small-groups' }, { label: group.name }]}
         actions={<LinkButton href="/small-groups" variant="outline" leftIcon={<ArrowLeft className="h-4 w-4" />}>Back to Small Groups</LinkButton>}
       />
 

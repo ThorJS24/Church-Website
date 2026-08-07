@@ -276,7 +276,7 @@ export default function AuditLogPage() {
                         ) : (
                           <button
                             onClick={(e) => { e.stopPropagation(); setHistoryTarget({ targetType: group.entries[0].targetType, targetId: group.entries[0].targetId }); }}
-                            className="inline-flex items-center gap-1 text-accent hover:underline"
+                            className="inline-flex items-center gap-1 text-accent hover:underline dark:text-accent-hover"
                           >
                             <History className="h-3 w-3" /> {group.entries[0].targetType}/{group.entries[0].targetId}
                           </button>
@@ -291,7 +291,7 @@ export default function AuditLogPage() {
                         <td className="p-2">
                           <button
                             onClick={() => setHistoryTarget({ targetType: entry.targetType, targetId: entry.targetId })}
-                            className="inline-flex items-center gap-1 text-caption text-accent hover:underline"
+                            className="inline-flex items-center gap-1 text-caption text-accent hover:underline dark:text-accent-hover"
                           >
                             <History className="h-3 w-3" /> {entry.targetType}/{entry.targetId}
                           </button>

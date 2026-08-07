@@ -166,7 +166,7 @@ export default function NewsletterPage() {
     <div>
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-headline-md text-foreground">Newsletter</h1>
-        <a href="/newsletter/archive" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-body-sm text-accent hover:underline">
+        <a href="/newsletter/archive" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-body-sm text-accent hover:underline dark:text-accent-hover">
           <Archive className="h-4 w-4" /> View public archive
         </a>
       </div>
@@ -300,7 +300,7 @@ function SubscribersTab({ subscribers, onSaveTags }: { subscribers: Subscriber[]
                   />
                 </td>
                 <td className="p-3 text-right">
-                  <button onClick={() => onSaveTags(s, draft)} className="text-caption font-medium text-accent hover:underline">Save</button>
+                  <button onClick={() => onSaveTags(s, draft)} className="text-caption font-medium text-accent hover:underline dark:text-accent-hover">Save</button>
                 </td>
               </tr>
             );

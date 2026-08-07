@@ -19,6 +19,7 @@ import { Container } from '@/components/ui/container';
 import { Grid } from '@/components/ui/grid';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Button, LinkButton } from '@/components/ui/button';
 import DynamicLiveStream from '@/components/DynamicLiveStream';
 import BibleVerse from '@/components/BibleVerse';
@@ -68,6 +69,7 @@ export default function Home() {
   const [livestream, setLivestream] = useState<Livestream | null>(null);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [showLiveStream, setShowLiveStream] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -106,6 +108,8 @@ export default function Home() {
         );
       } catch (error) {
         console.error('Failed to fetch homepage data:', error);
+      } finally {
+        setIsLoading(false);
       }
     }
 
@@ -214,7 +218,23 @@ export default function Home() {
       </Section>
 
       {/* Announcements */}
-      {announcements.length > 0 && (
+      {isLoading ? (
+        <Section spacing="md" className="bg-surface" id="announcements">
+          <h2 className="mb-8 text-center font-serif text-headline-md text-foreground">Latest Announcements</h2>
+          <div className="mx-auto max-w-3xl space-y-4">
+            {[0, 1].map((i) => (
+              <div key={i} className="flex items-start gap-4 rounded-xl border border-border bg-background p-6">
+                <Skeleton className="h-9 w-9 shrink-0 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-1/3" />
+                  <Skeleton className="h-3 w-full" />
+                  <Skeleton className="h-3 w-2/3" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </Section>
+      ) : announcements.length > 0 && (
         <Section spacing="md" className="bg-surface" id="announcements">
           <h2 className="mb-8 text-center font-serif text-headline-md text-foreground">Latest Announcements</h2>
           <div className="mx-auto max-w-3xl space-y-4">

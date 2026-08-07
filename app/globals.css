@@ -286,12 +286,13 @@ layer(utilities);
   /* Foreground — warm espresso, not cool zinc-900 */
   --foreground: 42 33 24;
   --foreground-muted: 90 76 61;
-  /* 128 111 93 computed 4.51:1 against --background (WCAG AA normal text,
-     >=4.5:1) — the original 130 113 94 measured 4.40:1 on an actual
-     luminance calculation done during Phase 12, despite an earlier
-     comment here claiming "verified ~4.6-4.7:1"; that estimate was wrong,
-     this one is computed, not eyeballed. */
-  --foreground-subtle: 128 111 93;
+  /* 124 107 89 computed 4.51:1 against --surface (WCAG AA normal text,
+     >=4.5:1) and 4.79:1 against --background. The prior value (128 111 93)
+     was tuned only against --background (4.51:1 there) and never checked
+     against --surface, where it actually measured 4.26:1 — a real failure
+     for the common text-foreground-subtle-on-bg-surface caption pattern
+     (card captions, dates), caught in a second-rebuild UI/UX audit pass. */
+  --foreground-subtle: 124 107 89;
 
   /* Primary — deep navy, admin-overridable via ThemeAccentInjector,
      siteSettings themeAccentColor. Hover, active, subtle, and foreground

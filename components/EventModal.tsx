@@ -6,6 +6,7 @@ import { Modal } from '@/components/ui/modal';
 import { Badge } from '@/components/ui/badge';
 import { LinkButton } from '@/components/ui/button';
 import { getEventCategory } from '@/lib/eventCategories';
+import { AddToCalendarButton } from '@/components/AddToCalendarButton';
 
 interface EventModalProps {
   event: any;
@@ -84,6 +85,14 @@ export default function EventModal({ event, isOpen, onClose }: EventModalProps) 
               {event.shortDescription || renderDescription(event.description)}
             </p>
           </div>
+
+          <AddToCalendarButton
+            title={event.title}
+            description={event.shortDescription}
+            location={event.location}
+            startDate={event.startDate}
+            endDate={event.endDate}
+          />
 
           {(event.organizerName || event.contactEmail || event.contactPhone) && (
             <div>

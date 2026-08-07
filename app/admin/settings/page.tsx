@@ -195,7 +195,7 @@ function ThemeCustomizer() {
 
   const save = async () => {
     if (!isValidHexColor(color)) {
-      toast({ title: `Enter a valid hex color, e.g. ${DEFAULT_ACCENT}`, variant: 'danger' });
+      toast({ title: `Enter a valid hex color, e.g. ${DEFAULT_ACCENT}`, variant: 'warning' });
       return;
     }
     setSaving(true);

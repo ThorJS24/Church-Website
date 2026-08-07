@@ -32,6 +32,7 @@ export default async function BlogCategoryPage({ params }: Props) {
         eyebrow="Category"
         title={categoryName}
         description={`${posts.length} ${posts.length === 1 ? 'post' : 'posts'} in this category`}
+        breadcrumbs={[{ label: 'Blog', href: '/blog' }, { label: categoryName }]}
       />
 
       <Section spacing="lg">

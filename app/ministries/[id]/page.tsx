@@ -66,6 +66,7 @@ export default function MinistryDetailPage() {
         eyebrow={ministry.ageGroup || 'Ministry'}
         title={ministry.title}
         description={ministry.description}
+        breadcrumbs={[{ label: 'Ministries', href: '/ministries' }, { label: ministry.title }]}
         actions={<LinkButton href="/ministries" variant="outline" leftIcon={<ArrowLeft className="h-4 w-4" />}>Back to Ministries</LinkButton>}
       />
 

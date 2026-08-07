@@ -71,6 +71,7 @@ export default function PastorsPage() {
         eyebrow="Leadership"
         title="Our Pastoral Team"
         description="Meet the shepherds who guide our congregation with wisdom, love, and unwavering faith"
+        breadcrumbs={[{ label: 'About', href: '/about' }, { label: 'Pastors' }]}
       />
 
       <Section spacing="lg">
@@ -128,7 +129,7 @@ export default function PastorsPage() {
                   <h3 className="text-title-sm text-foreground">{member.name}</h3>
                   <p className="text-body-sm text-foreground-muted">{member.position}</p>
                   {member.email && (
-                    <a href={`mailto:${member.email}`} className="mt-2 inline-flex items-center gap-1 text-caption text-accent hover:underline">
+                    <a href={`mailto:${member.email}`} className="mt-2 inline-flex items-center gap-1 text-caption text-accent hover:underline dark:text-accent-hover">
                       <Mail className="h-3 w-3" /> Contact
                     </a>
                   )}

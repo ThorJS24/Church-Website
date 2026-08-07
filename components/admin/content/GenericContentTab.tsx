@@ -542,7 +542,7 @@ export default function GenericContentTab({
                   <p className="text-body-sm text-foreground">{v.editedByEmail || 'Unknown'}</p>
                   <p className="text-caption text-foreground-subtle">{formatTimestamp(v.editedAt)}</p>
                 </div>
-                <button onClick={() => restoreVersion(v.id)} className="text-body-sm font-medium text-accent hover:underline">
+                <button onClick={() => restoreVersion(v.id)} className="text-body-sm font-medium text-accent hover:underline dark:text-accent-hover">
                   Restore
                 </button>
               </li>

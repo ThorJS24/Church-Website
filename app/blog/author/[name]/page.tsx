@@ -33,6 +33,7 @@ export default async function AuthorPage({ params }: Props) {
         eyebrow="Author"
         title={authorName}
         description={`${posts.length} ${posts.length === 1 ? 'post' : 'posts'} on the blog`}
+        breadcrumbs={[{ label: 'Blog', href: '/blog' }, { label: authorName }]}
       />
 
       <Section spacing="lg">

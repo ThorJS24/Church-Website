@@ -100,7 +100,7 @@ export default function ServiceRequestPage() {
             {submittedId && (
               <Link
                 href={`/services/request/status?id=${submittedId}&email=${encodeURIComponent(submittedEmail)}`}
-                className="mt-6 inline-flex items-center gap-1.5 text-body-sm font-medium text-accent hover:underline"
+                className="mt-6 inline-flex items-center gap-1.5 text-body-sm font-medium text-accent hover:underline dark:text-accent-hover"
               >
                 Track your request status <ArrowRight className="h-4 w-4" />
               </Link>

@@ -58,6 +58,10 @@ export const metadata = {
   authors: [{ name: 'Salem Primitive Baptist Church' }],
   creator: 'Salem Primitive Baptist Church',
   publisher: 'Salem Primitive Baptist Church',
+  // Was never referenced anywhere in the app before, so the browser had no
+  // way to discover /manifest.json — PWA install prompts couldn't have
+  // worked regardless of the icon files it points to.
+  manifest: '/manifest.json',
   openGraph: {
     type: 'website',
     locale: 'en_US',
@@ -80,16 +84,22 @@ export const metadata = {
     description: 'A place where faith, hope, and love come together. Join us every Sunday at 9:30 AM.',
     images: ['/og-image.jpg'],
   },
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 5,
-    userScalable: true,
-  },
   robots: {
     index: true,
     follow: true,
   },
+};
+
+// Next.js 15 split viewport out of `metadata` into its own export — the old
+// nested `metadata.viewport` field is silently ignored and logs a dev
+// warning ("Unsupported metadata viewport is configured in metadata
+// export"), which showed up on every request.
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  themeColor: '#1D3557',
 };
 
 export default function RootLayout({

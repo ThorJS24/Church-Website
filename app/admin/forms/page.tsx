@@ -215,7 +215,7 @@ export default function FormsBuilderPage() {
                 <tr key={form.id} className="border-t border-border">
                   <td className="p-3 text-foreground">{form.title}</td>
                   <td className="p-3">
-                    <button onClick={() => copyFormLink(form)} className="inline-flex items-center gap-1 font-mono text-caption text-accent hover:underline">
+                    <button onClick={() => copyFormLink(form)} className="inline-flex items-center gap-1 font-mono text-caption text-accent hover:underline dark:text-accent-hover">
                       <LinkIcon className="h-3 w-3" /> /forms/{form.id}
                     </button>
                   </td>
@@ -295,7 +295,7 @@ export default function FormsBuilderPage() {
 
         <div className="mb-2 flex items-center justify-between">
           <span className="text-label text-foreground">Fields</span>
-          <button type="button" onClick={() => setFields(prev => [...prev, emptyField()])} className="inline-flex items-center gap-1 text-caption text-accent hover:underline">
+          <button type="button" onClick={() => setFields(prev => [...prev, emptyField()])} className="inline-flex items-center gap-1 text-caption text-accent hover:underline dark:text-accent-hover">
             <Plus className="h-3 w-3" /> Add Field
           </button>
         </div>

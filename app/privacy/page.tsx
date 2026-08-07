@@ -186,7 +186,7 @@ export default function PrivacyPolicy() {
                 <Mail className="h-5 w-5 text-success" /> Contact Our Privacy Team
               </h3>
               <div className="space-y-2 text-body-sm text-foreground-muted">
-                <p><span className="font-medium text-foreground">Email:</span> <a href="mailto:privacy@salemprimitivebaptist.org" className="text-accent hover:underline">privacy@salemprimitivebaptist.org</a></p>
+                <p><span className="font-medium text-foreground">Email:</span> <a href="mailto:privacy@salemprimitivebaptist.org" className="text-accent hover:underline dark:text-accent-hover">privacy@salemprimitivebaptist.org</a></p>
                 <p><span className="font-medium text-foreground">Phone:</span> +91 94871 62485</p>
                 <p><span className="font-medium text-foreground">Address:</span> 223/838, Near north post office, Kannangurichi main road, Chinnathirupathi, Salem TN, PIN- 636008</p>
               </div>

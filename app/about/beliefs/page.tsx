@@ -69,6 +69,7 @@ export default function BeliefsPage() {
         eyebrow="About Us"
         title={aboutPage?.title || 'Our Beliefs & About Us'}
         description={aboutPage?.subtitle || 'Learn about our church family and what we believe'}
+        breadcrumbs={[{ label: 'About', href: '/about' }, { label: 'Beliefs' }]}
       />
 
       {/* Mission & Vision */}

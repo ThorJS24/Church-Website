@@ -325,7 +325,7 @@ export default function UserManagementPage() {
           )}
           rowActions={(u) => (
             <div className="flex items-center justify-end gap-3 whitespace-nowrap text-caption">
-              <button onClick={() => setEditingUser(u)} className="text-accent hover:underline">Edit</button>
+              <button onClick={() => setEditingUser(u)} className="text-accent hover:underline dark:text-accent-hover">Edit</button>
               {u.isActive === false ? (
                 <button onClick={() => setPendingAction({ type: 'reactivate', ids: [u.id] })} className="text-success hover:underline">Reactivate</button>
               ) : (

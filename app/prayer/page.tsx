@@ -112,7 +112,7 @@ export default function PrayerPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.followUpRequested && !formData.email) {
-      toast({ title: 'Email needed', description: 'Please add an email so we can follow up with you.', variant: 'danger' });
+      toast({ title: 'Email needed', description: 'Please add an email so we can follow up with you.', variant: 'warning' });
       return;
     }
     setSubmitting(true);
@@ -214,16 +214,34 @@ export default function PrayerPage() {
                     <div className="mt-4 flex items-center justify-between">
                       <span className="text-body-sm text-foreground-subtle">— {prayer.isAnonymous ? 'Anonymous' : prayer.authorName}</span>
                       {prayer.status !== 'answered' ? (
-                        <button
+                        <motion.button
                           onClick={() => handlePray(prayer.id)}
                           disabled={prayedIds.has(prayer.id)}
+                          whileTap={{ scale: 0.88 }}
+                          animate={prayedIds.has(prayer.id) ? { scale: [1, 1.2, 1] } : {}}
+                          transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
                           className={cn(
-                            'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-body-sm font-medium transition-colors',
+                            'relative flex items-center gap-1.5 rounded-full px-3 py-1.5 text-body-sm font-medium transition-colors',
                             prayedIds.has(prayer.id) ? 'bg-warm text-warm-foreground' : 'bg-surface-active text-foreground-muted hover:bg-warm-subtle hover:text-warm'
                           )}
                         >
                           <HandHeart className="h-4 w-4" /> {prayedIds.has(prayer.id) ? "I'm Praying" : 'Pray for This'} ({prayer.prayerTally ?? 0})
-                        </button>
+                          <AnimatePresence>
+                            {prayedIds.has(prayer.id) && (
+                              <motion.span
+                                key="burst"
+                                initial={{ opacity: 1, y: 0, scale: 0.6 }}
+                                animate={{ opacity: 0, y: -24, scale: 1.4 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.6, ease: 'easeOut' }}
+                                className="pointer-events-none absolute -top-1 right-2 text-warm"
+                                aria-hidden="true"
+                              >
+                                <Heart className="h-4 w-4 fill-current" />
+                              </motion.span>
+                            )}
+                          </AnimatePresence>
+                        </motion.button>
                       ) : (
                         <span className="flex items-center gap-1.5 text-body-sm text-foreground-subtle">
                           <HandHeart className="h-4 w-4" /> {prayer.prayerTally ?? 0} prayed

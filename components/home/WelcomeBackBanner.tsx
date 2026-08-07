@@ -19,7 +19,7 @@ export default function WelcomeBackBanner() {
           <Sparkles className="h-4 w-4" /> Welcome back, {firstName}
         </p>
         <div className="flex items-center gap-3">
-          <Link href="/dashboard" className="text-body-sm font-medium text-accent hover:underline">My Dashboard</Link>
+          <Link href="/dashboard" className="text-body-sm font-medium text-accent hover:underline dark:text-accent-hover">My Dashboard</Link>
           <LinkButton href="/prayer" variant="ghost" size="sm">Prayer Wall</LinkButton>
         </div>
       </Container>

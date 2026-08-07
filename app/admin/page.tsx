@@ -168,7 +168,7 @@ export default function AdminDashboardPage() {
               </p>
             </div>
           </div>
-          <Link href="/admin/content" className="text-caption text-accent hover:underline">Manage events</Link>
+          <Link href="/admin/content" className="text-caption text-accent hover:underline dark:text-accent-hover">Manage events</Link>
         </Card>
       )}
 
@@ -233,7 +233,7 @@ export default function AdminDashboardPage() {
         <Card>
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-title-md text-foreground">Recent Admin Actions</h2>
-            <Link href="/admin/audit-log" className="flex items-center gap-1 text-caption text-accent hover:underline">
+            <Link href="/admin/audit-log" className="flex items-center gap-1 text-caption text-accent hover:underline dark:text-accent-hover">
               <ScrollText className="h-3 w-3" /> View all
             </Link>
           </div>

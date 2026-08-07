@@ -283,7 +283,7 @@ export default function MediaLibraryPage() {
                 <p className="truncate text-body-sm font-medium text-foreground" title={item.fileName}>{item.fileName}</p>
                 <p className="text-caption text-foreground-subtle">{formatSize(item.size)}{item.folder ? ` · ${item.folder}` : ''}</p>
                 <div className="mt-2 flex items-center justify-between">
-                  <button onClick={() => copyUrl(item)} className="inline-flex items-center gap-1 text-caption text-accent hover:underline">
+                  <button onClick={() => copyUrl(item)} className="inline-flex items-center gap-1 text-caption text-accent hover:underline dark:text-accent-hover">
                     {copiedId === item.id ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
                     {copiedId === item.id ? 'Copied' : 'Copy URL'}
                   </button>

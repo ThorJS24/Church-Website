@@ -259,7 +259,7 @@ function GalleryPageInner() {
 
   const openEvent = (event: EventGallery) => {
     if (event.membersOnly && !user) {
-      toast({ title: 'Sign in required', description: 'This album is only visible to signed-in members.', variant: 'danger' });
+      toast({ title: 'Sign in required', description: 'This album is only visible to signed-in members.', variant: 'warning' });
       return;
     }
     setSelectedEvent(event);

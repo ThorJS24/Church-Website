@@ -60,6 +60,7 @@ export default function BranchesPage() {
         eyebrow="Locations"
         title={branchesData?.title || 'Our Branches'}
         description={branchesData?.subtitle || "Spreading God's love across communities"}
+        breadcrumbs={[{ label: 'About', href: '/about' }, { label: 'Branches' }]}
       />
 
       <Section spacing="lg">
