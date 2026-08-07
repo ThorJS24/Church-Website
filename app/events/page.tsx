@@ -62,6 +62,23 @@ export default function EventsPage() {
     return matchesSearch && matchesFilters;
   });
 
+  // expandServicesToEvents generates one instance per week (8 weeks ahead)
+  // for every recurring service, which used to mean a weekly Bible study
+  // produced 8 near-identical cards in this grid. Collapse each recurring
+  // title down to just its next occurrence, with a count of how many more
+  // are coming up.
+  const recurringCounts = new Map<string, number>();
+  filteredEvents.forEach((event: any) => {
+    if (event.recurring) recurringCounts.set(event.title, (recurringCounts.get(event.title) || 0) + 1);
+  });
+  const seenRecurring = new Set<string>();
+  const displayEvents = filteredEvents.filter((event: any) => {
+    if (!event.recurring) return true;
+    if (seenRecurring.has(event.title)) return false;
+    seenRecurring.add(event.title);
+    return true;
+  });
+
   const handleFilterChange = (categoryId: string) => {
     if (categoryId === 'all') {
       setSelectedFilters(['all']);
@@ -114,12 +131,13 @@ export default function EventsPage() {
       </Section>
 
       <Section spacing="lg">
-        {filteredEvents.length === 0 ? (
+        {displayEvents.length === 0 ? (
           <EmptyState icon={Calendar} title="No events found" description="Check back soon for new events and activities!" />
         ) : (
           <Grid cols={3} gap={6}>
-            {filteredEvents.map((event, index) => {
+            {displayEvents.map((event, index) => {
               const category = getEventCategory(event.category);
+              const moreCount = (recurringCounts.get(event.title) || 1) - 1;
               return (
                 <motion.div
                   key={event.id}
@@ -145,6 +163,9 @@ export default function EventsPage() {
                           <span className={cn('rounded-full px-2.5 py-1 text-caption font-medium text-white', category.dotClass)}>
                             {event.category === 'regular-service' ? 'Weekly' : new Date(event.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                           </span>
+                          {moreCount > 0 && (
+                            <span className="text-caption text-foreground-subtle">+{moreCount} more this month</span>
+                          )}
                           {event.featured && <Star className="h-4 w-4 fill-current text-warning" />}
                         </div>
                         {event.cost !== undefined && (

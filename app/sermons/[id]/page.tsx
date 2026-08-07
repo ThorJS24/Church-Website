@@ -14,6 +14,7 @@ import { ShareButton } from '@/components/ShareButton';
 import { PrintButton } from '@/components/PrintButton';
 import { SaveButton } from '@/components/SaveButton';
 import { SermonVideoPlayer } from '@/components/SermonVideoPlayer';
+import { SermonTranscript } from '@/components/SermonTranscript';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -115,9 +116,7 @@ export default async function SermonDetailPage({ params }: Props) {
                   <PrintButton label="Print Transcript" />
                 </div>
               </div>
-              <div className="whitespace-pre-line text-body-md leading-relaxed text-foreground-muted">
-                {sermon.transcript}
-              </div>
+              <SermonTranscript transcript={sermon.transcript} />
             </div>
           )}
         </Container>

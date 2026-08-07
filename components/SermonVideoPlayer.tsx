@@ -1,8 +1,11 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { NotebookPen } from 'lucide-react';
+import { NotebookPen, Gauge } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
+
+const PLAYBACK_RATES = [0.75, 1, 1.25, 1.5, 2];
 
 declare global {
   interface Window {
@@ -37,6 +40,8 @@ export function SermonVideoPlayer({ sermonId, embedUrl, title }: { sermonId: str
   const [resumeAt, setResumeAt] = useState<number | null>(null);
   const [notes, setNotes] = useState('');
   const [showNotes, setShowNotes] = useState(false);
+  const [playbackRate, setPlaybackRateState] = useState(1);
+  const [playerReady, setPlayerReady] = useState(false);
 
   const progressKey = `sermon-progress-${sermonId}`;
   const notesKey = `sermon-notes-${sermonId}`;
@@ -60,6 +65,7 @@ export function SermonVideoPlayer({ sermonId, embedUrl, title }: { sermonId: str
       playerRef.current = new window.YT.Player(containerRef.current, {
         events: {
           onReady: () => {
+            setPlayerReady(true);
             interval = setInterval(() => {
               const player = playerRef.current;
               if (!player?.getCurrentTime || !player?.getDuration) return;
@@ -96,6 +102,11 @@ export function SermonVideoPlayer({ sermonId, embedUrl, title }: { sermonId: str
     else localStorage.removeItem(notesKey);
   };
 
+  const changeRate = (rate: number) => {
+    setPlaybackRateState(rate);
+    playerRef.current?.setPlaybackRate?.(rate);
+  };
+
   const src = `${embedUrl}?enablejsapi=1`;
 
   return (
@@ -117,6 +128,28 @@ export function SermonVideoPlayer({ sermonId, embedUrl, title }: { sermonId: str
           <div className="flex gap-3">
             <button onClick={() => setResumeAt(null)} className="font-medium hover:underline">Dismiss</button>
             <button onClick={handleResume} className="font-medium underline underline-offset-2">Resume</button>
+          </div>
+        </div>
+      )}
+
+      {playerReady && (
+        <div className="mt-3 flex items-center gap-2 no-print">
+          <Gauge className="h-4 w-4 text-foreground-subtle" aria-hidden="true" />
+          <span className="text-caption text-foreground-subtle">Speed:</span>
+          <div className="flex gap-1">
+            {PLAYBACK_RATES.map((rate) => (
+              <button
+                key={rate}
+                type="button"
+                onClick={() => changeRate(rate)}
+                className={cn(
+                  'rounded-md px-2 py-0.5 text-caption font-medium transition-colors',
+                  playbackRate === rate ? 'bg-accent-subtle text-accent' : 'text-foreground-muted hover:text-foreground'
+                )}
+              >
+                {rate}x
+              </button>
+            ))}
           </div>
         </div>
       )}
