@@ -6,10 +6,10 @@ import { Search, Upload, Image as ImageIcon, FileText } from 'lucide-react';
 import { adminFetch } from '@/lib/adminApi';
 import { getIdToken } from '@/lib/firebase';
 import { LoadingState, EmptyState } from '@/components/admin/States';
-import { Modal } from '@/components/ui-legacy/Modal';
-import { Input } from '@/components/ui-legacy/Input';
-import { buttonClasses } from '@/components/ui-legacy/Button';
-import { useToast } from '@/components/ui-legacy/Toast';
+import { Modal } from '@/components/ui/modal';
+import { Input } from '@/components/ui/input';
+import { buttonClasses } from '@/components/ui/button';
+import { useToast } from '@/lib/toast';
 
 interface MediaItem {
   id: string;

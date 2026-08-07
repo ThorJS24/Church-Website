@@ -40,6 +40,26 @@ const buttonVariants = cva(
 export type ButtonVariant = NonNullable<VariantProps<typeof buttonVariants>['variant']>;
 export type ButtonSize = NonNullable<VariantProps<typeof buttonVariants>['size']>;
 
+/** Returns button classes for non-<button> elements that need to look
+ * like one — e.g. a <label> wrapping a hidden file input, which can't
+ * take a real `disabled` attribute, so the disabled look has to be
+ * applied via classes instead. */
+export function buttonClasses({
+  variant,
+  size,
+  fullWidth,
+  disabled = false,
+  className,
+}: {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  fullWidth?: boolean;
+  disabled?: boolean;
+  className?: string;
+}) {
+  return cn(buttonVariants({ variant, size, fullWidth }), disabled && 'pointer-events-none opacity-50', className);
+}
+
 export interface ButtonProps
   extends Omit<React.ComponentProps<'button'>, 'color'>,
     VariantProps<typeof buttonVariants> {
