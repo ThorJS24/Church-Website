@@ -2,8 +2,8 @@
 
 import { AlertTriangle } from 'lucide-react';
 import { useState } from 'react';
-import { Modal } from '@/components/ui-legacy/Modal';
-import { Button } from '@/components/ui-legacy/Button';
+import { Modal } from '@/components/ui/modal';
+import { Button } from '@/components/ui/button';
 
 interface ConfirmModalProps {
   isOpen: boolean;
