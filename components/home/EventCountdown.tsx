@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { CalendarClock } from 'lucide-react';
 import { EventItem } from '@/lib/content';
-import { Section } from '@/components/ui-legacy/Section';
-import { Container } from '@/components/ui-legacy/Container';
-import { LinkButton } from '@/components/ui-legacy/Button';
+import { Section } from '@/components/ui/section';
+import { Container } from '@/components/ui/container';
+import { LinkButton } from '@/components/ui/button';
 
 function timeParts(ms: number) {
   const clamped = Math.max(0, ms);
@@ -40,13 +40,13 @@ export default function EventCountdown({ event }: { event: EventItem | null }) {
   ];
 
   return (
-    <Section spacing="md" className="bg-zinc-950 text-white">
+    <Section spacing="md" className="bg-[#17130F] text-white">
       <Container className="flex flex-col items-center justify-between gap-6 text-center sm:flex-row sm:text-left">
         <div>
           <p className="flex items-center justify-center gap-1.5 text-caption font-semibold uppercase tracking-wide text-white/60 sm:justify-start">
             <CalendarClock className="h-3.5 w-3.5" /> Coming up
           </p>
-          <h3 className="mt-1 text-headline-sm">{event.title}</h3>
+          <h3 className="mt-1 font-serif text-headline-sm">{event.title}</h3>
           <p className="mt-1 text-body-sm text-white/60">
             {new Date(event.startDate).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })} · {event.location}
           </p>

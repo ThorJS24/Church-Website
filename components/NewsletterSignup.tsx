@@ -56,12 +56,12 @@ export default function NewsletterSignup() {
           type="submit"
           disabled={status === 'submitting'}
           aria-label="Subscribe to newsletter"
-          className="shrink-0 rounded-md bg-white px-3 py-2 text-zinc-900 transition-colors hover:bg-white/90 disabled:opacity-50"
+          className="shrink-0 rounded-md bg-white px-3 py-2 text-[#2A2118] transition-colors hover:bg-white/90 disabled:opacity-50"
         >
           <Mail className="h-4 w-4" />
         </button>
       </div>
-      {status === 'error' && <p className="text-caption text-red-400">{message}</p>}
+      {status === 'error' && <p className="text-caption text-[#E8898D]">{message}</p>}
     </form>
   );
 }

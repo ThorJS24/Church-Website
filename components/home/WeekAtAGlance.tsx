@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Clock, Calendar, Megaphone } from 'lucide-react';
 import { ServiceTime, EventItem, Announcement } from '@/lib/content';
-import { Card } from '@/components/ui-legacy/Card';
+import { Card } from '@/components/ui/card';
 
 interface Props {
   nextService: ServiceTime | null;

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { RefreshCw, Book, Heart, Share2, Copy, Sparkles, Star } from 'lucide-react';
 import { getRandomVerse, getVerseInVersion, BibleVerse as BibleVerseType } from '@/lib/bible-api';
 

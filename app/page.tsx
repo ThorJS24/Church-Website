@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import {
   Heart, Mail, Users, Calendar, MapPin, Phone, Clock, ArrowRight, Play,
   Church, BookOpen, Sparkles, ImageIcon,
@@ -14,12 +14,12 @@ import {
   Announcement, SiteSettings, ServiceTime, Sermon, EventItem, BlogPost, GalleryPhoto, Livestream, Testimonial,
 } from '@/lib/content';
 import { useAuth } from '@/contexts/AuthContext';
-import { Section } from '@/components/ui-legacy/Section';
-import { Container } from '@/components/ui-legacy/Container';
-import { Grid } from '@/components/ui-legacy/Grid';
-import { Card } from '@/components/ui-legacy/Card';
-import { Badge } from '@/components/ui-legacy/Badge';
-import { Button, LinkButton } from '@/components/ui-legacy/Button';
+import { Section } from '@/components/ui/section';
+import { Container } from '@/components/ui/container';
+import { Grid } from '@/components/ui/grid';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button, LinkButton } from '@/components/ui/button';
 import DynamicLiveStream from '@/components/DynamicLiveStream';
 import BibleVerse from '@/components/BibleVerse';
 import NewsletterSignup from '@/components/NewsletterSignup';
@@ -110,33 +110,33 @@ export default function Home() {
       <WelcomeBackBanner />
 
       {/* Hero */}
-      <section className="relative overflow-hidden bg-zinc-950 py-24 text-white sm:py-32">
+      <section className="relative overflow-hidden bg-[#17130F] py-24 text-white sm:py-32">
         <div
           className="absolute inset-0 opacity-40"
           style={{ backgroundImage: 'url(/images/hero-bg.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}
         />
-        <div className="absolute inset-0 bg-linear-to-b from-zinc-950/60 via-zinc-950/70 to-zinc-950" />
+        <div className="absolute inset-0 bg-linear-to-b from-[#17130F]/60 via-[#17130F]/75 to-[#17130F]" />
 
         <Container className="relative z-10 text-center">
           {isLive && (
             <motion.button
               {...fadeUp()}
               onClick={() => setShowLiveStream(true)}
-              className="mb-6 inline-flex items-center gap-2 rounded-full border border-red-400/30 bg-red-500/10 px-3 py-1 text-caption font-medium text-red-300"
+              className="mb-6 inline-flex items-center gap-2 rounded-full border border-danger/40 bg-danger/15 px-3 py-1 text-caption font-medium text-danger-subtle"
             >
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-400" />
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-danger" />
               Live now — tap to watch
             </motion.button>
           )}
           <motion.h1
             {...fadeUp(0.05)}
-            className="mx-auto max-w-3xl text-display-sm text-white sm:text-display-md"
+            className="mx-auto max-w-3xl font-serif text-display-sm text-white sm:text-display-md"
           >
             {siteSettings?.churchName || 'Salem Primitive Baptist Church'}
           </motion.h1>
           <motion.p
             {...fadeUp(0.1)}
-            className="mx-auto mt-5 max-w-xl text-body-lg text-white/70"
+            className="mx-auto mt-5 max-w-xl font-serif text-body-lg italic text-white/70"
           >
             {siteSettings?.tagline || 'A place where faith meets community, and hope comes alive.'}
           </motion.p>
@@ -159,7 +159,7 @@ export default function Home() {
       {showLiveStream && (
         <Section spacing="sm" className="bg-surface">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-headline-sm text-foreground">Live Stream</h2>
+            <h2 className="font-serif text-headline-sm text-foreground">Live Stream</h2>
             <button onClick={() => setShowLiveStream(false)} className="text-body-sm text-foreground-muted hover:text-foreground">
               Close
             </button>
@@ -176,7 +176,7 @@ export default function Home() {
             <Badge variant="accent" className="mb-4 w-fit">Next Service</Badge>
             {nextService ? (
               <>
-                <h3 className="text-headline-sm text-foreground">{nextService.title}</h3>
+                <h3 className="font-serif text-headline-sm text-foreground">{nextService.title}</h3>
                 <div className="mt-4 space-y-2 text-body-md text-foreground-muted">
                   <p className="flex items-center gap-2"><Clock className="h-4 w-4 text-foreground-subtle" /> {nextService.time}</p>
                   <p className="flex items-center gap-2"><MapPin className="h-4 w-4 text-foreground-subtle" /> {nextService.location}</p>
@@ -197,14 +197,14 @@ export default function Home() {
 
       {/* This week at a glance */}
       <Section spacing="md">
-        <h2 className="mb-6 text-headline-sm text-foreground">This Week at a Glance</h2>
+        <h2 className="mb-6 font-serif text-headline-sm text-foreground">This Week at a Glance</h2>
         <WeekAtAGlance nextService={nextService ?? null} weekEvents={weekEvents} latestAnnouncement={announcements[0] ?? null} />
       </Section>
 
       {/* Announcements */}
       {announcements.length > 0 && (
         <Section spacing="md" className="bg-surface" id="announcements">
-          <h2 className="mb-8 text-center text-headline-md text-foreground">Latest Announcements</h2>
+          <h2 className="mb-8 text-center font-serif text-headline-md text-foreground">Latest Announcements</h2>
           <div className="mx-auto max-w-3xl space-y-4">
             {announcements.map((announcement, index) => (
               <motion.div key={announcement.id} {...fadeUp(index * 0.05)}>
@@ -230,7 +230,7 @@ export default function Home() {
 
       {/* Quick actions */}
       <Section spacing="lg">
-        <h2 className="mb-10 text-center text-headline-md text-foreground">Connect With Us</h2>
+        <h2 className="mb-10 text-center font-serif text-headline-md text-foreground">Connect With Us</h2>
         <Grid cols={4} gap={6}>
           {quickActions.map((action, index) => (
             <motion.div key={action.title} {...fadeUp(index * 0.05)}>
@@ -251,7 +251,7 @@ export default function Home() {
       {recentSermons.length > 0 && (
         <Section spacing="lg" className="bg-surface">
           <div className="mb-8 flex items-center justify-between">
-            <h2 className="text-headline-md text-foreground">Recent Sermons</h2>
+            <h2 className="font-serif text-headline-md text-foreground">Recent Sermons</h2>
             <Link href="/sermons" className="text-body-sm font-medium text-accent hover:text-accent-hover">
               Browse all sermons →
             </Link>
@@ -266,7 +266,7 @@ export default function Home() {
       {upcomingEvents.length > 0 && (
         <Section spacing="lg">
           <div className="mb-8 flex items-center justify-between">
-            <h2 className="text-headline-md text-foreground">Upcoming Events</h2>
+            <h2 className="font-serif text-headline-md text-foreground">Upcoming Events</h2>
             <Link href="/events" className="text-body-sm font-medium text-accent hover:text-accent-hover">
               View all events →
             </Link>
@@ -325,7 +325,7 @@ export default function Home() {
       {/* Social proof */}
       {testimonials.length > 0 && (
         <Section spacing="lg">
-          <h2 className="mb-8 text-center text-headline-md text-foreground">What Our Church Family Says</h2>
+          <h2 className="mb-8 text-center font-serif text-headline-md text-foreground">What Our Church Family Says</h2>
           <SocialProofStrip testimonials={testimonials} />
         </Section>
       )}
@@ -334,7 +334,7 @@ export default function Home() {
       {latestPosts.length > 0 && (
         <Section spacing="lg">
           <div className="mb-8 flex items-center justify-between">
-            <h2 className="text-headline-md text-foreground">From the Blog</h2>
+            <h2 className="font-serif text-headline-md text-foreground">From the Blog</h2>
             <Link href="/blog" className="text-body-sm font-medium text-accent hover:text-accent-hover">
               Read more →
             </Link>
@@ -370,7 +370,7 @@ export default function Home() {
       {galleryPreview.length > 0 && (
         <Section spacing="lg" className="bg-surface">
           <div className="mb-8 flex items-center justify-between">
-            <h2 className="text-headline-md text-foreground">Gallery</h2>
+            <h2 className="font-serif text-headline-md text-foreground">Gallery</h2>
             <Link href="/gallery" className="text-body-sm font-medium text-accent hover:text-accent-hover">
               View gallery →
             </Link>
@@ -389,7 +389,7 @@ export default function Home() {
       <Section spacing="md" className="bg-warm text-warm-foreground">
         <div className="mx-auto max-w-2xl text-center">
           <Sparkles className="mx-auto mb-4 h-8 w-8 opacity-90" aria-hidden="true" />
-          <h2 className="text-headline-md">Need Prayer?</h2>
+          <h2 className="font-serif text-headline-md">Need Prayer?</h2>
           <p className="mt-3 text-body-md opacity-90">
             Our community would be honored to pray with and for you. Share your request — as public or private as you'd like.
           </p>
@@ -403,7 +403,7 @@ export default function Home() {
       <Section spacing="lg">
         <Grid cols={2} gap={12}>
           <div>
-            <h2 className="mb-6 text-headline-md text-foreground">{siteSettings?.churchName || 'Salem Primitive Baptist Church'}</h2>
+            <h2 className="mb-6 font-serif text-headline-md text-foreground">{siteSettings?.churchName || 'Salem Primitive Baptist Church'}</h2>
             <div className="space-y-3 text-body-md text-foreground-muted">
               <p className="flex items-start gap-3">
                 <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-accent" />

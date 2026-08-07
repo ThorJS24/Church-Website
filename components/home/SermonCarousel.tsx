@@ -3,12 +3,12 @@
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { BookOpen, Play, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Sermon } from '@/lib/content';
-import { Card } from '@/components/ui-legacy/Card';
-import { Badge } from '@/components/ui-legacy/Badge';
-import { LinkButton } from '@/components/ui-legacy/Button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { LinkButton } from '@/components/ui/button';
 
 const AUTO_ADVANCE_MS = 7000;
 
@@ -32,7 +32,7 @@ export default function SermonCarousel({ sermons }: { sermons: Sermon[] }) {
     <div onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
       <Card variant="raised" padding="none" className="overflow-hidden">
         <div className="grid md:grid-cols-2">
-          <div className="relative aspect-video bg-zinc-900 md:aspect-auto">
+          <div className="relative aspect-video bg-surface-active md:aspect-auto">
             <AnimatePresence mode="wait">
               <motion.div
                 key={sermon.id}

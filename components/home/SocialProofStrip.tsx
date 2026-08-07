@@ -1,10 +1,10 @@
 'use client';
 
 import { Quote } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Testimonial } from '@/lib/content';
-import { Grid } from '@/components/ui-legacy/Grid';
-import { Card } from '@/components/ui-legacy/Card';
+import { Grid } from '@/components/ui/grid';
+import { Card } from '@/components/ui/card';
 
 export default function SocialProofStrip({ testimonials }: { testimonials: Testimonial[] }) {
   if (testimonials.length === 0) return null;
