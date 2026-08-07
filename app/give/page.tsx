@@ -4,14 +4,14 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Heart, Building, Users, Globe, BookOpen, Mail, Landmark, Download, ScrollText, Check } from 'lucide-react';
 import { getSiteSettings, SiteSettings } from '@/lib/content';
-import { PageHero } from '@/components/ui-legacy/PageHero';
-import { Section } from '@/components/ui-legacy/Section';
-import { Container } from '@/components/ui-legacy/Container';
-import { Card } from '@/components/ui-legacy/Card';
-import { Grid } from '@/components/ui-legacy/Grid';
-import { LinkButton } from '@/components/ui-legacy/Button';
-import { Accordion, AccordionItem } from '@/components/ui-legacy/Accordion';
-import { cn } from '@/lib/cn';
+import { PageHero } from '@/components/ui/page-hero';
+import { Section } from '@/components/ui/section';
+import { Container } from '@/components/ui/container';
+import { Card } from '@/components/ui/card';
+import { Grid } from '@/components/ui/grid';
+import { LinkButton } from '@/components/ui/button';
+import { Accordion, AccordionItem } from '@/components/ui/accordion';
+import { cn } from '@/lib/utils';
 
 const givingFunds = [
   { id: 'tithe', title: 'Tithe & Offerings', description: 'Regular giving to support our church ministries and operations' },

@@ -2,17 +2,17 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Users, Baby, Music, BookOpen, Heart, Clock, MapPin, Search } from 'lucide-react';
 import { getPageContent, getMinistries, Ministry } from '@/lib/content';
-import { PageHero } from '@/components/ui-legacy/PageHero';
-import { Section } from '@/components/ui-legacy/Section';
-import { Card } from '@/components/ui-legacy/Card';
-import { Grid } from '@/components/ui-legacy/Grid';
-import { Input } from '@/components/ui-legacy/Input';
-import { Button, LinkButton } from '@/components/ui-legacy/Button';
-import { LoadingState, EmptyState } from '@/components/ui-legacy/States';
-import { cn } from '@/lib/cn';
+import { PageHero } from '@/components/ui/page-hero';
+import { Section } from '@/components/ui/section';
+import { Card } from '@/components/ui/card';
+import { Grid } from '@/components/ui/grid';
+import { Input } from '@/components/ui/input';
+import { Button, LinkButton } from '@/components/ui/button';
+import { LoadingState, EmptyState } from '@/components/ui/states';
+import { cn } from '@/lib/utils';
 
 interface MinistriesPage {
   title: string;

@@ -2,13 +2,13 @@ import {
   Shield, ShieldCheck, Users, Heart, Laptop, DollarSign, Check, Eye, Pencil, Trash2,
   Download, BellOff, SlidersHorizontal, Lock, Mail,
 } from 'lucide-react';
-import { PageHero } from '@/components/ui-legacy/PageHero';
-import { Section } from '@/components/ui-legacy/Section';
-import { Container } from '@/components/ui-legacy/Container';
-import { Card } from '@/components/ui-legacy/Card';
-import { Grid } from '@/components/ui-legacy/Grid';
-import { LinkButton } from '@/components/ui-legacy/Button';
-import { Accordion, AccordionItem } from '@/components/ui-legacy/Accordion';
+import { PageHero } from '@/components/ui/page-hero';
+import { Section } from '@/components/ui/section';
+import { Container } from '@/components/ui/container';
+import { Card } from '@/components/ui/card';
+import { Grid } from '@/components/ui/grid';
+import { LinkButton } from '@/components/ui/button';
+import { Accordion, AccordionItem } from '@/components/ui/accordion';
 import { PrintButton } from '@/components/PrintButton';
 import { PolicyVersionDiff, type PolicyVersion } from '@/components/PolicyVersionDiff';
 

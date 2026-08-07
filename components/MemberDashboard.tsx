@@ -1,17 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import Link from 'next/link';
 import { User, Calendar, Heart, DollarSign, Book, Users, Bell, Settings, Download, Bookmark, Star, HandHeart } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { getIdToken } from '@/lib/firebase';
-import { Container } from '@/components/ui-legacy/Container';
-import { Card } from '@/components/ui-legacy/Card';
-import { Grid } from '@/components/ui-legacy/Grid';
-import { Avatar } from '@/components/ui-legacy/Avatar';
-import { EmptyState } from '@/components/ui-legacy/States';
+import { Container } from '@/components/ui/container';
+import { Card } from '@/components/ui/card';
+import { Grid } from '@/components/ui/grid';
+import { Avatar } from '@/components/ui/avatar';
+import { EmptyState } from '@/components/ui/states';
 import { WelcomeTourModal } from '@/components/WelcomeTourModal';
 
 interface DashboardStats {
@@ -145,7 +145,7 @@ export default function MemberDashboard() {
   return (
     <Container size="lg" className="py-10">
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-        <h1 className="text-headline-lg text-foreground">Welcome back, {user.firstName || user.displayName}!</h1>
+        <h1 className="font-serif text-headline-lg text-foreground">Welcome back, {user.firstName || user.displayName}!</h1>
         <p className="mt-2 text-body-md text-foreground-muted">Here&apos;s what&apos;s happening in your church community</p>
       </motion.div>
 

@@ -3,9 +3,9 @@
 import { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import { Container } from '@/components/ui-legacy/Container';
-import { Card } from '@/components/ui-legacy/Card';
-import { LoadingState } from '@/components/ui-legacy/States';
+import { Container } from '@/components/ui/container';
+import { Card } from '@/components/ui/card';
+import { LoadingState } from '@/components/ui/states';
 
 interface CampaignDetail {
   id: string;
@@ -41,7 +41,7 @@ export default function NewsletterArchiveDetailPage({ params }: { params: Promis
         <ArrowLeft className="h-4 w-4" /> Back to archive
       </Link>
       <Card variant="raised" padding="lg">
-        <h1 className="text-headline-sm text-foreground">{campaign.subject}</h1>
+        <h1 className="font-serif text-headline-sm text-foreground">{campaign.subject}</h1>
         <p className="mt-1 text-caption text-foreground-subtle">
           {campaign.sentAt ? new Date(campaign.sentAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : '—'}
         </p>

@@ -1,24 +1,24 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { Plus, Heart, Users, Sparkles, HandHeart, CheckCircle2, Archive } from 'lucide-react';
 import { getIdToken } from '@/lib/firebase';
-import { PageHero } from '@/components/ui-legacy/PageHero';
-import { Section } from '@/components/ui-legacy/Section';
-import { Container } from '@/components/ui-legacy/Container';
-import { Card } from '@/components/ui-legacy/Card';
-import { Grid } from '@/components/ui-legacy/Grid';
-import { Badge } from '@/components/ui-legacy/Badge';
-import { Input } from '@/components/ui-legacy/Input';
-import { Select } from '@/components/ui-legacy/Select';
-import { Textarea } from '@/components/ui-legacy/Textarea';
-import { Checkbox } from '@/components/ui-legacy/Checkbox';
-import { Button } from '@/components/ui-legacy/Button';
-import { Modal } from '@/components/ui-legacy/Modal';
-import { LoadingState, EmptyState } from '@/components/ui-legacy/States';
-import { useToast } from '@/components/ui-legacy/Toast';
-import { cn } from '@/lib/cn';
+import { PageHero } from '@/components/ui/page-hero';
+import { Section } from '@/components/ui/section';
+import { Container } from '@/components/ui/container';
+import { Card } from '@/components/ui/card';
+import { Grid } from '@/components/ui/grid';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
+import { Modal } from '@/components/ui/modal';
+import { LoadingState, EmptyState } from '@/components/ui/states';
+import { useToast } from '@/lib/toast';
+import { cn } from '@/lib/utils';
 
 const CATEGORIES = ['all', 'healing', 'guidance', 'thanksgiving', 'family', 'work'];
 

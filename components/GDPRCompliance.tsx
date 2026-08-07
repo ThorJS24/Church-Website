@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { Shield, Download, Trash2, Eye, Settings } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getIdToken } from '@/lib/firebase';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
 
 export default function GDPRCompliance() {
   const { user } = useAuth();
@@ -29,12 +31,7 @@ export default function GDPRCompliance() {
   }, []);
 
   const handleAcceptAll = () => {
-    const allAccepted = {
-      necessary: true,
-      analytics: true,
-      marketing: true,
-      functional: true
-    };
+    const allAccepted = { necessary: true, analytics: true, marketing: true, functional: true };
     setPreferences(allAccepted);
     localStorage.setItem('gdpr-consent', JSON.stringify(allAccepted));
     setShowBanner(false);
@@ -94,73 +91,43 @@ export default function GDPRCompliance() {
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
-            className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg z-50 p-4"
+            className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background p-4 shadow-lg"
           >
-            <div className="max-w-6xl mx-auto">
+            <div className="mx-auto max-w-6xl">
               <div className="flex items-start justify-between">
-                <div className="flex-1 mr-4">
-                  <div className="flex items-center mb-2">
-                    <Shield className="w-5 h-5 text-blue-600 mr-2" />
-                    <h3 className="font-semibold text-gray-900">Privacy & Cookies</h3>
+                <div className="mr-4 flex-1">
+                  <div className="mb-2 flex items-center">
+                    <Shield className="mr-2 h-5 w-5 text-accent" />
+                    <h3 className="font-serif text-title-sm text-foreground">Privacy &amp; Cookies</h3>
                   </div>
-                  <p className="text-sm text-gray-600 mb-4">
-                    We use cookies to enhance your experience, analyze site usage, and assist in our marketing efforts. 
+                  <p className="mb-4 text-body-sm text-foreground-muted">
+                    We use cookies to enhance your experience, analyze site usage, and assist in our marketing efforts.
                     You can customize your preferences below.
                   </p>
-                  
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={preferences.necessary}
-                        disabled
-                        className="mr-2"
-                      />
-                      <span className="text-xs">Necessary</span>
-                    </label>
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={preferences.analytics}
-                        onChange={(e) => setPreferences(prev => ({ ...prev, analytics: e.target.checked }))}
-                        className="mr-2"
-                      />
-                      <span className="text-xs">Analytics</span>
-                    </label>
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={preferences.marketing}
-                        onChange={(e) => setPreferences(prev => ({ ...prev, marketing: e.target.checked }))}
-                        className="mr-2"
-                      />
-                      <span className="text-xs">Marketing</span>
-                    </label>
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={preferences.functional}
-                        onChange={(e) => setPreferences(prev => ({ ...prev, functional: e.target.checked }))}
-                        className="mr-2"
-                      />
-                      <span className="text-xs">Functional</span>
-                    </label>
+
+                  <div className="mb-4 grid grid-cols-2 gap-4 md:grid-cols-4">
+                    <Checkbox label="Necessary" checked={preferences.necessary} disabled onChange={() => {}} />
+                    <Checkbox
+                      label="Analytics"
+                      checked={preferences.analytics}
+                      onChange={(e) => setPreferences((prev) => ({ ...prev, analytics: e.target.checked }))}
+                    />
+                    <Checkbox
+                      label="Marketing"
+                      checked={preferences.marketing}
+                      onChange={(e) => setPreferences((prev) => ({ ...prev, marketing: e.target.checked }))}
+                    />
+                    <Checkbox
+                      label="Functional"
+                      checked={preferences.functional}
+                      onChange={(e) => setPreferences((prev) => ({ ...prev, functional: e.target.checked }))}
+                    />
                   </div>
                 </div>
-                
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <button
-                    onClick={handleSavePreferences}
-                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded text-sm hover:bg-gray-300"
-                  >
-                    Save Preferences
-                  </button>
-                  <button
-                    onClick={handleAcceptAll}
-                    className="px-4 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
-                  >
-                    Accept All
-                  </button>
+
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <Button variant="secondary" size="sm" onClick={handleSavePreferences}>Save Preferences</Button>
+                  <Button size="sm" onClick={handleAcceptAll}>Accept All</Button>
                 </div>
               </div>
             </div>
@@ -169,85 +136,82 @@ export default function GDPRCompliance() {
       </AnimatePresence>
 
       {/* GDPR Management Panel */}
-      <div role="region" aria-label="Data privacy and rights" className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-          <Shield className="w-5 h-5 mr-2" />
-          Data Privacy & Rights
+      <div role="region" aria-label="Data privacy and rights" className="rounded-lg border border-border bg-background p-6 shadow-sm">
+        <h3 className="mb-4 flex items-center font-serif text-title-md text-foreground">
+          <Shield className="mr-2 h-5 w-5 text-accent" />
+          Data Privacy &amp; Rights
         </h3>
-        
+
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <div className="flex items-center justify-between rounded-lg bg-surface p-3">
             <div className="flex items-center">
-              <Eye className="w-4 h-4 text-gray-600 mr-3" />
+              <Eye className="mr-3 h-4 w-4 text-foreground-muted" />
               <div>
-                <p className="font-medium text-sm">View Privacy Policy</p>
-                <p className="text-xs text-gray-500">Learn how we handle your data</p>
+                <p className="text-body-sm font-medium text-foreground">View Privacy Policy</p>
+                <p className="text-caption text-foreground-subtle">Learn how we handle your data</p>
               </div>
             </div>
-            <button onClick={() => router.push('/privacy')} className="text-blue-600 text-sm hover:underline">
+            <button onClick={() => router.push('/privacy')} className="text-body-sm text-accent hover:underline">
               View
             </button>
           </div>
 
-          <div className="p-3 bg-gray-50 rounded-lg">
+          <div className="rounded-lg bg-surface p-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <Download className="w-4 h-4 text-gray-600 mr-3" />
+                <Download className="mr-3 h-4 w-4 text-foreground-muted" />
                 <div>
-                  <p className="font-medium text-sm">Download My Data</p>
-                  <p className="text-xs text-gray-500">Get a copy of your personal data</p>
+                  <p className="text-body-sm font-medium text-foreground">Download My Data</p>
+                  <p className="text-caption text-foreground-subtle">Get a copy of your personal data</p>
                 </div>
               </div>
               <button
                 onClick={() => handleDataRequest('download')}
                 disabled={requestStatus.type === 'download' && requestStatus.state === 'working'}
-                className="text-blue-600 text-sm hover:underline disabled:opacity-50"
+                className="text-body-sm text-accent hover:underline disabled:opacity-50"
               >
                 {requestStatus.type === 'download' && requestStatus.state === 'working' ? 'Preparing...' : 'Download'}
               </button>
             </div>
             {requestStatus.type === 'download' && requestStatus.state === 'error' && (
-              <p className="text-xs text-red-600 mt-2">Couldn&apos;t download your data. Please try again.</p>
+              <p className="mt-2 text-caption text-danger">Couldn&apos;t download your data. Please try again.</p>
             )}
           </div>
 
-          <div className="p-3 bg-gray-50 rounded-lg">
+          <div className="rounded-lg bg-surface p-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <Trash2 className="w-4 h-4 text-red-600 mr-3" />
+                <Trash2 className="mr-3 h-4 w-4 text-danger" />
                 <div>
-                  <p className="font-medium text-sm">Delete My Account</p>
-                  <p className="text-xs text-gray-500">Permanently remove your data</p>
+                  <p className="text-body-sm font-medium text-foreground">Delete My Account</p>
+                  <p className="text-caption text-foreground-subtle">Permanently remove your data</p>
                 </div>
               </div>
               <button
                 onClick={() => handleDataRequest('delete')}
                 disabled={requestStatus.type === 'delete' && (requestStatus.state === 'working' || requestStatus.state === 'success')}
-                className="text-red-600 text-sm hover:underline disabled:opacity-50"
+                className="text-body-sm text-danger hover:underline disabled:opacity-50"
               >
                 {requestStatus.type === 'delete' && requestStatus.state === 'working' ? 'Submitting...' : 'Request'}
               </button>
             </div>
             {requestStatus.type === 'delete' && requestStatus.state === 'success' && (
-              <p className="text-xs text-green-600 mt-2">Request received — our staff will follow up by email.</p>
+              <p className="mt-2 text-caption text-success">Request received — our staff will follow up by email.</p>
             )}
             {requestStatus.type === 'delete' && requestStatus.state === 'error' && (
-              <p className="text-xs text-red-600 mt-2">Couldn&apos;t submit your request. Please try again.</p>
+              <p className="mt-2 text-caption text-danger">Couldn&apos;t submit your request. Please try again.</p>
             )}
           </div>
 
-          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <div className="flex items-center justify-between rounded-lg bg-surface p-3">
             <div className="flex items-center">
-              <Settings className="w-4 h-4 text-gray-600 mr-3" />
+              <Settings className="mr-3 h-4 w-4 text-foreground-muted" />
               <div>
-                <p className="font-medium text-sm">Cookie Preferences</p>
-                <p className="text-xs text-gray-500">Manage your cookie settings</p>
+                <p className="text-body-sm font-medium text-foreground">Cookie Preferences</p>
+                <p className="text-caption text-foreground-subtle">Manage your cookie settings</p>
               </div>
             </div>
-            <button
-              onClick={() => setShowBanner(true)}
-              className="text-blue-600 text-sm hover:underline"
-            >
+            <button onClick={() => setShowBanner(true)} className="text-body-sm text-accent hover:underline">
               Manage
             </button>
           </div>

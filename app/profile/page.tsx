@@ -1,19 +1,19 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { User, Mail, Phone, MapPin, Calendar, Edit, Save, X, LogOut } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { Container } from '@/components/ui-legacy/Container';
-import { Card } from '@/components/ui-legacy/Card';
-import { Grid } from '@/components/ui-legacy/Grid';
-import { Input } from '@/components/ui-legacy/Input';
-import { Button } from '@/components/ui-legacy/Button';
-import { Avatar } from '@/components/ui-legacy/Avatar';
-import { Badge } from '@/components/ui-legacy/Badge';
-import { LoadingState } from '@/components/ui-legacy/States';
-import { useToast } from '@/components/ui-legacy/Toast';
+import { Container } from '@/components/ui/container';
+import { Card } from '@/components/ui/card';
+import { Grid } from '@/components/ui/grid';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Avatar } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { LoadingState } from '@/components/ui/states';
+import { useToast } from '@/lib/toast';
 
 export default function ProfilePage() {
   const { user, isLoading, updateUser, logout } = useAuth();
@@ -72,7 +72,7 @@ export default function ProfilePage() {
             <div className="flex items-center gap-5">
               <Avatar src={user.photoURL} name={`${formData.firstName} ${formData.lastName}`.trim() || user.email} size="xl" className="bg-white/20 text-white" />
               <div>
-                <h1 className="text-headline-sm">{formData.firstName} {formData.lastName}</h1>
+                <h1 className="font-serif text-headline-sm">{formData.firstName} {formData.lastName}</h1>
                 <p className="opacity-90">{user.email}</p>
                 <p className="text-body-sm opacity-75">Member since {new Date(user.joinDate || user.createdAt).toLocaleDateString()}</p>
               </div>

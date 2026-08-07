@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { WifiOff, RefreshCw } from 'lucide-react';
-import { Container } from '@/components/ui-legacy/Container';
-import { Card } from '@/components/ui-legacy/Card';
-import { Button } from '@/components/ui-legacy/Button';
+import { Container } from '@/components/ui/container';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 export default function OfflinePage() {
   const [isOnline, setIsOnline] = useState(false);
@@ -25,7 +25,7 @@ export default function OfflinePage() {
     <Container size="sm" className="flex min-h-[70vh] items-center justify-center text-center">
       <div className="w-full max-w-md">
         <WifiOff className="mx-auto mb-4 h-20 w-20 text-foreground-subtle" />
-        <h1 className="text-headline-sm text-foreground">You&apos;re Offline</h1>
+        <h1 className="font-serif text-headline-sm text-foreground">You&apos;re Offline</h1>
         <p className="mt-2 text-body-md text-foreground-muted">Please check your internet connection and try again.</p>
 
         {isOnline && (

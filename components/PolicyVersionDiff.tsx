@@ -3,9 +3,9 @@
 import { useState, useMemo } from 'react';
 import { History } from 'lucide-react';
 import { wordDiff } from '@/lib/diff';
-import { Card } from '@/components/ui-legacy/Card';
-import { Select } from '@/components/ui-legacy/Select';
-import { cn } from '@/lib/cn';
+import { Card } from '@/components/ui/card';
+import { Select } from '@/components/ui/select';
+import { cn } from '@/lib/utils';
 
 export interface PolicyVersion {
   id: string;

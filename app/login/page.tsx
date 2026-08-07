@@ -1,15 +1,15 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Church, Eye, EyeOff, Mail, Lock } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
-import { Card } from '@/components/ui-legacy/Card'
-import { Input } from '@/components/ui-legacy/Input'
-import { Button } from '@/components/ui-legacy/Button'
-import { IconButton } from '@/components/ui-legacy/IconButton'
+import { Card } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { IconButton } from '@/components/ui/icon-button'
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -51,7 +51,7 @@ export default function LoginPage() {
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-accent">
               <Church className="h-7 w-7 text-accent-foreground" />
             </div>
-            <h1 className="text-headline-sm text-foreground">Welcome Back</h1>
+            <h1 className="font-serif text-headline-sm text-foreground">Welcome Back</h1>
             <p className="mt-1 text-body-sm text-foreground-muted">Sign in to your account</p>
           </div>
 

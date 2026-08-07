@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 import { ScrollText, FileText, Landmark, Gift, ArrowLeft } from 'lucide-react';
-import { PageHero } from '@/components/ui-legacy/PageHero';
-import { Section } from '@/components/ui-legacy/Section';
-import { Container } from '@/components/ui-legacy/Container';
-import { Card } from '@/components/ui-legacy/Card';
-import { Grid } from '@/components/ui-legacy/Grid';
-import { LinkButton } from '@/components/ui-legacy/Button';
+import { PageHero } from '@/components/ui/page-hero';
+import { Section } from '@/components/ui/section';
+import { Container } from '@/components/ui/container';
+import { Card } from '@/components/ui/card';
+import { Grid } from '@/components/ui/grid';
+import { LinkButton } from '@/components/ui/button';
 
 export const metadata: Metadata = {
   title: 'Legacy Giving — Salem Primitive Baptist Church',

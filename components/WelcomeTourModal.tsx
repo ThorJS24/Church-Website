@@ -1,15 +1,15 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'motion/react';
 import { Church, Book, Heart, Users, ChevronRight, ChevronLeft, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui-legacy/Button';
-import { IconButton } from '@/components/ui-legacy/IconButton';
+import { Button } from '@/components/ui/button';
+import { IconButton } from '@/components/ui/icon-button';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { useMounted } from '@/hooks/useMounted';
-import { cn } from '@/lib/cn';
+import { cn } from '@/lib/utils';
 
 const SLIDES = [
   { icon: Church, title: 'Welcome to the Family!', description: "We're glad you're here. This dashboard is your home base — let's take a quick look around." },

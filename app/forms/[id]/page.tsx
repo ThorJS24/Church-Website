@@ -3,14 +3,14 @@
 import { useEffect, useState, useMemo, use } from 'react';
 import { CheckCircle, Info, ChevronLeft, ChevronRight } from 'lucide-react';
 import { FieldSchema } from '@/types/contentType';
-import { Container } from '@/components/ui-legacy/Container';
-import { Card } from '@/components/ui-legacy/Card';
-import { Input } from '@/components/ui-legacy/Input';
-import { Textarea } from '@/components/ui-legacy/Textarea';
-import { Checkbox } from '@/components/ui-legacy/Checkbox';
-import { Button } from '@/components/ui-legacy/Button';
-import { LoadingState } from '@/components/ui-legacy/States';
-import { cn } from '@/lib/cn';
+import { Container } from '@/components/ui/container';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
+import { LoadingState } from '@/components/ui/states';
+import { cn } from '@/lib/utils';
 
 interface PublicForm {
   id: string;
@@ -216,7 +216,7 @@ export default function PublicFormPage({ params }: { params: Promise<{ id: strin
           </div>
         ) : (
           <>
-            <h1 className="text-headline-sm text-foreground">{form.title}</h1>
+            <h1 className="font-serif text-headline-sm text-foreground">{form.title}</h1>
             {form.description && <p className="mt-2 text-body-sm text-foreground-muted">{form.description}</p>}
 
             {draftRestored && (

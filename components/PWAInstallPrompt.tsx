@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { Download, X, Smartphone } from 'lucide-react';
+import { IconButton } from '@/components/ui/icon-button';
+import { Button } from '@/components/ui/button';
 
 export default function PWAInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -40,7 +42,7 @@ export default function PWAInstallPrompt() {
     if (deferredPrompt) {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
-      
+
       if (outcome === 'accepted') {
         setDeferredPrompt(null);
         setShowPrompt(false);
@@ -62,52 +64,41 @@ export default function PWAInstallPrompt() {
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 100, opacity: 0 }}
-          className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-80 bg-white rounded-lg shadow-lg border z-50 p-4"
+          className="fixed inset-x-4 bottom-4 z-50 rounded-lg border border-border bg-background p-4 shadow-lg md:inset-x-auto md:right-4 md:w-80"
         >
-          <div className="flex items-start justify-between mb-3">
+          <div className="mb-3 flex items-start justify-between">
             <div className="flex items-center">
-              <Smartphone className="w-5 h-5 text-blue-600 mr-2" />
-              <h3 className="font-semibold text-gray-900">Install Church App</h3>
+              <Smartphone className="mr-2 h-5 w-5 text-accent" />
+              <h3 className="font-serif text-title-sm text-foreground">Install Church App</h3>
             </div>
-            <button
-              onClick={handleDismiss}
-              className="text-gray-400 hover:text-gray-600"
-            >
-              <X className="w-4 h-4" />
-            </button>
+            <IconButton label="Dismiss" size="sm" onClick={handleDismiss}>
+              <X className="h-4 w-4" />
+            </IconButton>
           </div>
-          
-          <p className="text-sm text-gray-600 mb-4">
-            {isIOS 
+
+          <p className="mb-4 text-body-sm text-foreground-muted">
+            {isIOS
               ? 'Add Salem PBC to your home screen for quick access to sermons, events, and more!'
-              : 'Install our app for offline access, push notifications, and a better experience!'
-            }
+              : 'Install our app for offline access, push notifications, and a better experience!'}
           </p>
-          
+
           {isIOS ? (
-            <div className="text-xs text-gray-500 mb-4">
+            <div className="mb-4 text-caption text-foreground-subtle">
               <p>To install:</p>
-              <ol className="list-decimal list-inside mt-1 space-y-1">
+              <ol className="mt-1 list-inside list-decimal space-y-1">
                 <li>Tap the Share button in Safari</li>
-                <li>Scroll down and tap "Add to Home Screen"</li>
-                <li>Tap "Add" to confirm</li>
+                <li>Scroll down and tap &quot;Add to Home Screen&quot;</li>
+                <li>Tap &quot;Add&quot; to confirm</li>
               </ol>
             </div>
           ) : (
             <div className="flex gap-2">
-              <button
-                onClick={handleInstall}
-                className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center justify-center"
-              >
-                <Download className="w-4 h-4 mr-1" />
+              <Button onClick={handleInstall} size="sm" leftIcon={<Download className="h-4 w-4" />} fullWidth>
                 Install App
-              </button>
-              <button
-                onClick={handleDismiss}
-                className="px-4 py-2 text-gray-600 text-sm hover:text-gray-800"
-              >
+              </Button>
+              <Button onClick={handleDismiss} variant="ghost" size="sm">
                 Not now
-              </button>
+              </Button>
             </div>
           )}
         </motion.div>

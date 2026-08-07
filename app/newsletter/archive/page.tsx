@@ -3,9 +3,9 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Mail } from 'lucide-react';
-import { Container } from '@/components/ui-legacy/Container';
-import { Card } from '@/components/ui-legacy/Card';
-import { LoadingState, EmptyState } from '@/components/ui-legacy/States';
+import { Container } from '@/components/ui/container';
+import { Card } from '@/components/ui/card';
+import { LoadingState, EmptyState } from '@/components/ui/states';
 
 interface CampaignSummary {
   id: string;
@@ -25,7 +25,7 @@ export default function NewsletterArchivePage() {
 
   return (
     <Container size="sm" className="py-16">
-      <h1 className="mb-2 text-headline-sm text-foreground">Newsletter Archive</h1>
+      <h1 className="mb-2 font-serif text-headline-sm text-foreground">Newsletter Archive</h1>
       <p className="mb-8 text-body-sm text-foreground-muted">Past emails sent to our newsletter subscribers.</p>
 
       {campaigns === null ? (

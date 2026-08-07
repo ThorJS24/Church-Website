@@ -3,11 +3,11 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { CheckCircle } from 'lucide-react';
-import { Container } from '@/components/ui-legacy/Container';
-import { Card } from '@/components/ui-legacy/Card';
-import { Checkbox } from '@/components/ui-legacy/Checkbox';
-import { Button } from '@/components/ui-legacy/Button';
-import { LoadingState } from '@/components/ui-legacy/States';
+import { Container } from '@/components/ui/container';
+import { Card } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
+import { LoadingState } from '@/components/ui/states';
 
 // The topic list an admin can segment campaigns by — kept as a fixed set
 // here (rather than free-text tagging like the admin side) since visitors
@@ -73,7 +73,7 @@ function PreferencesForm() {
         </div>
       ) : (
         <>
-          <h1 className="text-headline-sm text-foreground">Email Preferences</h1>
+          <h1 className="font-serif text-headline-sm text-foreground">Email Preferences</h1>
           <p className="mt-2 text-body-sm text-foreground-muted">{email}</p>
           <p className="mt-4 text-body-sm text-foreground-muted">Choose which topics you&apos;d like to hear about. Leave all unchecked to receive every newsletter.</p>
           <div className="mt-4 space-y-3">

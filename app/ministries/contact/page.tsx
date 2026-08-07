@@ -2,16 +2,16 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { CheckCircle2 } from 'lucide-react';
 import { getMinistries } from '@/lib/content';
-import { Container } from '@/components/ui-legacy/Container';
-import { Card } from '@/components/ui-legacy/Card';
-import { Input } from '@/components/ui-legacy/Input';
-import { Select } from '@/components/ui-legacy/Select';
-import { Textarea } from '@/components/ui-legacy/Textarea';
-import { Button } from '@/components/ui-legacy/Button';
-import { LoadingState } from '@/components/ui-legacy/States';
+import { Container } from '@/components/ui/container';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { LoadingState } from '@/components/ui/states';
 
 interface Ministry {
   id: string;
@@ -82,7 +82,7 @@ function ContactMinistryLeaderPageInner() {
   return (
     <Container size="sm" className="py-16">
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="text-center">
-        <h1 className="text-display-sm text-foreground">Contact a Ministry Leader</h1>
+        <h1 className="font-serif text-display-sm text-foreground">Contact a Ministry Leader</h1>
         <p className="mt-3 text-body-lg text-foreground-muted">We&apos;re here to help you get connected. Select a ministry and send your message.</p>
       </motion.div>
 

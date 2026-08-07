@@ -2,17 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Users, Clock, MapPin, Link as LinkIcon, ArrowLeft, CheckCircle2, Mail } from 'lucide-react';
 import { getSmallGroupById, SmallGroup } from '@/lib/content';
-import { PageHero } from '@/components/ui-legacy/PageHero';
-import { Section } from '@/components/ui-legacy/Section';
-import { Card } from '@/components/ui-legacy/Card';
-import { Badge } from '@/components/ui-legacy/Badge';
-import { Input } from '@/components/ui-legacy/Input';
-import { Textarea } from '@/components/ui-legacy/Textarea';
-import { Button, LinkButton } from '@/components/ui-legacy/Button';
-import { LoadingState, EmptyState } from '@/components/ui-legacy/States';
+import { PageHero } from '@/components/ui/page-hero';
+import { Section } from '@/components/ui/section';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Button, LinkButton } from '@/components/ui/button';
+import { LoadingState, EmptyState } from '@/components/ui/states';
 
 function parseResourceLinks(raw?: string): { title: string; url: string }[] {
   return (raw ?? '')

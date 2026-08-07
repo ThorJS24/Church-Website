@@ -1,18 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { Settings, Bell, Shield, User as UserIcon, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getIdToken } from '@/lib/firebase';
 import ConfirmModal from '@/components/admin/ConfirmModal';
-import { Container } from '@/components/ui-legacy/Container';
-import { Card } from '@/components/ui-legacy/Card';
-import { Input } from '@/components/ui-legacy/Input';
-import { Button } from '@/components/ui-legacy/Button';
-import { Switch } from '@/components/ui-legacy/Switch';
-import { LoadingState } from '@/components/ui-legacy/States';
+import { Container } from '@/components/ui/container';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { LoadingState } from '@/components/ui/states';
 
 type Notifications = { email: boolean; events: boolean; prayers: boolean; newsletter: boolean; sermons: boolean; volunteerOpportunities: boolean };
 type Privacy = { profileVisible: boolean; contactVisible: boolean };
@@ -120,7 +120,7 @@ export default function SettingsPage() {
         <Card variant="raised" padding="none">
           <div className="flex items-center gap-3 border-b border-border p-6">
             <Settings className="h-6 w-6 text-accent" />
-            <h1 className="text-headline-sm text-foreground">Settings</h1>
+            <h1 className="font-serif text-headline-sm text-foreground">Settings</h1>
           </div>
 
           <div className="space-y-8 p-6">

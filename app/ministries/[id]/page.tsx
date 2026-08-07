@@ -2,15 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Mail, Phone, Clock, MapPin, Users, Quote, ArrowLeft } from 'lucide-react';
 import { getMinistryById, Ministry } from '@/lib/content';
-import { PageHero } from '@/components/ui-legacy/PageHero';
-import { Section } from '@/components/ui-legacy/Section';
-import { Card } from '@/components/ui-legacy/Card';
-import { Grid } from '@/components/ui-legacy/Grid';
-import { LinkButton } from '@/components/ui-legacy/Button';
-import { LoadingState, EmptyState } from '@/components/ui-legacy/States';
+import { PageHero } from '@/components/ui/page-hero';
+import { Section } from '@/components/ui/section';
+import { Card } from '@/components/ui/card';
+import { Grid } from '@/components/ui/grid';
+import { LinkButton } from '@/components/ui/button';
+import { LoadingState, EmptyState } from '@/components/ui/states';
 import Image from 'next/image';
 
 function parseVolunteerNeeds(raw?: string): string[] {
