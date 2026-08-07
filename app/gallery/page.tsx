@@ -38,6 +38,13 @@ function renderDescription(description: any): string {
 
 interface PhotoComment { id: string; text: string; author: string; createdAt?: string }
 
+// Falls back to the most-liked photo instead of just whichever uploaded
+// first, when an album has no explicitly-set cover image.
+function albumCoverPhoto(photos: GalleryPhoto[]): GalleryPhoto | undefined {
+  if (photos.length === 0) return undefined;
+  return [...photos].sort((a, b) => (b.likes || 0) - (a.likes || 0))[0];
+}
+
 function PhotoLightbox({
   photos,
   index,
@@ -537,12 +544,14 @@ function GalleryPageInner() {
           <EmptyState icon={Camera} title="No event galleries available" description="Check back soon for photos from our upcoming events." />
         ) : (
           <Grid cols={3} gap={6}>
-            {filteredEvents.map((event, index) => (
+            {filteredEvents.map((event, index) => {
+              const coverPhoto = albumCoverPhoto(event.photos);
+              return (
               <motion.div key={event.id} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-80px' }} transition={{ delay: Math.min(index * 0.05, 0.3), duration: 0.4 }}>
                 <Card padding="none" className="h-full cursor-pointer overflow-hidden" onClick={() => openEvent(event)}>
                   <div className="relative aspect-video bg-surface-active">
-                    {(event.imageUrl || event.photos[0]) ? (
-                      <Image src={event.imageUrl || event.photos[0].imageUrl} alt={event.title} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className={`object-cover ${event.membersOnly && !user ? 'blur-xs' : ''}`} />
+                    {(event.imageUrl || coverPhoto) ? (
+                      <Image src={event.imageUrl || coverPhoto!.imageUrl} alt={event.title} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className={`object-cover ${event.membersOnly && !user ? 'blur-xs' : ''}`} />
                     ) : (
                       <div className="flex h-full items-center justify-center">
                         <Camera className="h-10 w-10 text-foreground-subtle" />
@@ -569,7 +578,8 @@ function GalleryPageInner() {
                   </div>
                 </Card>
               </motion.div>
-            ))}
+              );
+            })}
           </Grid>
         )}
       </Section>

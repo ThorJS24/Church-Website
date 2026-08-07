@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Clock, Calendar } from 'lucide-react';
-import { getBlogPost, getBlogPosts } from '@/lib/content';
+import { getBlogPost, getBlogPosts, getPastors, getStaffMembers } from '@/lib/content';
 import { parseBlogContent, estimateReadingTime } from '@/lib/blogContent';
 import { Container } from '@/components/ui/container';
 import { Section } from '@/components/ui/section';
@@ -55,6 +55,22 @@ export default async function BlogPostPage({ params }: Props) {
     .filter((p) => p.id !== post.id)
     .sort((a, b) => (a.category === post.category ? -1 : 0) - (b.category === post.category ? -1 : 0))
     .slice(0, 3);
+
+  // BlogPost.authorName is a free-text string, no dedicated bio/photo
+  // fields — cross-reference against pastors/staff (who often are the
+  // authors) for a richer bio card, same matching approach the pastors
+  // page already uses for sermons-by-speaker.
+  let authorProfile: { name: string; title?: string; imageUrl?: string; bio?: string } | null = null;
+  if (post.authorName) {
+    const [pastors, staff] = await Promise.all([getPastors(), getStaffMembers()]);
+    const pastorMatch = pastors.find((p) => p.name === post.authorName);
+    const staffMatch = !pastorMatch ? staff.find((s) => s.name === post.authorName) : null;
+    if (pastorMatch) {
+      authorProfile = { name: pastorMatch.name, title: pastorMatch.title, imageUrl: pastorMatch.imageUrl, bio: pastorMatch.bio };
+    } else if (staffMatch) {
+      authorProfile = { name: staffMatch.name, title: staffMatch.position, imageUrl: undefined, bio: undefined };
+    }
+  }
 
   const articleJsonLd = {
     '@context': 'https://schema.org',
@@ -144,6 +160,25 @@ export default async function BlogPostPage({ params }: Props) {
               </aside>
             )}
           </div>
+
+          {post.authorName && (
+            <Card variant="raised" padding="lg" className="mt-10 no-print">
+              <div className="flex items-start gap-4">
+                <Avatar src={authorProfile?.imageUrl} name={post.authorName} size="lg" />
+                <div>
+                  <p className="text-title-sm text-foreground">{post.authorName}</p>
+                  {authorProfile?.title && <p className="text-body-sm text-foreground-subtle">{authorProfile.title}</p>}
+                  {authorProfile?.bio && <p className="mt-2 text-body-sm text-foreground-muted">{authorProfile.bio}</p>}
+                  <Link
+                    href={`/blog/author/${encodeURIComponent(post.authorName)}`}
+                    className="mt-2 inline-block text-body-sm font-medium text-accent hover:underline dark:text-accent-hover"
+                  >
+                    More posts by {post.authorName}
+                  </Link>
+                </div>
+              </div>
+            </Card>
+          )}
         </Container>
       </Section>
 
