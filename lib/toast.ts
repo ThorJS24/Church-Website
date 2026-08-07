@@ -12,9 +12,8 @@ export interface ToastOptions {
 /**
  * Thin adapter over sonner preserving the first rebuild's toast({ title,
  * description, variant }) call signature, so the many existing call sites
- * (components/ui-legacy/Toast.tsx's useToast()) do not need individual
- * rewrites as pages migrate off ui-legacy — only their import path changes,
- * from '@/components/ui-legacy/Toast' to '@/lib/toast'.
+ * didn't need individual rewrites when migrating off the old hand-rolled
+ * ToastProvider/useToast() — only the import path changed.
  */
 export function toast({ title, description, variant = 'default', duration }: ToastOptions) {
   const options = { description, duration };
