@@ -121,27 +121,35 @@ layer(utilities);
   --color-input: rgb(var(--border));
   --color-ring: rgb(var(--accent));
 
-  --radius-sm: var(--radius-sm);
-  --radius-md: var(--radius-md);
-  --radius-lg: var(--radius-lg);
-  --radius-xl: var(--radius-xl);
-  --radius-2xl: var(--radius-2xl);
-  --radius-full: var(--radius-full);
+  /* Radius/ease don't vary between light/dark, so they're inlined directly
+     here rather than indirected through a same-named --radius-xl: var(--radius-xl)
+     style reference, which is a self-referencing custom property and
+     resolves to the CSS-invalid value, not the intended one. */
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-2xl: 28px;
+  --radius-full: 9999px;
 
-  --shadow-xs: var(--shadow-xs);
-  --shadow-sm: var(--shadow-sm);
-  --shadow-md: var(--shadow-md);
-  --shadow-lg: var(--shadow-lg);
-  --shadow-xl: var(--shadow-xl);
+  /* Shadows DO vary between light/dark, so they keep the two-tier
+     indirection — but pointing at a distinctly-named backing variable
+     (--shadow-xs-value, defined in :root/.dark below), never the same
+     name on both sides of the var(), which is the self-reference bug. */
+  --shadow-xs: var(--shadow-xs-value);
+  --shadow-sm: var(--shadow-sm-value);
+  --shadow-md: var(--shadow-md-value);
+  --shadow-lg: var(--shadow-lg-value);
+  --shadow-xl: var(--shadow-xl-value);
 
   --transition-duration-fast: var(--duration-fast);
   --transition-duration-base: var(--duration-base);
   --transition-duration-slow: var(--duration-slow);
   --transition-duration-slower: var(--duration-slower);
 
-  --ease-standard: var(--ease-standard);
-  --ease-decelerate: var(--ease-decelerate);
-  --ease-accelerate: var(--ease-accelerate);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
+  --ease-accelerate: cubic-bezier(0.4, 0, 1, 1);
 
   --text-display-lg: 3.5rem;
   --text-display-lg--line-height: 1.1;
@@ -302,29 +310,23 @@ layer(utilities);
   --info: 46 111 149; /* blue-teal, distinct enough from navy --accent */
   --info-subtle: 225 235 240;
 
-  /* Radius — nudged rounder and friendlier than the first rebuild tighter scale */
-  --radius-sm: 8px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --radius-xl: 20px;
-  --radius-2xl: 28px;
-  --radius-full: 9999px;
+  /* Radius and ease are inlined directly in @theme above (they don't vary
+     by theme) — no real-value block needed here. */
 
-  /* Shadow / elevation — warmed from pure black to a warm dark brown tint */
-  --shadow-xs: 0 1px 2px 0 rgb(40 28 16 / 0.05);
-  --shadow-sm: 0 1px 3px 0 rgb(40 28 16 / 0.07), 0 1px 2px -1px rgb(40 28 16 / 0.07);
-  --shadow-md: 0 4px 6px -1px rgb(40 28 16 / 0.08), 0 2px 4px -2px rgb(40 28 16 / 0.07);
-  --shadow-lg: 0 10px 15px -3px rgb(40 28 16 / 0.09), 0 4px 6px -4px rgb(40 28 16 / 0.07);
-  --shadow-xl: 0 20px 25px -5px rgb(40 28 16 / 0.1), 0 8px 10px -6px rgb(40 28 16 / 0.07);
+  /* Shadow / elevation — warmed from pure black to a warm dark brown tint.
+     Named -value to stay distinct from @theme's --shadow-xs etc above,
+     which var()-reference these. */
+  --shadow-xs-value: 0 1px 2px 0 rgb(40 28 16 / 0.05);
+  --shadow-sm-value: 0 1px 3px 0 rgb(40 28 16 / 0.07), 0 1px 2px -1px rgb(40 28 16 / 0.07);
+  --shadow-md-value: 0 4px 6px -1px rgb(40 28 16 / 0.08), 0 2px 4px -2px rgb(40 28 16 / 0.07);
+  --shadow-lg-value: 0 10px 15px -3px rgb(40 28 16 / 0.09), 0 4px 6px -4px rgb(40 28 16 / 0.07);
+  --shadow-xl-value: 0 20px 25px -5px rgb(40 28 16 / 0.1), 0 8px 10px -6px rgb(40 28 16 / 0.07);
 
   /* Motion */
   --duration-fast: 120ms;
   --duration-base: 180ms;
   --duration-slow: 240ms;
   --duration-slower: 320ms;
-  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
-  --ease-accelerate: cubic-bezier(0.4, 0, 1, 1);
 
   /* Section rhythm */
   --space-section-sm: 3rem;
@@ -385,11 +387,11 @@ layer(utilities);
   --info-subtle: 20 38 49;
 
   /* Shadows barely read on dark backgrounds — lean on a hairline border glow instead */
-  --shadow-xs: 0 0 0 1px rgb(255 255 255 / 0.04);
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3), 0 0 0 1px rgb(255 255 255 / 0.05);
-  --shadow-md: 0 4px 8px 0 rgb(0 0 0 / 0.35), 0 0 0 1px rgb(255 255 255 / 0.06);
-  --shadow-lg: 0 12px 20px -4px rgb(0 0 0 / 0.4), 0 0 0 1px rgb(255 255 255 / 0.06);
-  --shadow-xl: 0 24px 32px -8px rgb(0 0 0 / 0.45), 0 0 0 1px rgb(255 255 255 / 0.07);
+  --shadow-xs-value: 0 0 0 1px rgb(255 255 255 / 0.04);
+  --shadow-sm-value: 0 1px 2px 0 rgb(0 0 0 / 0.3), 0 0 0 1px rgb(255 255 255 / 0.05);
+  --shadow-md-value: 0 4px 8px 0 rgb(0 0 0 / 0.35), 0 0 0 1px rgb(255 255 255 / 0.06);
+  --shadow-lg-value: 0 12px 20px -4px rgb(0 0 0 / 0.4), 0 0 0 1px rgb(255 255 255 / 0.06);
+  --shadow-xl-value: 0 24px 32px -8px rgb(0 0 0 / 0.45), 0 0 0 1px rgb(255 255 255 / 0.07);
 }
 
 /* ==========================================================================

@@ -40,7 +40,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }
 
   if (!mounted) {
-    return <div className="min-h-screen bg-white">{children}</div>
+    // Pre-hydration fallback — this is what the server actually sends for
+    // every page's first paint (SSR always has mounted=false), so it needs
+    // to match the real background, not a hardcoded white that flashes
+    // against the rest of the warm-toned page before hydration completes.
+    // bg-background alone is correct here: the default theme is 'light'
+    // and `.dark` is never on <html> yet at this point, so the light-mode
+    // CSS variable is exactly what should show.
+    return <div className="min-h-screen bg-background">{children}</div>
   }
 
   return (
