@@ -21,6 +21,7 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import CommandPalette from '@/components/CommandPalette';
 import { AccessibilityMenu } from '@/components/AccessibilityMenu';
+import { NotificationBell } from '@/components/NotificationBell';
 import EnhancedLoginModal from './EnhancedLoginModal';
 
 interface NavItem {
@@ -220,6 +221,8 @@ export default function Navbar() {
             </IconButton>
 
             <AccessibilityMenu />
+
+            <NotificationBell />
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

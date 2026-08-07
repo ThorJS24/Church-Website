@@ -22,13 +22,33 @@ export async function GET(request: NextRequest) {
     const { uid, email } = authResult.user;
     const db = getAdminDb();
 
-    const [prayerSnap, hoursSnap, ratingsSnap, savedSnap, contactsSnap] = await Promise.all([
+    const [prayerSnap, hoursSnap, ratingsSnap, savedSnap, contactsSnap, registrationsSnap] = await Promise.all([
       db.collection('prayerRequests').where('requestedBy', '==', uid).get(),
       db.collection('volunteerHours').where('uid', '==', uid).get(),
       db.collection('resourceRatings').where('uid', '==', uid).get(),
       db.collection('savedItems').where('uid', '==', uid).get(),
       email ? db.collection('contacts').where('email', '==', email).get() : Promise.resolve(null),
+      email
+        ? db.collection('eventRegistrations').where('email', '==', email.toLowerCase()).where('status', '==', 'confirmed').get()
+        : Promise.resolve(null),
     ]);
+
+    // upcomingEvents was previously hardcoded to 0 — eventRegistrations
+    // already exists (the RSVP system writes to it), it just wasn't being
+    // queried here. Cross-reference against the actual event dates so a
+    // past RSVP doesn't count as "upcoming".
+    let upcomingEventsCount = 0;
+    let nextEvent: { id: string; title: string; startDate: string } | null = null;
+    if (registrationsSnap && !registrationsSnap.empty) {
+      const eventIds = Array.from(new Set(registrationsSnap.docs.map((d) => d.data().eventId as string)));
+      const eventDocs = await Promise.all(eventIds.map((id) => db.collection('events').doc(id).get()));
+      const upcoming = eventDocs
+        .filter((d) => d.exists && new Date(d.data()!.startDate).getTime() >= Date.now())
+        .map((d) => ({ id: d.id, title: d.data()!.title as string, startDate: d.data()!.startDate as string }))
+        .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+      upcomingEventsCount = upcoming.length;
+      nextEvent = upcoming[0] || null;
+    }
 
     const activity: ActivityEntry[] = [];
     prayerSnap.docs.forEach((d) => {
@@ -69,7 +89,7 @@ export async function GET(request: NextRequest) {
       attendanceCount: 0,
       prayerRequests: prayerSnap.size,
       donationTotal: 0,
-      upcomingEvents: 0,
+      upcomingEvents: upcomingEventsCount,
       volunteerHours: hoursSnap.docs.reduce((sum, d) => sum + (d.data().hours || 0), 0),
       savedItems: savedSnap.size,
     };
@@ -79,6 +99,7 @@ export async function GET(request: NextRequest) {
       stats,
       recentActivity: activity.slice(0, 15),
       ministryInvolvement,
+      nextEvent,
     });
   } catch (error) {
     console.error('Dashboard API error:', error);

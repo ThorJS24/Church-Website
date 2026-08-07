@@ -3,6 +3,7 @@ import { getAdminDb } from '@/lib/firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
 import { getResend } from '@/lib/resend';
 import { checkRateLimit, clientIpFrom } from '@/lib/rateLimit';
+import { createNotification } from '@/lib/notifications';
 
 const RATE_LIMIT_MAX = 5;
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
@@ -131,6 +132,12 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
           subject: `A spot opened up: ${event?.title || 'your event'}`,
           html: `<p>Hi ${next.data().name},</p><p>Good news — a spot opened up and you're now confirmed for <strong>${event?.title}</strong>.</p>`,
         }).catch((err) => console.error('Waitlist promotion email failed:', err));
+        createNotification({
+          email: next.data().email,
+          title: 'You’re off the waitlist!',
+          message: `A spot opened up for ${event?.title || 'your event'} — you're now confirmed.`,
+          link: `/events/${id}`,
+        }).catch((err) => console.error('Waitlist promotion notification failed:', err));
       }
     }
 

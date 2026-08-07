@@ -13,6 +13,7 @@ import { Grid } from '@/components/ui/grid';
 import { Avatar } from '@/components/ui/avatar';
 import { EmptyState } from '@/components/ui/states';
 import { WelcomeTourModal } from '@/components/WelcomeTourModal';
+import { cn } from '@/lib/utils';
 
 interface DashboardStats {
   attendanceCount: number;
@@ -82,6 +83,7 @@ export default function MemberDashboard() {
   const [downloadingData, setDownloadingData] = useState(false);
   const [downloadError, setDownloadError] = useState('');
   const [showWelcomeTour, setShowWelcomeTour] = useState(false);
+  const [activityFilter, setActivityFilter] = useState<string>('all');
 
   useEffect(() => {
     if (user && !user.hasSeenWelcomeTour) setShowWelcomeTour(true);
@@ -187,24 +189,47 @@ export default function MemberDashboard() {
           </Grid>
 
           <div className="mt-8">
-            <h2 className="mb-4 text-title-lg text-foreground">Activity Timeline</h2>
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <h2 className="text-title-lg text-foreground">Activity Timeline</h2>
+              {recentActivity.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {['all', ...Array.from(new Set(recentActivity.map((a) => a.type)))].map((type) => (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setActivityFilter(type)}
+                      className={cn(
+                        'rounded-full border px-3 py-1 text-caption font-medium capitalize transition-colors',
+                        activityFilter === type
+                          ? 'border-accent bg-accent-subtle text-accent'
+                          : 'border-border text-foreground-muted hover:border-border-strong hover:text-foreground'
+                      )}
+                    >
+                      {type}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <Card padding="none">
               {recentActivity.length > 0 ? (
                 <div className="divide-y divide-border">
-                  {recentActivity.map((activity, index) => {
-                    const Icon = ACTIVITY_ICONS[activity.type] ?? Calendar;
-                    return (
-                      <div key={index} className="flex items-center gap-4 p-4">
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent-subtle">
-                          <Icon className="h-4 w-4 text-accent" />
+                  {recentActivity
+                    .filter((activity) => activityFilter === 'all' || activity.type === activityFilter)
+                    .map((activity, index) => {
+                      const Icon = ACTIVITY_ICONS[activity.type] ?? Calendar;
+                      return (
+                        <div key={index} className="flex items-center gap-4 p-4">
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent-subtle">
+                            <Icon className="h-4 w-4 text-accent" />
+                          </div>
+                          <div>
+                            <p className="text-body-sm font-medium text-foreground">{activity.title}</p>
+                            <p className="text-caption text-foreground-subtle">{timeAgo(activity.date)}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-body-sm font-medium text-foreground">{activity.title}</p>
-                          <p className="text-caption text-foreground-subtle">{timeAgo(activity.date)}</p>
-                        </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
                 </div>
               ) : (
                 <EmptyState icon={Calendar} title="No recent activity" description="Activity like prayer requests, volunteer hours, and saved sermons will show up here." />

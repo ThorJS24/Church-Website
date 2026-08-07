@@ -13,6 +13,7 @@ import { LinkButton } from '@/components/ui/button';
 import { ShareButton } from '@/components/ShareButton';
 import { PrintButton } from '@/components/PrintButton';
 import { SaveButton } from '@/components/SaveButton';
+import { SermonVideoPlayer } from '@/components/SermonVideoPlayer';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -92,17 +93,7 @@ export default async function SermonDetailPage({ params }: Props) {
             {sermon.scripture && <span className="font-serif font-medium italic text-warm">📖 {sermon.scripture}</span>}
           </p>
 
-          {embedUrl && (
-            <div className="relative mt-8 aspect-video w-full overflow-hidden rounded-xl bg-black no-print">
-              <iframe
-                src={embedUrl}
-                title={sermon.title}
-                className="absolute inset-0 h-full w-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            </div>
-          )}
+          {embedUrl && <SermonVideoPlayer sermonId={sermon.id} embedUrl={embedUrl} title={sermon.title} />}
 
           {sermon.description && <p className="mt-8 text-body-lg leading-relaxed text-foreground-muted">{sermon.description}</p>}
 

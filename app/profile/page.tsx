@@ -64,6 +64,16 @@ export default function ProfilePage() {
 
   if (isLoading || !user) return <LoadingState />;
 
+  const completenessFields: { label: string; done: boolean }[] = [
+    { label: 'name', done: !!(formData.firstName && formData.lastName) },
+    { label: 'photo', done: !!user.photoURL },
+    { label: 'phone', done: !!formData.phone },
+    { label: 'address', done: !!formData.address },
+    { label: 'date of birth', done: !!formData.dateOfBirth },
+  ];
+  const completenessPercent = Math.round((completenessFields.filter((f) => f.done).length / completenessFields.length) * 100);
+  const missingFields = completenessFields.filter((f) => !f.done).map((f) => f.label);
+
   return (
     <Container size="md" className="py-10">
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
@@ -86,6 +96,18 @@ export default function ProfilePage() {
               </Button>
             </div>
           </div>
+
+          {completenessPercent < 100 && (
+            <div className="border-b border-border bg-surface px-6 py-4">
+              <div className="mb-2 flex items-center justify-between text-body-sm">
+                <span className="font-medium text-foreground">Profile {completenessPercent}% complete</span>
+                <span className="text-foreground-subtle">Add your {missingFields.slice(0, 2).join(' and ')}{missingFields.length > 2 ? ', and more' : ''} to finish up</span>
+              </div>
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-active">
+                <div className="h-full rounded-full bg-accent transition-all duration-slow ease-standard" style={{ width: `${completenessPercent}%` }} />
+              </div>
+            </div>
+          )}
 
           <div className="p-6">
             <Grid cols={2} gap={6}>
