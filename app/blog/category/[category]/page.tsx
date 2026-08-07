@@ -3,11 +3,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Tag } from 'lucide-react';
 import { getBlogPosts } from '@/lib/content';
-import { PageHero } from '@/components/ui-legacy/PageHero';
-import { Section } from '@/components/ui-legacy/Section';
-import { Card } from '@/components/ui-legacy/Card';
-import { Grid } from '@/components/ui-legacy/Grid';
-import { EmptyState } from '@/components/ui-legacy/States';
+import { PageHero } from '@/components/ui/page-hero';
+import { Section } from '@/components/ui/section';
+import { Card } from '@/components/ui/card';
+import { Grid } from '@/components/ui/grid';
+import { EmptyState } from '@/components/ui/states';
 
 interface Props {
   params: Promise<{ category: string }>;

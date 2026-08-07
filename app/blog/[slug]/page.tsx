@@ -5,12 +5,12 @@ import Link from 'next/link';
 import { Clock, Calendar } from 'lucide-react';
 import { getBlogPost, getBlogPosts } from '@/lib/content';
 import { parseBlogContent, estimateReadingTime } from '@/lib/blogContent';
-import { Container } from '@/components/ui-legacy/Container';
-import { Section } from '@/components/ui-legacy/Section';
-import { Breadcrumbs } from '@/components/ui-legacy/Breadcrumbs';
-import { Badge } from '@/components/ui-legacy/Badge';
-import { Card } from '@/components/ui-legacy/Card';
-import { Avatar } from '@/components/ui-legacy/Avatar';
+import { Container } from '@/components/ui/container';
+import { Section } from '@/components/ui/section';
+import { Breadcrumbs } from '@/components/ui/breadcrumbs';
+import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
+import { Avatar } from '@/components/ui/avatar';
 import { ShareButton } from '@/components/ShareButton';
 import { ReadingProgressBar } from '@/components/ReadingProgressBar';
 import { PrintButton } from '@/components/PrintButton';
@@ -86,7 +86,7 @@ export default async function BlogPostPage({ params }: Props) {
               <Badge variant="accent" className="mb-3">{post.category}</Badge>
             </Link>
           )}
-          <h1 className="text-display-sm text-foreground">{post.title}</h1>
+          <h1 className="font-serif text-display-sm text-foreground">{post.title}</h1>
 
           <div className="mt-5 flex items-center gap-4">
             {post.authorName && <Avatar name={post.authorName} size="sm" />}
