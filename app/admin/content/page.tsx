@@ -11,9 +11,9 @@ import TagsTab from '@/components/admin/content/TagsTab';
 import EventRegistrationsModal from '@/components/admin/content/EventRegistrationsModal';
 import { adminFetch } from '@/lib/adminApi';
 import { ContentTypeDefinition } from '@/types/contentType';
-import { Tabs, TabList, Tab, TabPanel } from '@/components/ui-legacy/Tabs';
-import { Input } from '@/components/ui-legacy/Input';
-import { IconButton } from '@/components/ui-legacy/IconButton';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { IconButton } from '@/components/ui/icon-button';
 
 const SERMON_FIELDS: FieldSchema[] = [
   { key: 'title', label: 'Title', type: 'text', required: true },
@@ -296,36 +296,36 @@ export default function ContentEditorPage() {
         </div>
       </div>
 
-      <Tabs value={tab} onChange={(v) => setTab(v as TabKey)} className="mb-6">
-        <TabList className="flex-wrap">
+      <Tabs value={tab} onValueChange={(v) => setTab(v as TabKey)} className="mb-6">
+        <TabsList variant="line" className="h-auto flex-wrap justify-start">
           {BUILT_IN_TABS.map((t) => (
-            <Tab key={t.key} value={t.key}>
+            <TabsTrigger key={t.key} value={t.key}>
               {t.key === 'calendar' && <CalendarDays className="mr-1 inline h-3.5 w-3.5" />}
               {t.key === 'tags' && <TagIcon className="mr-1 inline h-3.5 w-3.5" />}
               {t.label}
-            </Tab>
+            </TabsTrigger>
           ))}
           {customTypes.map((ct) => (
-            <Tab key={ct.id} value={`custom:${ct.id}`}>{ct.pluralLabel}</Tab>
+            <TabsTrigger key={ct.id} value={`custom:${ct.id}`}>{ct.pluralLabel}</TabsTrigger>
           ))}
-        </TabList>
+        </TabsList>
 
-        <TabPanel value="sermons">
+        <TabsContent value="sermons">
           <GenericContentTab type="sermons" label="Sermons" fields={SERMON_FIELDS} columns={['title', 'speakerName', 'date']} autoOpenId={autoOpenId} onAutoOpened={() => setAutoOpenId(null)} />
-        </TabPanel>
-        <TabPanel value="series">
+        </TabsContent>
+        <TabsContent value="series">
           <p className="mb-4 rounded-lg border border-accent/30 bg-accent-subtle p-3 text-body-sm text-accent">
             Series titles here power the &quot;Series&quot; filter dropdown on the public Sermons page — a sermon joins a series when its Series field matches one of these titles exactly.
           </p>
           <GenericContentTab type="series" label="Series" fields={SERIES_FIELDS} columns={['title']} autoOpenId={autoOpenId} onAutoOpened={() => setAutoOpenId(null)} />
-        </TabPanel>
-        <TabPanel value="speakers">
+        </TabsContent>
+        <TabsContent value="speakers">
           <p className="mb-4 rounded-lg border border-accent/30 bg-accent-subtle p-3 text-body-sm text-accent">
             Speaker names here power the &quot;Speaker&quot; filter dropdown on the public Sermons page — a sermon is attributed when its Speaker field matches one of these names exactly.
           </p>
           <GenericContentTab type="speakers" label="Speakers" fields={SPEAKER_FIELDS} columns={['name']} autoOpenId={autoOpenId} onAutoOpened={() => setAutoOpenId(null)} />
-        </TabPanel>
-        <TabPanel value="events">
+        </TabsContent>
+        <TabsContent value="events">
           <GenericContentTab
             type="events"
             label="Events"
@@ -339,57 +339,57 @@ export default function ContentEditorPage() {
               </IconButton>
             )}
           />
-        </TabPanel>
-        <TabPanel value="gallery"><GalleryTab /></TabPanel>
-        <TabPanel value="pastors">
+        </TabsContent>
+        <TabsContent value="gallery"><GalleryTab /></TabsContent>
+        <TabsContent value="pastors">
           <GenericContentTab type="pastors" label="Pastors" fields={PASTOR_FIELDS} columns={['name', 'title', 'email']} autoOpenId={autoOpenId} onAutoOpened={() => setAutoOpenId(null)} />
-        </TabPanel>
-        <TabPanel value="staff">
+        </TabsContent>
+        <TabsContent value="staff">
           <p className="mb-4 rounded-lg border border-accent/30 bg-accent-subtle p-3 text-body-sm text-accent">
             Powers the department-routing list on the public Contact page and the Leadership listing on the Pastors page.
           </p>
           <GenericContentTab type="staffMembers" label="Staff" fields={STAFF_FIELDS} columns={['name', 'position', 'email']} autoOpenId={autoOpenId} onAutoOpened={() => setAutoOpenId(null)} />
-        </TabPanel>
-        <TabPanel value="ministries">
+        </TabsContent>
+        <TabsContent value="ministries">
           <GenericContentTab type="ministries" label="Ministries" fields={MINISTRY_FIELDS} columns={['title', 'category', 'meetingTime']} autoOpenId={autoOpenId} onAutoOpened={() => setAutoOpenId(null)} />
-        </TabPanel>
-        <TabPanel value="announcements">
+        </TabsContent>
+        <TabsContent value="announcements">
           <GenericContentTab type="announcements" label="Announcements" fields={ANNOUNCEMENT_FIELDS} columns={['title', 'date']} autoOpenId={autoOpenId} onAutoOpened={() => setAutoOpenId(null)} />
-        </TabPanel>
-        <TabPanel value="blog">
+        </TabsContent>
+        <TabsContent value="blog">
           <GenericContentTab type="blog" label="Blog Posts" fields={BLOG_FIELDS} columns={['title', 'authorName', 'category']} apiBase="/api/admin" autoOpenId={autoOpenId} onAutoOpened={() => setAutoOpenId(null)} />
-        </TabPanel>
-        <TabPanel value="small-groups">
+        </TabsContent>
+        <TabsContent value="small-groups">
           <GenericContentTab type="smallGroups" label="Small Groups" fields={SMALL_GROUP_FIELDS} columns={['name', 'leaderName', 'meetingSchedule']} autoOpenId={autoOpenId} onAutoOpened={() => setAutoOpenId(null)} />
-        </TabPanel>
-        <TabPanel value="testimonials">
+        </TabsContent>
+        <TabsContent value="testimonials">
           <GenericContentTab type="testimonials" label="Testimonials" fields={TESTIMONIAL_FIELDS} columns={['authorName', 'content']} autoOpenId={autoOpenId} onAutoOpened={() => setAutoOpenId(null)} />
-        </TabPanel>
-        <TabPanel value="resources">
+        </TabsContent>
+        <TabsContent value="resources">
           <GenericContentTab type="resources" label="Resources" fields={RESOURCE_FIELDS} columns={['title', 'category']} autoOpenId={autoOpenId} onAutoOpened={() => setAutoOpenId(null)} />
-        </TabPanel>
-        <TabPanel value="prayer-requests">
+        </TabsContent>
+        <TabsContent value="prayer-requests">
           <p className="mb-4 rounded-lg border border-info/30 bg-info-subtle p-3 text-body-sm text-info">
             New public submissions land in the Moderation Queue first. Once approved, manage their status (praying/ongoing/answered) here.
           </p>
           <GenericContentTab type="prayerRequests" label="Prayer Requests" fields={PRAYER_FIELDS} columns={['title', 'category', 'status', 'followUpRequested']} autoOpenId={autoOpenId} onAutoOpened={() => setAutoOpenId(null)} />
-        </TabPanel>
-        <TabPanel value="redirects">
+        </TabsContent>
+        <TabsContent value="redirects">
           <p className="mb-4 rounded-lg border border-warning/30 bg-warning-subtle p-3 text-body-sm text-warning">
             Redirects take effect on the next deploy, not immediately — they&apos;re resolved at build time, not on every request.
           </p>
           <GenericContentTab type="redirects" label="Redirects" fields={REDIRECT_FIELDS} columns={['fromPath', 'toPath', 'statusCode']} supportsVersions={false} />
-        </TabPanel>
-        <TabPanel value="calendar">
+        </TabsContent>
+        <TabsContent value="calendar">
           <ContentCalendarTab onOpenItem={openCalendarItem} />
-        </TabPanel>
-        <TabPanel value="tags">
+        </TabsContent>
+        <TabsContent value="tags">
           <TagsTab />
-        </TabPanel>
-        <TabPanel value="settings"><SiteSettingsTab /></TabPanel>
-        <TabPanel value="content-types"><ContentTypesTab onChange={loadCustomTypes} /></TabPanel>
+        </TabsContent>
+        <TabsContent value="settings"><SiteSettingsTab /></TabsContent>
+        <TabsContent value="content-types"><ContentTypesTab onChange={loadCustomTypes} /></TabsContent>
         {activeCustomType && (
-          <TabPanel value={tab}>
+          <TabsContent value={tab}>
             <GenericContentTab
               key={activeCustomType.id}
               type={activeCustomType.id}
@@ -398,7 +398,7 @@ export default function ContentEditorPage() {
               columns={activeCustomType.columns}
               apiBase="/api/admin/custom-content"
             />
-          </TabPanel>
+          </TabsContent>
         )}
       </Tabs>
 

@@ -4,16 +4,16 @@ import { useEffect, useMemo, useState } from 'react';
 import { Mail, Flag, Reply, MessageSquare, Users2, Settings2, Trash2, Send } from 'lucide-react';
 import { adminFetch } from '@/lib/adminApi';
 import { LoadingState, EmptyState, ErrorState } from '@/components/admin/States';
-import { Card } from '@/components/ui-legacy/Card';
-import { Badge, type BadgeVariant } from '@/components/ui-legacy/Badge';
-import { Select } from '@/components/ui-legacy/Select';
-import { Input } from '@/components/ui-legacy/Input';
-import { Textarea } from '@/components/ui-legacy/Textarea';
-import { Button } from '@/components/ui-legacy/Button';
-import { IconButton } from '@/components/ui-legacy/IconButton';
-import { Modal } from '@/components/ui-legacy/Modal';
-import { useToast } from '@/components/ui-legacy/Toast';
-import { cn } from '@/lib/cn';
+import { Card } from '@/components/ui/card';
+import { Badge, type BadgeVariant } from '@/components/ui/badge';
+import { Select } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { IconButton } from '@/components/ui/icon-button';
+import { Modal } from '@/components/ui/modal';
+import { useToast } from '@/lib/toast';
+import { cn } from '@/lib/utils';
 
 interface Reply { subject: string; body: string; sentBy: string; sentAt: string }
 interface Comment { text: string; authorEmail: string; at: string }

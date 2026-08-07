@@ -4,14 +4,14 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Send, Users, Mail, Bold, Italic, Link as LinkIcon, Heading2, List, Sparkles, Archive } from 'lucide-react';
 import { adminFetch } from '@/lib/adminApi';
 import { LoadingState, EmptyState } from '@/components/admin/States';
-import { Card } from '@/components/ui-legacy/Card';
-import { Input } from '@/components/ui-legacy/Input';
-import { Textarea } from '@/components/ui-legacy/Textarea';
-import { Button } from '@/components/ui-legacy/Button';
-import { IconButton } from '@/components/ui-legacy/IconButton';
-import { Select } from '@/components/ui-legacy/Select';
-import { Badge } from '@/components/ui-legacy/Badge';
-import { useToast } from '@/components/ui-legacy/Toast';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { IconButton } from '@/components/ui/icon-button';
+import { Select } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/lib/toast';
 
 interface Campaign {
   id: string;

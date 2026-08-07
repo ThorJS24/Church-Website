@@ -8,13 +8,13 @@ import {
 } from 'lucide-react';
 import { adminFetch } from '@/lib/adminApi';
 import { LoadingState, ErrorState } from '@/components/admin/States';
-import { Card } from '@/components/ui-legacy/Card';
-import { Grid } from '@/components/ui-legacy/Grid';
-import { Button } from '@/components/ui-legacy/Button';
-import { Modal } from '@/components/ui-legacy/Modal';
-import { Input } from '@/components/ui-legacy/Input';
-import { Textarea } from '@/components/ui-legacy/Textarea';
-import { useToast } from '@/components/ui-legacy/Toast';
+import { Card } from '@/components/ui/card';
+import { Grid } from '@/components/ui/grid';
+import { Button } from '@/components/ui/button';
+import { Modal } from '@/components/ui/modal';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/lib/toast';
 
 interface DashboardStats {
   totalUsers: number;
@@ -90,7 +90,7 @@ function feedItemLabel(item: FeedItem): { title: string; subtitle: string } {
 
 const ROLE_LABELS: Record<string, string> = { member: 'Member', moderator: 'Moderator', admin: 'Admin', super_admin: 'Super Admin' };
 const ROLE_COLORS: Record<string, string> = {
-  member: 'bg-zinc-400', moderator: 'bg-blue-500', admin: 'bg-accent', super_admin: 'bg-warm',
+  member: 'bg-foreground-subtle', moderator: 'bg-info', admin: 'bg-accent', super_admin: 'bg-warm',
 };
 
 export default function AdminDashboardPage() {

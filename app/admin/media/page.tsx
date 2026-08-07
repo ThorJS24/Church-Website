@@ -7,16 +7,16 @@ import { adminFetch } from '@/lib/adminApi';
 import { getIdToken } from '@/lib/firebase';
 import { LoadingState, EmptyState, ErrorState } from '@/components/admin/States';
 import ConfirmModal from '@/components/admin/ConfirmModal';
-import { Card } from '@/components/ui-legacy/Card';
-import { Grid } from '@/components/ui-legacy/Grid';
-import { Input } from '@/components/ui-legacy/Input';
-import { IconButton } from '@/components/ui-legacy/IconButton';
-import { Button, buttonClasses } from '@/components/ui-legacy/Button';
-import { Badge } from '@/components/ui-legacy/Badge';
-import { Checkbox } from '@/components/ui-legacy/Checkbox';
-import { Modal } from '@/components/ui-legacy/Modal';
-import { useToast } from '@/components/ui-legacy/Toast';
-import { cn } from '@/lib/cn';
+import { Card } from '@/components/ui/card';
+import { Grid } from '@/components/ui/grid';
+import { Input } from '@/components/ui/input';
+import { IconButton } from '@/components/ui/icon-button';
+import { Button, buttonClasses } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Modal } from '@/components/ui/modal';
+import { useToast } from '@/lib/toast';
+import { cn } from '@/lib/utils';
 
 interface MediaItem {
   id: string;

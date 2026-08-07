@@ -6,12 +6,12 @@ import { adminFetch } from '@/lib/adminApi';
 import { LoadingState, EmptyState, ErrorState } from '@/components/admin/States';
 import ConfirmModal from '@/components/admin/ConfirmModal';
 import { CONTENT_TYPE_SLUG_PATTERN, ContentTypeDefinition, FieldSchema, FieldType } from '@/types/contentType';
-import { Modal } from '@/components/ui-legacy/Modal';
-import { Button } from '@/components/ui-legacy/Button';
-import { IconButton } from '@/components/ui-legacy/IconButton';
-import { Input } from '@/components/ui-legacy/Input';
-import { Select } from '@/components/ui-legacy/Select';
-import { Checkbox } from '@/components/ui-legacy/Checkbox';
+import { Modal } from '@/components/ui/modal';
+import { Button } from '@/components/ui/button';
+import { IconButton } from '@/components/ui/icon-button';
+import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const FIELD_TYPES: FieldType[] = ['text', 'textarea', 'date', 'datetime', 'number', 'checkbox', 'url', 'email'];
 

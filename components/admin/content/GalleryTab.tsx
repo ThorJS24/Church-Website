@@ -7,12 +7,12 @@ import { adminFetch } from '@/lib/adminApi';
 import { getIdToken } from '@/lib/firebase';
 import { LoadingState, EmptyState, ErrorState } from '@/components/admin/States';
 import ConfirmModal from '@/components/admin/ConfirmModal';
-import { Card } from '@/components/ui-legacy/Card';
-import { Grid } from '@/components/ui-legacy/Grid';
-import { Badge, type BadgeVariant } from '@/components/ui-legacy/Badge';
-import { IconButton } from '@/components/ui-legacy/IconButton';
-import { buttonClasses } from '@/components/ui-legacy/Button';
-import { useToast } from '@/components/ui-legacy/Toast';
+import { Card } from '@/components/ui/card';
+import { Grid } from '@/components/ui/grid';
+import { Badge, type BadgeVariant } from '@/components/ui/badge';
+import { IconButton } from '@/components/ui/icon-button';
+import { buttonClasses } from '@/components/ui/button';
+import { useToast } from '@/lib/toast';
 
 interface GalleryItem {
   id: string;

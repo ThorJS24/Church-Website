@@ -6,13 +6,13 @@ import { adminFetch } from '@/lib/adminApi';
 import { getIdToken } from '@/lib/firebase';
 import { LoadingState, ErrorState, EmptyState } from '@/components/admin/States';
 import GenericContentTab, { FieldSchema } from '@/components/admin/content/GenericContentTab';
-import { Card } from '@/components/ui-legacy/Card';
-import { Checkbox } from '@/components/ui-legacy/Checkbox';
-import { Button } from '@/components/ui-legacy/Button';
-import { Input } from '@/components/ui-legacy/Input';
-import { Badge } from '@/components/ui-legacy/Badge';
-import { IconButton } from '@/components/ui-legacy/IconButton';
-import { useToast } from '@/components/ui-legacy/Toast';
+import { Card } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { IconButton } from '@/components/ui/icon-button';
+import { useToast } from '@/lib/toast';
 import { UserRole, Permission, getUserPermissions } from '@/lib/permissions';
 import { deriveAccentShades, isValidHexColor } from '@/lib/colorTheme';
 
@@ -178,8 +178,10 @@ function BackupSection() {
   );
 }
 
+const DEFAULT_ACCENT = '#1D3557';
+
 function ThemeCustomizer() {
-  const [color, setColor] = useState('#4F46E5');
+  const [color, setColor] = useState(DEFAULT_ACCENT);
   const [saved, setSaved] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -187,13 +189,13 @@ function ThemeCustomizer() {
 
   useEffect(() => {
     adminFetch('/api/admin/settings')
-      .then((data) => { const c = data.settings?.themeAccentColor || '#4F46E5'; setColor(c); setSaved(c); })
+      .then((data) => { const c = data.settings?.themeAccentColor || DEFAULT_ACCENT; setColor(c); setSaved(c); })
       .finally(() => setLoading(false));
   }, []);
 
   const save = async () => {
     if (!isValidHexColor(color)) {
-      toast({ title: 'Enter a valid hex color, e.g. #4F46E5', variant: 'danger' });
+      toast({ title: `Enter a valid hex color, e.g. ${DEFAULT_ACCENT}`, variant: 'danger' });
       return;
     }
     setSaving(true);
@@ -215,14 +217,15 @@ function ThemeCustomizer() {
   return (
     <Card>
       <p className="mb-4 text-body-sm text-foreground-muted">
-        Override the site&apos;s default indigo accent with your own color. Used for links, buttons, and highlights across the public site and this admin panel.
+        Override the site&apos;s default deep-navy primary brand color with your own. Used for links, buttons, and
+        highlights across the public site and this admin panel — the warm gold secondary accent stays fixed.
       </p>
       <div className="flex flex-wrap items-end gap-4">
         <div>
-          <label className="mb-1.5 block text-label text-foreground">Accent color</label>
+          <label className="mb-1.5 block text-label text-foreground">Primary brand color</label>
           <div className="flex items-center gap-2">
-            <input type="color" value={isValidHexColor(color) ? color : '#4F46E5'} onChange={(e) => setColor(e.target.value)} className="h-10 w-14 cursor-pointer rounded-md border border-border" aria-label="Accent color picker" />
-            <Input value={color} onChange={(e) => setColor(e.target.value)} className="w-32 font-mono" aria-label="Accent color hex value" />
+            <input type="color" value={isValidHexColor(color) ? color : DEFAULT_ACCENT} onChange={(e) => setColor(e.target.value)} className="h-10 w-14 cursor-pointer rounded-md border border-border" aria-label="Primary brand color picker" />
+            <Input value={color} onChange={(e) => setColor(e.target.value)} className="w-32 font-mono" aria-label="Primary brand color hex value" />
           </div>
         </div>
         {preview && (
@@ -239,7 +242,7 @@ function ThemeCustomizer() {
           </div>
         )}
         <Button leftIcon={<Save className="h-4 w-4" />} loading={saving} disabled={color === saved} onClick={save}>
-          {saving ? 'Saving...' : 'Save Accent Color'}
+          {saving ? 'Saving...' : 'Save Brand Color'}
         </Button>
       </div>
     </Card>

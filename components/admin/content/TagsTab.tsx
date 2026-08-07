@@ -4,13 +4,13 @@ import { useEffect, useState } from 'react';
 import { Tag as TagIcon, Pencil, Trash2 } from 'lucide-react';
 import { adminFetch } from '@/lib/adminApi';
 import { LoadingState, EmptyState, ErrorState } from '@/components/admin/States';
-import { IconButton } from '@/components/ui-legacy/IconButton';
-import { Badge } from '@/components/ui-legacy/Badge';
-import { Modal } from '@/components/ui-legacy/Modal';
-import { Input } from '@/components/ui-legacy/Input';
-import { Button } from '@/components/ui-legacy/Button';
+import { IconButton } from '@/components/ui/icon-button';
+import { Badge } from '@/components/ui/badge';
+import { Modal } from '@/components/ui/modal';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import ConfirmModal from '@/components/admin/ConfirmModal';
-import { useToast } from '@/components/ui-legacy/Toast';
+import { useToast } from '@/lib/toast';
 
 interface TagRow {
   tag: string;

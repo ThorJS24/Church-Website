@@ -8,7 +8,7 @@ import {
 import { ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react';
 import { adminFetch } from '@/lib/adminApi';
 import { LoadingState, ErrorState } from '@/components/admin/States';
-import { cn } from '@/lib/cn';
+import { cn } from '@/lib/utils';
 
 interface CalendarItem {
   id: string;

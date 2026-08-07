@@ -4,11 +4,11 @@ import { useEffect, useState } from 'react';
 import { Users2, AlertTriangle } from 'lucide-react';
 import { adminFetch } from '@/lib/adminApi';
 import { LoadingState, EmptyState } from '@/components/admin/States';
-import { Modal } from '@/components/ui-legacy/Modal';
-import { Badge } from '@/components/ui-legacy/Badge';
-import { Button } from '@/components/ui-legacy/Button';
-import { Textarea } from '@/components/ui-legacy/Textarea';
-import { useToast } from '@/components/ui-legacy/Toast';
+import { Modal } from '@/components/ui/modal';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/lib/toast';
 import ConfirmModal from '@/components/admin/ConfirmModal';
 
 interface Registration { id: string; name: string; email: string; headcount: number; status: string; createdAt?: string }
