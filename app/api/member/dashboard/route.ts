@@ -53,7 +53,13 @@ export async function GET(request: NextRequest) {
     const activity: ActivityEntry[] = [];
     prayerSnap.docs.forEach((d) => {
       const data = d.data();
-      activity.push({ type: 'prayer', title: `Submitted a prayer request: "${data.title}"`, date: data.createdAt });
+      const tally = data.prayerTally || 0;
+      const statusNote = data.status === 'answered'
+        ? ' — marked answered'
+        : tally > 0
+          ? ` — ${tally} ${tally === 1 ? 'person has' : 'people have'} prayed for this`
+          : '';
+      activity.push({ type: 'prayer', title: `Submitted a prayer request: "${data.title}"${statusNote}`, date: data.createdAt });
     });
     hoursSnap.docs.forEach((d) => {
       const data = d.data();
