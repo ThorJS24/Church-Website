@@ -1,4 +1,4 @@
-import type { BadgeVariant } from '@/components/ui-legacy/Badge';
+import type { BadgeVariant } from '@/components/ui/badge';
 
 export interface EventCategory {
   id: string;
@@ -17,7 +17,7 @@ export interface EventCategory {
 // Tailwind -500 shades range from 2.3:1 to 4.0:1 and fail; -600 clears it
 // for most hues, green and orange need -700 (verified numerically).
 export const EVENT_CATEGORIES: EventCategory[] = [
-  { id: 'all', label: 'All Events', dotClass: 'bg-zinc-600', chipActiveClass: 'bg-zinc-600 text-white', badgeVariant: 'neutral' },
+  { id: 'all', label: 'All Events', dotClass: 'bg-stone-600', chipActiveClass: 'bg-stone-600 text-white', badgeVariant: 'neutral' },
   { id: 'regular-service', label: 'Regular Services', dotClass: 'bg-blue-600', chipActiveClass: 'bg-blue-600 text-white', badgeVariant: 'info' },
   { id: 'special', label: 'Special Events', dotClass: 'bg-purple-600', chipActiveClass: 'bg-purple-600 text-white', badgeVariant: 'accent' },
   { id: 'ministry', label: 'Ministry Events', dotClass: 'bg-green-700', chipActiveClass: 'bg-green-700 text-white', badgeVariant: 'success' },
@@ -27,7 +27,7 @@ export const EVENT_CATEGORIES: EventCategory[] = [
 ];
 
 export function getEventCategory(id: string): EventCategory {
-  return EVENT_CATEGORIES.find((c) => c.id === id) ?? { id, label: id, dotClass: 'bg-zinc-600', chipActiveClass: 'bg-zinc-600 text-white', badgeVariant: 'neutral' };
+  return EVENT_CATEGORIES.find((c) => c.id === id) ?? { id, label: id, dotClass: 'bg-stone-600', chipActiveClass: 'bg-stone-600 text-white', badgeVariant: 'neutral' };
 }
 
 /**

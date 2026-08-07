@@ -2,9 +2,9 @@
 
 import { Calendar, Clock, MapPin, User, Phone, Mail, Tag, DollarSign, ExternalLink } from 'lucide-react';
 import Image from 'next/image';
-import { Modal } from '@/components/ui-legacy/Modal';
-import { Badge } from '@/components/ui-legacy/Badge';
-import { LinkButton } from '@/components/ui-legacy/Button';
+import { Modal } from '@/components/ui/modal';
+import { Badge } from '@/components/ui/badge';
+import { LinkButton } from '@/components/ui/button';
 import { getEventCategory } from '@/lib/eventCategories';
 
 interface EventModalProps {

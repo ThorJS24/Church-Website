@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Clock, MapPin } from 'lucide-react';
 import { getEvents, getServiceTimes, EventItem } from '@/lib/content';
 import { getEventCategory, expandServicesToEvents } from '@/lib/eventCategories';
-import { IconButton } from '@/components/ui-legacy/IconButton';
-import { Modal } from '@/components/ui-legacy/Modal';
-import { cn } from '@/lib/cn';
+import { IconButton } from '@/components/ui/icon-button';
+import { Modal } from '@/components/ui/modal';
+import { cn } from '@/lib/utils';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import EventModal from '@/components/EventModal';
 

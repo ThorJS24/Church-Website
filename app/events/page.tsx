@@ -1,22 +1,22 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Calendar, Clock, MapPin, Search, Star } from 'lucide-react';
 import { getEvents as getEventsData, getServiceTimes, EventItem as Event } from '@/lib/content';
 import { EVENT_CATEGORIES, getEventCategory, expandServicesToEvents } from '@/lib/eventCategories';
 import Image from 'next/image';
 import EventModal from '@/components/EventModal';
 import InteractiveCalendar from '@/components/InteractiveCalendar';
-import { PageHero } from '@/components/ui-legacy/PageHero';
-import { Section } from '@/components/ui-legacy/Section';
-import { Card } from '@/components/ui-legacy/Card';
-import { Grid } from '@/components/ui-legacy/Grid';
-import { Input } from '@/components/ui-legacy/Input';
-import { Badge } from '@/components/ui-legacy/Badge';
-import { Button, LinkButton } from '@/components/ui-legacy/Button';
-import { LoadingState, EmptyState } from '@/components/ui-legacy/States';
-import { cn } from '@/lib/cn';
+import { PageHero } from '@/components/ui/page-hero';
+import { Section } from '@/components/ui/section';
+import { Card } from '@/components/ui/card';
+import { Grid } from '@/components/ui/grid';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Button, LinkButton } from '@/components/ui/button';
+import { LoadingState, EmptyState } from '@/components/ui/states';
+import { cn } from '@/lib/utils';
 
 const extractYouTubeId = (url: string): string | null => {
   const regex = /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/;

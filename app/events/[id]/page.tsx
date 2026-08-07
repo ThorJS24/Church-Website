@@ -5,12 +5,12 @@ import Link from 'next/link';
 import { Calendar, Clock, MapPin, Camera } from 'lucide-react';
 import { getEventById, getEvents, getEventGalleries } from '@/lib/content';
 import { getEventCategory } from '@/lib/eventCategories';
-import { Container } from '@/components/ui-legacy/Container';
-import { Section } from '@/components/ui-legacy/Section';
-import { Breadcrumbs } from '@/components/ui-legacy/Breadcrumbs';
-import { Badge } from '@/components/ui-legacy/Badge';
-import { Card } from '@/components/ui-legacy/Card';
-import { LinkButton } from '@/components/ui-legacy/Button';
+import { Container } from '@/components/ui/container';
+import { Section } from '@/components/ui/section';
+import { Breadcrumbs } from '@/components/ui/breadcrumbs';
+import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
+import { LinkButton } from '@/components/ui/button';
 import { ShareButton } from '@/components/ShareButton';
 import { EventCountdown } from '@/components/EventCountdown';
 import { RsvpForm } from '@/components/events/RsvpForm';
@@ -93,7 +93,7 @@ export default async function EventDetailPage({ params }: Props) {
           )}
 
           {category && <Badge variant={category.badgeVariant} className="mb-3">{category.label}</Badge>}
-          <h1 className="text-display-sm text-foreground">{event.title}</h1>
+          <h1 className="font-serif text-display-sm text-foreground">{event.title}</h1>
           <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-body-sm text-foreground-muted">
             <span className="flex items-center gap-1.5">
               <Calendar className="h-4 w-4" />
