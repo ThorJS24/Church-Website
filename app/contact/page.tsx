@@ -1,23 +1,23 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { MapPin, Phone, Mail, Clock, Send, User, MessageSquare, Calendar, Navigation, ChevronRight, ChevronLeft, Heart, Building, Video, Globe, Timer, UserCheck } from 'lucide-react';
 import { getSiteSettings, getStaffMembers, SiteSettings, StaffMember } from '@/lib/content';
-import { PageHero } from '@/components/ui-legacy/PageHero';
-import { Section } from '@/components/ui-legacy/Section';
-import { Container } from '@/components/ui-legacy/Container';
-import { Card } from '@/components/ui-legacy/Card';
-import { Grid } from '@/components/ui-legacy/Grid';
-import { Input } from '@/components/ui-legacy/Input';
-import { Select } from '@/components/ui-legacy/Select';
-import { Textarea } from '@/components/ui-legacy/Textarea';
-import { Checkbox } from '@/components/ui-legacy/Checkbox';
-import { Button } from '@/components/ui-legacy/Button';
-import { Avatar } from '@/components/ui-legacy/Avatar';
-import { Accordion, AccordionItem } from '@/components/ui-legacy/Accordion';
-import { LoadingState } from '@/components/ui-legacy/States';
-import { cn } from '@/lib/cn';
+import { PageHero } from '@/components/ui/page-hero';
+import { Section } from '@/components/ui/section';
+import { Container } from '@/components/ui/container';
+import { Card } from '@/components/ui/card';
+import { Grid } from '@/components/ui/grid';
+import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
+import { Avatar } from '@/components/ui/avatar';
+import { Accordion, AccordionItem } from '@/components/ui/accordion';
+import { LoadingState } from '@/components/ui/states';
+import { cn } from '@/lib/utils';
 
 const categories = [
   { id: 'spiritual', name: 'Spiritual & Community Life', icon: Heart },

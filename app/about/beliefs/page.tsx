@@ -1,16 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Book, Heart, Target, Eye, CheckCircle, HelpCircle } from 'lucide-react';
 import { getPageContent } from '@/lib/content';
 import ScriptureReference from '@/components/ScriptureReference';
-import { PageHero } from '@/components/ui-legacy/PageHero';
-import { Section } from '@/components/ui-legacy/Section';
-import { Card } from '@/components/ui-legacy/Card';
-import { Grid } from '@/components/ui-legacy/Grid';
-import { LoadingState } from '@/components/ui-legacy/States';
-import { Accordion, AccordionItem } from '@/components/ui-legacy/Accordion';
+import { PageHero } from '@/components/ui/page-hero';
+import { Section } from '@/components/ui/section';
+import { Card } from '@/components/ui/card';
+import { Grid } from '@/components/ui/grid';
+import { LoadingState } from '@/components/ui/states';
+import { Accordion, AccordionItem } from '@/components/ui/accordion';
 
 interface AboutPage {
   title: string;

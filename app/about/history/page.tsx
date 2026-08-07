@@ -1,19 +1,19 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { Clock, Users, Building, Award, Heart, Search, Play, Pause, Star } from 'lucide-react';
 import { getHistoryTimeline, TimelineEvent } from '@/lib/content';
 import Image from 'next/image';
-import { PageHero } from '@/components/ui-legacy/PageHero';
-import { Section } from '@/components/ui-legacy/Section';
-import { Card } from '@/components/ui-legacy/Card';
-import { Grid } from '@/components/ui-legacy/Grid';
-import { Input } from '@/components/ui-legacy/Input';
-import { Select } from '@/components/ui-legacy/Select';
-import { Button } from '@/components/ui-legacy/Button';
-import { Badge } from '@/components/ui-legacy/Badge';
-import { LoadingState, EmptyState } from '@/components/ui-legacy/States';
+import { PageHero } from '@/components/ui/page-hero';
+import { Section } from '@/components/ui/section';
+import { Card } from '@/components/ui/card';
+import { Grid } from '@/components/ui/grid';
+import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { LoadingState, EmptyState } from '@/components/ui/states';
 
 const CATEGORY_ICONS: Record<string, typeof Clock> = {
   foundation: Building,

@@ -1,19 +1,19 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { MapPin, Calendar, Users, Phone, Mail, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getPageContent } from '@/lib/content';
 import Image from 'next/image';
-import { PageHero } from '@/components/ui-legacy/PageHero';
-import { Section } from '@/components/ui-legacy/Section';
-import { Card } from '@/components/ui-legacy/Card';
-import { Grid } from '@/components/ui-legacy/Grid';
-import { Badge } from '@/components/ui-legacy/Badge';
-import { Button } from '@/components/ui-legacy/Button';
-import { IconButton } from '@/components/ui-legacy/IconButton';
-import { Modal } from '@/components/ui-legacy/Modal';
-import { LoadingState } from '@/components/ui-legacy/States';
+import { PageHero } from '@/components/ui/page-hero';
+import { Section } from '@/components/ui/section';
+import { Card } from '@/components/ui/card';
+import { Grid } from '@/components/ui/grid';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { IconButton } from '@/components/ui/icon-button';
+import { Modal } from '@/components/ui/modal';
+import { LoadingState } from '@/components/ui/states';
 
 interface Branch {
   id: string;

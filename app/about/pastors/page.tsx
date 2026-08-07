@@ -1,20 +1,20 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import Link from 'next/link';
 import { User, Mail, Phone, BookOpen, Users2, Play } from 'lucide-react';
 import { getPastors, getStaffMembers, getSermons, Pastor, StaffMember, Sermon } from '@/lib/content';
 import Image from 'next/image';
-import { PageHero } from '@/components/ui-legacy/PageHero';
-import { Section } from '@/components/ui-legacy/Section';
-import { Card } from '@/components/ui-legacy/Card';
-import { Grid } from '@/components/ui-legacy/Grid';
-import { Badge } from '@/components/ui-legacy/Badge';
-import { Button } from '@/components/ui-legacy/Button';
-import { Avatar } from '@/components/ui-legacy/Avatar';
-import { Modal } from '@/components/ui-legacy/Modal';
-import { LoadingState, EmptyState } from '@/components/ui-legacy/States';
+import { PageHero } from '@/components/ui/page-hero';
+import { Section } from '@/components/ui/section';
+import { Card } from '@/components/ui/card';
+import { Grid } from '@/components/ui/grid';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Avatar } from '@/components/ui/avatar';
+import { Modal } from '@/components/ui/modal';
+import { LoadingState, EmptyState } from '@/components/ui/states';
 
 const HIERARCHY_ORDER: Record<string, number> = {
   'Senior Pastor': 1,

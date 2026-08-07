@@ -3,15 +3,15 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Calendar, Heart, Droplets, Send, Phone, Mail, User, CheckCircle2, FileText, ArrowRight } from 'lucide-react';
-import { Container } from '@/components/ui-legacy/Container';
-import { Card } from '@/components/ui-legacy/Card';
-import { Grid } from '@/components/ui-legacy/Grid';
-import { Input } from '@/components/ui-legacy/Input';
-import { Textarea } from '@/components/ui-legacy/Textarea';
-import { Button } from '@/components/ui-legacy/Button';
-import { cn } from '@/lib/cn';
+import { Container } from '@/components/ui/container';
+import { Card } from '@/components/ui/card';
+import { Grid } from '@/components/ui/grid';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 const DOCUMENT_CHECKLISTS: Record<'wedding' | 'baptism', string[]> = {
   wedding: [
@@ -116,7 +116,7 @@ export default function ServiceRequestPage() {
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
         <Card variant="raised" padding="none" className="overflow-hidden">
           <div className="bg-accent px-8 py-6 text-accent-foreground">
-            <h1 className="text-headline-sm">Service Request</h1>
+            <h1 className="font-serif text-headline-sm">Service Request</h1>
             <p className="mt-1 opacity-90">Request wedding or baptism services</p>
           </div>
 

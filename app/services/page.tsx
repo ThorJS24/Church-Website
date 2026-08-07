@@ -1,17 +1,17 @@
 'use client';
 
 import { useState, useEffect, lazy, Suspense } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Sun, Moon, BookOpen, Clock, MapPin, Calendar, Video, Coffee, Baby, Users, Bell, Heart, Radio, Accessibility } from 'lucide-react';
 import { getPageContent, getServiceTimes, getSiteSettings, getLivestream } from '@/lib/content';
-import { PageHero } from '@/components/ui-legacy/PageHero';
-import { Section } from '@/components/ui-legacy/Section';
-import { Card } from '@/components/ui-legacy/Card';
-import { Grid } from '@/components/ui-legacy/Grid';
-import { Button, LinkButton } from '@/components/ui-legacy/Button';
-import { Badge } from '@/components/ui-legacy/Badge';
-import { Modal } from '@/components/ui-legacy/Modal';
-import { LoadingState, EmptyState } from '@/components/ui-legacy/States';
+import { PageHero } from '@/components/ui/page-hero';
+import { Section } from '@/components/ui/section';
+import { Card } from '@/components/ui/card';
+import { Grid } from '@/components/ui/grid';
+import { Button, LinkButton } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Modal } from '@/components/ui/modal';
+import { LoadingState, EmptyState } from '@/components/ui/states';
 
 const DynamicLiveStream = lazy(() => import('@/components/DynamicLiveStream'));
 

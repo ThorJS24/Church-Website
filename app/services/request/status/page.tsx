@@ -3,12 +3,12 @@
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Check, Clock, Heart, Droplets } from 'lucide-react';
-import { Container } from '@/components/ui-legacy/Container';
-import { Card } from '@/components/ui-legacy/Card';
-import { Input } from '@/components/ui-legacy/Input';
-import { Button } from '@/components/ui-legacy/Button';
-import { LoadingState } from '@/components/ui-legacy/States';
-import { cn } from '@/lib/cn';
+import { Container } from '@/components/ui/container';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { LoadingState } from '@/components/ui/states';
+import { cn } from '@/lib/utils';
 
 interface RequestStatus {
   serviceType: string;
@@ -55,7 +55,7 @@ function StatusForm() {
   return (
     <Container size="sm" className="py-16">
       <Card variant="raised" padding="lg">
-        <h1 className="text-headline-sm text-foreground">Track Your Request</h1>
+        <h1 className="font-serif text-headline-sm text-foreground">Track Your Request</h1>
         <p className="mt-2 text-body-sm text-foreground-muted">Enter the request ID from your confirmation email and the email you submitted with.</p>
 
         <form
