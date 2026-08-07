@@ -1,24 +1,24 @@
 'use client';
 
 import { useState, useEffect, lazy, Suspense, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Play, Calendar, User, Clock, Search, BookOpen, Video, Radio, History, Bookmark, BookmarkCheck } from 'lucide-react';
 import { getSermons, getSeriesList, getSpeakersList, getLivestream, Sermon } from '@/lib/content';
 import { extractYouTubeId, getYouTubeEmbedUrl } from '@/lib/utils';
 import Image from 'next/image';
-import { PageHero } from '@/components/ui-legacy/PageHero';
-import { Section } from '@/components/ui-legacy/Section';
-import { Card } from '@/components/ui-legacy/Card';
-import { Grid } from '@/components/ui-legacy/Grid';
-import { Input } from '@/components/ui-legacy/Input';
-import { Select } from '@/components/ui-legacy/Select';
-import { Button } from '@/components/ui-legacy/Button';
-import { IconButton } from '@/components/ui-legacy/IconButton';
-import { Badge } from '@/components/ui-legacy/Badge';
-import { Avatar } from '@/components/ui-legacy/Avatar';
-import { Modal } from '@/components/ui-legacy/Modal';
-import { LoadingState, EmptyState } from '@/components/ui-legacy/States';
-import { cn } from '@/lib/cn';
+import { PageHero } from '@/components/ui/page-hero';
+import { Section } from '@/components/ui/section';
+import { Card } from '@/components/ui/card';
+import { Grid } from '@/components/ui/grid';
+import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { IconButton } from '@/components/ui/icon-button';
+import { Badge } from '@/components/ui/badge';
+import { Avatar } from '@/components/ui/avatar';
+import { Modal } from '@/components/ui/modal';
+import { LoadingState, EmptyState } from '@/components/ui/states';
+import { cn } from '@/lib/utils';
 
 const DynamicLiveStream = lazy(() => import('@/components/DynamicLiveStream'));
 
@@ -199,7 +199,7 @@ export default function SermonsPage() {
           <h2 className="mb-8 text-center text-headline-md text-foreground">Latest Sermon</h2>
           <Card variant="raised" padding="none" className="mx-auto max-w-4xl overflow-hidden">
             <div className="md:flex">
-              <div className="relative h-64 shrink-0 bg-zinc-900 md:h-auto md:w-1/2">
+              <div className="relative h-64 shrink-0 bg-surface-active md:h-auto md:w-1/2">
                 {featuredSermon.imageUrl ? (
                   <Image src={featuredSermon.imageUrl} alt={featuredSermon.title} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
                 ) : (
@@ -381,7 +381,7 @@ export default function SermonsPage() {
                 transition={{ delay: Math.min(index * 0.04, 0.4), duration: 0.4 }}
               >
                 <Card padding="none" className="h-full overflow-hidden">
-                  <div className="relative aspect-video bg-zinc-900">
+                  <div className="relative aspect-video bg-surface-active">
                     {sermon.imageUrl || sermon.youtubeUrl ? (
                       <Image
                         src={sermon.imageUrl || `https://img.youtube.com/vi/${extractYouTubeId(sermon.youtubeUrl || '')}/maxresdefault.jpg`}

@@ -4,12 +4,12 @@ import Image from 'next/image';
 import { Calendar, User, Download } from 'lucide-react';
 import { getSermonById, getSermons } from '@/lib/content';
 import { extractYouTubeId, getYouTubeEmbedUrl } from '@/lib/utils';
-import { Container } from '@/components/ui-legacy/Container';
-import { Section } from '@/components/ui-legacy/Section';
-import { Breadcrumbs } from '@/components/ui-legacy/Breadcrumbs';
-import { Badge } from '@/components/ui-legacy/Badge';
-import { Card } from '@/components/ui-legacy/Card';
-import { LinkButton } from '@/components/ui-legacy/Button';
+import { Container } from '@/components/ui/container';
+import { Section } from '@/components/ui/section';
+import { Breadcrumbs } from '@/components/ui/breadcrumbs';
+import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
+import { LinkButton } from '@/components/ui/button';
 import { ShareButton } from '@/components/ShareButton';
 import { PrintButton } from '@/components/PrintButton';
 import { SaveButton } from '@/components/SaveButton';
@@ -83,13 +83,13 @@ export default async function SermonDetailPage({ params }: Props) {
           <Breadcrumbs items={[{ label: 'Sermons', href: '/sermons' }, { label: sermon.title }]} className="mb-6 no-print" />
 
           {sermon.seriesTitle && <Badge variant="accent" className="mb-3">{sermon.seriesTitle}</Badge>}
-          <h1 className="text-display-sm text-foreground">{sermon.title}</h1>
+          <h1 className="font-serif text-display-sm text-foreground">{sermon.title}</h1>
           <p className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-body-sm text-foreground-muted">
             {sermon.speakerName && <span className="flex items-center gap-1.5"><User className="h-4 w-4" /> {sermon.speakerName}</span>}
             <span className="flex items-center gap-1.5">
               <Calendar className="h-4 w-4" /> {new Date(sermon.date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
             </span>
-            {sermon.scripture && <span className="font-medium text-warm">📖 {sermon.scripture}</span>}
+            {sermon.scripture && <span className="font-serif font-medium italic text-warm">📖 {sermon.scripture}</span>}
           </p>
 
           {embedUrl && (
@@ -140,7 +140,7 @@ export default async function SermonDetailPage({ params }: Props) {
               {relatedSermons.map((related) => (
                 <a key={related.id} href={`/sermons/${related.id}`} className="block">
                   <Card padding="none" className="h-full overflow-hidden transition-shadow hover:shadow-md">
-                    <div className="relative aspect-video bg-zinc-900">
+                    <div className="relative aspect-video bg-surface-active">
                       {related.imageUrl && <Image src={related.imageUrl} alt={related.title} fill sizes="300px" className="object-cover" />}
                     </div>
                     <div className="p-4">

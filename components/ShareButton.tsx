@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Share2, Check } from 'lucide-react';
-import { Button } from '@/components/ui-legacy/Button';
+import { Button } from '@/components/ui/button';
 
 export function ShareButton({ title, className }: { title: string; className?: string }) {
   const [copied, setCopied] = useState(false);
