@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { Shield, Download, Trash2, FileText, Cookie, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getIdToken } from '@/lib/firebase';
+import { toast } from '@/lib/toast';
 import { Modal } from '@/components/ui/modal';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -14,12 +15,13 @@ import { Switch } from '@/components/ui/switch';
 interface PrivacyDialogProps {
   isOpen: boolean;
   onClose: () => void;
+  initialTab?: 'overview' | 'policy' | 'cookies';
 }
 
-export default function PrivacyDialog({ isOpen, onClose }: PrivacyDialogProps) {
+export default function PrivacyDialog({ isOpen, onClose, initialTab = 'overview' }: PrivacyDialogProps) {
   const { user } = useAuth();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [downloadState, setDownloadState] = useState<'idle' | 'working' | 'error'>('idle');
   const [deleteState, setDeleteState] = useState<'idle' | 'working' | 'success' | 'error'>('idle');
@@ -29,6 +31,13 @@ export default function PrivacyDialog({ isOpen, onClose }: PrivacyDialogProps) {
     marketing: false,
     functional: true
   });
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setActiveTab(initialTab);
+    const saved = localStorage.getItem('cookiePreferences');
+    if (saved) setCookiePreferences(JSON.parse(saved));
+  }, [isOpen, initialTab]);
 
   const handleDataDownload = async () => {
     if (!user) {
@@ -88,7 +97,7 @@ export default function PrivacyDialog({ isOpen, onClose }: PrivacyDialogProps) {
 
   const saveCookiePreferences = () => {
     localStorage.setItem('cookiePreferences', JSON.stringify(cookiePreferences));
-    alert('Cookie preferences saved!');
+    toast({ title: 'Cookie preferences saved', variant: 'success' });
   };
 
   const privacyActions = [
@@ -134,7 +143,7 @@ export default function PrivacyDialog({ isOpen, onClose }: PrivacyDialogProps) {
       </span>
     }>
       <div className="relative">
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof initialTab)}>
           <TabsList className="mb-4">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="policy">Policy</TabsTrigger>
