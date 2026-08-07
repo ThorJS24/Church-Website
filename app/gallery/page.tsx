@@ -196,7 +196,7 @@ function PhotoLightbox({
             <span className="flex items-center gap-4">
               <span>{new Date(photo.dateTaken).toLocaleDateString()}</span>
               {photo.photographer && <span>📸 {photo.photographer}</span>}
-              <button onClick={like} disabled={liking} className="flex items-center gap-1 hover:text-red-400">
+              <button onClick={like} disabled={liking} className="flex items-center gap-1 hover:text-danger">
                 <Heart className="h-4 w-4" /> {photo.likes ?? 0}
               </button>
               <button onClick={() => setShowComments((v) => !v)} className="flex items-center gap-1 hover:text-accent">

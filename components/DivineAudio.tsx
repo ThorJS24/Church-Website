@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { Volume2, VolumeX, Music } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
+import { cn } from '@/lib/utils';
 
 interface DivineAudioProps {
   autoPlay?: boolean;
@@ -14,23 +15,21 @@ export default function DivineAudio({ showControls = true }: DivineAudioProps) {
   const [isMuted, setIsMuted] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-
-
   const startAmbientSound = async () => {
     try {
       const response = await fetch('/api/ambient-audio');
       const ambientData = await response.json();
       console.log('Ambient data:', ambientData);
-      
+
       if (ambientData?.audioUrl) {
         audioRef.current = new Audio(ambientData.audioUrl);
         audioRef.current.loop = true;
         audioRef.current.volume = (ambientData.volume || 20) / 100;
-        
+
         audioRef.current.addEventListener('canplaythrough', () => {
           audioRef.current?.play().catch(e => console.log('Play error:', e));
         });
-        
+
         audioRef.current.load();
       } else {
         console.log('No audio URL found');
@@ -56,7 +55,7 @@ export default function DivineAudio({ showControls = true }: DivineAudioProps) {
         const response = await fetch('/api/ambient-audio');
         const ambientData = await response.json();
         console.log('API Response:', JSON.stringify(ambientData, null, 2));
-        
+
         if (ambientData?.audioUrl) {
           await startAmbientSound();
           setIsPlaying(true);
@@ -84,53 +83,49 @@ export default function DivineAudio({ showControls = true }: DivineAudioProps) {
     <motion.div
       role="region"
       aria-label="Ambient audio controls"
-      className="fixed bottom-4 right-4 z-50 bg-white/90 dark:bg-gray-800/90 backdrop-blur-xs rounded-full p-3 border border-yellow-200/50 dark:border-yellow-700/50 shadow-lg"
+      className="fixed bottom-4 right-4 z-50 rounded-full border border-warm/30 bg-background/90 p-3 shadow-lg backdrop-blur-xs"
       initial={{ opacity: 0, scale: 0 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: 1, duration: 0.5 }}
     >
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center gap-2">
         <motion.button
           onClick={togglePlay}
-          className={`p-2 rounded-full transition-colors ${
-            isPlaying 
-              ? 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-600 dark:text-yellow-400' 
-              : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
-          }`}
+          className={cn(
+            'rounded-full p-2 transition-colors',
+            isPlaying ? 'bg-warm-subtle text-warm' : 'bg-surface text-foreground-muted'
+          )}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
           title={isPlaying ? 'Stop ambient sounds' : 'Play ambient sounds'}
         >
           {isPlaying ? (
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-            >
-              <Music className="w-4 h-4" />
+            <motion.div animate={{ rotate: 360 }} transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}>
+              <Music className="h-4 w-4" />
             </motion.div>
           ) : (
-            <Music className="w-4 h-4" />
+            <Music className="h-4 w-4" />
           )}
         </motion.button>
-        
+
         {isPlaying && (
           <motion.button
             onClick={toggleMute}
-            className="p-2 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+            className="rounded-full bg-surface p-2 text-foreground-muted transition-colors hover:bg-surface-hover"
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             title={isMuted ? 'Unmute' : 'Mute'}
           >
-            {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+            {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
           </motion.button>
         )}
       </div>
-      
+
       {isPlaying && !isMuted && (
         <motion.div
-          className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full"
+          className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-warm"
           animate={{ scale: [1, 1.3, 1], opacity: [1, 0.7, 1] }}
           transition={{ duration: 2, repeat: Infinity }}
         />

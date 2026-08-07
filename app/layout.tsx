@@ -6,7 +6,6 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import ClientLayout from '@/components/ClientLayout';
 import SkipLink from '@/components/SkipLink';
-import { ToastProvider } from '@/components/ui-legacy/Toast';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { PublicChrome } from '@/components/PublicChrome';
@@ -124,18 +123,12 @@ export default function RootLayout({
             <LanguageProvider>
               <AuthProvider>
                 <TooltipProvider>
-                  {/* ToastProvider stays until every ui-legacy page migrates
-                      off useToast() from components/ui-legacy/Toast — the
-                      new lib/toast.ts adapter (sonner-backed) is what new
-                      pages should use instead, no provider required. */}
-                  <ToastProvider>
-                    <ThemeAccentInjector />
-                    <ClientLayout>
-                      <SkipLink />
-                      <PublicChrome>{children}</PublicChrome>
-                    </ClientLayout>
-                    <Toaster />
-                  </ToastProvider>
+                  <ThemeAccentInjector />
+                  <ClientLayout>
+                    <SkipLink />
+                    <PublicChrome>{children}</PublicChrome>
+                  </ClientLayout>
+                  <Toaster />
                 </TooltipProvider>
               </AuthProvider>
             </LanguageProvider>

@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { X, CheckCircle, AlertCircle, Info, XCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export interface Notification {
   id: string;
@@ -20,24 +21,24 @@ interface NotificationSystemProps {
 const NotificationSystem = ({ notifications, onRemove }: NotificationSystemProps) => {
   const getIcon = (type: string) => {
     switch (type) {
-      case 'success': return <CheckCircle className="w-5 h-5" />;
-      case 'error': return <XCircle className="w-5 h-5" />;
-      case 'warning': return <AlertCircle className="w-5 h-5" />;
-      default: return <Info className="w-5 h-5" />;
+      case 'success': return <CheckCircle className="h-5 w-5" />;
+      case 'error': return <XCircle className="h-5 w-5" />;
+      case 'warning': return <AlertCircle className="h-5 w-5" />;
+      default: return <Info className="h-5 w-5" />;
     }
   };
 
   const getColors = (type: string) => {
     switch (type) {
-      case 'success': return 'bg-green-50 border-green-200 text-green-800';
-      case 'error': return 'bg-red-50 border-red-200 text-red-800';
-      case 'warning': return 'bg-yellow-50 border-yellow-200 text-yellow-800';
-      default: return 'bg-blue-50 border-blue-200 text-blue-800';
+      case 'success': return 'bg-success-subtle border-success/30 text-success';
+      case 'error': return 'bg-danger-subtle border-danger/30 text-danger';
+      case 'warning': return 'bg-warning-subtle border-warning/30 text-warning';
+      default: return 'bg-info-subtle border-info/30 text-info';
     }
   };
 
   return (
-    <div className="fixed top-24 right-4 z-50 space-y-2 max-w-sm">
+    <div className="fixed top-24 right-4 z-50 max-w-sm space-y-2">
       <AnimatePresence>
         {notifications.map((notification) => (
           <motion.div
@@ -45,21 +46,19 @@ const NotificationSystem = ({ notifications, onRemove }: NotificationSystemProps
             initial={{ opacity: 0, x: 300 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 300 }}
-            className={`p-4 rounded-lg border shadow-lg ${getColors(notification.type)}`}
+            className={cn('rounded-lg border p-4 shadow-lg', getColors(notification.type))}
           >
             <div className="flex items-start">
-              <div className="shrink-0 mr-3">
-                {getIcon(notification.type)}
-              </div>
+              <div className="mr-3 shrink-0">{getIcon(notification.type)}</div>
               <div className="flex-1">
-                <h4 className="font-semibold text-sm">{notification.title}</h4>
-                <p className="text-sm mt-1">{notification.message}</p>
+                <h4 className="text-body-sm font-semibold">{notification.title}</h4>
+                <p className="mt-1 text-body-sm">{notification.message}</p>
               </div>
               <button
                 onClick={() => onRemove(notification.id)}
-                className="shrink-0 ml-2 text-gray-400 hover:text-gray-600"
+                className="ml-2 shrink-0 text-foreground-subtle hover:text-foreground"
               >
-                <X className="w-4 h-4" />
+                <X className="h-4 w-4" />
               </button>
             </div>
           </motion.div>
@@ -76,7 +75,7 @@ export const useNotifications = () => {
   const addNotification = (notification: Omit<Notification, 'id'>) => {
     const id = Date.now().toString();
     const newNotification = { ...notification, id };
-    
+
     setNotifications(prev => [...prev, newNotification]);
 
     // Auto remove after duration

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Card } from '@/components/ui-legacy/Card';
+import { Card } from '@/components/ui/card';
 
 function getTimeLeft(target: string) {
   const diff = new Date(target).getTime() - Date.now();

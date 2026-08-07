@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { Book } from 'lucide-react';
 
 interface ScriptureReferenceProps {
@@ -58,7 +58,7 @@ export default function ScriptureReference({ reference, verse, version = 'NKJV' 
                 <div className="text-caption font-medium text-foreground">
                   {reference} ({version})
                 </div>
-                <div className="whitespace-pre-line text-caption italic leading-relaxed text-foreground-muted">
+                <div className="whitespace-pre-line font-serif text-caption italic leading-relaxed text-foreground-muted">
                   "{verse}"
                 </div>
               </div>

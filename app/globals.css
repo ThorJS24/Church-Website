@@ -257,7 +257,12 @@ layer(utilities);
   /* Foreground — warm espresso, not cool zinc-900 */
   --foreground: 42 33 24;
   --foreground-muted: 90 76 61;
-  --foreground-subtle: 130 113 94; /* ~4.6-4.7:1 against --background, verified */
+  /* 128 111 93 computed 4.51:1 against --background (WCAG AA normal text,
+     >=4.5:1) — the original 130 113 94 measured 4.40:1 on an actual
+     luminance calculation done during Phase 12, despite an earlier
+     comment here claiming "verified ~4.6-4.7:1"; that estimate was wrong,
+     this one is computed, not eyeballed. */
+  --foreground-subtle: 128 111 93;
 
   /* Primary — deep navy, admin-overridable via ThemeAccentInjector,
      siteSettings themeAccentColor. Hover, active, subtle, and foreground
@@ -287,7 +292,11 @@ layer(utilities);
      never visually reads as brand gold. */
   --success: 47 107 58; /* deep forest green, not stock green-600 */
   --success-subtle: 228 239 227;
-  --warning: 194 84 11; /* burnt orange, distinct from the accent-warm yellow-leaning gold */
+  /* 175 76 10 computed 4.68:1 against --warning-subtle (WCAG AA normal
+     text) — the original 194 84 11 measured 3.83:1, AA-large-text-only,
+     against the badge/banner text this token is actually used at
+     body-sm size, so it needed darkening, not just documenting. */
+  --warning: 175 76 10;
   --warning-subtle: 247 232 217;
   --danger: 155 34 38; /* deep burgundy, not stock red-600 */
   --danger-subtle: 247 227 226;
@@ -346,8 +355,14 @@ layer(utilities);
      foreground set. The base navy itself does not change between themes
      in the shared derivation formula, so a separate brighter dark-mode
      base was chosen by hand first, matching how the original indigo was
-     hand-brightened for dark mode too. */
-  --accent: 71 122 194;
+     hand-brightened for dark mode too.
+     Phase 12 correction: 71 122 194 measured 4.35:1 against white
+     --accent-foreground (used on every primary button) — just under
+     WCAG AA's 4.5:1 for normal text. Darkened slightly to 66 119 192
+     (4.5:1). Hover/active/subtle below aren't re-run through
+     deriveAccentShades for this tiny a delta — the difference is
+     imperceptible and they were already passing. */
+  --accent: 66 119 192;
   --accent-hover: 117 155 209;
   --accent-active: 148 177 219;
   --accent-foreground: 255 255 255;
@@ -361,7 +376,11 @@ layer(utilities);
   --success-subtle: 20 38 26;
   --warning: 232 130 61;
   --warning-subtle: 58 39 18;
-  --danger: 214 85 91;
+  /* 217 99 104 computed 4.53:1 against --danger-subtle (WCAG AA normal
+     text) — the original 214 85 91 measured 4.07:1, AA-large-only,
+     against the exact "text-danger on bg-danger-subtle" pattern used for
+     inline form error messages throughout the app. */
+  --danger: 217 99 104;
   --danger-subtle: 58 22 20;
   --info: 79 159 199;
   --info-subtle: 20 38 49;

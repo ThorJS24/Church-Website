@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect } from 'react';
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Compass } from 'lucide-react';
+import { LinkButton } from '@/components/ui/button';
 
 export default function NotFound() {
   const pathname = usePathname();
@@ -17,17 +18,15 @@ export default function NotFound() {
   }, []);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="text-center">
-        <h1 className="text-6xl font-bold text-gray-900 mb-4">404</h1>
-        <h2 className="text-2xl font-semibold text-gray-700 mb-4">Page Not Found</h2>
-        <p className="text-gray-600 mb-8">The page you're looking for doesn't exist.</p>
-        <Link
-          href="/"
-          className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors min-w-touch min-h-touch inline-block"
-        >
-          Go Home
-        </Link>
+        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent-subtle text-accent">
+          <Compass className="h-8 w-8" />
+        </div>
+        <h1 className="font-serif text-display-md text-foreground">404</h1>
+        <h2 className="mt-2 text-title-lg text-foreground">Page Not Found</h2>
+        <p className="mt-3 text-body-md text-foreground-muted">The page you&apos;re looking for doesn&apos;t exist.</p>
+        <LinkButton href="/" className="mt-8">Go Home</LinkButton>
       </div>
     </div>
   );

@@ -33,8 +33,8 @@ export default function NewsletterSignup() {
 
   if (status === 'success') {
     return (
-      <p className="flex items-center gap-2 text-body-sm text-emerald-400">
-        <CheckCircle className="w-4 h-4" /> Thanks for subscribing!
+      <p className="flex items-center gap-2 text-body-sm text-success">
+        <CheckCircle className="h-4 w-4" /> Thanks for subscribing!
       </p>
     );
   }

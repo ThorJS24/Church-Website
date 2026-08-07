@@ -1,6 +1,7 @@
 'use client';
 
-import Link from 'next/link';
+import { AlertTriangle } from 'lucide-react';
+import { LinkButton, Button } from '@/components/ui/button';
 
 export default function Error({
   error,
@@ -10,24 +11,17 @@ export default function Error({
   reset: () => void;
 }) {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="text-center">
-        <h1 className="text-6xl font-bold text-gray-900 mb-4">500</h1>
-        <h2 className="text-2xl font-semibold text-gray-700 mb-4">Something went wrong</h2>
-        <p className="text-gray-600 mb-8">We're sorry, but something went wrong on our end.</p>
-        <div className="space-x-4">
-          <button
-            onClick={reset}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors min-w-touch min-h-touch"
-          >
-            Try Again
-          </button>
-          <Link
-            href="/"
-            className="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors inline-block min-w-touch min-h-touch"
-          >
-            Go Home
-          </Link>
+        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-danger-subtle text-danger">
+          <AlertTriangle className="h-8 w-8" />
+        </div>
+        <h1 className="font-serif text-display-md text-foreground">500</h1>
+        <h2 className="mt-2 text-title-lg text-foreground">Something went wrong</h2>
+        <p className="mt-3 text-body-md text-foreground-muted">We&apos;re sorry, but something went wrong on our end.</p>
+        <div className="mt-8 flex justify-center gap-3">
+          <Button onClick={reset}>Try Again</Button>
+          <LinkButton href="/" variant="outline">Go Home</LinkButton>
         </div>
       </div>
     </div>
