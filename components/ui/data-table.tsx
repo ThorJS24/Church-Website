@@ -180,6 +180,12 @@ export function DataTable<T>({
     } else if (e.key === 'Enter') {
       const row = pageRows[focusedRow];
       if (row && onRowClick) onRowClick(row);
+    } else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'a' && selectable) {
+      e.preventDefault();
+      toggleSelectAllOnPage();
+    } else if (e.key === 'Escape' && selected.size > 0) {
+      e.preventDefault();
+      clearSelection();
     }
   };
 
@@ -195,6 +201,9 @@ export function DataTable<T>({
           {selected.size > 0 && bulkActions && (
             <div className="flex items-center gap-2 rounded-md bg-accent-subtle px-3 py-1.5 text-body-sm text-accent">
               <span>{selected.size} selected</span>
+              <span className="text-caption text-accent/70" title="Click a row then use these shortcuts">
+                (⌘/Ctrl+A all · Esc clear)
+              </span>
               {bulkActions(Array.from(selected), clearSelection)}
             </div>
           )}
