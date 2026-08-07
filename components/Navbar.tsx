@@ -7,15 +7,18 @@ import {
   Church, Menu, X, ChevronDown, User, LogOut, Sun, Moon, Search,
   Home, Calendar, BookOpen, Users, Heart, Camera, Phone, Gift, Globe, LayoutGrid, ShieldCheck,
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { cn } from '@/lib/cn';
-import { IconButton } from '@/components/ui-legacy/IconButton';
-import { Button, LinkButton } from '@/components/ui-legacy/Button';
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, DropdownSeparator } from '@/components/ui-legacy/Dropdown';
-import { Avatar } from '@/components/ui-legacy/Avatar';
+import { cn } from '@/lib/utils';
+import { IconButton } from '@/components/ui/icon-button';
+import { Button, LinkButton } from '@/components/ui/button';
+import { Avatar } from '@/components/ui/avatar';
+import {
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel,
+} from '@/components/ui/dropdown-menu';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import CommandPalette from '@/components/CommandPalette';
 import EnhancedLoginModal from './EnhancedLoginModal';
 
@@ -119,10 +122,8 @@ export default function Navbar() {
       <nav
         ref={navRef}
         className={cn(
-          'fixed top-0 left-0 right-0 z-40 h-16 border-b transition-colors duration-base ease-standard',
-          scrolled
-            ? 'border-border bg-background/90 backdrop-blur-md shadow-sm'
-            : 'border-transparent bg-background'
+          'fixed left-0 right-0 top-0 z-40 h-16 border-b transition-colors duration-base ease-standard',
+          scrolled ? 'border-border bg-background/90 shadow-sm backdrop-blur-md' : 'border-transparent bg-background'
         )}
       >
         <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -131,14 +132,14 @@ export default function Navbar() {
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent">
               <Church className="h-5 w-5 text-accent-foreground" aria-hidden="true" />
             </div>
-            <div className="hidden sm:block leading-tight">
-              <p className="text-title-sm text-foreground">Salem PBC</p>
+            <div className="hidden leading-tight sm:block">
+              <p className="font-serif text-title-sm text-foreground">Salem PBC</p>
               <p className="text-caption text-foreground-subtle">{t('nav.tagline')}</p>
             </div>
           </Link>
 
           {/* Desktop navigation */}
-          <div className="hidden lg:flex items-center gap-1">
+          <div className="hidden items-center gap-1 lg:flex">
             {primaryItems.map((item) => {
               const active = isActive(item.href);
               return (
@@ -162,36 +163,39 @@ export default function Navbar() {
               );
             })}
 
-            <Dropdown align="right">
-              <DropdownTrigger className="flex items-center gap-1 rounded-md px-3.5 py-2 text-body-sm font-medium text-foreground-muted hover:text-foreground transition-colors duration-fast">
-                <span>{t('nav.more')}</span>
-                <ChevronDown className="h-4 w-4" aria-hidden="true" />
-              </DropdownTrigger>
-              <DropdownMenu className="min-w-[16rem]">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  className="flex items-center gap-1 rounded-md px-3.5 py-2 text-body-sm font-medium text-foreground-muted transition-colors duration-fast hover:text-foreground"
+                >
+                  <span>{t('nav.more')}</span>
+                  <ChevronDown className="h-4 w-4" aria-hidden="true" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="min-w-64">
                 {secondaryItems.map((item, i) => (
                   <div key={item.key}>
-                    {i > 0 && <DropdownSeparator />}
+                    {i > 0 && <DropdownMenuSeparator />}
                     {item.section ? (
                       <>
-                        <div className="px-3 pt-2 pb-1 text-caption font-medium uppercase tracking-wide text-foreground-subtle">
-                          {t(item.labelKey)}
-                        </div>
+                        <DropdownMenuLabel>{t(item.labelKey)}</DropdownMenuLabel>
                         {item.section.map((sub) => (
-                          <DropdownItem key={sub.key} onClick={() => (router.push(sub.href))}>
+                          <DropdownMenuItem key={sub.key} onClick={() => router.push(sub.href)}>
                             {t(sub.labelKey)}
-                          </DropdownItem>
+                          </DropdownMenuItem>
                         ))}
                       </>
                     ) : (
-                      <DropdownItem onClick={() => (router.push(item.href))}>
+                      <DropdownMenuItem onClick={() => router.push(item.href)}>
                         <item.icon className="h-4 w-4 text-foreground-subtle" aria-hidden="true" />
                         {t(item.labelKey)}
-                      </DropdownItem>
+                      </DropdownMenuItem>
                     )}
                   </div>
                 ))}
-              </DropdownMenu>
-            </Dropdown>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* Right actions */}
@@ -199,21 +203,14 @@ export default function Navbar() {
             <button
               type="button"
               onClick={() => setShowCommandPalette(true)}
-              className="hidden md:flex items-center gap-2 rounded-md border border-border bg-surface px-3 py-1.5 text-body-sm text-foreground-subtle hover:border-border-strong hover:text-foreground transition-colors duration-fast"
+              className="hidden items-center gap-2 rounded-md border border-border bg-surface px-3 py-1.5 text-body-sm text-foreground-subtle transition-colors duration-fast hover:border-border-strong hover:text-foreground md:flex"
               aria-label={t('common.search') || 'Search'}
             >
               <Search className="h-4 w-4" aria-hidden="true" />
               <span>{t('common.search') || 'Search'}</span>
-              <kbd className="ml-2 rounded border border-border bg-background px-1.5 py-0.5 text-caption">
-                ⌘K
-              </kbd>
+              <kbd className="ml-2 rounded border border-border bg-background px-1.5 py-0.5 text-caption">⌘K</kbd>
             </button>
-            <IconButton
-              label={t('common.search') || 'Search'}
-              size="md"
-              className="md:hidden"
-              onClick={() => setShowCommandPalette(true)}
-            >
+            <IconButton label={t('common.search') || 'Search'} size="md" className="md:hidden" onClick={() => setShowCommandPalette(true)}>
               <Search />
             </IconButton>
 
@@ -221,185 +218,166 @@ export default function Navbar() {
               {theme === 'light' ? <Moon /> : <Sun />}
             </IconButton>
 
-            <Dropdown align="right">
-              <DropdownTrigger
-                aria-label="Language"
-                className="flex h-10 w-10 items-center justify-center rounded-md text-foreground-muted hover:bg-surface-hover hover:text-foreground transition-colors duration-fast"
-              >
-                <Globe className="h-5 w-5" aria-hidden="true" />
-              </DropdownTrigger>
-              <DropdownMenu>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  aria-label="Language"
+                  className="flex h-10 w-10 items-center justify-center rounded-md text-foreground-muted transition-colors duration-fast hover:bg-surface-hover hover:text-foreground"
+                >
+                  <Globe className="h-5 w-5" aria-hidden="true" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
                 {LANGUAGES.map((lang) => (
-                  <DropdownItem key={lang.code} onClick={() => handleLanguageChange(lang.code)}>
+                  <DropdownMenuItem key={lang.code} onClick={() => handleLanguageChange(lang.code)}>
                     <span className="text-base">{lang.flag}</span>
                     <span className="flex-1">{lang.nameNative}</span>
                     {language === lang.code && <span className="h-1.5 w-1.5 rounded-full bg-accent" />}
-                  </DropdownItem>
+                  </DropdownMenuItem>
                 ))}
-              </DropdownMenu>
-            </Dropdown>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             {user ? (
-              <Dropdown align="right">
-                <DropdownTrigger className="flex items-center gap-2 rounded-md border border-border bg-surface px-2 py-1.5">
-                  <Avatar name={user.displayName || user.firstName || user.email} size="xs" />
-                  <span className="hidden sm:block max-w-24 truncate text-body-sm font-medium text-foreground">
-                    {user.displayName || user.firstName || user.email}
-                  </span>
-                  <ChevronDown className="h-3.5 w-3.5 text-foreground-subtle" aria-hidden="true" />
-                </DropdownTrigger>
-                <DropdownMenu>
-                  <DropdownItem onClick={() => (router.push('/profile'))}>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button type="button" className="flex items-center gap-2 rounded-md border border-border bg-surface px-2 py-1.5">
+                    <Avatar name={user.displayName || user.firstName || user.email} size="xs" />
+                    <span className="hidden max-w-24 truncate text-body-sm font-medium text-foreground sm:block">
+                      {user.displayName || user.firstName || user.email}
+                    </span>
+                    <ChevronDown className="h-3.5 w-3.5 text-foreground-subtle" aria-hidden="true" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => router.push('/profile')}>
                     <User className="h-4 w-4 text-foreground-subtle" /> {t('nav.profile')}
-                  </DropdownItem>
-                  <DropdownItem onClick={() => (router.push('/dashboard'))}>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push('/dashboard')}>
                     <LayoutGrid className="h-4 w-4 text-foreground-subtle" /> {t('nav.dashboard')}
-                  </DropdownItem>
+                  </DropdownMenuItem>
                   {canAccessAdminPanel() && (
-                    <DropdownItem onClick={() => (router.push('/admin'))}>
+                    <DropdownMenuItem onClick={() => router.push('/admin')}>
                       <ShieldCheck className="h-4 w-4 text-foreground-subtle" /> Admin Dashboard
-                    </DropdownItem>
+                    </DropdownMenuItem>
                   )}
-                  <DropdownSeparator />
-                  <DropdownItem destructive onClick={logout}>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem variant="destructive" onClick={logout}>
                     <LogOut className="h-4 w-4" /> {t('nav.logout')}
-                  </DropdownItem>
-                </DropdownMenu>
-              </Dropdown>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
-              <div className="hidden sm:flex items-center gap-2">
+              <div className="hidden items-center gap-2 sm:flex">
                 <Button variant="ghost" size="sm" onClick={() => setShowLoginModal(true)}>
                   {t('nav.login')}
                 </Button>
-                <LinkButton href="/register" size="sm">
-                  {t('nav.register')}
-                </LinkButton>
+                <LinkButton href="/register" size="sm">{t('nav.register')}</LinkButton>
               </div>
             )}
 
-            <IconButton
-              label={isMobileOpen ? 'Close menu' : 'Open menu'}
-              className="lg:hidden"
-              onClick={() => setIsMobileOpen((v) => !v)}
-            >
-              {isMobileOpen ? <X /> : <Menu />}
-            </IconButton>
+            <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
+              <SheetTrigger asChild>
+                <IconButton label={isMobileOpen ? 'Close menu' : 'Open menu'} className="lg:hidden">
+                  {isMobileOpen ? <X /> : <Menu />}
+                </IconButton>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-full max-w-sm p-0">
+                <div className="flex h-16 items-center gap-3 border-b border-border px-4">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent">
+                    <Church className="h-5 w-5 text-accent-foreground" aria-hidden="true" />
+                  </div>
+                  <p className="font-serif text-title-sm text-foreground">Salem PBC</p>
+                </div>
+                <div className="max-h-[calc(100vh-4rem)] space-y-1 overflow-y-auto px-4 py-4">
+                  {!user && (
+                    <div className="mb-3 flex gap-3 border-b border-border pb-4">
+                      <Button variant="secondary" fullWidth onClick={() => setShowLoginModal(true)}>{t('nav.login')}</Button>
+                      <LinkButton href="/register" fullWidth>{t('nav.register')}</LinkButton>
+                    </div>
+                  )}
+                  {user && (
+                    <div className="mb-3 space-y-1 border-b border-border pb-3">
+                      <Link href="/profile" className="flex items-center gap-3 rounded-md px-3 py-3 text-body-md font-medium text-foreground hover:text-accent">
+                        <User className="h-5 w-5 text-foreground-subtle" aria-hidden="true" /> {t('nav.profile')}
+                      </Link>
+                      <Link href="/dashboard" className="flex items-center gap-3 rounded-md px-3 py-3 text-body-md font-medium text-foreground hover:text-accent">
+                        <LayoutGrid className="h-5 w-5 text-foreground-subtle" aria-hidden="true" /> {t('nav.dashboard')}
+                      </Link>
+                      {canAccessAdminPanel() && (
+                        <Link href="/admin" className="flex items-center gap-3 rounded-md px-3 py-3 text-body-md font-medium text-foreground hover:text-accent">
+                          <ShieldCheck className="h-5 w-5 text-foreground-subtle" aria-hidden="true" /> Admin Dashboard
+                        </Link>
+                      )}
+                      <button type="button" onClick={logout} className="flex w-full items-center gap-3 rounded-md px-3 py-3 text-body-md font-medium text-danger">
+                        <LogOut className="h-5 w-5" aria-hidden="true" /> {t('nav.logout')}
+                      </button>
+                    </div>
+                  )}
+                  {navigationItems.map((item) => {
+                    const Icon = item.icon;
+                    const active = isActive(item.href);
+                    if (item.section) {
+                      const open = mobileSection === item.key;
+                      return (
+                        <div key={item.key}>
+                          <button
+                            type="button"
+                            onClick={() => setMobileSection(open ? null : item.key)}
+                            className={cn(
+                              'flex w-full items-center justify-between rounded-md px-3 py-3 text-body-md font-medium transition-colors',
+                              active ? 'text-accent' : 'text-foreground'
+                            )}
+                          >
+                            <span className="flex items-center gap-3">
+                              <Icon className="h-5 w-5 text-foreground-subtle" aria-hidden="true" />
+                              {t(item.labelKey)}
+                            </span>
+                            <ChevronDown className={cn('h-4 w-4 transition-transform', open && 'rotate-180')} />
+                          </button>
+                          <AnimatePresence>
+                            {open && (
+                              <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                transition={{ duration: 0.16 }}
+                                className="ml-8 overflow-hidden"
+                              >
+                                {item.section.map((sub) => (
+                                  <Link key={sub.key} href={sub.href} className="block rounded-md px-3 py-2 text-body-sm text-foreground-muted hover:text-foreground">
+                                    {t(sub.labelKey)}
+                                  </Link>
+                                ))}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      );
+                    }
+                    return (
+                      <Link
+                        key={item.key}
+                        href={item.href}
+                        className={cn(
+                          'flex items-center gap-3 rounded-md px-3 py-3 text-body-md font-medium transition-colors',
+                          active ? 'text-accent' : 'text-foreground hover:text-accent'
+                        )}
+                      >
+                        <Icon className="h-5 w-5 text-foreground-subtle" aria-hidden="true" />
+                        {t(item.labelKey)}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
-
-        {/* Mobile navigation */}
-        <AnimatePresence>
-          {isMobileOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-              className="lg:hidden overflow-hidden border-t border-border bg-background"
-            >
-              <div className="max-h-[calc(100vh-4rem)] space-y-1 overflow-y-auto px-4 py-4">
-                {!user && (
-                  <div className="mb-3 flex gap-3 border-b border-border pb-4">
-                    <Button variant="secondary" fullWidth onClick={() => setShowLoginModal(true)}>
-                      {t('nav.login')}
-                    </Button>
-                    <LinkButton href="/register" fullWidth>
-                      {t('nav.register')}
-                    </LinkButton>
-                  </div>
-                )}
-                {user && (
-                  <div className="mb-3 space-y-1 border-b border-border pb-3">
-                    <Link href="/profile" className="flex items-center gap-3 rounded-md px-3 py-3 text-body-md font-medium text-foreground hover:text-accent">
-                      <User className="h-5 w-5 text-foreground-subtle" aria-hidden="true" /> {t('nav.profile')}
-                    </Link>
-                    <Link href="/dashboard" className="flex items-center gap-3 rounded-md px-3 py-3 text-body-md font-medium text-foreground hover:text-accent">
-                      <LayoutGrid className="h-5 w-5 text-foreground-subtle" aria-hidden="true" /> {t('nav.dashboard')}
-                    </Link>
-                    {canAccessAdminPanel() && (
-                      <Link href="/admin" className="flex items-center gap-3 rounded-md px-3 py-3 text-body-md font-medium text-foreground hover:text-accent">
-                        <ShieldCheck className="h-5 w-5 text-foreground-subtle" aria-hidden="true" /> Admin Dashboard
-                      </Link>
-                    )}
-                    <button
-                      type="button"
-                      onClick={logout}
-                      className="flex w-full items-center gap-3 rounded-md px-3 py-3 text-body-md font-medium text-danger"
-                    >
-                      <LogOut className="h-5 w-5" aria-hidden="true" /> {t('nav.logout')}
-                    </button>
-                  </div>
-                )}
-                {navigationItems.map((item) => {
-                  const Icon = item.icon;
-                  const active = isActive(item.href);
-                  if (item.section) {
-                    const open = mobileSection === item.key;
-                    return (
-                      <div key={item.key}>
-                        <button
-                          type="button"
-                          onClick={() => setMobileSection(open ? null : item.key)}
-                          className={cn(
-                            'flex w-full items-center justify-between rounded-md px-3 py-3 text-body-md font-medium transition-colors',
-                            active ? 'text-accent' : 'text-foreground'
-                          )}
-                        >
-                          <span className="flex items-center gap-3">
-                            <Icon className="h-5 w-5 text-foreground-subtle" aria-hidden="true" />
-                            {t(item.labelKey)}
-                          </span>
-                          <ChevronDown className={cn('h-4 w-4 transition-transform', open && 'rotate-180')} />
-                        </button>
-                        <AnimatePresence>
-                          {open && (
-                            <motion.div
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: 'auto' }}
-                              exit={{ opacity: 0, height: 0 }}
-                              transition={{ duration: 0.16 }}
-                              className="ml-8 overflow-hidden"
-                            >
-                              {item.section.map((sub) => (
-                                <Link
-                                  key={sub.key}
-                                  href={sub.href}
-                                  className="block rounded-md px-3 py-2 text-body-sm text-foreground-muted hover:text-foreground"
-                                >
-                                  {t(sub.labelKey)}
-                                </Link>
-                              ))}
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    );
-                  }
-                  return (
-                    <Link
-                      key={item.key}
-                      href={item.href}
-                      className={cn(
-                        'flex items-center gap-3 rounded-md px-3 py-3 text-body-md font-medium transition-colors',
-                        active ? 'text-accent' : 'text-foreground hover:text-accent'
-                      )}
-                    >
-                      <Icon className="h-5 w-5 text-foreground-subtle" aria-hidden="true" />
-                      {t(item.labelKey)}
-                    </Link>
-                  );
-                })}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </nav>
 
-      <EnhancedLoginModal
-        isOpen={showLoginModal}
-        onClose={() => setShowLoginModal(false)}
-        onLogin={() => setShowLoginModal(false)}
-      />
+      <EnhancedLoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} onLogin={() => setShowLoginModal(false)} />
 
       <CommandPalette isOpen={showCommandPalette} onClose={() => setShowCommandPalette(false)} />
     </>

@@ -3,9 +3,9 @@
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Home, Calendar, MessageSquare, BookOpen, Phone } from 'lucide-react';
-import { cn } from '@/lib/cn';
+import { cn } from '@/lib/utils';
 
 const navigationItems = [
   { key: 'home', href: '/', icon: Home, labelKey: 'nav.home' },
