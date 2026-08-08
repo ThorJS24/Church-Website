@@ -6,6 +6,7 @@ import { Play, Calendar, User, Clock, Search, BookOpen, Video, Radio, History, B
 import { getSermons, getSeriesList, getSpeakersList, getLivestream, Sermon } from '@/lib/content';
 import { extractYouTubeId, getYouTubeEmbedUrl } from '@/lib/utils';
 import Image from 'next/image';
+import Link from 'next/link';
 import { PageHero } from '@/components/ui/page-hero';
 import { Section } from '@/components/ui/section';
 import { Card } from '@/components/ui/card';
@@ -118,6 +119,10 @@ export default function SermonsPage() {
     () => Array.from(new Set(sermons.filter((s) => s.scripture).map((s) => scriptureBook(s.scripture!)))).sort(),
     [sermons]
   );
+
+  // Sermons only carry a seriesTitle string, not a seriesId — this maps
+  // back to the series doc's id so its title can link to /sermons/series/[id].
+  const seriesIdByTitle = useMemo(() => new Map(series.map((s) => [s.title, s.id])), [series]);
 
   const selectedSpeakerBio = selectedSpeaker !== 'All Speakers' ? speakers.find((s) => s.name === selectedSpeaker) : null;
 
@@ -289,7 +294,13 @@ export default function SermonsPage() {
               </div>
               <div className="flex-1 p-8">
                 <div className="mb-2 flex items-center justify-between">
-                  <span className="text-body-sm font-semibold text-accent">{featuredSermon.seriesTitle}</span>
+                  {featuredSermon.seriesTitle && seriesIdByTitle.has(featuredSermon.seriesTitle) ? (
+                    <Link href={`/sermons/series/${seriesIdByTitle.get(featuredSermon.seriesTitle)}`} className="text-body-sm font-semibold text-accent hover:underline">
+                      {featuredSermon.seriesTitle}
+                    </Link>
+                  ) : (
+                    <span className="text-body-sm font-semibold text-accent">{featuredSermon.seriesTitle}</span>
+                  )}
                   <Badge variant="warning">Latest</Badge>
                 </div>
                 <h3 className="text-headline-sm text-foreground">{featuredSermon.title}</h3>
@@ -341,6 +352,21 @@ export default function SermonsPage() {
             </SheetContent>
           </Sheet>
         </div>
+
+        {series.length > 0 && (
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+            <span className="text-caption text-foreground-subtle">Browse by series:</span>
+            {series.map((s) => (
+              <Link
+                key={s.id}
+                href={`/sermons/series/${s.id}`}
+                className="rounded-full bg-surface-active px-3 py-1 text-caption font-medium text-foreground-muted transition-colors hover:text-foreground"
+              >
+                {s.title}
+              </Link>
+            ))}
+          </div>
+        )}
 
         {scriptureBooks.length > 0 && (
           <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
@@ -477,7 +503,13 @@ export default function SermonsPage() {
 
                   <div className="p-5">
                     <div className="mb-2 flex items-center justify-between">
-                      <span className="text-caption font-semibold text-accent">{sermon.seriesTitle}</span>
+                      {sermon.seriesTitle && seriesIdByTitle.has(sermon.seriesTitle) ? (
+                        <Link href={`/sermons/series/${seriesIdByTitle.get(sermon.seriesTitle)}`} className="text-caption font-semibold text-accent hover:underline">
+                          {sermon.seriesTitle}
+                        </Link>
+                      ) : (
+                        <span className="text-caption font-semibold text-accent">{sermon.seriesTitle}</span>
+                      )}
                       {sermon.duration && (
                         <span className="flex items-center gap-1 text-caption text-foreground-subtle">
                           <Clock className="h-3 w-3" /> {sermon.duration}min

@@ -75,9 +75,23 @@ export async function getSermonById(id: string): Promise<Sermon | null> {
   return isEffectivelyPublished(sermon) ? sermon : null;
 }
 
-export async function getSeriesList(): Promise<{ id: string; title: string; description?: string; imageUrl?: string }[]> {
+export interface Series extends Publishable {
+  id: string;
+  title: string;
+  description?: string;
+  imageUrl?: string;
+}
+
+export async function getSeriesList(): Promise<Series[]> {
   const snap = await getDocs(collection(db, 'series'));
-  return snap.docs.map(d => withId<{ id: string; title: string; description?: string; imageUrl?: string } & Publishable>(d)).filter(isEffectivelyPublished);
+  return snap.docs.map(d => withId<Series>(d)).filter(isEffectivelyPublished);
+}
+
+export async function getSeriesById(id: string): Promise<Series | null> {
+  const snap = await getDoc(doc(db, 'series', id));
+  if (!snap.exists()) return null;
+  const series = withId<Series>(snap);
+  return isEffectivelyPublished(series) ? series : null;
 }
 
 export async function getSpeakersList(): Promise<{ id: string; name: string; bio?: string; imageUrl?: string }[]> {

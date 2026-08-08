@@ -32,12 +32,16 @@ interface NavItem {
   labelKey: string;
   primary?: boolean;
   section?: { key: string; href: string; labelKey: string }[];
+  /** Column this item's card belongs to in the desktop "More" mega-menu.
+   * Ignored on mobile, where the Sheet just lists every non-primary item
+   * in a single flat/expandable column regardless of group. */
+  menuGroup?: 'about' | 'getInvolved' | 'connect';
 }
 
 const navigationItems: NavItem[] = [
   { key: 'home', href: '/', icon: Home, labelKey: 'nav.home', primary: true },
   {
-    key: 'about', href: '/about/beliefs', icon: Users, labelKey: 'nav.about',
+    key: 'about', href: '/about/beliefs', icon: Users, labelKey: 'nav.about', menuGroup: 'about',
     section: [
       { key: 'beliefs', href: '/about/beliefs', labelKey: 'nav.beliefs' },
       { key: 'branches', href: '/about/branches', labelKey: 'nav.branches' },
@@ -49,7 +53,7 @@ const navigationItems: NavItem[] = [
   { key: 'events', href: '/events', icon: Calendar, labelKey: 'nav.events', primary: true },
   { key: 'sermons', href: '/sermons', icon: BookOpen, labelKey: 'nav.sermons', primary: true },
   {
-    key: 'ministries', href: '/ministries', icon: Users, labelKey: 'nav.ministries',
+    key: 'ministries', href: '/ministries', icon: Users, labelKey: 'nav.ministries', menuGroup: 'getInvolved',
     section: [
       { key: 'all', href: '/ministries', labelKey: 'nav.allMinistries' },
       { key: 'smallGroups', href: '/small-groups', labelKey: 'nav.smallGroups' },
@@ -57,11 +61,17 @@ const navigationItems: NavItem[] = [
       { key: 'resources', href: '/resources', labelKey: 'nav.resources' },
     ],
   },
-  { key: 'community', href: '/community', icon: Users, labelKey: 'nav.community' },
-  { key: 'gallery', href: '/gallery', icon: Camera, labelKey: 'nav.gallery' },
-  { key: 'blog', href: '/blog', icon: BookOpen, labelKey: 'nav.blog' },
-  { key: 'give', href: '/give', icon: Gift, labelKey: 'nav.give' },
-  { key: 'contact', href: '/contact', icon: Phone, labelKey: 'nav.contact' },
+  { key: 'community', href: '/community', icon: Users, labelKey: 'nav.community', menuGroup: 'getInvolved' },
+  { key: 'gallery', href: '/gallery', icon: Camera, labelKey: 'nav.gallery', menuGroup: 'connect' },
+  { key: 'blog', href: '/blog', icon: BookOpen, labelKey: 'nav.blog', menuGroup: 'connect' },
+  { key: 'give', href: '/give', icon: Gift, labelKey: 'nav.give', menuGroup: 'connect' },
+  { key: 'contact', href: '/contact', icon: Phone, labelKey: 'nav.contact', menuGroup: 'connect' },
+];
+
+const MENU_GROUPS: { key: NonNullable<NavItem['menuGroup']>; labelKey: string }[] = [
+  { key: 'about', labelKey: 'nav.about' },
+  { key: 'getInvolved', labelKey: 'nav.getInvolved' },
+  { key: 'connect', labelKey: 'nav.connect' },
 ];
 
 const LANGUAGES = [
@@ -198,27 +208,32 @@ export default function Navbar() {
                   <ChevronDown className="h-4 w-4" aria-hidden="true" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="min-w-64">
-                {secondaryItems.map((item, i) => (
-                  <div key={item.key}>
-                    {i > 0 && <DropdownMenuSeparator />}
-                    {item.section ? (
-                      <>
-                        <DropdownMenuLabel>{t(item.labelKey)}</DropdownMenuLabel>
-                        {item.section.map((sub) => (
-                          <DropdownMenuItem key={sub.key} onClick={() => router.push(sub.href)}>
-                            {t(sub.labelKey)}
-                          </DropdownMenuItem>
-                        ))}
-                      </>
-                    ) : (
-                      <DropdownMenuItem onClick={() => router.push(item.href)}>
-                        <item.icon className="h-4 w-4 text-foreground-subtle" aria-hidden="true" />
-                        {t(item.labelKey)}
-                      </DropdownMenuItem>
-                    )}
-                  </div>
-                ))}
+              <DropdownMenuContent align="end" className="!w-[600px] !max-w-[calc(100vw-2rem)] p-2">
+                <div className="grid grid-cols-3 gap-1">
+                  {MENU_GROUPS.map((group) => (
+                    <div key={group.key} className="px-1">
+                      <DropdownMenuLabel className="text-caption font-semibold tracking-wide text-foreground-subtle uppercase">
+                        {t(group.labelKey)}
+                      </DropdownMenuLabel>
+                      {secondaryItems
+                        .filter((item) => item.menuGroup === group.key)
+                        .map((item) =>
+                          item.section ? (
+                            item.section.map((sub) => (
+                              <DropdownMenuItem key={sub.key} onClick={() => router.push(sub.href)}>
+                                {t(sub.labelKey)}
+                              </DropdownMenuItem>
+                            ))
+                          ) : (
+                            <DropdownMenuItem key={item.key} onClick={() => router.push(item.href)}>
+                              <item.icon className="h-4 w-4 text-foreground-subtle" aria-hidden="true" />
+                              {t(item.labelKey)}
+                            </DropdownMenuItem>
+                          )
+                        )}
+                    </div>
+                  ))}
+                </div>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
