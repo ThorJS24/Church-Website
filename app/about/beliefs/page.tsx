@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Book, Heart, Target, Eye, CheckCircle, HelpCircle } from 'lucide-react';
-import { getPageContent } from '@/lib/content';
+import { getPageContent, getSiteSettings, SiteSettings } from '@/lib/content';
 import ScriptureReference from '@/components/ScriptureReference';
+import StatBar from '@/components/StatBar';
 import { PageHero } from '@/components/ui/page-hero';
 import { Section } from '@/components/ui/section';
 import { SectionNav } from '@/components/ui/section-nav';
@@ -52,11 +53,15 @@ function fadeUp(delay = 0) {
 
 export default function BeliefsPage() {
   const [aboutPage, setAboutPage] = useState<AboutPage | null>(null);
+  const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getPageContent<AboutPage>('about')
-      .then((data) => data && setAboutPage(data))
+    Promise.all([getPageContent<AboutPage>('about'), getSiteSettings()])
+      .then(([data, settings]) => {
+        if (data) setAboutPage(data);
+        setSiteSettings(settings);
+      })
       .catch((error) => console.error('Error fetching about page content:', error))
       .finally(() => setLoading(false));
   }, []);
@@ -72,6 +77,8 @@ export default function BeliefsPage() {
         description={aboutPage?.subtitle || 'Learn about our church family and what we believe'}
         breadcrumbs={[{ label: 'About', href: '/about' }, { label: 'Beliefs' }]}
       />
+
+      <StatBar statistics={siteSettings?.statistics} />
 
       <SectionNav
         items={[

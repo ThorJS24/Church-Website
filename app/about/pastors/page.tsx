@@ -87,21 +87,31 @@ export default function PastorsPage() {
                 viewport={{ once: true, margin: '-80px' }}
                 transition={{ delay: index * 0.05, duration: 0.4 }}
               >
-                <Card className="h-full">
-                  <div className="mb-4 flex items-center gap-4">
-                    <Avatar src={pastor.imageUrl} name={pastor.name} size="lg" />
-                    <div>
-                      <h3 className="text-title-md text-foreground">{pastor.name}</h3>
-                      <p className="text-body-sm font-medium text-accent">{pastor.title}</p>
+                <Card padding="none" className="flex h-full flex-col overflow-hidden">
+                  <div className="relative aspect-[4/3] bg-surface-active">
+                    {pastor.imageUrl ? (
+                      <Image src={pastor.imageUrl} alt={pastor.name} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover" />
+                    ) : (
+                      <div className="flex h-full items-center justify-center">
+                        <User className="h-14 w-14 text-foreground-subtle" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex flex-1 flex-col p-6">
+                    <h3 className="text-title-md text-foreground">{pastor.name}</h3>
+                    <p className="text-body-sm font-medium text-accent">{pastor.title}</p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {pastor.yearsOfService && <Badge variant="accent">{pastor.yearsOfService}y service</Badge>}
+                      {pastor.ordainedDate && <Badge variant="neutral">Est. {new Date(pastor.ordainedDate).getFullYear()}</Badge>}
                     </div>
+                    {pastor.bio && (
+                      <p className="mt-3 line-clamp-3 text-body-sm italic text-foreground-muted">&ldquo;{renderBio(pastor.bio)}&rdquo;</p>
+                    )}
+                    <div className="flex-1" />
+                    <Button fullWidth className="mt-4" onClick={() => setSelectedPastor(pastor)}>
+                      Learn More
+                    </Button>
                   </div>
-                  <div className="mb-4 flex flex-wrap gap-2">
-                    {pastor.yearsOfService && <Badge variant="accent">{pastor.yearsOfService}y service</Badge>}
-                    {pastor.ordainedDate && <Badge variant="neutral">Est. {new Date(pastor.ordainedDate).getFullYear()}</Badge>}
-                  </div>
-                  <Button fullWidth onClick={() => setSelectedPastor(pastor)}>
-                    Learn More
-                  </Button>
                 </Card>
               </motion.div>
             ))}

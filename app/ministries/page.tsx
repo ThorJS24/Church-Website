@@ -4,7 +4,8 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { motion } from 'motion/react';
 import { Users, Baby, Music, BookOpen, Heart, Clock, MapPin, Search } from 'lucide-react';
-import { getPageContent, getMinistries, Ministry } from '@/lib/content';
+import { getPageContent, getMinistries, getSiteSettings, Ministry, SiteSettings } from '@/lib/content';
+import StatBar from '@/components/StatBar';
 import { PageHero } from '@/components/ui/page-hero';
 import { Section } from '@/components/ui/section';
 import { Card } from '@/components/ui/card';
@@ -47,6 +48,7 @@ const GET_INVOLVED = [
 export default function MinistriesPage() {
   const [ministriesPage, setMinistriesPage] = useState<MinistriesPage | null>(null);
   const [ministries, setMinistries] = useState<Ministry[]>([]);
+  const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
@@ -55,9 +57,10 @@ export default function MinistriesPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [ministriesPageData, ministriesData] = await Promise.all([getPageContent<MinistriesPage>('ministries'), getMinistries()]);
+        const [ministriesPageData, ministriesData, siteSettingsData] = await Promise.all([getPageContent<MinistriesPage>('ministries'), getMinistries(), getSiteSettings()]);
         if (ministriesPageData) setMinistriesPage(ministriesPageData);
         setMinistries(ministriesData);
+        setSiteSettings(siteSettingsData);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -82,6 +85,8 @@ export default function MinistriesPage() {
   return (
     <div>
       <PageHero icon={<Heart />} eyebrow="Get Involved" title={ministriesPage?.title || 'Our Ministries'} description={ministriesPage?.subtitle || 'Find your place to serve, grow, and make a difference in our community'} />
+
+      <StatBar statistics={siteSettings?.statistics} />
 
       <div ref={ministriesGridRef} className="border-b border-border bg-background py-6">
         <div className="mx-auto mb-4 flex max-w-md justify-center px-4">

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'motion/react';
 import {
-  Heart, Mail, Users, Calendar, MapPin, Phone, Clock, ArrowRight, Play,
+  Heart, Mail, Calendar, MapPin, Phone, Clock, ArrowRight, Play,
   Church, BookOpen, Sparkles, ImageIcon,
 } from 'lucide-react';
 import {
@@ -29,6 +29,7 @@ import WeekAtAGlance from '@/components/home/WeekAtAGlance';
 import EventCountdown from '@/components/home/EventCountdown';
 import SermonCarousel from '@/components/home/SermonCarousel';
 import SocialProofStrip from '@/components/home/SocialProofStrip';
+import StatBar from '@/components/StatBar';
 
 const quickActions = [
   { href: '/services', icon: Church, title: 'Join Us Sunday', description: 'Worship with us every Sunday at 9:30 AM' },
@@ -341,22 +342,7 @@ export default function Home() {
       )}
 
       {/* Church overview stats */}
-      <Section spacing="md" className="bg-accent text-accent-foreground">
-        <Grid cols={4} gap={6} className="text-center">
-          {[
-            { icon: Users, value: siteSettings?.statistics?.members || '500+', label: 'Members' },
-            { icon: Heart, value: siteSettings?.statistics?.yearsServing || '25+', label: 'Years Serving' },
-            { icon: Church, value: siteSettings?.statistics?.weeklyServices || '3', label: 'Weekly Services' },
-            { icon: Users, value: siteSettings?.statistics?.ministries || '15+', label: 'Ministries' },
-          ].map((stat, index) => (
-            <motion.div key={stat.label} {...fadeUp(index * 0.05)}>
-              <stat.icon className="mx-auto mb-3 h-8 w-8 opacity-90" aria-hidden="true" />
-              <div className="text-display-sm">{stat.value}</div>
-              <div className="mt-1 text-body-sm opacity-80">{stat.label}</div>
-            </motion.div>
-          ))}
-        </Grid>
-      </Section>
+      <StatBar statistics={siteSettings?.statistics} />
 
       {/* Social proof */}
       {testimonials.length > 0 && (
