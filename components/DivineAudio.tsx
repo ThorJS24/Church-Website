@@ -83,7 +83,12 @@ export default function DivineAudio({ showControls = true }: DivineAudioProps) {
     <motion.div
       role="region"
       aria-label="Ambient audio controls"
-      className="fixed bottom-4 right-4 z-50 rounded-full border border-warm/30 bg-background/90 p-3 shadow-lg backdrop-blur-xs"
+      // bottom-4 alone put this directly on top of MobileBottomNav's
+      // rightmost tab below md (confirmed via CDP: both occupied the same
+      // ~56px vertical band, with the FAB visually cutting off the
+      // "Contact" label) — lifted above the nav bar there, back to bottom-4
+      // at md: and up where MobileBottomNav doesn't render.
+      className="fixed bottom-24 right-4 z-50 rounded-full border border-warm/30 bg-background/90 p-3 shadow-lg backdrop-blur-xs md:bottom-4"
       initial={{ opacity: 0, scale: 0 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: 1, duration: 0.5 }}

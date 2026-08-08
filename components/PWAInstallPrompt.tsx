@@ -64,7 +64,11 @@ export default function PWAInstallPrompt() {
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 100, opacity: 0 }}
-          className="fixed inset-x-4 bottom-4 z-50 rounded-lg border border-border bg-background p-4 shadow-lg md:inset-x-auto md:right-4 md:w-80"
+          // Same MobileBottomNav collision as DivineAudio (see that
+          // component for the CDP-confirmed geometry) — worse here, since
+          // this is a near-full-width banner that would sit on top of most
+          // of the nav bar rather than just one tab.
+          className="fixed inset-x-4 bottom-24 z-50 rounded-lg border border-border bg-background p-4 shadow-lg md:inset-x-auto md:right-4 md:bottom-4 md:w-80"
         >
           <div className="mb-3 flex items-start justify-between">
             <div className="flex items-center">

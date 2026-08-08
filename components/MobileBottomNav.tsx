@@ -4,14 +4,20 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'motion/react';
-import { Home, Calendar, MessageSquare, BookOpen, Phone } from 'lucide-react';
+import { Home, Calendar, MessageSquare, BookOpen, Gift, Phone } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+// Give wasn't in this bar at all until this pass — a real gap for a church
+// app's most common one-thumb action. Added between Sermons and Contact
+// rather than swapping Contact out: 6 items at ~44px+ each still clears
+// the min-touch floor (confirmed via CDP at 390px), so nothing had to be
+// removed to make room.
 const navigationItems = [
   { key: 'home', href: '/', icon: Home, labelKey: 'nav.home' },
   { key: 'prayer', href: '/prayer', icon: MessageSquare, labelKey: 'nav.prayer' },
   { key: 'events', href: '/events', icon: Calendar, labelKey: 'nav.events' },
   { key: 'sermons', href: '/sermons', icon: BookOpen, labelKey: 'nav.sermons' },
+  { key: 'give', href: '/give', icon: Gift, labelKey: 'nav.give' },
   { key: 'contact', href: '/contact', icon: Phone, labelKey: 'nav.contact' },
 ];
 
