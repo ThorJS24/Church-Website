@@ -557,7 +557,21 @@ function GalleryPageInner() {
               const coverPhoto = albumCoverPhoto(event.photos);
               return (
               <motion.div key={event.id} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-80px' }} transition={{ delay: Math.min(index * 0.05, 0.3), duration: 0.4 }}>
-                <Card padding="none" className="h-full cursor-pointer overflow-hidden" onClick={() => openEvent(event)}>
+                <Card
+                  padding="none"
+                  variant="interactive"
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`View photos from ${event.title}`}
+                  className="h-full overflow-hidden"
+                  onClick={() => openEvent(event)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      openEvent(event);
+                    }
+                  }}
+                >
                   <div className="relative aspect-video bg-surface-active">
                     {(event.imageUrl || coverPhoto) ? (
                       <Image src={event.imageUrl || coverPhoto!.imageUrl} alt={event.title} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className={`object-cover ${event.membersOnly && !user ? 'blur-xs' : ''}`} />

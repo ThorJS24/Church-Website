@@ -10,6 +10,12 @@ const Toaster = ({ ...props }: ToasterProps) => {
   return (
     <Sonner
       theme={theme}
+      // Bottom positions (sonner's default) dock in the same screen region
+      // as the fixed mobile bottom nav (MobileBottomNav.tsx) — top-center
+      // avoids that overlap sitewide instead of only on mobile, since a
+      // toast fighting for space with a thumb-zone nav bar is undesirable
+      // at any width.
+      position="top-center"
       className="toaster group"
       icons={{
         success: (

@@ -192,8 +192,8 @@ export default async function EventDetailPage({ params }: Props) {
             <h2 className="mb-6 text-title-lg text-foreground">Related Events</h2>
             <div className="grid gap-4 sm:grid-cols-3">
               {relatedEvents.map((related) => (
-                <a key={related.id} href={`/events/${related.id}`} className="block">
-                  <Card padding="none" className="h-full overflow-hidden transition-shadow hover:shadow-md">
+                <Link key={related.id} href={`/events/${related.id}`} className="block h-full">
+                  <Card variant="interactive" padding="none" className="h-full overflow-hidden">
                     <div className="relative aspect-video bg-surface-active">
                       {related.imageUrl && <Image src={related.imageUrl} alt={related.title} fill sizes="300px" className="object-cover" />}
                     </div>
@@ -202,7 +202,7 @@ export default async function EventDetailPage({ params }: Props) {
                       <p className="mt-1 text-caption text-foreground-subtle">{new Date(related.startDate).toLocaleDateString()}</p>
                     </div>
                   </Card>
-                </a>
+                </Link>
               ))}
             </div>
           </Container>
