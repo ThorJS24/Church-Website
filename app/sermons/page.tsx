@@ -17,7 +17,7 @@ import { IconButton } from '@/components/ui/icon-button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar } from '@/components/ui/avatar';
 import { Modal } from '@/components/ui/modal';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { LoadingState, EmptyState } from '@/components/ui/states';
 import { cn } from '@/lib/utils';
 
@@ -317,6 +317,7 @@ export default function SermonsPage() {
               </Button>
             </SheetTrigger>
             <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto">
+              <SheetTitle className="sr-only">Filter Sermons</SheetTitle>
               <div className="flex flex-col gap-3 p-4 pt-8">
                 {renderFilterControls(true)}
               </div>

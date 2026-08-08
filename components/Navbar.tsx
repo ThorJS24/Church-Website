@@ -19,7 +19,7 @@ import { Avatar } from '@/components/ui/avatar';
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import CommandPalette from '@/components/CommandPalette';
 import { AccessibilityMenu } from '@/components/AccessibilityMenu';
 import { NotificationBell } from '@/components/NotificationBell';
@@ -317,7 +317,7 @@ export default function Navbar() {
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent">
                     <Church className="h-5 w-5 text-accent-foreground" aria-hidden="true" />
                   </div>
-                  <p className="font-serif text-title-sm text-foreground">Salem PBC</p>
+                  <SheetTitle className="font-serif text-title-sm text-foreground">Salem PBC</SheetTitle>
                 </div>
                 <div className="max-h-[calc(100vh-4rem)] space-y-1 overflow-y-auto px-4 py-4">
                   {!user && (

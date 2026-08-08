@@ -52,6 +52,7 @@ export function Modal({ isOpen, onClose, title, description, children, footer, s
             ref={containerRef}
             role="dialog"
             aria-modal="true"
+            tabIndex={-1}
             aria-labelledby={title ? 'modal-title' : undefined}
             aria-describedby={description ? 'modal-description' : undefined}
             initial={{ opacity: 0, scale: 0.97, y: 8 }}
