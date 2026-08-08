@@ -147,9 +147,18 @@ function PhotoLightbox({
           <X />
         </IconButton>
 
-        <div className="relative flex h-full w-full items-center justify-center p-4">
+        <motion.div
+          className="relative flex h-full w-full items-center justify-center p-4"
+          drag="x"
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.4}
+          onDragEnd={(_, info) => {
+            if (info.offset.x < -80) onNavigate('next');
+            else if (info.offset.x > 80) onNavigate('prev');
+          }}
+        >
           <Image src={photo.imageUrl} alt={photo.title} fill className="object-contain" sizes="100vw" priority />
-        </div>
+        </motion.div>
 
         {showComments && (
           <div className="absolute inset-y-0 right-0 z-10 w-full max-w-sm overflow-y-auto bg-[#17130F]/95 p-5 text-white sm:border-l sm:border-white/10">

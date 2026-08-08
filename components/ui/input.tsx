@@ -1,4 +1,4 @@
-import { forwardRef, type InputHTMLAttributes, type ReactNode, useId } from 'react';
+import { forwardRef, type InputHTMLAttributes, type ReactNode, useId, useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> {
@@ -23,6 +23,21 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     const hintId = hint ? `${inputId}-hint` : undefined;
     const errorId = error ? `${inputId}-error` : undefined;
 
+    // Shake only on the transition into an error state, not on every
+    // re-render while the error message is present (which would shake
+    // continuously as the user keeps typing against a still-invalid value).
+    const [shake, setShake] = useState(false);
+    const hadError = useRef(!!error);
+    useEffect(() => {
+      if (error && !hadError.current) {
+        setShake(true);
+        const t = setTimeout(() => setShake(false), 400);
+        hadError.current = true;
+        return () => clearTimeout(t);
+      }
+      hadError.current = !!error;
+    }, [error]);
+
     return (
       <div className={cn('w-full', className)}>
         {label && (
@@ -31,7 +46,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             {required && <span className="ml-0.5 text-danger">*</span>}
           </label>
         )}
-        <div className="relative">
+        <div className={cn('relative', shake && 'animate-shake')}>
           {leftIcon && (
             <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-foreground-subtle [&_svg]:h-4 [&_svg]:w-4">
               {leftIcon}

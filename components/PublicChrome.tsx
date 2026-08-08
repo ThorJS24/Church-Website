@@ -1,6 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+import { motion, AnimatePresence } from 'motion/react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import MobileBottomNav from '@/components/MobileBottomNav';
@@ -26,7 +27,16 @@ export function PublicChrome({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main id="main-content" className="grow pt-16 pb-16 md:pb-0" role="main">
-        {children}
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={pathname}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+          >
+            {children}
+          </motion.div>
+        </AnimatePresence>
       </main>
       <Footer />
       <MobileBottomNav />

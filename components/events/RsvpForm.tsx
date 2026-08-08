@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { LinkButton } from '@/components/ui/button';
+import { ConfettiBurst } from '@/components/ui/confetti-burst';
 
 export function RsvpForm({ eventId, maxAttendees }: { eventId: string; maxAttendees?: number }) {
   const [name, setName] = useState('');
@@ -51,7 +52,8 @@ export function RsvpForm({ eventId, maxAttendees }: { eventId: string; maxAttend
 
   if (result) {
     return (
-      <Card variant="raised" padding="lg">
+      <Card variant="raised" padding="lg" className="relative overflow-visible">
+        {result.status === 'confirmed' && <ConfettiBurst />}
         <div className={`mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full ${result.status === 'confirmed' ? 'bg-success-subtle' : 'bg-warning-subtle'}`}>
           {result.status === 'confirmed' ? <CheckCircle2 className="h-6 w-6 text-success" /> : <Clock3 className="h-6 w-6 text-warning" />}
         </div>

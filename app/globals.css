@@ -204,6 +204,7 @@ layer(utilities);
   --animate-fade-in: fadeIn var(--duration-slow) var(--ease-decelerate);
   --animate-slide-up: slideUp var(--duration-slow) var(--ease-decelerate);
   --animate-scale-in: scaleIn var(--duration-base) var(--ease-decelerate);
+  --animate-shake: shake 0.4s var(--ease-standard);
 
   @keyframes fadeIn {
     0% {
@@ -231,6 +232,17 @@ layer(utilities);
     100% {
       transform: scale(1);
       opacity: 1;
+    }
+  }
+  @keyframes shake {
+    0%, 100% {
+      transform: translateX(0);
+    }
+    20%, 60% {
+      transform: translateX(-4px);
+    }
+    40%, 80% {
+      transform: translateX(4px);
     }
   }
 }

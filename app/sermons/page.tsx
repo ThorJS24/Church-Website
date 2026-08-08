@@ -2,7 +2,7 @@
 
 import { useState, useEffect, lazy, Suspense, useMemo } from 'react';
 import { motion } from 'motion/react';
-import { Play, Calendar, User, Clock, Search, BookOpen, Video, Radio, History, Bookmark, BookmarkCheck } from 'lucide-react';
+import { Play, Calendar, User, Clock, Search, BookOpen, Video, Radio, History, Bookmark, BookmarkCheck, SlidersHorizontal } from 'lucide-react';
 import { getSermons, getSeriesList, getSpeakersList, getLivestream, Sermon } from '@/lib/content';
 import { extractYouTubeId, getYouTubeEmbedUrl } from '@/lib/utils';
 import Image from 'next/image';
@@ -17,6 +17,7 @@ import { IconButton } from '@/components/ui/icon-button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar } from '@/components/ui/avatar';
 import { Modal } from '@/components/ui/modal';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { LoadingState, EmptyState } from '@/components/ui/states';
 import { cn } from '@/lib/utils';
 
@@ -84,6 +85,7 @@ export default function SermonsPage() {
   const [queue, setQueue] = useState<string[]>([]);
   const [queueOnly, setQueueOnly] = useState(false);
   const [selectedBook, setSelectedBook] = useState<string | null>(null);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -149,6 +151,53 @@ export default function SermonsPage() {
     recordWatched(sermon);
     setRecentlyWatched(getRecentlyWatched());
   };
+
+  const activeFilterCount = [selectedSeries !== 'All Series', selectedSpeaker !== 'All Speakers', queueOnly].filter(Boolean).length;
+
+  const renderFilterControls = (mobile = false) => (
+    <>
+      <Select
+        aria-label="Filter by series"
+        value={selectedSeries}
+        onChange={(e) => setSelectedSeries(e.target.value)}
+        options={[{ value: 'All Series', label: 'All Series' }, ...series.map((s) => ({ value: s.title, label: s.title }))]}
+        className={mobile ? 'w-full' : 'w-auto'}
+      />
+      <Select
+        aria-label="Filter by speaker"
+        value={selectedSpeaker}
+        onChange={(e) => setSelectedSpeaker(e.target.value)}
+        options={[{ value: 'All Speakers', label: 'All Speakers' }, ...speakers.map((s) => ({ value: s.name, label: s.name }))]}
+        className={mobile ? 'w-full' : 'w-auto'}
+      />
+      <div className={cn('flex rounded-lg bg-surface-active p-1', mobile && 'w-full')}>
+        {(['grid', 'timeline'] as const).map((mode) => (
+          <button
+            key={mode}
+            onClick={() => setViewMode(mode)}
+            className={cn(
+              'rounded-md px-3 py-1.5 text-body-sm capitalize transition-colors',
+              mobile && 'flex-1',
+              viewMode === mode ? 'bg-background text-foreground shadow-xs' : 'text-foreground-muted'
+            )}
+          >
+            {mode}
+          </button>
+        ))}
+      </div>
+      <button
+        onClick={() => setQueueOnly((v) => !v)}
+        className={cn(
+          'flex items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-body-sm transition-colors',
+          mobile && 'w-full',
+          queueOnly ? 'bg-accent text-accent-foreground' : 'bg-surface-active text-foreground-muted hover:text-foreground'
+        )}
+      >
+        {queueOnly ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
+        My Queue {queue.length > 0 && `(${queue.length})`}
+      </button>
+    </>
+  );
 
   if (loading) return <LoadingState label="Loading sermons..." />;
 
@@ -256,46 +305,23 @@ export default function SermonsPage() {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="max-w-md md:w-80"
           />
-          <div className="flex flex-wrap items-center gap-3">
-            <Select
-              aria-label="Filter by series"
-              value={selectedSeries}
-              onChange={(e) => setSelectedSeries(e.target.value)}
-              options={[{ value: 'All Series', label: 'All Series' }, ...series.map((s) => ({ value: s.title, label: s.title }))]}
-              className="w-auto"
-            />
-            <Select
-              aria-label="Filter by speaker"
-              value={selectedSpeaker}
-              onChange={(e) => setSelectedSpeaker(e.target.value)}
-              options={[{ value: 'All Speakers', label: 'All Speakers' }, ...speakers.map((s) => ({ value: s.name, label: s.name }))]}
-              className="w-auto"
-            />
-            <div className="flex rounded-lg bg-surface-active p-1">
-              {(['grid', 'timeline'] as const).map((mode) => (
-                <button
-                  key={mode}
-                  onClick={() => setViewMode(mode)}
-                  className={cn(
-                    'rounded-md px-3 py-1.5 text-body-sm capitalize transition-colors',
-                    viewMode === mode ? 'bg-background text-foreground shadow-xs' : 'text-foreground-muted'
-                  )}
-                >
-                  {mode}
-                </button>
-              ))}
-            </div>
-            <button
-              onClick={() => setQueueOnly((v) => !v)}
-              className={cn(
-                'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-body-sm transition-colors',
-                queueOnly ? 'bg-accent text-accent-foreground' : 'bg-surface-active text-foreground-muted hover:text-foreground'
-              )}
-            >
-              {queueOnly ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
-              My Queue {queue.length > 0 && `(${queue.length})`}
-            </button>
+
+          <div className="hidden flex-wrap items-center gap-3 md:flex">
+            {renderFilterControls()}
           </div>
+
+          <Sheet open={showMobileFilters} onOpenChange={setShowMobileFilters}>
+            <SheetTrigger asChild>
+              <Button variant="secondary" leftIcon={<SlidersHorizontal className="h-4 w-4" />} className="md:hidden">
+                Filters{activeFilterCount > 0 && ` (${activeFilterCount})`}
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto">
+              <div className="flex flex-col gap-3 p-4 pt-8">
+                {renderFilterControls(true)}
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
 
         {scriptureBooks.length > 0 && (

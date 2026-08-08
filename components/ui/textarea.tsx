@@ -1,4 +1,4 @@
-import { forwardRef, type TextareaHTMLAttributes, useId } from 'react';
+import { forwardRef, type TextareaHTMLAttributes, useId, useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 export interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
@@ -14,8 +14,20 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
     const hintId = hint ? `${inputId}-hint` : undefined;
     const errorId = error ? `${inputId}-error` : undefined;
 
+    const [shake, setShake] = useState(false);
+    const hadError = useRef(!!error);
+    useEffect(() => {
+      if (error && !hadError.current) {
+        setShake(true);
+        const t = setTimeout(() => setShake(false), 400);
+        hadError.current = true;
+        return () => clearTimeout(t);
+      }
+      hadError.current = !!error;
+    }, [error]);
+
     return (
-      <div className={cn('w-full', className)}>
+      <div className={cn('w-full', shake && 'animate-shake', className)}>
         {label && (
           <label htmlFor={inputId} className="mb-1.5 block text-label text-foreground">
             {label}

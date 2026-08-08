@@ -32,7 +32,16 @@ export default function SermonCarousel({ sermons }: { sermons: Sermon[] }) {
     <div onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
       <Card variant="raised" padding="none" className="overflow-hidden">
         <div className="grid md:grid-cols-2">
-          <div className="relative aspect-video bg-surface-active md:aspect-auto">
+          <motion.div
+            className="relative aspect-video touch-pan-y bg-surface-active md:aspect-auto"
+            drag={sermons.length > 1 ? 'x' : false}
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.4}
+            onDragEnd={(_, info) => {
+              if (info.offset.x < -80) go(1);
+              else if (info.offset.x > 80) go(-1);
+            }}
+          >
             <AnimatePresence mode="wait">
               <motion.div
                 key={sermon.id}
@@ -69,7 +78,7 @@ export default function SermonCarousel({ sermons }: { sermons: Sermon[] }) {
                 </button>
               </>
             )}
-          </div>
+          </motion.div>
           <div className="flex flex-col justify-center p-8">
             <AnimatePresence mode="wait">
               <motion.div key={sermon.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }}>
