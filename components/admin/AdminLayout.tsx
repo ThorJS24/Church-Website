@@ -24,7 +24,7 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, minRole: UserRole.ADMIN },
+  { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, minRole: UserRole.MODERATOR },
   { href: '/admin/users', label: 'Members', icon: Users, minRole: UserRole.ADMIN },
   { href: '/admin/content', label: 'Content', icon: FileText, minRole: UserRole.ADMIN },
   { href: '/admin/messages', label: 'Messages', icon: Inbox, minRole: UserRole.ADMIN },

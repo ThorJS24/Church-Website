@@ -4,13 +4,15 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   Users, ShieldCheck, Calendar, TrendingUp, ScrollText, AlertCircle,
-  Inbox, UserPlus, Megaphone, Clock, Mail, MessageSquare,
+  Inbox, UserPlus, Megaphone, Clock, Mail, MessageSquare, Heart, Camera, Quote,
 } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { UserRole } from '@/lib/permissions';
 import { adminFetch } from '@/lib/adminApi';
 import { LoadingState, ErrorState } from '@/components/admin/States';
 import { Card } from '@/components/ui/card';
 import { Grid } from '@/components/ui/grid';
-import { Button } from '@/components/ui/button';
+import { Button, LinkButton } from '@/components/ui/button';
 import { Modal } from '@/components/ui/modal';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -94,6 +96,17 @@ const ROLE_COLORS: Record<string, string> = {
 };
 
 export default function AdminDashboardPage() {
+  const { user } = useAuth();
+  // Moderators can only reach the moderation queue (see NAV_ITEMS in
+  // AdminLayout — everything else on this page is minRole: ADMIN), and
+  // /api/admin/stats itself requires ADMIN, so a moderator landing here
+  // used to get a hard 403 -> ErrorState instead of a usable dashboard.
+  // Give them a real landing focused on what they can actually do.
+  if (user?.role === UserRole.MODERATOR) return <ModeratorDashboard />;
+  return <FullAdminDashboard />;
+}
+
+function FullAdminDashboard() {
   const { toast } = useToast();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentActions, setRecentActions] = useState<AuditEntry[]>([]);
@@ -327,6 +340,112 @@ export default function AdminDashboardPage() {
       </Grid>
 
       <AnnouncementComposer isOpen={showComposer} onClose={() => setShowComposer(false)} onPosted={load} />
+    </div>
+  );
+}
+
+interface ModerationItem {
+  id: string;
+  collection: 'prayerRequests' | 'comments' | 'galleryImages' | 'testimonials';
+  title?: string;
+  content?: string;
+  submittedAt?: string;
+  priorRejected?: unknown;
+}
+
+const MODERATION_COLLECTION_META: Record<ModerationItem['collection'], { label: string; icon: React.ComponentType<{ className?: string }> }> = {
+  prayerRequests: { label: 'Prayer Requests', icon: Heart },
+  comments: { label: 'Comments', icon: MessageSquare },
+  galleryImages: { label: 'Gallery Photos', icon: Camera },
+  testimonials: { label: 'Testimonials', icon: Quote },
+};
+
+function ModeratorDashboard() {
+  const { user } = useAuth();
+  const [items, setItems] = useState<ModerationItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = () => {
+    setLoading(true);
+    setError(null);
+    adminFetch('/api/admin/moderation')
+      .then((data) => setItems(data.items || []))
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => { load(); }, []);
+
+  if (loading) return <LoadingState label="Loading moderation queue..." />;
+  if (error) return <ErrorState message={error} onRetry={load} />;
+
+  const byCollection = (Object.keys(MODERATION_COLLECTION_META) as ModerationItem['collection'][]).map((key) => ({
+    key,
+    ...MODERATION_COLLECTION_META[key],
+    count: items.filter((i) => i.collection === key).length,
+  }));
+
+  const oldest = [...items]
+    .sort((a, b) => new Date(a.submittedAt ?? 0).getTime() - new Date(b.submittedAt ?? 0).getTime())
+    .slice(0, 6);
+
+  return (
+    <div>
+      <div className="mb-6">
+        <h1 className="text-headline-md text-foreground">Welcome back{user?.displayName ? `, ${user.displayName}` : ''}</h1>
+        <p className="text-body-sm text-foreground-muted">Here&apos;s what needs your review.</p>
+      </div>
+
+      <Card className="mb-6 flex flex-wrap items-center justify-between gap-4 bg-warning-subtle">
+        <div className="flex items-center gap-3">
+          <ShieldCheck className="h-6 w-6 shrink-0 text-warning" />
+          <div>
+            <p className="text-headline-sm text-foreground">
+              {items.length === 0 ? 'Nothing pending review' : `${items.length} item${items.length === 1 ? '' : 's'} pending review`}
+            </p>
+            <p className="text-caption text-foreground-muted">Prayer requests, comments, gallery submissions, and testimonials awaiting approval.</p>
+          </div>
+        </div>
+        <LinkButton href="/admin/moderation">Open Queue</LinkButton>
+      </Card>
+
+      <Grid cols={4} gap={4} className="mb-8">
+        {byCollection.map((c) => (
+          <Link key={c.key} href="/admin/moderation">
+            <Card variant="interactive" padding="md">
+              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-warning-subtle">
+                <c.icon className="h-5 w-5 text-warning" />
+              </div>
+              <div className="text-headline-sm text-foreground">{c.count}</div>
+              <div className="text-body-sm text-foreground-muted">{c.label}</div>
+            </Card>
+          </Link>
+        ))}
+      </Grid>
+
+      {oldest.length > 0 && (
+        <Card>
+          <h2 className="mb-4 text-title-md text-foreground">Oldest pending items</h2>
+          <ul className="space-y-3">
+            {oldest.map((item) => (
+              <li key={`${item.collection}-${item.id}`}>
+                <Link href="/admin/moderation" className="-mx-1.5 flex items-center justify-between gap-3 rounded-md p-1.5 hover:bg-surface-hover">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-body-sm font-medium text-foreground">
+                      {item.title || (item.content ? String(item.content).slice(0, 60) : '(untitled)')}
+                    </p>
+                    <p className="truncate text-caption text-foreground-subtle">
+                      {MODERATION_COLLECTION_META[item.collection].label}{item.priorRejected ? ' · resubmitted' : ''}
+                    </p>
+                  </div>
+                  <span className="shrink-0 text-caption text-foreground-subtle">{timeAgo(item.submittedAt)}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
     </div>
   );
 }
