@@ -274,6 +274,23 @@ layer(utilities);
   }
 }
 
+/* Same cascade-layers regression as above, this time on Preflight's
+   `a { color: inherit }` reset (a real Tailwind Preflight rule, not custom
+   to this app). It keeps winning against LinkButton's `text-*-foreground`
+   utility class — confirmed via CDP matched-styles inspection, e.g. the
+   homepage's "secondary" hero button rendering white-on-cream text
+   invisible against its own background (Lighthouse color-contrast audit
+   caught it: 1.13:1 against a required 4.5:1). Scoped to `.group\/button`
+   (the marker class every Button/LinkButton variant carries) rather than
+   all anchors, since plenty of *other* links on the site intentionally
+   inherit their color from surrounding text and would regress to the
+   browser's default link blue if this were unscoped. */
+@layer base {
+  a.group\/button {
+    color: revert-layer;
+  }
+}
+
 /* ==========================================================================
    Design tokens — Warm and traditional-modern direction.
    Consumed by the @theme block above. Color tokens are raw R G B

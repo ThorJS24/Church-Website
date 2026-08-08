@@ -19,6 +19,7 @@ import { Avatar } from '@/components/ui/avatar';
 import { Modal } from '@/components/ui/modal';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { LoadingState, EmptyState } from '@/components/ui/states';
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
 const DynamicLiveStream = lazy(() => import('@/components/DynamicLiveStream'));
@@ -199,8 +200,6 @@ export default function SermonsPage() {
     </>
   );
 
-  if (loading) return <LoadingState label="Loading sermons..." />;
-
   return (
     <div>
       <PageHero
@@ -243,7 +242,25 @@ export default function SermonsPage() {
         </Section>
       )}
 
-      {featuredSermon && (
+      {loading && (
+        <Section spacing="lg">
+          <h2 className="mb-8 text-center text-headline-md text-foreground">Latest Sermon</h2>
+          <Card variant="raised" padding="none" className="mx-auto max-w-4xl overflow-hidden">
+            <div className="md:flex">
+              <Skeleton className="h-64 shrink-0 rounded-none md:h-auto md:w-1/2" />
+              <div className="flex-1 space-y-3 p-8">
+                <Skeleton className="h-4 w-1/4" />
+                <Skeleton className="h-7 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-16 w-full" />
+                <Skeleton className="h-10 w-32" />
+              </div>
+            </div>
+          </Card>
+        </Section>
+      )}
+
+      {!loading && featuredSermon && (
         <Section spacing="lg">
           <h2 className="mb-8 text-center text-headline-md text-foreground">Latest Sermon</h2>
           <Card variant="raised" padding="none" className="mx-auto max-w-4xl overflow-hidden">
@@ -355,8 +372,21 @@ export default function SermonsPage() {
       </Section>
 
       <Section spacing="lg">
-        {filteredSermons.length === 0 ? (
-          <EmptyState icon={BookOpen} title="No sermons found" description="Check back soon for new sermons!" />
+        {loading ? (
+          <Grid cols={3} gap={6}>
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Card key={i} padding="none" className="overflow-hidden">
+                <Skeleton className="aspect-video w-full rounded-none" />
+                <div className="space-y-2 p-5">
+                  <Skeleton className="h-3 w-1/3" />
+                  <Skeleton className="h-5 w-full" />
+                  <Skeleton className="h-3 w-2/3" />
+                </div>
+              </Card>
+            ))}
+          </Grid>
+        ) : filteredSermons.length === 0 ? (
+          <EmptyState as="h2" icon={BookOpen} title="No sermons found" description="Check back soon for new sermons!" />
         ) : viewMode === 'timeline' ? (
           <div className="space-y-10">
             {Object.entries(groupedSermons)

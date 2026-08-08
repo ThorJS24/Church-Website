@@ -16,7 +16,8 @@ import { Grid } from '@/components/ui/grid';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button, LinkButton } from '@/components/ui/button';
-import { LoadingState, EmptyState } from '@/components/ui/states';
+import { EmptyState } from '@/components/ui/states';
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
 const extractYouTubeId = (url: string): string | null => {
@@ -27,7 +28,7 @@ const extractYouTubeId = (url: string): string | null => {
 
 const getYouTubeThumbnail = (url: string): string => {
   const videoId = extractYouTubeId(url);
-  return videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : '/images/default-event.jpg';
+  return videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : '/images/default-event.svg';
 };
 
 export default function EventsPage() {
@@ -92,8 +93,6 @@ export default function EventsPage() {
     }
   };
 
-  if (loading) return <LoadingState label="Loading events..." />;
-
   return (
     <div>
       <PageHero icon={<Calendar />} eyebrow="What's Happening" title="Upcoming Events" description="Join us for worship, fellowship, and community events" />
@@ -131,7 +130,20 @@ export default function EventsPage() {
       </Section>
 
       <Section spacing="lg">
-        {displayEvents.length === 0 ? (
+        {loading ? (
+          <Grid cols={3} gap={6}>
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Card key={i} padding="none" className="overflow-hidden">
+                <Skeleton className="aspect-16/10 w-full rounded-none" />
+                <div className="space-y-2 p-5">
+                  <Skeleton className="h-3 w-1/3" />
+                  <Skeleton className="h-5 w-full" />
+                  <Skeleton className="h-3 w-2/3" />
+                </div>
+              </Card>
+            ))}
+          </Grid>
+        ) : displayEvents.length === 0 ? (
           <EmptyState icon={Calendar} title="No events found" description="Check back soon for new events and activities!" />
         ) : (
           <Grid cols={3} gap={6}>
@@ -149,7 +161,7 @@ export default function EventsPage() {
                   <Card padding="none" className="h-full overflow-hidden">
                     <div className="relative aspect-16/10 bg-surface-active">
                       <Image
-                        src={event.imageUrl || getYouTubeThumbnail(event.youtubeUrl || '') || '/images/default-event.jpg'}
+                        src={event.imageUrl || getYouTubeThumbnail(event.youtubeUrl || '') || '/images/default-event.svg'}
                         alt={event.title}
                         fill
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"

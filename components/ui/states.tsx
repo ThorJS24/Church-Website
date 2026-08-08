@@ -18,16 +18,22 @@ export function EmptyState({
   title,
   description,
   action,
+  as: Heading = 'h3',
 }: {
   icon?: ComponentType<{ className?: string }>;
   title: string;
   description?: string;
   action?: ReactNode;
+  /** Heading level for `title` — defaults to h3 (the common case: nested
+   * under a section's own h2). Pass "h2" when this is the first heading
+   * after the page's h1 (e.g. no other section heading precedes it), so
+   * the document's heading order doesn't skip a level. */
+  as?: 'h2' | 'h3';
 }) {
   return (
     <div className="px-4 py-16 text-center">
       <Icon className="mx-auto mb-3 h-12 w-12 text-foreground-subtle" aria-hidden="true" />
-      <h3 className="mb-1 text-title-sm text-foreground">{title}</h3>
+      <Heading className="mb-1 text-title-sm text-foreground">{title}</Heading>
       {description && <p className="mb-4 text-body-sm text-foreground-muted">{description}</p>}
       {action}
     </div>

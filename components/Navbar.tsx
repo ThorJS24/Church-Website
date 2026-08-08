@@ -229,11 +229,10 @@ export default function Navbar() {
               type="button"
               onClick={() => setShowCommandPalette(true)}
               className="hidden items-center gap-2 rounded-md border border-border bg-surface px-3 py-1.5 text-body-sm text-foreground-subtle transition-colors duration-fast hover:border-border-strong hover:text-foreground md:flex"
-              aria-label={t('common.search') || 'Search'}
             >
               <Search className="h-4 w-4" aria-hidden="true" />
               <span>{t('common.search') || 'Search'}</span>
-              <kbd className="ml-2 rounded border border-border bg-background px-1.5 py-0.5 text-caption">⌘K</kbd>
+              <kbd aria-hidden="true" className="ml-2 rounded border border-border bg-background px-1.5 py-0.5 text-caption">⌘K</kbd>
             </button>
             <IconButton label={t('common.search') || 'Search'} size="md" className="md:hidden" onClick={() => setShowCommandPalette(true)}>
               <Search />
