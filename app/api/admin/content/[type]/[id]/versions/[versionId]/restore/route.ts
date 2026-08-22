@@ -2,23 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAdminDb } from '@/lib/firebase-admin';
 import { requireAdmin, withAudit } from '@/lib/api-auth';
 import { saveContentVersion } from '@/lib/contentVersions';
-
-const COLLECTIONS: Record<string, string> = {
-  sermons: 'sermons',
-  events: 'events',
-  pastors: 'pastors',
-  series: 'series',
-  speakers: 'speakers',
-  ministries: 'ministries',
-  announcements: 'announcements',
-  services: 'services',
-  smallGroups: 'smallGroups',
-  testimonials: 'testimonials',
-  redirects: 'redirects',
-  resources: 'resources',
-  staffMembers: 'staffMembers',
-  prayerRequests: 'prayerRequests',
-};
+import { COLLECTIONS } from '@/lib/adminContentCollections';
 
 export async function POST(
   request: NextRequest,

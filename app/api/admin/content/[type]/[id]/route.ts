@@ -2,27 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAdminDb } from '@/lib/firebase-admin';
 import { requireAdmin, withAudit } from '@/lib/api-auth';
 import { saveContentVersion } from '@/lib/contentVersions';
-
-const COLLECTIONS: Record<string, string> = {
-  sermons: 'sermons',
-  events: 'events',
-  pastors: 'pastors',
-  series: 'series',
-  speakers: 'speakers',
-  ministries: 'ministries',
-  announcements: 'announcements',
-  services: 'services',
-  smallGroups: 'smallGroups',
-  testimonials: 'testimonials',
-  redirects: 'redirects',
-  resources: 'resources',
-  staffMembers: 'staffMembers',
-  prayerRequests: 'prayerRequests',
-};
-
-function resolveCollection(type: string): string | null {
-  return COLLECTIONS[type] ?? null;
-}
+import { resolveCollection } from '@/lib/adminContentCollections';
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ type: string; id: string }> }) {
   const authResult = await requireAdmin(request);

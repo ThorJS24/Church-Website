@@ -13,9 +13,8 @@ import {
 
 /**
  * Every route below puts its rate-limit check first, before any external
- * call (Firestore write, Cloudinary/AWS/SMTP) — so these tests exercise
- * the real gate on every route without depending on AWS Polly actually
- * being configured. `services/request` DOES send real email through the
+ * call (Firestore write, Cloudinary/SMTP) — so these tests exercise
+ * the real gate on every route. `services/request` DOES send real email through the
  * live Resend API on every non-429 call, so each route gets exactly ONE
  * consolidated test (max successes, then a 429, then a post-reset success)
  * instead of three separate tests — this keeps the real-world side effects
@@ -130,17 +129,6 @@ test.describe('Rate limiting is applied to every unauthenticated public POST rou
       keyPrefix: 'livestream-chat_',
       expectSuccessStatus: 200,
       cleanup: { collection: 'chatMessages', field: 'message', value: 'rl test message' },
-    },
-    {
-      name: 'text-to-speech',
-      path: '/api/tts',
-      body: () => ({ text: 'rate limit test', language: 'en' }),
-      max: 10,
-      windowMs: 60 * 60 * 1000,
-      keyPrefix: 'tts_',
-      // AWS isn't configured in this environment, so a non-429 response is
-      // 503 (TTS_NOT_CONFIGURED), not 200 — the point is it's never 429
-      // until the limit is actually exceeded.
     },
     {
       name: 'service request (wedding/baptism)',

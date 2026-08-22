@@ -1,25 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminDb, serializeTimestamps } from '@/lib/firebase-admin';
 import { requireAdmin } from '@/lib/api-auth';
-
-// Same allowlist as app/api/admin/content/[type] — kept in sync manually
-// since both routes gate the same fixed set of built-in collections.
-const COLLECTIONS: Record<string, string> = {
-  sermons: 'sermons',
-  events: 'events',
-  pastors: 'pastors',
-  series: 'series',
-  speakers: 'speakers',
-  ministries: 'ministries',
-  announcements: 'announcements',
-  services: 'services',
-  smallGroups: 'smallGroups',
-  testimonials: 'testimonials',
-  redirects: 'redirects',
-  resources: 'resources',
-  staffMembers: 'staffMembers',
-  prayerRequests: 'prayerRequests',
-};
+import { COLLECTIONS } from '@/lib/adminContentCollections';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ type: string; id: string }> }) {
   const authResult = await requireAdmin(request);
