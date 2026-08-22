@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { getAdminDb } from '@/lib/firebase-admin';
 import { checkRateLimit, clientIpFrom } from '@/lib/rateLimit';
 
 // Same threshold as prayer/gallery submission — a public form feeding the
@@ -43,7 +42,7 @@ export async function POST(request: NextRequest) {
       createdAt: new Date().toISOString(),
     };
 
-    const docRef = await addDoc(collection(db, 'testimonials'), doc);
+    const docRef = await getAdminDb().collection('testimonials').add(doc);
 
     return NextResponse.json({ success: true, id: docRef.id, message: 'Thank you — your testimony will appear once reviewed.' });
   } catch (error) {

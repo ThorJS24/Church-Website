@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
-import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { getAdminDb } from '@/lib/firebase-admin';
 import { checkRateLimit, clientIpFrom } from '@/lib/rateLimit';
 import { requireAuth } from '@/lib/api-auth';
 
@@ -68,7 +69,7 @@ export async function POST(request: NextRequest) {
       updatedAt: new Date().toISOString()
     };
 
-    const docRef = await addDoc(collection(db, 'prayerRequests'), newPrayerRequest);
+    const docRef = await getAdminDb().collection('prayerRequests').add(newPrayerRequest);
 
     return NextResponse.json({
       success: true,

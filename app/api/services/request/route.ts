@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { getAdminDb } from '@/lib/firebase-admin';
 import { getResend } from '@/lib/resend';
 import * as Sentry from '@sentry/nextjs';
 import { checkRateLimit, clientIpFrom } from '@/lib/rateLimit';
@@ -44,7 +43,7 @@ export async function POST(request: NextRequest) {
     // itself failing, since the request is already saved and will show up
     // in the admin panel's moderation/requests view regardless of whether
     // either email below goes out.
-    const docRef = await addDoc(collection(db, 'serviceRequests'), serviceRequest);
+    const docRef = await getAdminDb().collection('serviceRequests').add(serviceRequest);
 
     const serviceTypeTitle = data.serviceType === 'wedding' ? 'Wedding' : 'Baptism';
 

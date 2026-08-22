@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { getAdminDb } from '@/lib/firebase-admin';
 import { checkRateLimit, clientIpFrom } from '@/lib/rateLimit';
 
 // 5/hour: same profile as prayer requests — a public form, not something a
@@ -50,7 +49,7 @@ export async function POST(request: NextRequest) {
       updatedAt: new Date().toISOString()
     };
 
-    const docRef = await addDoc(collection(db, 'contacts'), newContact);
+    const docRef = await getAdminDb().collection('contacts').add(newContact);
 
     return NextResponse.json({
       success: true,

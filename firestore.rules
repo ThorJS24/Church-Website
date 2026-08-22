@@ -56,7 +56,10 @@ service cloud.firestore {
 
     // ---- Prayer requests (public submit, moderator+ approve) ----
     match /prayerRequests/{requestId} {
-      allow create: if true;
+      // Public submission goes through /api/prayer (Admin SDK, bypasses
+      // these rules) so it can share the route's rate limiting — direct
+      // client writes are refused here rather than left open.
+      allow create: if false;
       allow read: if isModerator()
         || (isSignedIn() && resource.data.requestedBy == request.auth.uid)
         || (resource.data.isPrivate == false && isApproved());
@@ -65,15 +68,15 @@ service cloud.firestore {
 
     // ---- Public form submissions (write-only from the client's perspective) ----
     match /contacts/{docId} {
-      allow create: if true;
-      allow read, update, delete: if isAdmin();
-    }
-    match /enhanced_contacts/{docId} {
-      allow create: if true;
+      // Public submission goes through /api/contact (Admin SDK) for rate
+      // limiting — direct client writes are refused here.
+      allow create: if false;
       allow read, update, delete: if isAdmin();
     }
     match /serviceRequests/{docId} {
-      allow create: if true;
+      // Public submission goes through /api/services/request (Admin SDK)
+      // for rate limiting — direct client writes are refused here.
+      allow create: if false;
       allow read, update, delete: if isAdmin();
     }
     match /emailNotifications/{docId} {
@@ -107,7 +110,9 @@ service cloud.firestore {
     // moderator). Public read only ever sees approved images.
     match /galleryImages/{docId} {
       allow read: if isApproved() || isModerator();
-      allow create: if true;
+      // Public submission goes through /api/gallery/submit (Admin SDK) for
+      // rate limiting and upload validation — direct client writes refused.
+      allow create: if false;
       allow update, delete: if isModerator();
     }
     match /announcements/{docId} {
@@ -155,7 +160,9 @@ service cloud.firestore {
     // and the 'testimonials' special-case in app/api/admin/content/[type].
     match /testimonials/{docId} {
       allow read: if isApproved() || isModerator();
-      allow create: if true;
+      // Public submission goes through /api/testimonials/submit (Admin
+      // SDK) for rate limiting — direct client writes refused here.
+      allow create: if false;
       allow update, delete: if isModerator();
     }
     // Editable marketing copy for about/community/ministries/services/branches
@@ -181,7 +188,9 @@ service cloud.firestore {
     // Public comment submission on gallery images, moderator+ approve.
     match /comments/{docId} {
       allow read: if isApproved() || isModerator();
-      allow create: if true;
+      // Public submission goes through /api/gallery/comment (Admin SDK)
+      // for rate limiting — direct client writes refused here.
+      allow create: if false;
       allow update, delete: if isModerator();
     }
 
