@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { RefreshCw, Book, Heart, Share2, Copy, Sparkles, Star } from 'lucide-react';
+import { motion } from 'motion/react';
+import { RefreshCw, Book, Heart, Share2, Copy, Star } from 'lucide-react';
 import { getRandomVerse, getVerseInVersion, BibleVerse as BibleVerseType } from '@/lib/bible-api';
 
 export default function BibleVerse() {
@@ -10,7 +10,6 @@ export default function BibleVerse() {
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [liked, setLiked] = useState(false);
-  const [sparkles, setSparkles] = useState<Array<{id: number, x: number, y: number}>>([]);
   const [bibleVersion, setBibleVersion] = useState('NKJV');
   const [currentVerseId, setCurrentVerseId] = useState<string | null>(null);
 
@@ -55,15 +54,6 @@ export default function BibleVerse() {
 
   const handleLike = () => {
     setLiked(!liked);
-    if (!liked) {
-      const newSparkles = Array.from({length: 6}, (_, i) => ({
-        id: Date.now() + i,
-        x: Math.random() * 100,
-        y: Math.random() * 100
-      }));
-      setSparkles(newSparkles);
-      setTimeout(() => setSparkles([]), 1000);
-    }
   };
 
   useEffect(() => {
@@ -105,22 +95,6 @@ export default function BibleVerse() {
       transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
       className="relative overflow-hidden rounded-2xl border border-border bg-warm-subtle p-8 shadow-sm"
     >
-      <AnimatePresence>
-        {sparkles.map((sparkle) => (
-          <motion.div
-            key={sparkle.id}
-            initial={{ opacity: 0, scale: 0, rotate: 0 }}
-            animate={{ opacity: 1, scale: 1, rotate: 180 }}
-            exit={{ opacity: 0, scale: 0, rotate: 360 }}
-            transition={{ duration: 0.8 }}
-            className="pointer-events-none absolute"
-            style={{ left: `${sparkle.x}%`, top: `${sparkle.y}%` }}
-          >
-            <Sparkles className="h-4 w-4 text-warm" />
-          </motion.div>
-        ))}
-      </AnimatePresence>
-
       <div className="relative mb-6 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="shrink-0 rounded-xl bg-warm p-3 shadow-sm">
@@ -175,12 +149,10 @@ export default function BibleVerse() {
       </div>
 
       <div key={displayVerse.id} className="relative">
-        <div className="relative mb-6 px-8 text-center font-serif text-headline-sm leading-relaxed text-foreground">
-          <span className="absolute -top-4 left-2 font-serif text-6xl text-warm/20" aria-hidden="true">&ldquo;</span>
-          <span className="relative z-10 block italic">
+        <div className="relative mb-6 px-4 text-center font-serif text-headline-sm leading-relaxed text-foreground">
+          <span className="block italic">
             {displayVerse.content.replace(/"/g, '')}
           </span>
-          <span className="absolute -bottom-8 right-2 font-serif text-6xl text-warm/20" aria-hidden="true">&rdquo;</span>
         </div>
 
         <div className="flex items-center justify-between">
