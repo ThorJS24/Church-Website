@@ -11,9 +11,26 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
 }
 
 const SIZE_CLASSES = {
-  sm: 'h-8 text-body-sm px-3',
-  md: 'h-10 text-body-md px-3.5',
-  lg: 'h-12 text-body-lg px-4',
+  sm: 'h-8 text-body-sm',
+  md: 'h-10 text-body-md',
+  lg: 'h-12 text-body-lg',
+};
+
+// Left/right padding are applied separately (rather than via a single
+// `px-*` class) so that an icon's `pl-9`/`pr-9` never has to coexist with
+// a conflicting `px-*` on the same element — cn()/tailwind-merge can't
+// resolve that conflict reliably since Tailwind's compiled stylesheet
+// order, not className order, decides which wins.
+const SIZE_PL = {
+  sm: 'pl-3',
+  md: 'pl-3.5',
+  lg: 'pl-4',
+};
+
+const SIZE_PR = {
+  sm: 'pr-3',
+  md: 'pr-3.5',
+  lg: 'pr-4',
 };
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
@@ -65,8 +82,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               'disabled:opacity-50 disabled:cursor-not-allowed',
               error ? 'border-danger' : 'border-border',
               SIZE_CLASSES[size],
-              leftIcon && 'pl-9',
-              rightIcon && 'pr-9',
+              leftIcon ? 'pl-9' : SIZE_PL[size],
+              rightIcon ? 'pr-9' : SIZE_PR[size],
               className
             )}
             {...props}

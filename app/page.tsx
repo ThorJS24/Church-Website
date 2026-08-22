@@ -134,9 +134,9 @@ export default function Home() {
           fill
           priority
           sizes="100vw"
-          className="object-cover opacity-40"
+          className="object-cover"
         />
-        <div className="absolute inset-0 bg-linear-to-b from-[#17130F]/60 via-[#17130F]/75 to-[#17130F]" />
+        <div className="absolute inset-0 bg-linear-to-b from-[#17130F]/25 via-[#17130F]/35 to-[#17130F]" />
 
         <Container className="relative z-10 text-center">
           {isLive && (
@@ -151,13 +151,13 @@ export default function Home() {
           )}
           <motion.h1
             {...fadeUpImmediate(0.05)}
-            className="mx-auto max-w-3xl font-serif text-display-sm text-white sm:text-display-md"
+            className="mx-auto max-w-3xl font-serif text-display-sm text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)] sm:text-display-md"
           >
             {siteSettings?.churchName || 'Salem Primitive Baptist Church'}
           </motion.h1>
           <motion.p
             {...fadeUpImmediate(0.1)}
-            className="mx-auto mt-5 max-w-xl font-serif text-body-lg italic text-white/70"
+            className="mx-auto mt-5 max-w-xl font-serif text-body-lg italic text-white/80 drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
           >
             {siteSettings?.tagline || 'A place where faith meets community, and hope comes alive.'}
           </motion.p>

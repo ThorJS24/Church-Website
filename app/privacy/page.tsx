@@ -77,7 +77,7 @@ export default function PrivacyPolicy() {
     <div>
       <PageHero
         icon={<Shield />}
-        eyebrow={`Effective Jan 1, 2024 · Last updated ${new Date().toLocaleDateString()}`}
+        eyebrow={`Effective Jan 1, 2024 · Last updated ${POLICY_VERSIONS[POLICY_VERSIONS.length - 1].date}`}
         title="Privacy Policy"
         description="Your privacy and data protection rights"
       />

@@ -16,10 +16,16 @@ const AccessibilityContext = createContext<AccessibilityContextType | undefined>
 export function AccessibilityProvider({ children }: { children: React.ReactNode }) {
   const [textSize, setTextSizeState] = useState<TextSize>('normal');
   const [highContrast, setHighContrast] = useState(false);
-  const [mounted, setMounted] = useState(false);
 
+  // Read persisted preferences after mount and apply them in place, rather
+  // than gating the Provider itself behind a `mounted` flag — that would
+  // mean AccessibilityMenu (and its useId()-based DropdownMenu) renders
+  // `null` during SSR/initial hydration and then mounts moments later,
+  // shifting how many useId()-consuming components exist ahead of other
+  // Radix primitives (like CommandPalette's DialogTitle) further down the
+  // tree between renders — the suspected cause of an intermittent id
+  // hydration-mismatch warning seen once during a full-site audit.
   useEffect(() => {
-    setMounted(true);
     const savedTextSize = localStorage.getItem('a11y-text-size') as TextSize | null;
     if (savedTextSize) {
       setTextSizeState(savedTextSize);
@@ -44,10 +50,6 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
       return next;
     });
   };
-
-  if (!mounted) {
-    return <>{children}</>;
-  }
 
   return (
     <AccessibilityContext.Provider value={{ textSize, setTextSize, highContrast, toggleHighContrast }}>

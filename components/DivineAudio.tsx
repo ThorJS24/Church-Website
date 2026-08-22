@@ -87,8 +87,15 @@ export default function DivineAudio({ showControls = true }: DivineAudioProps) {
       // rightmost tab below md (confirmed via CDP: both occupied the same
       // ~56px vertical band, with the FAB visually cutting off the
       // "Contact" label) — lifted above the nav bar there, back to bottom-4
-      // at md: and up where MobileBottomNav doesn't render.
-      className="fixed bottom-24 right-4 z-50 rounded-full border border-warm/30 bg-background/90 p-3 shadow-lg backdrop-blur-xs md:bottom-4"
+      // at md: and up where MobileBottomNav doesn't render. It's still a
+      // fixed-position control that can drift over whatever content sits at
+      // that corner as the page scrolls, so it recedes to low opacity at
+      // rest and only comes fully into view on hover/focus/while playing —
+      // less likely to obscure a card or calendar cell underneath it.
+      className={cn(
+        'fixed bottom-24 right-4 z-50 rounded-full border border-warm/30 bg-background/90 p-3 shadow-lg backdrop-blur-xs transition-opacity duration-300 md:bottom-4',
+        isPlaying ? 'opacity-100' : 'opacity-55 hover:opacity-100 focus-within:opacity-100'
+      )}
       initial={{ opacity: 0, scale: 0 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: 1, duration: 0.5 }}

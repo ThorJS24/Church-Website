@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'motion/react';
-import { Clock, MapPin } from 'lucide-react';
+import { Clock, MapPin, CalendarDays } from 'lucide-react';
 import { getEvents, getServiceTimes, EventItem } from '@/lib/content';
 import { getEventCategory, expandServicesToEvents } from '@/lib/eventCategories';
 import { IconButton } from '@/components/ui/icon-button';
 import { Modal } from '@/components/ui/modal';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import EventModal from '@/components/EventModal';
@@ -22,6 +23,7 @@ export default function InteractiveCalendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<{ date: Date; events: CalendarEvent[] } | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [pickerYear, setPickerYear] = useState(currentDate.getFullYear());
 
   useEffect(() => {
     async function fetchEvents() {
@@ -90,16 +92,55 @@ export default function InteractiveCalendar() {
             <h2 className="text-title-lg" key={currentDate.getMonth()}>
               {MONTH_NAMES[currentDate.getMonth()]} {currentDate.getFullYear()}
             </h2>
-            <input
-              type="month"
-              aria-label="Jump to month"
-              value={`${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`}
-              onChange={(e) => {
-                const [year, month] = e.target.value.split('-');
-                setCurrentDate(new Date(parseInt(year), parseInt(month) - 1, 1));
-              }}
-              className="rounded-lg border border-white/20 bg-white/10 px-2 py-1 text-caption text-accent-foreground"
-            />
+            <DropdownMenu onOpenChange={(open) => open && setPickerYear(currentDate.getFullYear())}>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  aria-label="Jump to month"
+                  className="flex items-center gap-1 rounded-lg border border-white/20 bg-white/10 px-2 py-1 text-caption text-accent-foreground transition-colors hover:bg-white/20"
+                >
+                  <CalendarDays className="h-3.5 w-3.5" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="center" className="w-56 bg-background p-3 text-foreground">
+                <div className="mb-2 flex items-center justify-between">
+                  <IconButton
+                    label="Previous year"
+                    size="sm"
+                    variant="ghost"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setPickerYear((y) => y - 1);
+                    }}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </IconButton>
+                  <span className="text-body-sm font-semibold text-foreground">{pickerYear}</span>
+                  <IconButton
+                    label="Next year"
+                    size="sm"
+                    variant="ghost"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setPickerYear((y) => y + 1);
+                    }}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </IconButton>
+                </div>
+                <div className="grid grid-cols-3 gap-1">
+                  {MONTH_NAMES.map((m, i) => (
+                    <DropdownMenuItem
+                      key={m}
+                      onSelect={() => setCurrentDate(new Date(pickerYear, i, 1))}
+                      className="justify-center text-center"
+                    >
+                      {m.slice(0, 3)}
+                    </DropdownMenuItem>
+                  ))}
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
           <IconButton label="Next month" onClick={() => navigateMonth('next')} className="text-accent-foreground hover:bg-white/10">
             <ChevronRight />

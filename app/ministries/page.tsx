@@ -30,13 +30,16 @@ const iconMap = {
   default: BookOpen,
 };
 
+// Colored dot + matching active-chip color, mirroring the category filter
+// idiom used on /events — both pages filter a small, fixed set of
+// categories, so the two controls should read as the same kind of thing.
 const CATEGORIES = [
-  { id: 'all', label: 'All Ministries' },
-  { id: 'children', label: 'Children' },
-  { id: 'youth', label: 'Youth' },
-  { id: 'adults', label: 'Adults' },
-  { id: 'worship', label: 'Worship' },
-  { id: 'outreach', label: 'Outreach' },
+  { id: 'all', label: 'All Ministries', dotClass: 'bg-stone-600', chipActiveClass: 'bg-stone-600 text-white' },
+  { id: 'children', label: 'Children', dotClass: 'bg-amber-600', chipActiveClass: 'bg-amber-600 text-white' },
+  { id: 'youth', label: 'Youth', dotClass: 'bg-pink-600', chipActiveClass: 'bg-pink-600 text-white' },
+  { id: 'adults', label: 'Adults', dotClass: 'bg-blue-600', chipActiveClass: 'bg-blue-600 text-white' },
+  { id: 'worship', label: 'Worship', dotClass: 'bg-indigo-600', chipActiveClass: 'bg-indigo-600 text-white' },
+  { id: 'outreach', label: 'Outreach', dotClass: 'bg-green-700', chipActiveClass: 'bg-green-700 text-white' },
 ];
 
 const GET_INVOLVED = [
@@ -98,10 +101,11 @@ export default function MinistriesPage() {
               key={category.id}
               onClick={() => setActiveCategory(category.id)}
               className={cn(
-                'rounded-full px-5 py-2 text-body-sm font-medium transition-colors',
-                activeCategory === category.id ? 'bg-accent text-accent-foreground' : 'bg-surface-active text-foreground-muted hover:bg-surface-hover'
+                'flex items-center gap-2 rounded-full px-5 py-2 text-body-sm font-medium transition-colors',
+                activeCategory === category.id ? category.chipActiveClass : 'bg-surface-active text-foreground-muted hover:bg-surface-hover'
               )}
             >
+              <span className={cn('h-2 w-2 rounded-full', category.dotClass)} />
               {category.label}
             </button>
           ))}

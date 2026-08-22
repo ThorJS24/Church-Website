@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { IconButton } from '@/components/ui/icon-button';
 import { Modal } from '@/components/ui/modal';
-import { LoadingState } from '@/components/ui/states';
+import { LoadingState, EmptyState } from '@/components/ui/states';
 
 interface Branch {
   id: string;
@@ -64,8 +64,15 @@ export default function BranchesPage() {
       />
 
       <Section spacing="lg">
+        {!branchesData?.branches || branchesData.branches.length === 0 ? (
+          <EmptyState
+            icon={MapPin}
+            title="No branches listed yet"
+            description="Check back soon — we're still adding our branch locations."
+          />
+        ) : (
         <Grid cols={3} gap={6}>
-          {branchesData?.branches?.map((branch, index) => (
+          {branchesData.branches.map((branch, index) => (
             <motion.div
               key={branch.id}
               initial={{ opacity: 0, y: 16 }}
@@ -130,6 +137,7 @@ export default function BranchesPage() {
             </motion.div>
           ))}
         </Grid>
+        )}
       </Section>
 
       <Modal isOpen={!!selectedBranch} onClose={() => setSelectedBranch(null)} title={selectedBranch?.name} size="lg">

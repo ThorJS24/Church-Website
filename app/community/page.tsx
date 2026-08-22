@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { LoadingState } from '@/components/ui/states';
+import { LoadingState, EmptyState } from '@/components/ui/states';
 import { useToast } from '@/lib/toast';
 
 const SURVEY_INTERESTS = [
@@ -107,6 +107,20 @@ export default function CommunityPage() {
         title={communityData?.title || 'Community & Outreach'}
         description={communityData?.subtitle || 'Serving our community with love and compassion'}
       />
+
+      {!communityData?.missions?.length &&
+        !communityData?.outreachStories?.length &&
+        !communityData?.communityResources?.length &&
+        !communityData?.testimonies?.length && (
+          <Section spacing="lg">
+            <EmptyState
+              icon={Heart}
+              title="Our community stories are coming soon"
+              description="We're still adding missions, outreach, and resources here — tell us what you'd like to see in the survey below."
+              as="h2"
+            />
+          </Section>
+        )}
 
       {communityData?.missions && communityData.missions.length > 0 && (
         <Section spacing="lg">

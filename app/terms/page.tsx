@@ -67,7 +67,7 @@ export default function TermsOfService() {
     <div>
       <PageHero
         icon={<Gavel />}
-        eyebrow={`Effective Jan 1, 2024 · Last updated ${new Date().toLocaleDateString()}`}
+        eyebrow={`Effective Jan 1, 2024 · Last updated ${POLICY_VERSIONS[POLICY_VERSIONS.length - 1].date}`}
         title="Terms of Service"
         description="Community guidelines and usage terms"
       />

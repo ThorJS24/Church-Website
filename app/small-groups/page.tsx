@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import Link from 'next/link';
 import { motion } from 'motion/react';
 import { Users, Clock, MapPin, Search } from 'lucide-react';
 import { getSmallGroups, SmallGroup } from '@/lib/content';
@@ -13,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { LinkButton } from '@/components/ui/button';
-import { LoadingState } from '@/components/ui/states';
+import { LoadingState, EmptyState } from '@/components/ui/states';
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -70,13 +69,20 @@ export default function SmallGroupsPage() {
 
       <Section spacing="lg">
         {filteredGroups.length === 0 ? (
-          <p className="text-center text-body-md text-foreground-muted">
-            {groups.length === 0 ? (
-              <>No small groups are listed yet — <Link href="/contact" className="text-accent underline">contact us</Link> to find one.</>
-            ) : (
-              'No small groups match your search — try a different day, life stage, or location.'
-            )}
-          </p>
+          groups.length === 0 ? (
+            <EmptyState
+              icon={Users}
+              title="No small groups are listed yet"
+              description="Contact us and we'll help you find one."
+              action={<LinkButton href="/contact" size="sm">Contact Us</LinkButton>}
+            />
+          ) : (
+            <EmptyState
+              icon={Search}
+              title="No small groups match your search"
+              description="Try a different day, life stage, or location."
+            />
+          )
         ) : (
           <Grid cols={3} gap={6}>
             {filteredGroups.map((group, index) => {

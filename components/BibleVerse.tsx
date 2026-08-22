@@ -121,13 +121,13 @@ export default function BibleVerse() {
         ))}
       </AnimatePresence>
 
-      <div className="relative mb-6 flex items-center justify-between gap-3">
+      <div className="relative mb-6 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="rounded-xl bg-warm p-3 shadow-sm">
+          <div className="shrink-0 rounded-xl bg-warm p-3 shadow-sm">
             <Book className="h-5 w-5 text-warm-foreground" aria-hidden="true" />
           </div>
           <div>
-            <h2 className="text-title-md text-foreground">Today's Verse</h2>
+            <h2 className="text-title-md whitespace-nowrap text-foreground">Today's Verse</h2>
             <p className="text-caption text-foreground-subtle">A blessing for your day</p>
           </div>
         </div>
