@@ -5,8 +5,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'motion/react';
 import {
-  Heart, Mail, Calendar, MapPin, Phone, Clock, ArrowRight, Play,
-  Church, BookOpen, Sparkles, ImageIcon,
+  Heart, Mail, MapPin, Phone, Clock, ArrowRight, Play,
+  Church, Sparkles,
 } from 'lucide-react';
 import {
   getAnnouncements, getSiteSettings, getServiceTimes, getSermons, getEvents,
@@ -29,6 +29,8 @@ import WeekAtAGlance from '@/components/home/WeekAtAGlance';
 import EventCountdown from '@/components/home/EventCountdown';
 import SermonCarousel from '@/components/home/SermonCarousel';
 import SocialProofStrip from '@/components/home/SocialProofStrip';
+import UpcomingEventsStrip from '@/components/home/UpcomingEventsStrip';
+import BlogHighlights from '@/components/home/BlogHighlights';
 import StatBar from '@/components/StatBar';
 
 const quickActions = [
@@ -37,15 +39,6 @@ const quickActions = [
   { href: '/prayer', icon: Sparkles, title: 'Prayer Request', description: 'Share your prayer needs with our community' },
   { href: '/contact', icon: Mail, title: 'Get In Touch', description: 'Contact us with questions or to learn more' },
 ];
-
-function fadeUp(delay = 0) {
-  return {
-    initial: { opacity: 0, y: 16 },
-    whileInView: { opacity: 1, y: 0 },
-    viewport: { once: true, margin: '-80px' },
-    transition: { duration: 0.4, delay, ease: [0.4, 0, 0.2, 1] as const },
-  };
-}
 
 // Hero content is visible on first paint, not scrolled into view, so it
 // animates via `animate` rather than `whileInView` — an IntersectionObserver
@@ -243,23 +236,21 @@ export default function Home() {
         <Section spacing="md" className="bg-surface" id="announcements">
           <h2 className="mb-8 text-center font-serif text-headline-md text-foreground">Latest Announcements</h2>
           <div className="mx-auto max-w-3xl space-y-4">
-            {announcements.map((announcement, index) => (
-              <motion.div key={announcement.id} {...fadeUp(index * 0.05)}>
-                <Card className="flex items-start gap-4">
-                  <div className="rounded-full bg-accent-subtle p-2.5">
-                    <Mail className="h-4 w-4 text-accent" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-title-sm text-foreground">{announcement.title}</h3>
-                    <p className="mt-1 text-body-sm text-foreground-muted">{announcement.content}</p>
-                    {announcement.date && (
-                      <p className="mt-2 text-caption text-foreground-subtle">
-                        {new Date(announcement.date).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
-                      </p>
-                    )}
-                  </div>
-                </Card>
-              </motion.div>
+            {announcements.map((announcement) => (
+              <Card key={announcement.id} className="flex items-start gap-4">
+                <div className="rounded-full bg-accent-subtle p-2.5">
+                  <Mail className="h-4 w-4 text-accent" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-title-sm text-foreground">{announcement.title}</h3>
+                  <p className="mt-1 text-body-sm text-foreground-muted">{announcement.content}</p>
+                  {announcement.date && (
+                    <p className="mt-2 text-caption text-foreground-subtle">
+                      {new Date(announcement.date).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
+                    </p>
+                  )}
+                </div>
+              </Card>
             ))}
           </div>
         </Section>
@@ -269,17 +260,15 @@ export default function Home() {
       <Section spacing="lg">
         <h2 className="mb-10 text-center font-serif text-headline-md text-foreground">Connect With Us</h2>
         <Grid cols={4} gap={6}>
-          {quickActions.map((action, index) => (
-            <motion.div key={action.title} {...fadeUp(index * 0.05)}>
-              <Link href={action.href} className="block h-full">
-                <Card variant="interactive" padding="lg" className="h-full text-center">
-                  <action.icon className="mx-auto mb-4 h-9 w-9 text-accent" aria-hidden="true" />
-                  <h3 className="text-title-md text-foreground">{action.title}</h3>
-                  <p className="mt-2 text-body-sm text-foreground-muted">{action.description}</p>
-                  <ArrowRight className="mx-auto mt-4 h-4 w-4 text-accent" aria-hidden="true" />
-                </Card>
-              </Link>
-            </motion.div>
+          {quickActions.map((action) => (
+            <Link key={action.title} href={action.href} className="block h-full">
+              <Card variant="interactive" padding="lg" className="h-full text-center">
+                <action.icon className="mx-auto mb-4 h-9 w-9 text-accent" aria-hidden="true" />
+                <h3 className="text-title-md text-foreground">{action.title}</h3>
+                <p className="mt-2 text-body-sm text-foreground-muted">{action.description}</p>
+                <ArrowRight className="mx-auto mt-4 h-4 w-4 text-accent" aria-hidden="true" />
+              </Card>
+            </Link>
           ))}
         </Grid>
       </Section>
@@ -308,36 +297,7 @@ export default function Home() {
               View all events →
             </Link>
           </div>
-          <Grid cols={3} gap={6}>
-            {upcomingEvents.map((event, index) => (
-              <motion.div key={event.id} {...fadeUp(index * 0.05)}>
-                <Link href={`/events/${event.id}`} className="block h-full">
-                  <Card variant="interactive" padding="none" className="h-full overflow-hidden">
-                    <div className="relative aspect-16/10 bg-surface-active">
-                      {event.imageUrl ? (
-                        <Image src={event.imageUrl} alt={event.title} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover" />
-                      ) : (
-                        <div className="flex h-full items-center justify-center">
-                          <Calendar className="h-8 w-8 text-foreground-subtle" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-5">
-                      <Badge variant="neutral" className="mb-3">{event.category}</Badge>
-                      <h3 className="text-title-md text-foreground">{event.title}</h3>
-                      <p className="mt-2 flex items-center gap-1.5 text-body-sm text-foreground-muted">
-                        <Calendar className="h-3.5 w-3.5" />
-                        {new Date(event.startDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                      </p>
-                      <p className="mt-1 flex items-center gap-1.5 text-body-sm text-foreground-muted">
-                        <MapPin className="h-3.5 w-3.5" /> {event.location}
-                      </p>
-                    </div>
-                  </Card>
-                </Link>
-              </motion.div>
-            ))}
-          </Grid>
+          <UpcomingEventsStrip events={upcomingEvents} />
         </Section>
       )}
 
@@ -361,30 +321,7 @@ export default function Home() {
               Read more →
             </Link>
           </div>
-          <Grid cols={3} gap={6}>
-            {latestPosts.map((post, index) => (
-              <motion.div key={post.id} {...fadeUp(index * 0.05)}>
-                <Link href={`/blog/${post.slug}`} className="block h-full">
-                  <Card variant="interactive" padding="none" className="h-full overflow-hidden">
-                    <div className="relative aspect-16/10 bg-surface-active">
-                      {post.imageUrl ? (
-                        <Image src={post.imageUrl} alt={post.title} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover" />
-                      ) : (
-                        <div className="flex h-full items-center justify-center">
-                          <BookOpen className="h-8 w-8 text-foreground-subtle" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-5">
-                      {post.category && <Badge variant="neutral" className="mb-3">{post.category}</Badge>}
-                      <h3 className="text-title-md text-foreground line-clamp-2">{post.title}</h3>
-                      {post.excerpt && <p className="mt-2 line-clamp-2 text-body-sm text-foreground-muted">{post.excerpt}</p>}
-                    </div>
-                  </Card>
-                </Link>
-              </motion.div>
-            ))}
-          </Grid>
+          <BlogHighlights posts={latestPosts} />
         </Section>
       )}
 
@@ -398,10 +335,10 @@ export default function Home() {
             </Link>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-6">
-            {galleryPreview.map((photo, index) => (
-              <motion.div key={photo.id} {...fadeUp(index * 0.03)} className="relative aspect-square overflow-hidden rounded-lg bg-surface-active">
+            {galleryPreview.map((photo) => (
+              <div key={photo.id} className="relative aspect-square overflow-hidden rounded-lg bg-surface-active">
                 <Image src={photo.imageUrl} alt={photo.title || 'Gallery photo'} fill sizes="200px" className="object-cover transition-transform duration-slow hover:scale-105" />
-              </motion.div>
+              </div>
             ))}
           </div>
         </Section>
