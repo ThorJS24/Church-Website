@@ -64,7 +64,14 @@ const navigationItems: NavItem[] = [
   { key: 'community', href: '/community', icon: Users, labelKey: 'nav.community', menuGroup: 'getInvolved' },
   { key: 'gallery', href: '/gallery', icon: Camera, labelKey: 'nav.gallery', menuGroup: 'connect' },
   { key: 'blog', href: '/blog', icon: BookOpen, labelKey: 'nav.blog', menuGroup: 'connect' },
-  { key: 'give', href: '/give', icon: Gift, labelKey: 'nav.give', menuGroup: 'connect' },
+  // Give promoted to the primary desktop row — there was open space between
+  // "More" and the right-hand action icons at desktop widths, and it's the
+  // single highest-value CTA sitting inside the "More" mega-menu. Contact
+  // stays in "More": promoting both pushed Login/Register off the visible
+  // viewport right at the lg breakpoint's 1024px floor (verified with a
+  // screenshot at 1024px — Login/Register still fit comfortably with just
+  // Give promoted, at every width from 1024px up).
+  { key: 'give', href: '/give', icon: Gift, labelKey: 'nav.give', primary: true },
   { key: 'contact', href: '/contact', icon: Phone, labelKey: 'nav.contact', menuGroup: 'connect' },
 ];
 
