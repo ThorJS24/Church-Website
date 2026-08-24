@@ -24,14 +24,15 @@ import UpcomingEventsStrip from '@/components/home/UpcomingEventsStrip';
 import BlogHighlights from '@/components/home/BlogHighlights';
 import StatBar from '@/components/StatBar';
 import { HeroSection } from '@/components/home/HeroSection';
+import { Trans } from '@/components/i18n/Trans';
 
 export const revalidate = 300;
 
 const quickActions = [
-  { href: '/services', icon: Church, title: 'Join Us Sunday', description: 'Worship with us every Sunday at 9:30 AM' },
-  { href: '/give', icon: Heart, title: 'Give', description: 'See how to support our mission' },
-  { href: '/prayer', icon: Sparkles, title: 'Prayer Request', description: 'Share your prayer needs with our community' },
-  { href: '/contact', icon: Mail, title: 'Get In Touch', description: 'Contact us with questions or to learn more' },
+  { href: '/services', icon: Church, titleKey: 'home.quickJoinTitle', descKey: 'home.quickJoinDesc' },
+  { href: '/give', icon: Heart, titleKey: 'home.quickGiveTitle', descKey: 'home.quickGiveDesc' },
+  { href: '/prayer', icon: Sparkles, titleKey: 'home.quickPrayerTitle', descKey: 'home.quickPrayerDesc' },
+  { href: '/contact', icon: Mail, titleKey: 'home.quickContactTitle', descKey: 'home.quickContactDesc' },
 ];
 
 export default async function Home() {
@@ -75,7 +76,7 @@ export default async function Home() {
         <Grid cols={2} gap={8}>
           <BibleVerse />
           <Card variant="raised" padding="lg" className="flex flex-col justify-center">
-            <Badge variant="accent" className="mb-4 w-fit">Next Service</Badge>
+            <Badge variant="accent" className="mb-4 w-fit"><Trans k="home.nextService" /></Badge>
             {nextService ? (
               <>
                 <h3 className="font-serif text-headline-sm text-foreground">{nextService.title}</h3>
@@ -88,10 +89,10 @@ export default async function Home() {
                 )}
               </>
             ) : (
-              <p className="text-body-md text-foreground-muted">Sunday Worship — 9:30 AM</p>
+              <Trans k="home.defaultServiceFallback" as="p" className="text-body-md text-foreground-muted" />
             )}
             <LinkButton href="/services" variant="outline" className="mt-6 w-fit">
-              View all service times
+              <Trans k="home.viewServiceTimes" />
             </LinkButton>
           </Card>
         </Grid>
@@ -99,14 +100,14 @@ export default async function Home() {
 
       {/* This week at a glance */}
       <Section spacing="md">
-        <h2 className="mb-6 font-serif text-headline-sm text-foreground">This Week at a Glance</h2>
+        <Trans k="home.weekAtGlance" as="h2" className="mb-6 font-serif text-headline-sm text-foreground" />
         <WeekAtAGlance nextService={nextService ?? null} weekEvents={weekEvents} latestAnnouncement={announcements[0] ?? null} />
       </Section>
 
       {/* Announcements */}
       {announcements.length > 0 && (
         <Section spacing="md" className="bg-surface" id="announcements">
-          <h2 className="mb-8 text-center font-serif text-headline-md text-foreground">Latest Announcements</h2>
+          <Trans k="home.latestAnnouncements" as="h2" className="mb-8 text-center font-serif text-headline-md text-foreground" />
           <div className="mx-auto max-w-3xl space-y-4">
             {announcements.map((announcement) => (
               <Card key={announcement.id} className="flex items-start gap-4">
@@ -130,14 +131,14 @@ export default async function Home() {
 
       {/* Quick actions */}
       <Section spacing="lg">
-        <h2 className="mb-10 text-center font-serif text-headline-md text-foreground">Connect With Us</h2>
+        <Trans k="home.connectWithUs" as="h2" className="mb-10 text-center font-serif text-headline-md text-foreground" />
         <Grid cols={4} gap={6}>
           {quickActions.map((action) => (
-            <Link key={action.title} href={action.href} className="block h-full">
+            <Link key={action.titleKey} href={action.href} className="block h-full">
               <Card variant="interactive" padding="lg" className="h-full text-center">
                 <action.icon className="mx-auto mb-4 h-9 w-9 text-accent" aria-hidden="true" />
-                <h3 className="text-title-md text-foreground">{action.title}</h3>
-                <p className="mt-2 text-body-sm text-foreground-muted">{action.description}</p>
+                <Trans k={action.titleKey} as="h3" className="text-title-md text-foreground" />
+                <Trans k={action.descKey} as="p" className="mt-2 text-body-sm text-foreground-muted" />
                 <ArrowRight className="mx-auto mt-4 h-4 w-4 text-accent" aria-hidden="true" />
               </Card>
             </Link>
@@ -149,9 +150,9 @@ export default async function Home() {
       {recentSermons.length > 0 && (
         <Section spacing="lg" className="bg-surface">
           <div className="mb-8 flex items-center justify-between">
-            <h2 className="font-serif text-headline-md text-foreground">Recent Sermons</h2>
+            <Trans k="home.recentSermons" as="h2" className="font-serif text-headline-md text-foreground" />
             <Link href="/sermons" className="text-body-sm font-medium text-accent hover:text-accent-hover">
-              Browse all sermons →
+              <Trans k="home.browseAllSermons" /> →
             </Link>
           </div>
           <SermonCarousel sermons={recentSermons} />
@@ -164,9 +165,9 @@ export default async function Home() {
       {upcomingEvents.length > 0 && (
         <Section spacing="lg">
           <div className="mb-8 flex items-center justify-between">
-            <h2 className="font-serif text-headline-md text-foreground">Upcoming Events</h2>
+            <Trans k="home.upcomingEvents" as="h2" className="font-serif text-headline-md text-foreground" />
             <Link href="/events" className="text-body-sm font-medium text-accent hover:text-accent-hover">
-              View all events →
+              <Trans k="events.viewAll" /> →
             </Link>
           </div>
           <UpcomingEventsStrip events={upcomingEvents} />
@@ -179,7 +180,7 @@ export default async function Home() {
       {/* Social proof */}
       {testimonials.length > 0 && (
         <Section spacing="lg">
-          <h2 className="mb-8 text-center font-serif text-headline-md text-foreground">What Our Church Family Says</h2>
+          <Trans k="home.testimonialsHeading" as="h2" className="mb-8 text-center font-serif text-headline-md text-foreground" />
           <SocialProofStrip testimonials={testimonials} />
         </Section>
       )}
@@ -188,9 +189,9 @@ export default async function Home() {
       {latestPosts.length > 0 && (
         <Section spacing="lg">
           <div className="mb-8 flex items-center justify-between">
-            <h2 className="font-serif text-headline-md text-foreground">From the Blog</h2>
+            <Trans k="home.fromBlog" as="h2" className="font-serif text-headline-md text-foreground" />
             <Link href="/blog" className="text-body-sm font-medium text-accent hover:text-accent-hover">
-              Read more →
+              <Trans k="common.readMore" /> →
             </Link>
           </div>
           <BlogHighlights posts={latestPosts} />
@@ -201,9 +202,9 @@ export default async function Home() {
       {galleryPreview.length > 0 && (
         <Section spacing="lg" className="bg-surface">
           <div className="mb-8 flex items-center justify-between">
-            <h2 className="font-serif text-headline-md text-foreground">Gallery</h2>
+            <Trans k="home.galleryHeading" as="h2" className="font-serif text-headline-md text-foreground" />
             <Link href="/gallery" className="text-body-sm font-medium text-accent hover:text-accent-hover">
-              View gallery →
+              <Trans k="home.viewGallery" /> →
             </Link>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-6">
@@ -220,12 +221,10 @@ export default async function Home() {
       <Section spacing="md" className="bg-warm text-warm-foreground">
         <div className="mx-auto max-w-2xl text-center">
           <Sparkles className="mx-auto mb-4 h-8 w-8 opacity-90" aria-hidden="true" />
-          <h2 className="font-serif text-headline-md">Need Prayer?</h2>
-          <p className="mt-3 text-body-md opacity-90">
-            Our community would be honored to pray with and for you. Share your request — as public or private as you'd like.
-          </p>
+          <Trans k="home.needPrayerHeading" as="h2" className="font-serif text-headline-md" />
+          <Trans k="home.needPrayerBody" as="p" className="mt-3 text-body-md opacity-90" />
           <LinkButton href="/prayer" variant="secondary" size="lg" className="mt-6">
-            Submit a Prayer Request
+            <Trans k="home.submitPrayerRequest" />
           </LinkButton>
         </div>
       </Section>
@@ -249,8 +248,8 @@ export default async function Home() {
             </div>
 
             <div className="mt-8 rounded-xl border border-border bg-surface p-6">
-              <h3 className="mb-1 text-title-sm text-foreground">Stay in the loop</h3>
-              <p className="mb-4 text-body-sm text-foreground-muted">Announcements and updates, straight to your inbox.</p>
+              <Trans k="home.stayInLoop" as="h3" className="mb-1 text-title-sm text-foreground" />
+              <Trans k="home.newsletterBlurb" as="p" className="mb-4 text-body-sm text-foreground-muted" />
               <NewsletterSignupLight />
             </div>
           </div>

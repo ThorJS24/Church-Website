@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { MapPin, Phone, Mail, Clock, Send, User, MessageSquare, Calendar, Navigation, ChevronRight, ChevronLeft, Heart, Building, Video, Globe, Timer, UserCheck } from 'lucide-react';
 import { getSiteSettings, getStaffMembers, SiteSettings, StaffMember } from '@/lib/content';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { PageHero } from '@/components/ui/page-hero';
 import { Section } from '@/components/ui/section';
 import { Container } from '@/components/ui/container';
@@ -20,10 +21,10 @@ import { LoadingState } from '@/components/ui/states';
 import { cn } from '@/lib/utils';
 
 const categories = [
-  { id: 'spiritual', name: 'Spiritual & Community Life', icon: Heart },
-  { id: 'administrative', name: 'Administrative & Facility', icon: Building },
-  { id: 'media', name: 'Media & Communication', icon: Video },
-  { id: 'outreach', name: 'Outreach & Missions', icon: Globe },
+  { id: 'spiritual', nameKey: 'contact.category.spiritual', icon: Heart },
+  { id: 'administrative', nameKey: 'contact.category.administrative', icon: Building },
+  { id: 'media', nameKey: 'contact.category.media', icon: Video },
+  { id: 'outreach', nameKey: 'contact.category.outreach', icon: Globe },
 ];
 
 const RESPONSE_TIME: Record<string, string> = {
@@ -34,10 +35,10 @@ const RESPONSE_TIME: Record<string, string> = {
 };
 
 const CONTACT_FAQ = [
-  { id: 'response-time', q: 'How quickly will I hear back?', a: 'It depends on the type of request — typically 1-5 business days. Prayer requests marked urgent or emergency are prioritized and answered as soon as possible.' },
-  { id: 'who-responds', q: 'Who will respond to my message?', a: 'Your message is routed based on the category you select, so it reaches the staff member or ministry team best equipped to help.' },
-  { id: 'urgent', q: 'What if my need is urgent?', a: 'For a pastoral emergency, please call the church office directly rather than submitting the form — phone reaches us faster than email.' },
-  { id: 'visit', q: 'Can I just stop by instead of submitting a form?', a: 'Absolutely — our office hours are listed on this page. You\'re always welcome to visit or call directly.' },
+  { id: 'response-time', qKey: 'contact.faq.responseTime.q', aKey: 'contact.faq.responseTime.a' },
+  { id: 'who-responds', qKey: 'contact.faq.whoResponds.q', aKey: 'contact.faq.whoResponds.a' },
+  { id: 'urgent', qKey: 'contact.faq.urgent.q', aKey: 'contact.faq.urgent.a' },
+  { id: 'visit', qKey: 'contact.faq.visit.q', aKey: 'contact.faq.visit.a' },
 ];
 
 const formTypes: Record<string, { id: string; name: string }[]> = {
@@ -86,6 +87,8 @@ export default function ContactPage() {
   const [formData, setFormData] = useState(INITIAL_FORM);
   const [loading, setLoading] = useState(true);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const { t, language } = useLanguage();
+  const tamilFont = language === 'ta' ? 'font-tamil' : '';
 
   useEffect(() => {
     async function fetchData() {
@@ -133,22 +136,22 @@ export default function ContactPage() {
   const canProceedStep1 = formData.firstName && formData.lastName && formData.email;
   const canProceedStep2 = formData.category && formData.formType;
 
-  if (loading) return <LoadingState label="Loading contact information..." />;
+  if (loading) return <LoadingState label={t('contact.loading')} />;
 
   const contactInfo = [
-    { icon: MapPin, title: 'Address', details: [siteSettings?.address || 'Address not available'] },
-    { icon: Phone, title: 'Phone', details: [siteSettings?.phoneNumber || 'Phone not available'] },
-    { icon: Mail, title: 'Email', details: [siteSettings?.email || 'Email not available'] },
-    { icon: Clock, title: 'Office Hours', details: officeHours.length > 0 ? officeHours : ['Contact us for availability'] },
+    { icon: MapPin, title: t('contact.addressLabel'), details: [siteSettings?.address || t('contact.addressUnavailable')] },
+    { icon: Phone, title: t('contact.phoneLabel'), details: [siteSettings?.phoneNumber || t('contact.phoneUnavailable')] },
+    { icon: Mail, title: t('contact.emailLabel'), details: [siteSettings?.email || t('contact.emailUnavailable')] },
+    { icon: Clock, title: t('contact.officeHoursLabel'), details: officeHours.length > 0 ? officeHours : [t('contact.officeHoursUnavailable')] },
   ];
 
   return (
     <div>
       <PageHero
         icon={<MessageSquare />}
-        eyebrow="Get In Touch"
-        title="Contact Us"
-        description="We'd love to hear from you. Get in touch with our church family."
+        eyebrow={t('contact.eyebrow')}
+        title={t('contact.title')}
+        description={t('contact.description')}
       />
 
       <Section spacing="lg">
@@ -156,7 +159,7 @@ export default function ContactPage() {
           {/* Contact form */}
           <motion.div initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4 }}>
             <Card variant="raised" padding="lg">
-              <h2 className="text-headline-sm text-foreground">Send us a Message</h2>
+              <h2 className={cn('text-headline-sm text-foreground', tamilFont)}>{t('contact.sendMessage')}</h2>
 
               <div className="my-6">
                 <div className="relative mb-3 flex items-center justify-between">
@@ -177,8 +180,8 @@ export default function ContactPage() {
                     </div>
                   ))}
                 </div>
-                <p className="text-caption text-foreground-subtle">
-                  Step {currentStep} of 3: {currentStep === 1 ? 'Personal Information' : currentStep === 2 ? 'Category Selection' : 'Details & Message'}
+                <p className={cn('text-caption text-foreground-subtle', tamilFont)}>
+                  {t('contact.stepOf').replace('{n}', String(currentStep))} {currentStep === 1 ? t('contact.stepPersonal') : currentStep === 2 ? t('contact.stepCategory') : t('contact.stepDetails')}
                 </p>
               </div>
 
@@ -186,12 +189,12 @@ export default function ContactPage() {
                 {currentStep === 1 && (
                   <motion.div initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} className="space-y-5">
                     <Grid cols={2} gap={4}>
-                      <Input label="First Name" required value={formData.firstName} onChange={(e) => setFormData({ ...formData, firstName: e.target.value })} />
-                      <Input label="Last Name" required value={formData.lastName} onChange={(e) => setFormData({ ...formData, lastName: e.target.value })} />
+                      <Input label={t('form.firstName')} required value={formData.firstName} onChange={(e) => setFormData({ ...formData, firstName: e.target.value })} />
+                      <Input label={t('form.lastName')} required value={formData.lastName} onChange={(e) => setFormData({ ...formData, lastName: e.target.value })} />
                     </Grid>
                     <Grid cols={2} gap={4}>
-                      <Input label="Email" type="email" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
-                      <Input label="Phone Number" type="tel" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
+                      <Input label={t('form.email')} type="email" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
+                      <Input label={t('form.phone')} type="tel" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
                     </Grid>
                     <Input label="Address" placeholder="Street address" value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} />
                     <Grid cols={3} gap={4}>
@@ -236,7 +239,7 @@ export default function ContactPage() {
                 {currentStep === 2 && (
                   <motion.div initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} className="space-y-5">
                     <div>
-                      <p className="mb-3 text-label text-foreground">Category *</p>
+                      <p className={cn('mb-3 text-label text-foreground', tamilFont)}>{t('contact.category')} *</p>
                       <div className="grid grid-cols-2 gap-3">
                         {categories.map((category) => (
                           <button
@@ -249,7 +252,7 @@ export default function ContactPage() {
                             )}
                           >
                             <category.icon className="mb-2 h-5 w-5 text-accent" />
-                            <p className="text-body-sm font-semibold text-foreground">{category.name}</p>
+                            <p className={cn('text-body-sm font-semibold text-foreground', tamilFont)}>{t(category.nameKey)}</p>
                           </button>
                         ))}
                       </div>
@@ -258,22 +261,22 @@ export default function ContactPage() {
                     {formData.category && (
                       <>
                         <Select
-                          label="Specific Request"
+                          label={t('contact.specificRequest')}
                           required
-                          placeholder="Select request type"
+                          placeholder={t('contact.selectRequestType')}
                           value={formData.formType}
                           onChange={(e) => setFormData({ ...formData, formType: e.target.value })}
-                          options={formTypes[formData.category]?.map((t) => ({ value: t.id, label: t.name })) ?? []}
+                          options={formTypes[formData.category]?.map((ft) => ({ value: ft.id, label: ft.name })) ?? []}
                         />
                         <div className="space-y-2 rounded-lg bg-surface p-4">
-                          <p className="flex items-center gap-2 text-body-sm text-foreground-muted">
-                            <Timer className="h-4 w-4 text-accent shrink-0" /> Expected response time: <strong className="text-foreground">{RESPONSE_TIME[formData.category]}</strong>
+                          <p className={cn('flex items-center gap-2 text-body-sm text-foreground-muted', tamilFont)}>
+                            <Timer className="h-4 w-4 text-accent shrink-0" /> {t('contact.expectedResponseTime')} <strong className="text-foreground">{RESPONSE_TIME[formData.category]}</strong>
                           </p>
                           {(() => {
                             const routedStaff = staff.find((s) => s.handlesCategory === formData.category);
                             return routedStaff ? (
-                              <p className="flex items-center gap-2 text-body-sm text-foreground-muted">
-                                <UserCheck className="h-4 w-4 text-accent shrink-0" /> This will be routed to <strong className="text-foreground">{routedStaff.name}</strong> ({routedStaff.position})
+                              <p className={cn('flex items-center gap-2 text-body-sm text-foreground-muted', tamilFont)}>
+                                <UserCheck className="h-4 w-4 text-accent shrink-0" /> {t('contact.routedTo')} <strong className="text-foreground">{routedStaff.name}</strong> ({routedStaff.position})
                               </p>
                             ) : null;
                           })()}
@@ -381,35 +384,35 @@ export default function ContactPage() {
 
                 <div className="flex justify-between pt-2">
                   {currentStep > 1 && (
-                    <Button type="button" variant="outline" leftIcon={<ChevronLeft className="h-4 w-4" />} onClick={prevStep}>
-                      Previous
+                    <Button type="button" variant="outline" className={tamilFont} leftIcon={<ChevronLeft className="h-4 w-4" />} onClick={prevStep}>
+                      {t('contact.previous')}
                     </Button>
                   )}
                   {currentStep < 3 ? (
                     <Button
                       type="button"
-                      className="ml-auto"
+                      className={cn('ml-auto', tamilFont)}
                       rightIcon={<ChevronRight className="h-4 w-4" />}
                       disabled={(currentStep === 1 && !canProceedStep1) || (currentStep === 2 && !canProceedStep2)}
                       onClick={nextStep}
                     >
-                      Next
+                      {t('contact.next')}
                     </Button>
                   ) : (
-                    <Button type="submit" className="ml-auto" leftIcon={<Send className="h-4 w-4" />}>
-                      Send Message
+                    <Button type="submit" className={cn('ml-auto', tamilFont)} leftIcon={<Send className="h-4 w-4" />}>
+                      {t('contact.sendMessageBtn')}
                     </Button>
                   )}
                 </div>
 
                 {submitStatus === 'success' && (
-                  <div className="rounded-lg border border-success/30 bg-success-subtle p-4 text-body-sm text-success">
-                    Thank you for your message! We&apos;ll get back to you soon.
+                  <div className={cn('rounded-lg border border-success/30 bg-success-subtle p-4 text-body-sm text-success', tamilFont)}>
+                    {t('contact.submitSuccess')}
                   </div>
                 )}
                 {submitStatus === 'error' && (
-                  <div className="rounded-lg border border-danger/30 bg-danger-subtle p-4 text-body-sm text-danger">
-                    Something went wrong sending your message. Please try again, or reach us directly using the contact details on this page.
+                  <div className={cn('rounded-lg border border-danger/30 bg-danger-subtle p-4 text-body-sm text-danger', tamilFont)}>
+                    {t('contact.submitError')}
                   </div>
                 )}
               </form>
@@ -419,9 +422,9 @@ export default function ContactPage() {
           {/* Contact info */}
           <motion.div initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4, delay: 0.1 }} className="space-y-8">
             <div>
-              <h2 className="text-headline-sm text-foreground">Get in Touch</h2>
-              <p className="mt-3 text-body-md text-foreground-muted">
-                Whether you&apos;re looking for information about our services, want to get involved, or need prayer, we&apos;re here for you. Don&apos;t hesitate to reach out!
+              <h2 className={cn('text-headline-sm text-foreground', tamilFont)}>{t('contact.getInTouch')}</h2>
+              <p className={cn('mt-3 text-body-md text-foreground-muted', tamilFont)}>
+                {t('contact.getInTouchBody')}
               </p>
             </div>
 
@@ -432,7 +435,7 @@ export default function ContactPage() {
                     <info.icon className="h-5 w-5 text-accent" />
                   </div>
                   <div>
-                    <h3 className="text-title-sm text-foreground">{info.title}</h3>
+                    <h3 className={cn('text-title-sm text-foreground', tamilFont)}>{info.title}</h3>
                     {info.details.map((detail, idx) => (
                       <p key={idx} className="text-body-sm text-foreground-muted">{detail}</p>
                     ))}
@@ -442,45 +445,45 @@ export default function ContactPage() {
             </div>
 
             <Card>
-              <h3 className="mb-4 text-title-sm text-foreground">Quick Actions</h3>
+              <h3 className={cn('mb-4 text-title-sm text-foreground', tamilFont)}>{t('contact.quickActions')}</h3>
               <div className="space-y-2">
                 <button
                   onClick={() => {
                     setCurrentStep(2);
                     setFormData({ ...formData, category: 'spiritual', formType: 'counseling' });
                   }}
-                  className="flex w-full items-center gap-3 rounded-lg bg-surface p-3 text-left text-body-sm text-foreground transition-colors hover:bg-surface-hover"
+                  className={cn('flex w-full items-center gap-3 rounded-lg bg-surface p-3 text-left text-body-sm text-foreground transition-colors hover:bg-surface-hover', tamilFont)}
                 >
-                  <Calendar className="h-4 w-4 text-accent" /> Schedule a Meeting
+                  <Calendar className="h-4 w-4 text-accent" /> {t('contact.scheduleMeeting')}
                 </button>
                 <button
                   onClick={() => {
                     setCurrentStep(2);
                     setFormData({ ...formData, category: 'spiritual', formType: 'prayer' });
                   }}
-                  className="flex w-full items-center gap-3 rounded-lg bg-surface p-3 text-left text-body-sm text-foreground transition-colors hover:bg-surface-hover"
+                  className={cn('flex w-full items-center gap-3 rounded-lg bg-surface p-3 text-left text-body-sm text-foreground transition-colors hover:bg-surface-hover', tamilFont)}
                 >
-                  <MessageSquare className="h-4 w-4 text-accent" /> Submit Prayer Request
+                  <MessageSquare className="h-4 w-4 text-accent" /> {t('contact.submitPrayerRequest')}
                 </button>
                 <a
                   href="https://www.google.com/maps/dir//SALEM+PRIMITIVE+BAPTIST+CHURCH,+Salem,+Tamil+Nadu/@11.678130577350974,78.16560039927737,17z/data=!4m8!4m7!1m0!1m5!1m1!1s0x3babf16da41b56e5:0x30049390bc14cac1!2m2!1d78.16560039927737!2d11.678130577350974"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex w-full items-center gap-3 rounded-lg bg-surface p-3 text-body-sm text-foreground transition-colors hover:bg-surface-hover"
+                  className={cn('flex w-full items-center gap-3 rounded-lg bg-surface p-3 text-body-sm text-foreground transition-colors hover:bg-surface-hover', tamilFont)}
                 >
-                  <Navigation className="h-4 w-4 text-accent" /> Get Directions
+                  <Navigation className="h-4 w-4 text-accent" /> {t('contact.getDirections')}
                 </a>
                 {siteSettings?.whatsappGroupUrl && (
                   <a
                     href={siteSettings.whatsappGroupUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex w-full items-center gap-3 rounded-lg bg-surface p-3 text-body-sm text-foreground transition-colors hover:bg-surface-hover"
+                    className={cn('flex w-full items-center gap-3 rounded-lg bg-surface p-3 text-body-sm text-foreground transition-colors hover:bg-surface-hover', tamilFont)}
                   >
                     <svg className="h-4 w-4 text-success" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893A11.821 11.821 0 0020.465 3.488" />
                     </svg>
-                    Join WhatsApp Group
+                    {t('contact.joinWhatsApp')}
                   </a>
                 )}
               </div>
@@ -492,8 +495,8 @@ export default function ContactPage() {
       {staff.length > 0 && (
         <Section spacing="lg" className="bg-surface">
           <div className="mb-10 text-center">
-            <h2 className="text-headline-md text-foreground">Our Staff</h2>
-            <p className="mt-2 text-body-md text-foreground-muted">Meet our dedicated team who are here to serve you</p>
+            <h2 className={cn('text-headline-md text-foreground', tamilFont)}>{t('contact.ourStaff')}</h2>
+            <p className={cn('mt-2 text-body-md text-foreground-muted', tamilFont)}>{t('contact.ourStaffSubtitle')}</p>
           </div>
           <Grid cols={4} gap={6}>
             {staff.map((member, index) => (
@@ -530,13 +533,13 @@ export default function ContactPage() {
       <Section spacing="lg" className="bg-surface">
         <Container size="sm">
           <div className="mb-8 text-center">
-            <h2 className="text-headline-md text-foreground">Contact FAQ</h2>
+            <h2 className={cn('text-headline-md text-foreground', tamilFont)}>{t('contact.faqHeading')}</h2>
           </div>
           <Card variant="raised" padding="lg">
             <Accordion type="single">
               {CONTACT_FAQ.map((item) => (
-                <AccordionItem key={item.id} id={item.id} title={item.q}>
-                  {item.a}
+                <AccordionItem key={item.id} id={item.id} title={t(item.qKey)}>
+                  {t(item.aKey)}
                 </AccordionItem>
               ))}
             </Accordion>
@@ -546,8 +549,8 @@ export default function ContactPage() {
 
       <Section spacing="lg">
         <div className="mb-10 text-center">
-          <h2 className="text-headline-md text-foreground">Find Us</h2>
-          <p className="mt-2 text-body-md text-foreground-muted">Visit us at our location</p>
+          <h2 className={cn('text-headline-md text-foreground', tamilFont)}>{t('contact.findUs')}</h2>
+          <p className={cn('mt-2 text-body-md text-foreground-muted', tamilFont)}>{t('contact.findUsSubtitle')}</p>
         </div>
         <div className="h-96 overflow-hidden rounded-xl border border-border">
           <iframe

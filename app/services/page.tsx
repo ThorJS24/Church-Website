@@ -4,6 +4,8 @@ import { useState, useEffect, lazy, Suspense } from 'react';
 import { motion } from 'motion/react';
 import { Sun, Moon, BookOpen, Clock, MapPin, Calendar, Video, Coffee, Baby, Users, Bell, Heart, Radio, Accessibility } from 'lucide-react';
 import { getPageContent, getServiceTimes, getSiteSettings, getLivestream } from '@/lib/content';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { cn } from '@/lib/utils';
 import { PageHero } from '@/components/ui/page-hero';
 import { Section } from '@/components/ui/section';
 import { SectionNav } from '@/components/ui/section-nav';
@@ -75,6 +77,8 @@ export default function ServicesPage() {
   const [loading, setLoading] = useState(true);
   const [showLiveStream, setShowLiveStream] = useState(false);
   const [hasLiveStream, setHasLiveStream] = useState(false);
+  const { t, language } = useLanguage();
+  const tamilFont = language === 'ta' ? 'font-tamil' : '';
 
   useEffect(() => {
     async function fetchData() {
@@ -98,14 +102,14 @@ export default function ServicesPage() {
     fetchData();
   }, []);
 
-  if (loading) return <LoadingState label="Loading services..." />;
+  if (loading) return <LoadingState label={t('services.loading')} />;
 
   if (!servicesPage) {
     return (
       <EmptyState
         icon={Clock}
-        title="Services page content not found"
-        description="Please add content through the admin panel"
+        title={t('services.notFoundTitle')}
+        description={t('services.notFoundDescription')}
       />
     );
   }
@@ -114,27 +118,27 @@ export default function ServicesPage() {
     <div>
       <PageHero
         icon={<Clock />}
-        eyebrow="Worship With Us"
+        eyebrow={t('services.eyebrow')}
         title={servicesPage.title}
         description={servicesPage.subtitle}
         actions={
           hasLiveStream ? (
-            <Button variant="danger" leftIcon={<Radio className="h-4 w-4 animate-pulse" />} onClick={() => setShowLiveStream(true)}>
-              Watch Live Stream
+            <Button variant="danger" leftIcon={<Radio className="h-4 w-4 animate-pulse" />} onClick={() => setShowLiveStream(true)} className={tamilFont}>
+              {t('liveStream.watchButton')}
             </Button>
           ) : (
-            <Badge variant="neutral"><Radio className="h-4 w-4" /> No Live Stream Currently</Badge>
+            <Badge variant="neutral" className={tamilFont}><Radio className="h-4 w-4" /> {t('liveStream.noneCurrently')}</Badge>
           )
         }
       />
 
       <SectionNav
         items={[
-          ...(services.length > 0 ? [{ id: 'service-times', label: 'Service Times' }] : []),
-          ...(servicesPage.whatToExpect?.length > 0 ? [{ id: 'what-to-expect', label: 'What to Expect' }] : []),
-          ...(servicesPage.specialEvents?.length > 0 ? [{ id: 'special-events', label: 'Special Events' }] : []),
-          { id: 'online-services', label: 'Online Services' },
-          { id: 'plan-your-visit', label: 'Plan Your Visit' },
+          ...(services.length > 0 ? [{ id: 'service-times', label: t('services.nav.serviceTimes') }] : []),
+          ...(servicesPage.whatToExpect?.length > 0 ? [{ id: 'what-to-expect', label: t('services.nav.whatToExpect') }] : []),
+          ...(servicesPage.specialEvents?.length > 0 ? [{ id: 'special-events', label: t('services.nav.specialEvents') }] : []),
+          { id: 'online-services', label: t('services.nav.onlineServices') },
+          { id: 'plan-your-visit', label: t('services.nav.planYourVisit') },
         ]}
       />
 
@@ -167,8 +171,8 @@ export default function ServicesPage() {
                         {service.accessibilityInfo}
                       </p>
                     )}
-                    <Button variant="secondary" className="mt-5" leftIcon={<Calendar className="h-4 w-4" />} onClick={() => addServiceToCalendar(service)}>
-                      Add to Calendar
+                    <Button variant="secondary" className={cn('mt-5', tamilFont)} leftIcon={<Calendar className="h-4 w-4" />} onClick={() => addServiceToCalendar(service)}>
+                      {t('services.addToCalendar')}
                     </Button>
                   </Card>
                 </motion.div>
@@ -182,7 +186,7 @@ export default function ServicesPage() {
         <Section id="what-to-expect" spacing="lg" className="bg-surface">
           <div className="mb-10 text-center">
             <h2 className="text-headline-md text-foreground">{servicesPage.whatToExpectSectionTitle}</h2>
-            <p className="mt-2 text-body-md text-foreground-muted">Your first visit made easy — here&apos;s what you can expect when you join us</p>
+            <p className={cn('mt-2 text-body-md text-foreground-muted', tamilFont)}>{t('services.whatToExpectSubtitle')}</p>
           </div>
           <Grid cols={3} gap={6}>
             {servicesPage.whatToExpect.map((item, index) => {
@@ -210,7 +214,7 @@ export default function ServicesPage() {
         <Section id="special-events" spacing="lg">
           <div className="mb-10 text-center">
             <h2 className="text-headline-md text-foreground">{servicesPage.specialEventsSectionTitle}</h2>
-            <p className="mt-2 text-body-md text-foreground-muted">Join us for these special worship experiences throughout the year</p>
+            <p className={cn('mt-2 text-body-md text-foreground-muted', tamilFont)}>{t('services.specialEventsSubtitle')}</p>
           </div>
           <Grid cols={4} gap={6}>
             {servicesPage.specialEvents.map((event, index) => (
@@ -238,28 +242,29 @@ export default function ServicesPage() {
             <h2 className="text-headline-md text-foreground">{servicesPage.onlineServicesTitle}</h2>
             <p className="mt-4 text-body-md text-foreground-muted">{servicesPage.onlineServicesDescription}</p>
             <div className="mt-6 flex flex-wrap gap-3">
-              <Button leftIcon={<Video className="h-4 w-4" />} onClick={() => siteSettings?.youtubeChannelUrl && window.open(siteSettings.youtubeChannelUrl, '_blank')}>
-                Watch on YouTube
+              <Button className={tamilFont} leftIcon={<Video className="h-4 w-4" />} onClick={() => siteSettings?.youtubeChannelUrl && window.open(siteSettings.youtubeChannelUrl, '_blank')}>
+                {t('services.watchOnYouTube')}
               </Button>
               {siteSettings?.zoomMeetingUrl && (
-                <Button variant="secondary" leftIcon={<Video className="h-4 w-4" />} onClick={() => window.open(siteSettings.zoomMeetingUrl, '_blank')}>
-                  Join via Zoom
+                <Button variant="secondary" className={tamilFont} leftIcon={<Video className="h-4 w-4" />} onClick={() => window.open(siteSettings.zoomMeetingUrl, '_blank')}>
+                  {t('services.joinViaZoom')}
                 </Button>
               )}
               <Button
                 variant="outline"
+                className={tamilFont}
                 leftIcon={<Bell className="h-4 w-4" />}
                 onClick={() => siteSettings?.youtubeChannelUrl && window.open(`${siteSettings.youtubeChannelUrl}?sub_confirmation=1`, '_blank')}
               >
-                Get Notifications
+                {t('services.getNotifications')}
               </Button>
             </div>
           </div>
           <Card variant="raised" padding="lg" className="text-center">
             <Video className="mx-auto mb-4 h-12 w-12 text-accent" aria-hidden="true" />
-            <p className="text-title-lg text-foreground">Live Stream Available</p>
-            <p className="mt-1 text-body-sm text-foreground-muted">
-              {services.length > 0 ? `Next service: ${services[0]?.time}` : 'Check schedule for times'}
+            <p className={cn('text-title-lg text-foreground', tamilFont)}>{t('services.liveStreamAvailable')}</p>
+            <p className={cn('mt-1 text-body-sm text-foreground-muted', tamilFont)}>
+              {services.length > 0 ? `${t('services.nextService')} ${services[0]?.time}` : t('services.checkScheduleForTimes')}
             </p>
           </Card>
         </Grid>
@@ -286,13 +291,13 @@ export default function ServicesPage() {
             </Grid>
           )}
           <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
-            <LinkButton href="/contact" variant="secondary" size="lg">
-              Contact Us
+            <LinkButton href="/contact" variant="secondary" size="lg" className={tamilFont}>
+              {t('services.contactUs')}
             </LinkButton>
             <Button
               variant="outline"
               size="lg"
-              className="border-white/40 text-accent-foreground hover:bg-white/10"
+              className={cn('border-white/40 text-accent-foreground hover:bg-white/10', tamilFont)}
               leftIcon={<MapPin className="h-4 w-4" />}
               onClick={() => {
                 if (siteSettings?.googleMapsUrl) {
@@ -309,13 +314,13 @@ export default function ServicesPage() {
                 }
               }}
             >
-              Get Directions
+              {t('services.getDirections')}
             </Button>
           </div>
         </div>
       </Section>
 
-      <Modal isOpen={showLiveStream} onClose={() => setShowLiveStream(false)} title="Live Stream" size="xl">
+      <Modal isOpen={showLiveStream} onClose={() => setShowLiveStream(false)} title={t('home.liveStream')} size="xl">
         <Suspense fallback={<LoadingState label="Loading stream..." />}>
           <DynamicLiveStream />
         </Suspense>

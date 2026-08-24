@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Plus, Heart, Users, Sparkles, HandHeart, CheckCircle2, Archive } from 'lucide-react';
 import { getIdToken } from '@/lib/firebase';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { PageHero } from '@/components/ui/page-hero';
 import { Section } from '@/components/ui/section';
 import { Container } from '@/components/ui/container';
@@ -21,6 +22,13 @@ import { useToast } from '@/lib/toast';
 import { cn } from '@/lib/utils';
 
 const CATEGORIES = ['all', 'healing', 'guidance', 'thanksgiving', 'family', 'work'];
+const CATEGORY_KEYS: Record<string, string> = {
+  healing: 'prayer.category.healing',
+  guidance: 'prayer.category.guidance',
+  thanksgiving: 'prayer.category.thanksgiving',
+  family: 'prayer.category.family',
+  work: 'prayer.category.work',
+};
 
 interface PrayerRequest {
   id: string;
@@ -55,6 +63,8 @@ export default function PrayerPage() {
   });
   const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
+  const { t, language } = useLanguage();
+  const tamilFont = language === 'ta' ? 'font-tamil' : '';
 
   useEffect(() => {
     fetch('/api/prayer')
@@ -142,25 +152,25 @@ export default function PrayerPage() {
     <div>
       <PageHero
         icon={<Sparkles />}
-        eyebrow="Prayer Wall"
-        title="Prayer Requests"
-        description="Share your prayer needs and join us in lifting each other up"
-        actions={<Button leftIcon={<Plus className="h-4 w-4" />} onClick={() => setShowModal(true)}>Submit Prayer Request</Button>}
+        eyebrow={t('prayer.eyebrow')}
+        title={t('prayer.title')}
+        description={t('prayer.description')}
+        actions={<Button className={tamilFont} leftIcon={<Plus className="h-4 w-4" />} onClick={() => setShowModal(true)}>{t('prayer.submitRequest')}</Button>}
       />
 
       <div className="border-b border-border bg-background py-6">
         <div className="mx-auto mb-4 flex max-w-7xl justify-center gap-2 px-4">
           <button
             onClick={() => setView('wall')}
-            className={cn('flex items-center gap-1.5 rounded-full px-5 py-2 text-body-sm font-medium transition-colors', view === 'wall' ? 'bg-warm text-warm-foreground' : 'bg-surface-active text-foreground-muted hover:bg-surface-hover')}
+            className={cn('flex items-center gap-1.5 rounded-full px-5 py-2 text-body-sm font-medium transition-colors', view === 'wall' ? 'bg-warm text-warm-foreground' : 'bg-surface-active text-foreground-muted hover:bg-surface-hover', tamilFont)}
           >
-            <HandHeart className="h-4 w-4" /> Prayer Wall
+            <HandHeart className="h-4 w-4" /> {t('prayer.wallTab')}
           </button>
           <button
             onClick={() => setView('answered')}
-            className={cn('flex items-center gap-1.5 rounded-full px-5 py-2 text-body-sm font-medium transition-colors', view === 'answered' ? 'bg-warm text-warm-foreground' : 'bg-surface-active text-foreground-muted hover:bg-surface-hover')}
+            className={cn('flex items-center gap-1.5 rounded-full px-5 py-2 text-body-sm font-medium transition-colors', view === 'answered' ? 'bg-warm text-warm-foreground' : 'bg-surface-active text-foreground-muted hover:bg-surface-hover', tamilFont)}
           >
-            <Archive className="h-4 w-4" /> Answered Prayers {answeredPrayers.length > 0 && `(${answeredPrayers.length})`}
+            <Archive className="h-4 w-4" /> {t('prayer.answeredTab')} {answeredPrayers.length > 0 && `(${answeredPrayers.length})`}
           </button>
         </div>
         <div className="mx-auto flex max-w-7xl flex-wrap justify-center gap-3 px-4">
@@ -168,11 +178,13 @@ export default function PrayerPage() {
             <button
               key={category}
               onClick={() => setActiveFilter(category)}
-              className={`rounded-full px-5 py-2 text-body-sm font-medium capitalize transition-colors ${
-                activeFilter === category ? 'bg-warm text-warm-foreground' : 'bg-surface-active text-foreground-muted hover:bg-surface-hover'
-              }`}
+              className={cn(
+                'rounded-full px-5 py-2 text-body-sm font-medium capitalize transition-colors',
+                activeFilter === category ? 'bg-warm text-warm-foreground' : 'bg-surface-active text-foreground-muted hover:bg-surface-hover',
+                tamilFont
+              )}
             >
-              {category === 'all' ? 'All Prayers' : category}
+              {category === 'all' ? t('prayer.allPrayers') : t(CATEGORY_KEYS[category])}
             </button>
           ))}
         </div>
@@ -180,17 +192,17 @@ export default function PrayerPage() {
 
       <Section spacing="lg">
         {loading ? (
-          <LoadingState label="Loading prayer requests..." />
+          <LoadingState label={t('prayer.loading')} />
         ) : visiblePrayers.length === 0 ? (
           <Card variant="raised" padding="lg" className="mx-auto max-w-2xl text-center">
             <motion.div animate={{ scale: [1, 1.08, 1] }} transition={{ duration: 3, repeat: Infinity }}>
               <Heart className="mx-auto mb-4 h-12 w-12 text-warm" />
             </motion.div>
-            <h2 className="text-title-lg text-foreground">
-              {view === 'answered' ? 'No answered prayers yet' : 'No prayer requests yet'}
+            <h2 className={cn('text-title-lg text-foreground', tamilFont)}>
+              {view === 'answered' ? t('prayer.noAnsweredYet') : t('prayer.noRequestsYet')}
             </h2>
-            <p className="mt-2 text-body-sm text-foreground-muted">
-              {view === 'answered' ? 'Check back soon to celebrate what God has done.' : 'Submit a prayer request to get started'}
+            <p className={cn('mt-2 text-body-sm text-foreground-muted', tamilFont)}>
+              {view === 'answered' ? t('prayer.checkBackAnswered') : t('prayer.submitToStart')}
             </p>
           </Card>
         ) : (
@@ -201,8 +213,8 @@ export default function PrayerPage() {
                   <Card variant="raised" padding="lg" className="h-full">
                     <div className="flex flex-wrap items-center gap-2">
                       <Badge variant="accent" className="capitalize">{prayer.category}</Badge>
-                      {prayer.status === 'ongoing' && <Badge variant="info">Ongoing</Badge>}
-                      {prayer.status === 'answered' && <Badge variant="success"><CheckCircle2 className="h-3 w-3" /> Answered</Badge>}
+                      {prayer.status === 'ongoing' && <Badge variant="info" className={tamilFont}>{t('prayer.ongoing')}</Badge>}
+                      {prayer.status === 'answered' && <Badge variant="success" className={tamilFont}><CheckCircle2 className="h-3 w-3" /> {t('prayer.answered')}</Badge>}
                     </div>
                     <h3 className="mt-3 text-title-md text-foreground">{prayer.title}</h3>
                     <p className="mt-2 text-body-sm text-foreground-muted">{prayer.description}</p>
@@ -212,7 +224,7 @@ export default function PrayerPage() {
                       </div>
                     )}
                     <div className="mt-4 flex items-center justify-between">
-                      <span className="text-body-sm text-foreground-subtle">— {prayer.isAnonymous ? 'Anonymous' : prayer.authorName}</span>
+                      <span className={cn('text-body-sm text-foreground-subtle', tamilFont)}>— {prayer.isAnonymous ? t('prayer.anonymous') : prayer.authorName}</span>
                       {prayer.status !== 'answered' ? (
                         <motion.button
                           onClick={() => handlePray(prayer.id)}
@@ -222,10 +234,11 @@ export default function PrayerPage() {
                           transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
                           className={cn(
                             'relative flex items-center gap-1.5 rounded-full px-3 py-1.5 text-body-sm font-medium transition-colors',
-                            prayedIds.has(prayer.id) ? 'bg-warm text-warm-foreground' : 'bg-surface-active text-foreground-muted hover:bg-warm-subtle hover:text-warm'
+                            prayedIds.has(prayer.id) ? 'bg-warm text-warm-foreground' : 'bg-surface-active text-foreground-muted hover:bg-warm-subtle hover:text-warm',
+                            tamilFont
                           )}
                         >
-                          <HandHeart className="h-4 w-4" /> {prayedIds.has(prayer.id) ? "I'm Praying" : 'Pray for This'} ({prayer.prayerTally ?? 0})
+                          <HandHeart className="h-4 w-4" /> {prayedIds.has(prayer.id) ? t('prayer.imPraying') : t('prayer.prayForThis')} ({prayer.prayerTally ?? 0})
                           <AnimatePresence>
                             {prayedIds.has(prayer.id) && (
                               <motion.span
@@ -243,8 +256,8 @@ export default function PrayerPage() {
                           </AnimatePresence>
                         </motion.button>
                       ) : (
-                        <span className="flex items-center gap-1.5 text-body-sm text-foreground-subtle">
-                          <HandHeart className="h-4 w-4" /> {prayer.prayerTally ?? 0} prayed
+                        <span className={cn('flex items-center gap-1.5 text-body-sm text-foreground-subtle', tamilFont)}>
+                          <HandHeart className="h-4 w-4" /> {prayer.prayerTally ?? 0} {t('prayer.prayed')}
                         </span>
                       )}
                     </div>
@@ -259,45 +272,45 @@ export default function PrayerPage() {
       <Section spacing="lg" className="bg-warm text-warm-foreground">
         <Grid cols={3} gap={6} className="text-center">
           {[
-            { icon: Heart, value: prayerStats.requests > 0 ? `${prayerStats.requests}+` : '∞', label: 'Prayer Requests' },
-            { icon: Users, value: prayerStats.people > 0 ? `${prayerStats.people}+` : '∞', label: 'People Praying' },
-            { icon: Heart, value: prayerStats.prayers > 0 ? `${prayerStats.prayers}+` : '∞', label: 'Prayers Offered' },
+            { icon: Heart, value: prayerStats.requests > 0 ? `${prayerStats.requests}+` : '∞', labelKey: 'prayer.statRequests' },
+            { icon: Users, value: prayerStats.people > 0 ? `${prayerStats.people}+` : '∞', labelKey: 'prayer.statPeople' },
+            { icon: Heart, value: prayerStats.prayers > 0 ? `${prayerStats.prayers}+` : '∞', labelKey: 'prayer.statPrayers' },
           ].map((stat) => (
-            <div key={stat.label} className="rounded-2xl border border-white/20 bg-white/10 p-6 backdrop-blur-xs">
+            <div key={stat.labelKey} className="rounded-2xl border border-white/20 bg-white/10 p-6 backdrop-blur-xs">
               <stat.icon className="mx-auto mb-4 h-10 w-10 opacity-90" />
               <div className="text-display-sm">{stat.value}</div>
-              <div className="mt-1 text-body-sm">{stat.label}</div>
+              <div className={cn('mt-1 text-body-sm', tamilFont)}>{t(stat.labelKey)}</div>
             </div>
           ))}
         </Grid>
       </Section>
 
-      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Submit Prayer Request">
+      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={t('prayer.modalTitle')}>
         <form onSubmit={handleSubmit} className="space-y-5">
-          <Input label="Prayer Title" required placeholder="Enter a title for your prayer request" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} />
+          <Input label={t('prayer.prayerTitleLabel')} required placeholder={t('prayer.prayerTitlePlaceholder')} value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} />
           <Select
-            label="Category"
+            label={t('contact.category')}
             value={formData.category}
             onChange={(e) => setFormData({ ...formData, category: e.target.value })}
             options={[
-              { value: 'general', label: 'General' },
-              { value: 'healing', label: 'Healing' },
-              { value: 'guidance', label: 'Guidance' },
-              { value: 'thanksgiving', label: 'Thanksgiving' },
-              { value: 'family', label: 'Family' },
-              { value: 'work', label: 'Work' },
+              { value: 'general', label: t('prayer.category.general') },
+              { value: 'healing', label: t('prayer.category.healing') },
+              { value: 'guidance', label: t('prayer.category.guidance') },
+              { value: 'thanksgiving', label: t('prayer.category.thanksgiving') },
+              { value: 'family', label: t('prayer.category.family') },
+              { value: 'work', label: t('prayer.category.work') },
             ]}
           />
-          <Textarea label="Prayer Request" required rows={4} placeholder="Share your prayer request..." value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
+          <Textarea label={t('prayer.requestLabel')} required rows={4} placeholder={t('prayer.requestPlaceholder')} value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
 
           <div className="space-y-3">
-            <Checkbox label="Submit anonymously" checked={formData.isAnonymous} onChange={(e) => setFormData({ ...formData, isAnonymous: e.target.checked })} />
+            <Checkbox label={t('prayer.submitAnonymously')} checked={formData.isAnonymous} onChange={(e) => setFormData({ ...formData, isAnonymous: e.target.checked })} />
             {!formData.isAnonymous && (
-              <Input placeholder="Your name (optional)" value={formData.authorName} onChange={(e) => setFormData({ ...formData, authorName: e.target.value })} />
+              <Input placeholder={t('prayer.yourNameOptional')} value={formData.authorName} onChange={(e) => setFormData({ ...formData, authorName: e.target.value })} />
             )}
-            <Checkbox label="Keep this prayer private (only pastors will see it)" checked={formData.isPrivate} onChange={(e) => setFormData({ ...formData, isPrivate: e.target.checked })} />
+            <Checkbox label={t('prayer.keepPrivate')} checked={formData.isPrivate} onChange={(e) => setFormData({ ...formData, isPrivate: e.target.checked })} />
             <Checkbox
-              label="Request a private follow-up check-in in about a week"
+              label={t('prayer.requestFollowUp')}
               checked={formData.followUpRequested}
               onChange={(e) => setFormData({ ...formData, followUpRequested: e.target.checked })}
             />
@@ -305,7 +318,7 @@ export default function PrayerPage() {
               <Input
                 type="email"
                 required
-                placeholder="Your email for the follow-up"
+                placeholder={t('prayer.emailForFollowUp')}
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               />
@@ -313,21 +326,21 @@ export default function PrayerPage() {
           </div>
 
           <div className="flex gap-3 pt-2">
-            <Button type="button" variant="secondary" fullWidth onClick={() => setShowModal(false)}>Cancel</Button>
-            <Button type="submit" variant="warm" fullWidth loading={submitting}>Submit Prayer</Button>
+            <Button type="button" variant="secondary" fullWidth className={tamilFont} onClick={() => setShowModal(false)}>{t('prayer.cancel')}</Button>
+            <Button type="submit" variant="warm" fullWidth loading={submitting} className={tamilFont}>{t('prayer.submitPrayer')}</Button>
           </div>
         </form>
       </Modal>
 
       <Section spacing="lg" className="bg-warm-subtle">
         <Container size="sm" className="text-center">
-          <h2 className="text-headline-md text-foreground">The Power of Prayer</h2>
-          <blockquote className="mx-auto mt-6 max-w-2xl text-body-lg italic text-foreground">
-            &quot;Therefore I tell you, whatever you ask for in prayer, believe that you have received it, and it will be yours.&quot;
+          <h2 className={cn('text-headline-md text-foreground', tamilFont)}>{t('prayer.powerOfPrayer')}</h2>
+          <blockquote className={cn('mx-auto mt-6 max-w-2xl text-body-lg italic text-foreground', tamilFont)}>
+            {t('prayer.verseQuote')}
           </blockquote>
-          <cite className="mt-3 block text-body-sm font-semibold text-warm">Mark 11:24</cite>
-          <p className="mx-auto mt-6 max-w-2xl text-body-md leading-relaxed text-foreground-muted">
-            We believe in the power of prayer and the strength that comes from praying together as a community. Your prayers matter, and we are honored to lift each other up before God.
+          <cite className={cn('mt-3 block text-body-sm font-semibold text-warm', tamilFont)}>{t('prayer.verseCitation')}</cite>
+          <p className={cn('mx-auto mt-6 max-w-2xl text-body-md leading-relaxed text-foreground-muted', tamilFont)}>
+            {t('prayer.powerBody')}
           </p>
         </Container>
       </Section>

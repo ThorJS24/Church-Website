@@ -6,10 +6,13 @@ import { motion } from 'motion/react';
 import { Play } from 'lucide-react';
 import { getLivestream } from '@/lib/content';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Section } from '@/components/ui/section';
 import { Container } from '@/components/ui/container';
 import { Button, LinkButton } from '@/components/ui/button';
 import DynamicLiveStream from '@/components/DynamicLiveStream';
+import { Trans } from '@/components/i18n/Trans';
+import { cn } from '@/lib/utils';
 
 // Hero content is visible on first paint, not scrolled into view, so it
 // animates via `animate` rather than `whileInView` — an IntersectionObserver
@@ -32,6 +35,8 @@ export function HeroSection({ churchName, tagline }: HeroSectionProps) {
   const [isLive, setIsLive] = useState(false);
   const [showLiveStream, setShowLiveStream] = useState(false);
   const { user } = useAuth();
+  const { t, language } = useLanguage();
+  const tamilFont = language === 'ta' ? 'font-tamil' : '';
 
   useEffect(() => {
     // Fetched client-side (rather than server-fetched with the rest of the
@@ -59,10 +64,10 @@ export function HeroSection({ churchName, tagline }: HeroSectionProps) {
             <motion.button
               {...fadeUpImmediate()}
               onClick={() => setShowLiveStream(true)}
-              className="mb-6 inline-flex items-center gap-2 rounded-full border border-danger/40 bg-danger/15 px-3 py-1 text-caption font-medium text-danger-subtle"
+              className={cn('mb-6 inline-flex items-center gap-2 rounded-full border border-danger/40 bg-danger/15 px-3 py-1 text-caption font-medium text-danger-subtle', tamilFont)}
             >
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-danger" />
-              Live now — tap to watch
+              {t('home.liveNowTap')}
             </motion.button>
           )}
           <motion.h1
@@ -78,15 +83,15 @@ export function HeroSection({ churchName, tagline }: HeroSectionProps) {
             {tagline}
           </motion.p>
           <motion.div {...fadeUpImmediate(0.15)} className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <LinkButton href="/services" size="lg">
-              Join Us Sunday 9:30 AM
+            <LinkButton href="/services" size="lg" className={tamilFont}>
+              {t('home.joinSundayCta')}
             </LinkButton>
-            <LinkButton href={user ? '/dashboard' : '/login'} variant="secondary" size="lg">
-              {user ? 'My Dashboard' : 'Sign In'}
+            <LinkButton href={user ? '/dashboard' : '/login'} variant="secondary" size="lg" className={tamilFont}>
+              {user ? t('home.myDashboard') : t('auth.signIn')}
             </LinkButton>
             {isLive && (
-              <Button size="lg" variant="danger" leftIcon={<Play className="h-4 w-4" />} onClick={() => setShowLiveStream(true)}>
-                Watch Live
+              <Button size="lg" variant="danger" leftIcon={<Play className="h-4 w-4" />} onClick={() => setShowLiveStream(true)} className={tamilFont}>
+                {t('home.watchLive')}
               </Button>
             )}
           </motion.div>
@@ -96,9 +101,9 @@ export function HeroSection({ churchName, tagline }: HeroSectionProps) {
       {showLiveStream && (
         <Section spacing="sm" className="bg-surface">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-serif text-headline-sm text-foreground">Live Stream</h2>
-            <button onClick={() => setShowLiveStream(false)} className="text-body-sm text-foreground-muted hover:text-foreground">
-              Close
+            <h2 className={cn('font-serif text-headline-sm text-foreground', tamilFont)}>{t('home.liveStream')}</h2>
+            <button onClick={() => setShowLiveStream(false)} className={cn('text-body-sm text-foreground-muted hover:text-foreground', tamilFont)}>
+              {t('common.close')}
             </button>
           </div>
           <DynamicLiveStream />

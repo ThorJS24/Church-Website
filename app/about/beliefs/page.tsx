@@ -4,10 +4,12 @@ import ScriptureReference from '@/components/ScriptureReference';
 import StatBar from '@/components/StatBar';
 import { PageHero } from '@/components/ui/page-hero';
 import { Section } from '@/components/ui/section';
-import { SectionNav } from '@/components/ui/section-nav';
 import { Card } from '@/components/ui/card';
 import { Grid } from '@/components/ui/grid';
 import { Accordion, AccordionItem } from '@/components/ui/accordion';
+import { Trans } from '@/components/i18n/Trans';
+import { BeliefsSectionNav } from '@/components/about/BeliefsSectionNav';
+import { BeliefsHero } from '@/components/about/BeliefsHero';
 
 // Without this, Next.js would fully prerender this page at build time
 // (it has no dynamic route params, unlike blog/[slug] etc.) and freeze
@@ -36,11 +38,11 @@ interface AboutPage {
   faqs?: Array<{ question: string; answer: string }>;
 }
 
-const DEFAULT_FAQS = [
-  { question: 'What should I expect when visiting for the first time?', answer: 'A warm welcome, congregational singing, prayer, and expository preaching from Scripture. Services typically run about 90 minutes, and there\'s no dress code — come as you are.' },
-  { question: 'Do you baptize infants or only believers?', answer: 'We practice believer\'s baptism by immersion, following a personal profession of faith, in keeping with our Primitive Baptist convictions.' },
-  { question: 'Is there a place for my children during the service?', answer: 'Children are welcome to worship alongside their families. Reach out to a greeter when you arrive and they\'ll point you to any age-appropriate provisions we have that day.' },
-  { question: 'How can I become a member?', answer: 'Membership follows a profession of faith and believer\'s baptism, along with meeting our pastors. Speak with one of our pastors after a service or use the Contact page to start the conversation.' },
+const DEFAULT_FAQ_KEYS = [
+  { questionKey: 'about.faq.visit.q', answerKey: 'about.faq.visit.a' },
+  { questionKey: 'about.faq.baptism.q', answerKey: 'about.faq.baptism.a' },
+  { questionKey: 'about.faq.children.q', answerKey: 'about.faq.children.a' },
+  { questionKey: 'about.faq.membership.q', answerKey: 'about.faq.membership.a' },
 ];
 
 export default async function BeliefsPage() {
@@ -51,24 +53,11 @@ export default async function BeliefsPage() {
 
   return (
     <div>
-      <PageHero
-        icon={<Book />}
-        eyebrow="About Us"
-        title={aboutPage?.title || 'Our Beliefs & About Us'}
-        description={aboutPage?.subtitle || 'Learn about our church family and what we believe'}
-        breadcrumbs={[{ label: 'About', href: '/about' }, { label: 'Beliefs' }]}
-      />
+      <BeliefsHero title={aboutPage?.title} subtitle={aboutPage?.subtitle} />
 
       <StatBar statistics={siteSettings?.statistics} />
 
-      <SectionNav
-        items={[
-          { id: 'mission-vision', label: 'Mission & Vision' },
-          ...(aboutPage?.values && aboutPage.values.length > 0 ? [{ id: 'core-values', label: 'Core Values' }] : []),
-          { id: 'what-we-believe', label: 'What We Believe' },
-          { id: 'faq', label: 'FAQ' },
-        ]}
-      />
+      <BeliefsSectionNav hasCoreValues={!!(aboutPage?.values && aboutPage.values.length > 0)} />
 
       {/* Mission & Vision */}
       <Section id="mission-vision" spacing="lg">
@@ -76,18 +65,18 @@ export default async function BeliefsPage() {
           <div>
             <Card variant="raised" padding="lg" className="h-full text-center">
               <Target className="mx-auto mb-5 h-10 w-10 text-accent" aria-hidden="true" />
-              <h2 className="text-headline-sm text-foreground">Our Mission</h2>
+              <Trans k="about.ourMission" as="h2" className="text-headline-sm text-foreground" />
               <p className="mt-4 text-body-md leading-relaxed text-foreground-muted">
-                {aboutPage?.mission || 'To proclaim the Gospel of Jesus Christ, nurture believers through sound teaching, and build a community grounded in grace, faith, and love.'}
+                {aboutPage?.mission || <Trans k="about.defaultMission" />}
               </p>
             </Card>
           </div>
           <div>
             <Card variant="raised" padding="lg" className="h-full text-center">
               <Eye className="mx-auto mb-5 h-10 w-10 text-accent" aria-hidden="true" />
-              <h2 className="text-headline-sm text-foreground">Our Vision</h2>
+              <Trans k="about.ourVision" as="h2" className="text-headline-sm text-foreground" />
               <p className="mt-4 text-body-md leading-relaxed text-foreground-muted">
-                {aboutPage?.vision || 'To be a Christ-centered church that transforms lives and communities through faith, love, and service — equipping every believer to live with purpose.'}
+                {aboutPage?.vision || <Trans k="about.defaultVision" />}
               </p>
             </Card>
           </div>
@@ -98,7 +87,7 @@ export default async function BeliefsPage() {
       {aboutPage?.values && aboutPage.values.length > 0 && (
         <Section id="core-values" spacing="lg" className="bg-surface">
           <h2 className="mb-10 text-center text-headline-md text-foreground">
-            {aboutPage.valuesSectionTitle || 'Core Values'}
+            {aboutPage.valuesSectionTitle || <Trans k="about.defaultCoreValues" />}
           </h2>
           <Grid cols={3} gap={6}>
             {aboutPage.values.map((value, index) => (
@@ -125,7 +114,7 @@ export default async function BeliefsPage() {
       <Section id="what-we-believe" spacing="lg">
         <div className="mb-10 text-center">
           <Book className="mx-auto mb-4 h-10 w-10 text-accent" aria-hidden="true" />
-          <h2 className="text-headline-md text-foreground">{aboutPage?.beliefsSectionTitle || 'What We Believe'}</h2>
+          <h2 className="text-headline-md text-foreground">{aboutPage?.beliefsSectionTitle || <Trans k="about.defaultWhatWeBelieve" />}</h2>
         </div>
 
         {aboutPage?.beliefs && (
@@ -154,7 +143,7 @@ export default async function BeliefsPage() {
         {aboutPage?.guidingScripture && (
           <div className="mx-auto mt-10 max-w-3xl">
             <Card variant="raised" padding="lg" className="text-center">
-              <h3 className="text-title-lg text-foreground">Guiding Scripture</h3>
+              <Trans k="about.guidingScripture" as="h3" className="text-title-lg text-foreground" />
               <p className="mt-4 text-body-lg italic text-foreground">"{aboutPage.guidingScripture.verse}"</p>
               <p className="mt-3 text-body-sm font-semibold text-accent">— {aboutPage.guidingScripture.reference}</p>
             </Card>
@@ -166,16 +155,24 @@ export default async function BeliefsPage() {
       <Section id="faq" spacing="lg" className="bg-surface">
         <div className="mb-10 text-center">
           <HelpCircle className="mx-auto mb-4 h-10 w-10 text-accent" aria-hidden="true" />
-          <h2 className="text-headline-md text-foreground">Frequently Asked Questions</h2>
+          <Trans k="about.faqHeading" as="h2" className="text-headline-md text-foreground" />
         </div>
         <div className="mx-auto max-w-3xl">
           <Card padding="lg">
             <Accordion>
-              {(aboutPage?.faqs && aboutPage.faqs.length > 0 ? aboutPage.faqs : DEFAULT_FAQS).map((faq, i) => (
-                <AccordionItem key={i} id={`faq-${i}`} title={faq.question}>
-                  {faq.answer}
-                </AccordionItem>
-              ))}
+              {aboutPage?.faqs && aboutPage.faqs.length > 0 ? (
+                aboutPage.faqs.map((faq, i) => (
+                  <AccordionItem key={i} id={`faq-${i}`} title={faq.question}>
+                    {faq.answer}
+                  </AccordionItem>
+                ))
+              ) : (
+                DEFAULT_FAQ_KEYS.map((faq, i) => (
+                  <AccordionItem key={i} id={`faq-${i}`} title={<Trans k={faq.questionKey} />}>
+                    <Trans k={faq.answerKey} />
+                  </AccordionItem>
+                ))
+              )}
             </Accordion>
           </Card>
         </div>
