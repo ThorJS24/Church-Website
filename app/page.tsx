@@ -1,27 +1,18 @@
-'use client';
-
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion } from 'motion/react';
 import {
-  Heart, Mail, MapPin, Phone, Clock, ArrowRight, Play,
-  Church, Sparkles,
+  Heart, Mail, MapPin, Phone, Clock, ArrowRight, Church, Sparkles,
 } from 'lucide-react';
 import {
   getAnnouncements, getSiteSettings, getServiceTimes, getSermons, getEvents,
-  getBlogPosts, getEventGalleries, getLivestream, getTestimonials,
-  Announcement, SiteSettings, ServiceTime, Sermon, EventItem, BlogPost, GalleryPhoto, Livestream, Testimonial,
+  getBlogPosts, getEventGalleries, getTestimonials,
 } from '@/lib/content';
-import { useAuth } from '@/contexts/AuthContext';
 import { Section } from '@/components/ui/section';
 import { Container } from '@/components/ui/container';
 import { Grid } from '@/components/ui/grid';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Button, LinkButton } from '@/components/ui/button';
-import DynamicLiveStream from '@/components/DynamicLiveStream';
+import { LinkButton } from '@/components/ui/button';
 import BibleVerse from '@/components/BibleVerse';
 import NewsletterSignup from '@/components/NewsletterSignup';
 import WelcomeBackBanner from '@/components/home/WelcomeBackBanner';
@@ -32,6 +23,9 @@ import SocialProofStrip from '@/components/home/SocialProofStrip';
 import UpcomingEventsStrip from '@/components/home/UpcomingEventsStrip';
 import BlogHighlights from '@/components/home/BlogHighlights';
 import StatBar from '@/components/StatBar';
+import { HeroSection } from '@/components/home/HeroSection';
+
+export const revalidate = 300;
 
 const quickActions = [
   { href: '/services', icon: Church, title: 'Join Us Sunday', description: 'Worship with us every Sunday at 9:30 AM' },
@@ -40,78 +34,30 @@ const quickActions = [
   { href: '/contact', icon: Mail, title: 'Get In Touch', description: 'Contact us with questions or to learn more' },
 ];
 
-// Hero content is visible on first paint, not scrolled into view, so it
-// animates via `animate` rather than `whileInView` — an IntersectionObserver
-// that never fires (slow mount, blocked API, etc) would otherwise leave the
-// page's most important content stuck invisible with no fallback.
-function fadeUpImmediate(delay = 0) {
-  return {
-    initial: { opacity: 0, y: 16 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.4, delay, ease: [0.4, 0, 0.2, 1] as const },
-  };
-}
+export default async function Home() {
+  const [
+    announcements, siteSettings, services, sermonsData,
+    eventsData, latestPosts, galleriesData, testimonialsData,
+  ] = await Promise.all([
+    getAnnouncements(3),
+    getSiteSettings(),
+    getServiceTimes(),
+    getSermons(10),
+    getEvents(),
+    getBlogPosts(3),
+    getEventGalleries(),
+    getTestimonials(),
+  ]);
 
-export default function Home() {
-  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-  const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
-  const [services, setServices] = useState<ServiceTime[]>([]);
-  const [recentSermons, setRecentSermons] = useState<Sermon[]>([]);
-  const [upcomingEvents, setUpcomingEvents] = useState<EventItem[]>([]);
-  const [latestPosts, setLatestPosts] = useState<BlogPost[]>([]);
-  const [galleryPreview, setGalleryPreview] = useState<GalleryPhoto[]>([]);
-  const [livestream, setLivestream] = useState<Livestream | null>(null);
-  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
-  const [showLiveStream, setShowLiveStream] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const { user } = useAuth();
-
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const [
-          announcementsData, siteSettingsData, servicesData, sermonsData,
-          eventsData, blogData, galleriesData, livestreamData, testimonialsData,
-        ] = await Promise.all([
-          getAnnouncements(3),
-          getSiteSettings(),
-          getServiceTimes(),
-          getSermons(10),
-          getEvents(),
-          getBlogPosts(3),
-          getEventGalleries(),
-          getLivestream(),
-          getTestimonials(),
-        ]);
-
-        setAnnouncements(announcementsData);
-        setSiteSettings(siteSettingsData);
-        setServices(servicesData);
-        setRecentSermons(sermonsData.slice(0, 6));
-        setUpcomingEvents(
-          eventsData
-            .filter((e) => new Date(e.startDate).getTime() >= Date.now())
-            .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
-            .slice(0, 3)
-        );
-        setLatestPosts(blogData);
-        setGalleryPreview(galleriesData.flatMap((g) => g.photos).slice(0, 6));
-        setLivestream(livestreamData);
-        setTestimonials(
-          [...testimonialsData].sort((a, b) => Number(b.featured) - Number(a.featured)).slice(0, 3)
-        );
-      } catch (error) {
-        console.error('Failed to fetch homepage data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchData();
-  }, []);
+  const recentSermons = sermonsData.slice(0, 6);
+  const upcomingEvents = eventsData
+    .filter((e) => new Date(e.startDate).getTime() >= Date.now())
+    .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
+    .slice(0, 3);
+  const galleryPreview = galleriesData.flatMap((g) => g.photos).slice(0, 6);
+  const testimonials = [...testimonialsData].sort((a, b) => Number(b.featured) - Number(a.featured)).slice(0, 3);
 
   const nextService = services[0];
-  const isLive = !!livestream?.isLive;
   const weekEvents = upcomingEvents.filter((e) => new Date(e.startDate).getTime() - Date.now() < 7 * 86_400_000);
   const nextMajorEvent = upcomingEvents.find((e) => e.featured) ?? upcomingEvents[0] ?? null;
 
@@ -119,68 +65,10 @@ export default function Home() {
     <div>
       <WelcomeBackBanner />
 
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-[#17130F] py-24 text-white sm:py-32">
-        <Image
-          src="/images/hero-bg.jpg"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover"
-        />
-        <div className="absolute inset-0 bg-linear-to-b from-[#17130F]/25 via-[#17130F]/35 to-[#17130F]" />
-
-        <Container className="relative z-10 text-center">
-          {isLive && (
-            <motion.button
-              {...fadeUpImmediate()}
-              onClick={() => setShowLiveStream(true)}
-              className="mb-6 inline-flex items-center gap-2 rounded-full border border-danger/40 bg-danger/15 px-3 py-1 text-caption font-medium text-danger-subtle"
-            >
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-danger" />
-              Live now — tap to watch
-            </motion.button>
-          )}
-          <motion.h1
-            {...fadeUpImmediate(0.05)}
-            className="mx-auto max-w-3xl font-serif text-display-sm text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)] sm:text-display-md"
-          >
-            {siteSettings?.churchName || 'Salem Primitive Baptist Church'}
-          </motion.h1>
-          <motion.p
-            {...fadeUpImmediate(0.1)}
-            className="mx-auto mt-5 max-w-xl font-serif text-body-lg italic text-white/80 drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
-          >
-            {siteSettings?.tagline || 'A place where faith meets community, and hope comes alive.'}
-          </motion.p>
-          <motion.div {...fadeUpImmediate(0.15)} className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <LinkButton href="/services" size="lg">
-              Join Us Sunday 9:30 AM
-            </LinkButton>
-            <LinkButton href={user ? '/dashboard' : '/login'} variant="secondary" size="lg">
-              {user ? 'My Dashboard' : 'Sign In'}
-            </LinkButton>
-            {isLive && (
-              <Button size="lg" variant="danger" leftIcon={<Play className="h-4 w-4" />} onClick={() => setShowLiveStream(true)}>
-                Watch Live
-              </Button>
-            )}
-          </motion.div>
-        </Container>
-      </section>
-
-      {showLiveStream && (
-        <Section spacing="sm" className="bg-surface">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-serif text-headline-sm text-foreground">Live Stream</h2>
-            <button onClick={() => setShowLiveStream(false)} className="text-body-sm text-foreground-muted hover:text-foreground">
-              Close
-            </button>
-          </div>
-          <DynamicLiveStream />
-        </Section>
-      )}
+      <HeroSection
+        churchName={siteSettings?.churchName || 'Salem Primitive Baptist Church'}
+        tagline={siteSettings?.tagline || 'A place where faith meets community, and hope comes alive.'}
+      />
 
       {/* Today's verse + next service */}
       <Section spacing="lg">
@@ -216,23 +104,7 @@ export default function Home() {
       </Section>
 
       {/* Announcements */}
-      {isLoading ? (
-        <Section spacing="md" className="bg-surface" id="announcements">
-          <h2 className="mb-8 text-center font-serif text-headline-md text-foreground">Latest Announcements</h2>
-          <div className="mx-auto max-w-3xl space-y-4">
-            {[0, 1].map((i) => (
-              <div key={i} className="flex items-start gap-4 rounded-xl border border-border bg-background p-6">
-                <Skeleton className="h-9 w-9 shrink-0 rounded-full" />
-                <div className="flex-1 space-y-2">
-                  <Skeleton className="h-4 w-1/3" />
-                  <Skeleton className="h-3 w-full" />
-                  <Skeleton className="h-3 w-2/3" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </Section>
-      ) : announcements.length > 0 && (
+      {announcements.length > 0 && (
         <Section spacing="md" className="bg-surface" id="announcements">
           <h2 className="mb-8 text-center font-serif text-headline-md text-foreground">Latest Announcements</h2>
           <div className="mx-auto max-w-3xl space-y-4">
