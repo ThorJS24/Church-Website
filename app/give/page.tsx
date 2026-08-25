@@ -70,94 +70,97 @@ export default function GivePage() {
     <div>
       <PageHero icon={<Heart />} eyebrow={t('give.eyebrow')} title={t('give.title')} description={t('give.description')} />
 
+      {/* Trust-and-clarity panel: "how" and "where" your gift goes sit
+          side by side as one focused action, instead of two separate
+          centered sections stacked one after another. */}
       <Section spacing="lg">
-        <Container size="md">
-          <div className="mb-10 text-center">
-            <h2 className={cn('text-headline-md text-foreground', tamilFont)}>{t('give.waysToGive')}</h2>
-            <p className={cn('mt-2 text-body-md text-foreground-muted', tamilFont)}>{t('give.waysToGiveSubtitle')}</p>
-          </div>
+        <Container size="lg">
+          <div className="grid gap-12 lg:grid-cols-2">
+            <div>
+              <h2 className={cn('text-headline-md text-foreground', tamilFont)}>{t('give.waysToGive')}</h2>
+              <p className={cn('mt-2 text-body-md text-foreground-muted', tamilFont)}>{t('give.waysToGiveSubtitle')}</p>
 
-          <div className="relative mb-12">
-            <div className="absolute left-6 top-6 bottom-6 hidden w-px bg-border sm:block" aria-hidden="true" />
-            <div className="space-y-8">
-              <div className="relative flex gap-5 sm:pl-0">
-                <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-accent-subtle">
-                  <Landmark className="h-5 w-5 text-accent" />
-                </div>
-                <div className="pt-1.5">
-                  <h3 className={cn('text-title-md text-foreground', tamilFont)}>{t('give.bankTransferTitle')}</h3>
-                  <p className={cn('mt-1.5 text-body-sm text-foreground-muted', tamilFont)}>
-                    {/* TODO (church staff): replace this with the church's real bank account
-                        details (account name, number, IFSC/routing, bank branch) once provided.
-                        Do not publish placeholder account numbers in the meantime. */}
-                    {t('give.bankTransferBodyPrefix')}{' '}
-                    {siteSettings?.phoneNumber ? (
-                      <>{t('give.call')} <a href={`tel:${siteSettings.phoneNumber}`} className="text-accent underline">{siteSettings.phoneNumber}</a> {t('give.or')} </>
-                    ) : null}
-                    <Link href="/contact" className="text-accent underline">{t('give.contactUs')}</Link> {t('give.bankTransferBodySuffix')}
-                  </p>
-                </div>
-              </div>
+              <div className="relative mt-8">
+                <div className="absolute left-6 top-6 bottom-6 hidden w-px bg-border sm:block" aria-hidden="true" />
+                <div className="space-y-8">
+                  <div className="relative flex gap-5 sm:pl-0">
+                    <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-accent-subtle">
+                      <Landmark className="h-5 w-5 text-accent" />
+                    </div>
+                    <div className="pt-1.5">
+                      <h3 className={cn('text-title-md text-foreground', tamilFont)}>{t('give.bankTransferTitle')}</h3>
+                      <p className={cn('mt-1.5 text-body-sm text-foreground-muted', tamilFont)}>
+                        {t('give.bankTransferBodyPrefix')}{' '}
+                        {siteSettings?.phoneNumber ? (
+                          <>{t('give.call')} <a href={`tel:${siteSettings.phoneNumber}`} className="text-accent underline">{siteSettings.phoneNumber}</a> {t('give.or')} </>
+                        ) : null}
+                        <Link href="/contact" className="text-accent underline">{t('give.contactUs')}</Link> {t('give.bankTransferBodySuffix')}
+                      </p>
+                    </div>
+                  </div>
 
-              <div className="relative flex gap-5">
-                <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-accent-subtle">
-                  <Building className="h-5 w-5 text-accent" />
-                </div>
-                <div className="pt-1.5">
-                  <h3 className={cn('text-title-md text-foreground', tamilFont)}>{t('give.inPersonTitle')}</h3>
-                  <p className={cn('mt-1.5 text-body-sm text-foreground-muted', tamilFont)}>{t('give.inPersonBody')}</p>
-                  <Link href="/services" className={cn('mt-1.5 inline-block text-body-sm font-semibold text-accent hover:underline dark:text-accent-hover', tamilFont)}>{t('give.viewServiceTimes')} →</Link>
-                </div>
-              </div>
+                  <div className="relative flex gap-5">
+                    <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-accent-subtle">
+                      <Building className="h-5 w-5 text-accent" />
+                    </div>
+                    <div className="pt-1.5">
+                      <h3 className={cn('text-title-md text-foreground', tamilFont)}>{t('give.inPersonTitle')}</h3>
+                      <p className={cn('mt-1.5 text-body-sm text-foreground-muted', tamilFont)}>{t('give.inPersonBody')}</p>
+                      <Link href="/services" className={cn('mt-1.5 inline-block text-body-sm font-semibold text-accent hover:underline dark:text-accent-hover', tamilFont)}>{t('give.viewServiceTimes')} →</Link>
+                    </div>
+                  </div>
 
-              <div className="relative flex gap-5">
-                <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-accent-subtle">
-                  <Mail className="h-5 w-5 text-accent" />
-                </div>
-                <div className="pt-1.5">
-                  <h3 className={cn('text-title-md text-foreground', tamilFont)}>{t('give.questionsTitle')}</h3>
-                  <p className={cn('mt-1.5 text-body-sm text-foreground-muted', tamilFont)}>{t('give.questionsBody')}</p>
-                  <Link href="/contact" className={cn('mt-1.5 inline-block text-body-sm font-semibold text-accent hover:underline dark:text-accent-hover', tamilFont)}>{t('give.contactUsArrow')} →</Link>
+                  <div className="relative flex gap-5">
+                    <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-accent-subtle">
+                      <Mail className="h-5 w-5 text-accent" />
+                    </div>
+                    <div className="pt-1.5">
+                      <h3 className={cn('text-title-md text-foreground', tamilFont)}>{t('give.questionsTitle')}</h3>
+                      <p className={cn('mt-1.5 text-body-sm text-foreground-muted', tamilFont)}>{t('give.questionsBody')}</p>
+                      <Link href="/contact" className={cn('mt-1.5 inline-block text-body-sm font-semibold text-accent hover:underline dark:text-accent-hover', tamilFont)}>{t('give.contactUsArrow')} →</Link>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div>
-            <h3 className={cn('mb-2 text-center text-title-lg text-foreground', tamilFont)}>{t('give.designateHeading')}</h3>
-            <p className={cn('mb-6 text-center text-body-sm text-foreground-muted', tamilFont)}>{t('give.designateSubtitle')}</p>
-            <Grid cols={2} gap={4}>
-              {givingFunds.map((fund) => {
-                const isSelected = selectedFund === fund.id;
-                return (
-                  <Card
-                    key={fund.id}
-                    variant={isSelected ? 'raised' : 'flat'}
-                    className={cn('cursor-pointer transition-colors', isSelected && 'border-2 border-accent')}
-                    onClick={() => setSelectedFund(isSelected ? null : fund.id)}
-                  >
-                    <div className="flex items-start justify-between gap-3">
+            <div className="rounded-xl border border-border bg-surface p-6 lg:sticky lg:top-28 lg:self-start">
+              <h3 className={cn('text-title-lg text-foreground', tamilFont)}>{t('give.designateHeading')}</h3>
+              <p className={cn('mt-1 text-body-sm text-foreground-muted', tamilFont)}>{t('give.designateSubtitle')}</p>
+              <div className="mt-5 space-y-3">
+                {givingFunds.map((fund) => {
+                  const isSelected = selectedFund === fund.id;
+                  return (
+                    <button
+                      key={fund.id}
+                      type="button"
+                      onClick={() => setSelectedFund(isSelected ? null : fund.id)}
+                      className={cn(
+                        'flex w-full items-start justify-between gap-3 rounded-lg border p-4 text-left transition-colors',
+                        isSelected ? 'border-accent bg-accent-subtle' : 'border-border bg-background hover:border-border-strong'
+                      )}
+                    >
                       <div>
                         <h4 className={cn('text-title-sm text-foreground', tamilFont)}>{t(fund.titleKey)}</h4>
                         <p className={cn('mt-1 text-body-sm text-foreground-muted', tamilFont)}>{t(fund.descKey)}</p>
                       </div>
                       {isSelected && <Check className="h-5 w-5 shrink-0 text-accent" aria-hidden="true" />}
-                    </div>
-                  </Card>
-                );
-              })}
-            </Grid>
-            {selectedFund ? (
-              <div className="mt-6 rounded-lg border border-accent/30 bg-accent-subtle p-4 text-center">
-                <p className={cn('text-body-sm text-foreground', tamilFont)}>
-                  {t('give.designateSelected')} <strong>&ldquo;{t(givingFunds.find((f) => f.id === selectedFund)!.titleKey)}&rdquo;</strong> {t('give.designateSelectedSuffix')}
-                </p>
+                    </button>
+                  );
+                })}
               </div>
-            ) : (
-              <p className={cn('mt-6 text-center text-body-sm text-foreground-subtle', tamilFont)}>
-                {t('give.designateHint')}
-              </p>
-            )}
+              {selectedFund ? (
+                <div className="mt-5 rounded-lg border border-accent/30 bg-accent-subtle p-4">
+                  <p className={cn('text-body-sm text-foreground', tamilFont)}>
+                    {t('give.designateSelected')} <strong>&ldquo;{t(givingFunds.find((f) => f.id === selectedFund)!.titleKey)}&rdquo;</strong> {t('give.designateSelectedSuffix')}
+                  </p>
+                </div>
+              ) : (
+                <p className={cn('mt-5 text-body-sm text-foreground-subtle', tamilFont)}>
+                  {t('give.designateHint')}
+                </p>
+              )}
+            </div>
           </div>
         </Container>
       </Section>

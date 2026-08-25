@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Calendar, Clock, MapPin, Camera } from 'lucide-react';
+import { Clock, MapPin, Camera, AlertTriangle } from 'lucide-react';
 import { getEventById, getEvents, getEventGalleries } from '@/lib/content';
 import { getEventCategory } from '@/lib/eventCategories';
 import { Container } from '@/components/ui/container';
@@ -16,7 +16,6 @@ import { AddToCalendarButton } from '@/components/AddToCalendarButton';
 import { EventCountdown } from '@/components/EventCountdown';
 import { RsvpForm } from '@/components/events/RsvpForm';
 import { AttendeeCount } from '@/components/events/AttendeeCount';
-import { AlertTriangle } from 'lucide-react';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -61,6 +60,7 @@ export default async function EventDetailPage({ params }: Props) {
 
   const category = event.category ? getEventCategory(event.category) : null;
   const mapQuery = encodeURIComponent(event.address || event.location);
+  const start = new Date(event.startDate);
 
   const eventJsonLd = {
     '@context': 'https://schema.org',
@@ -89,33 +89,49 @@ export default async function EventDetailPage({ params }: Props) {
           <Breadcrumbs items={[{ label: 'Events', href: '/events' }, { label: event.title }]} className="mb-6" />
 
           {event.cancelled && (
-            <div className="mb-4 flex items-center gap-2 rounded-lg border border-danger/30 bg-danger-subtle p-3 text-body-sm text-danger">
+            <div className="mb-6 flex items-center gap-2 rounded-lg border border-danger/30 bg-danger-subtle p-3 text-body-sm text-danger">
               <AlertTriangle className="h-4 w-4 shrink-0" /> This event has been cancelled.
             </div>
           )}
 
-          {category && <Badge variant={category.badgeVariant} className="mb-3">{category.label}</Badge>}
-          <h1 className="font-serif text-display-sm text-foreground">{event.title}</h1>
-          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-body-sm text-foreground-muted">
-            <span className="flex items-center gap-1.5">
-              <Calendar className="h-4 w-4" />
-              {new Date(event.startDate).toLocaleString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
-            </span>
-            <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4" /> {event.location}</span>
-          </div>
+          {/* Logistics-first: a "ticket" rail (date block, countdown, RSVP)
+              leads the page — pinned on desktop — with the narrative
+              content flowing beside it, rather than a full-width hero image
+              followed by text. This page answers "will I go", not "read this". */}
+          <div className="grid gap-8 lg:grid-cols-[240px_1fr]">
+            <div className="space-y-4 lg:sticky lg:top-28 lg:self-start">
+              <Card padding="none" className="overflow-hidden text-center">
+                <div className="bg-accent px-4 py-5 text-accent-foreground">
+                  <p className="text-caption font-semibold uppercase tracking-widest opacity-80">
+                    {start.toLocaleDateString(undefined, { month: 'short' })}
+                  </p>
+                  <p className="font-serif text-display-md leading-none">{start.getDate()}</p>
+                  <p className="mt-1 text-caption opacity-85">{start.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric' })}</p>
+                </div>
+                <div className="space-y-2 p-4 text-left text-body-sm text-foreground-muted">
+                  <p className="flex items-center gap-2"><Clock className="h-4 w-4 shrink-0 text-foreground-subtle" />
+                    {start.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+                    {event.endDate && <span> – {new Date(event.endDate).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}</span>}
+                  </p>
+                  <p className="flex items-start gap-2"><MapPin className="mt-0.5 h-4 w-4 shrink-0 text-foreground-subtle" /> {event.location}</p>
+                </div>
+              </Card>
 
-          {event.imageUrl && (
-            <div className="relative mt-8 h-64 w-full overflow-hidden rounded-xl bg-surface-active sm:h-96">
-              <Image src={event.imageUrl} alt={event.title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 768px" priority />
-            </div>
-          )}
+              {!event.cancelled && <EventCountdown startDate={event.startDate} />}
 
-          <div className="mt-8 grid gap-8 md:grid-cols-3">
-            <div className="md:col-span-2">
-              {(event.description || event.shortDescription) && (
-                <p className="text-body-lg leading-relaxed text-foreground-muted">{event.description || event.shortDescription}</p>
+              {!event.cancelled && event.registrationRequired && event.registrationUrl && (
+                <LinkButton href={event.registrationUrl} target="_blank" rel="noopener noreferrer" fullWidth>
+                  Register
+                </LinkButton>
               )}
-              <div className="mt-6 flex flex-wrap gap-3">
+              {!event.cancelled && event.registrationRequired && !event.registrationUrl && (
+                <div className="space-y-3">
+                  <AttendeeCount eventId={event.id} className="flex items-center gap-2 text-body-sm text-foreground-muted" />
+                  <RsvpForm eventId={event.id} maxAttendees={event.maxAttendees} />
+                </div>
+              )}
+
+              <div className="flex flex-wrap gap-2">
                 <ShareButton title={event.title} />
                 {!event.cancelled && (
                   <AddToCalendarButton
@@ -126,23 +142,10 @@ export default async function EventDetailPage({ params }: Props) {
                     endDate={event.endDate}
                   />
                 )}
-                {!event.cancelled && event.registrationRequired && event.registrationUrl && (
-                  <LinkButton href={event.registrationUrl} target="_blank" rel="noopener noreferrer">
-                    Register
-                  </LinkButton>
-                )}
               </div>
-            </div>
-            <div className="space-y-6">
-              {!event.cancelled && <EventCountdown startDate={event.startDate} />}
-              {!event.cancelled && event.registrationRequired && !event.registrationUrl && (
-                <>
-                  <AttendeeCount eventId={event.id} className="flex items-center gap-2 text-body-sm text-foreground-muted" />
-                  <RsvpForm eventId={event.id} maxAttendees={event.maxAttendees} />
-                </>
-              )}
+
               <Card padding="none" className="overflow-hidden">
-                <div className="h-48">
+                <div className="h-40">
                   <iframe
                     title={`Map for ${event.title}`}
                     src={`https://maps.google.com/maps?q=${mapQuery}&hl=en&z=15&output=embed`}
@@ -153,12 +156,22 @@ export default async function EventDetailPage({ params }: Props) {
                     referrerPolicy="no-referrer-when-downgrade"
                   />
                 </div>
-                <div className="flex items-center gap-2 p-3 text-body-sm text-foreground-muted">
-                  <Clock className="h-4 w-4 shrink-0" />
-                  {new Date(event.startDate).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
-                  {event.endDate && <span> – {new Date(event.endDate).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}</span>}
-                </div>
               </Card>
+            </div>
+
+            <div>
+              {category && <Badge variant={category.badgeVariant} className="mb-3">{category.label}</Badge>}
+              <h1 className="font-serif text-display-sm text-foreground">{event.title}</h1>
+
+              {event.imageUrl && (
+                <div className="relative mt-6 h-56 w-full overflow-hidden rounded-xl bg-surface-active sm:h-80">
+                  <Image src={event.imageUrl} alt={event.title} fill className="object-cover" sizes="(max-width: 1024px) 100vw, 700px" priority />
+                </div>
+              )}
+
+              {(event.description || event.shortDescription) && (
+                <p className="mt-6 text-body-lg leading-relaxed text-foreground-muted">{event.description || event.shortDescription}</p>
+              )}
             </div>
           </div>
         </Container>

@@ -5,8 +5,6 @@ import {
 import { PageHero } from '@/components/ui/page-hero';
 import { Section } from '@/components/ui/section';
 import { Container } from '@/components/ui/container';
-import { Card } from '@/components/ui/card';
-import { Grid } from '@/components/ui/grid';
 import { LinkButton } from '@/components/ui/button';
 import { Accordion, AccordionItem } from '@/components/ui/accordion';
 import { PrintButton } from '@/components/PrintButton';
@@ -72,6 +70,16 @@ const SECURITY = [
   'Incident response and breach notification',
 ];
 
+const TOC = [
+  { id: 'glance', label: 'Privacy at a Glance' },
+  { id: 'collection', label: 'Information We Collect' },
+  { id: 'uses', label: 'How We Use It' },
+  { id: 'rights', label: 'Your Privacy Rights' },
+  { id: 'history', label: 'Version History' },
+  { id: 'faq', label: 'FAQ' },
+  { id: 'security', label: 'Security & Contact' },
+];
+
 export default function PrivacyPolicy() {
   return (
     <div>
@@ -82,124 +90,128 @@ export default function PrivacyPolicy() {
         description="Your privacy and data protection rights"
       />
 
+      {/* Same reading-focused document layout as /terms — a sticky table of
+          contents beside a flowing prose column, not a grid of colored
+          info-cards. */}
       <Section spacing="lg">
-        <Container size="md">
-          <div className="mb-6 flex justify-end no-print">
-            <PrintButton label="Print / Save as PDF" />
-          </div>
+        <Container size="lg">
+          <div className="grid gap-12 lg:grid-cols-[220px_1fr]">
+            <aside className="no-print hidden lg:block">
+              <nav className="sticky top-28 space-y-1">
+                {TOC.map((item) => (
+                  <a key={item.id} href={`#${item.id}`} className="block rounded-md px-3 py-1.5 text-body-sm text-foreground-muted hover:bg-surface-hover hover:text-foreground">
+                    {item.label}
+                  </a>
+                ))}
+              </nav>
+            </aside>
 
-          <Card className="mb-10 border-l-4 border-l-accent">
-            <h2 className="mb-3 flex items-center gap-2 text-title-lg text-foreground">
-              <ShieldCheck className="h-5 w-5 text-accent" /> Privacy at a Glance (Plain-Language Summary)
-            </h2>
-            <ul className="space-y-2">
-              {GLANCE.map((item) => (
-                <li key={item} className="flex items-start gap-2 text-body-sm text-foreground-muted">
-                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-success" /> {item}
-                </li>
-              ))}
-            </ul>
-          </Card>
+            <div className="max-w-2xl">
+              <div className="mb-8 flex justify-end no-print">
+                <PrintButton label="Print / Save as PDF" />
+              </div>
 
-          <div className="mb-10">
-            <h2 className="mb-6 text-headline-sm text-foreground">Information We Collect</h2>
-            <Grid cols={2} gap={4}>
-              {COLLECTION_CATEGORIES.map((cat) => {
-                const Icon = cat.icon;
-                return (
-                  <Card key={cat.title} className="bg-surface">
-                    <h3 className="mb-3 flex items-center gap-2 text-title-sm text-foreground">
-                      <Icon className="h-4 w-4 text-accent" /> {cat.title}
-                    </h3>
-                    <ul className="space-y-1 text-body-sm text-foreground-muted">
-                      {cat.items.map((item) => <li key={item}>• {item}</li>)}
-                    </ul>
-                  </Card>
-                );
-              })}
-            </Grid>
-          </div>
+              <section id="glance" className="mb-12 scroll-mt-28">
+                <h2 className="flex items-center gap-2 font-serif text-headline-sm text-foreground"><ShieldCheck className="h-5 w-5 text-accent" /> Privacy at a Glance</h2>
+                <ul className="mt-4 space-y-2">
+                  {GLANCE.map((item) => (
+                    <li key={item} className="flex items-start gap-2 text-body-md text-foreground-muted">
+                      <Check className="mt-1 h-4 w-4 shrink-0 text-success" /> {item}
+                    </li>
+                  ))}
+                </ul>
+              </section>
 
-          <div className="mb-10">
-            <h2 className="mb-6 text-headline-sm text-foreground">How We Use Your Information</h2>
-            <div className="space-y-3">
-              {USES.map((use) => (
-                <div key={use.title} className="flex items-start gap-4 rounded-lg border border-border bg-surface p-4">
-                  <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-success">
-                    <Check className="h-3.5 w-3.5 text-white" />
+              <section id="collection" className="mb-12 scroll-mt-28">
+                <h2 className="font-serif text-headline-sm text-foreground">Information We Collect</h2>
+                <div className="mt-4 grid gap-6 sm:grid-cols-2">
+                  {COLLECTION_CATEGORIES.map((cat) => {
+                    const Icon = cat.icon;
+                    return (
+                      <div key={cat.title}>
+                        <h3 className="mb-2 flex items-center gap-2 text-title-sm text-foreground">
+                          <Icon className="h-4 w-4 text-accent" /> {cat.title}
+                        </h3>
+                        <ul className="space-y-1 text-body-sm text-foreground-muted">
+                          {cat.items.map((item) => <li key={item}>• {item}</li>)}
+                        </ul>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+
+              <section id="uses" className="mb-12 scroll-mt-28">
+                <h2 className="font-serif text-headline-sm text-foreground">How We Use Your Information</h2>
+                <div className="mt-4 divide-y divide-border border-y border-border">
+                  {USES.map((use) => (
+                    <div key={use.title} className="py-4">
+                      <h3 className="text-title-sm text-foreground">{use.title}</h3>
+                      <p className="mt-1 text-body-sm text-foreground-muted">{use.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              <section id="rights" className="mb-12 scroll-mt-28">
+                <h2 className="font-serif text-headline-sm text-foreground">Your Privacy Rights</h2>
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  {RIGHTS.map((right) => {
+                    const Icon = right.icon;
+                    return (
+                      <div key={right.title} className="flex items-start gap-3">
+                        <Icon className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+                        <div>
+                          <h3 className="text-body-sm font-semibold text-foreground">{right.title}</h3>
+                          <p className="text-caption text-foreground-subtle">{right.description}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+
+              <section id="history" className="mb-12 scroll-mt-28">
+                <h2 className="mb-4 font-serif text-headline-sm text-foreground">Version History</h2>
+                <PolicyVersionDiff versions={POLICY_VERSIONS} clauseLabel="Information We Collect" />
+              </section>
+
+              <section id="faq" className="mb-12 scroll-mt-28">
+                <h2 className="mb-4 font-serif text-headline-sm text-foreground">FAQ</h2>
+                <Accordion type="single">
+                  {PRIVACY_FAQ.map((item) => (
+                    <AccordionItem key={item.id} id={item.id} title={item.q}>{item.a}</AccordionItem>
+                  ))}
+                </Accordion>
+              </section>
+
+              <section id="security" className="mb-12 scroll-mt-28">
+                <h2 className="font-serif text-headline-sm text-foreground">Security &amp; Contact</h2>
+                <div className="mt-4 grid gap-8 sm:grid-cols-2">
+                  <div>
+                    <h3 className="mb-2 flex items-center gap-2 text-title-sm text-foreground"><Lock className="h-4 w-4 text-danger" /> Data Security</h3>
+                    <ul className="space-y-1.5 text-body-sm text-foreground-muted">{SECURITY.map((item) => <li key={item}>{item}</li>)}</ul>
                   </div>
                   <div>
-                    <h3 className="text-title-sm text-foreground">{use.title}</h3>
-                    <p className="mt-0.5 text-body-sm text-foreground-muted">{use.description}</p>
+                    <h3 className="mb-2 flex items-center gap-2 text-title-sm text-foreground"><Mail className="h-4 w-4 text-success" /> Contact Our Privacy Team</h3>
+                    <div className="space-y-1.5 text-body-sm text-foreground-muted">
+                      <p><span className="font-medium text-foreground">Email:</span> <a href="mailto:privacy@salemprimitivebaptist.org" className="text-accent hover:underline dark:text-accent-hover">privacy@salemprimitivebaptist.org</a></p>
+                      <p><span className="font-medium text-foreground">Phone:</span> +91 94871 62485</p>
+                      <p><span className="font-medium text-foreground">Address:</span> 223/838, Near north post office, Kannangurichi main road, Chinnathirupathi, Salem TN, PIN- 636008</p>
+                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
+              </section>
 
-          <div className="mb-10">
-            <h2 className="mb-6 text-headline-sm text-foreground">Your Privacy Rights</h2>
-            <Card className="bg-surface">
-              <Grid cols={2} gap={4}>
-                {RIGHTS.map((right) => {
-                  const Icon = right.icon;
-                  return (
-                    <div key={right.title} className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-subtle">
-                        <Icon className="h-4 w-4 text-accent" />
-                      </div>
-                      <div>
-                        <h3 className="text-body-sm font-semibold text-foreground">{right.title}</h3>
-                        <p className="text-caption text-foreground-subtle">{right.description}</p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </Grid>
-            </Card>
-          </div>
-
-          <PolicyVersionDiff versions={POLICY_VERSIONS} clauseLabel="Information We Collect" />
-
-          <div className="mb-10">
-            <h2 className="mb-6 text-headline-sm text-foreground">Privacy FAQ</h2>
-            <Card className="bg-surface">
-              <Accordion type="single">
-                {PRIVACY_FAQ.map((item) => (
-                  <AccordionItem key={item.id} id={item.id} title={item.q}>{item.a}</AccordionItem>
-                ))}
-              </Accordion>
-            </Card>
-          </div>
-
-          <Grid cols={2} gap={6} className="mb-10">
-            <Card className="bg-danger-subtle">
-              <h3 className="mb-3 flex items-center gap-2 text-title-md text-foreground">
-                <Lock className="h-5 w-5 text-danger" /> Data Security
-              </h3>
-              <ul className="space-y-1.5 text-body-sm text-foreground-muted">
-                {SECURITY.map((item) => <li key={item}>🔒 {item}</li>)}
-              </ul>
-            </Card>
-            <Card className="bg-success-subtle">
-              <h3 className="mb-3 flex items-center gap-2 text-title-md text-foreground">
-                <Mail className="h-5 w-5 text-success" /> Contact Our Privacy Team
-              </h3>
-              <div className="space-y-2 text-body-sm text-foreground-muted">
-                <p><span className="font-medium text-foreground">Email:</span> <a href="mailto:privacy@salemprimitivebaptist.org" className="text-accent hover:underline dark:text-accent-hover">privacy@salemprimitivebaptist.org</a></p>
-                <p><span className="font-medium text-foreground">Phone:</span> +91 94871 62485</p>
-                <p><span className="font-medium text-foreground">Address:</span> 223/838, Near north post office, Kannangurichi main road, Chinnathirupathi, Salem TN, PIN- 636008</p>
+              <div className="flex flex-wrap items-center justify-between gap-4 border-t border-border pt-6">
+                <div>
+                  <h4 className="text-title-sm text-foreground">Questions about this policy?</h4>
+                  <p className="text-body-sm text-foreground-muted">We&apos;re here to help you understand your privacy rights.</p>
+                </div>
+                <LinkButton href="/terms" size="sm">Terms of Service</LinkButton>
               </div>
-            </Card>
-          </Grid>
-
-          <Card className="flex flex-wrap items-center justify-between gap-4 bg-surface">
-            <div>
-              <h4 className="text-title-sm text-foreground">Questions about this policy?</h4>
-              <p className="text-body-sm text-foreground-muted">We&apos;re here to help you understand your privacy rights.</p>
             </div>
-            <LinkButton href="/terms" size="sm">Terms of Service</LinkButton>
-          </Card>
+          </div>
         </Container>
       </Section>
     </div>

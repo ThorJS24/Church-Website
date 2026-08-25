@@ -6,7 +6,6 @@ import { Sun, Moon, BookOpen, Clock, MapPin, Calendar, Video, Coffee, Baby, User
 import { getPageContent, getServiceTimes, getSiteSettings, getLivestream } from '@/lib/content';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
-import { PageHero } from '@/components/ui/page-hero';
 import { Section } from '@/components/ui/section';
 import { SectionNav } from '@/components/ui/section-nav';
 import { Card } from '@/components/ui/card';
@@ -116,21 +115,41 @@ export default function ServicesPage() {
 
   return (
     <div>
-      <PageHero
-        icon={<Clock />}
-        eyebrow={t('services.eyebrow')}
-        title={servicesPage.title}
-        description={servicesPage.subtitle}
-        actions={
-          hasLiveStream ? (
-            <Button variant="danger" leftIcon={<Radio className="h-4 w-4 animate-pulse" />} onClick={() => setShowLiveStream(true)} className={tamilFont}>
-              {t('liveStream.watchButton')}
-            </Button>
-          ) : (
-            <Badge variant="neutral" className={tamilFont}><Radio className="h-4 w-4" /> {t('liveStream.noneCurrently')}</Badge>
-          )
-        }
-      />
+      {/* Bulletin header: this page's job is "when/where is the next
+          service", so it leads with that answer directly — a compact
+          service-times strip inline with the title — instead of a generic
+          icon+title block that makes the visitor scroll to find times. */}
+      <div className="border-b border-border bg-surface">
+        <div className="mx-auto max-w-[1680px] px-4 py-8 sm:px-6 lg:px-8">
+          <div className="flex flex-wrap items-start justify-between gap-6">
+            <div>
+              <p className={cn('flex items-center gap-2 text-caption font-semibold uppercase tracking-widest text-foreground-subtle', tamilFont)}>
+                <Clock className="h-3.5 w-3.5" /> {t('services.eyebrow')}
+              </p>
+              <h1 className="mt-2 font-serif text-headline-lg text-foreground sm:text-display-sm">{servicesPage.title}</h1>
+              <p className={cn('mt-2 max-w-xl text-body-md text-foreground-muted', tamilFont)}>{servicesPage.subtitle}</p>
+            </div>
+            {hasLiveStream ? (
+              <Button variant="danger" leftIcon={<Radio className="h-4 w-4 animate-pulse" />} onClick={() => setShowLiveStream(true)} className={tamilFont}>
+                {t('liveStream.watchButton')}
+              </Button>
+            ) : (
+              <Badge variant="neutral" className={tamilFont}><Radio className="h-4 w-4" /> {t('liveStream.noneCurrently')}</Badge>
+            )}
+          </div>
+
+          {services.length > 0 && (
+            <div className="mt-6 flex flex-wrap gap-x-8 gap-y-3 border-t border-border pt-5">
+              {services.map((service) => (
+                <a key={service.id} href="#service-times" className="group">
+                  <p className="text-title-sm font-medium text-foreground group-hover:text-accent">{service.title}</p>
+                  <p className="text-body-sm text-foreground-muted">{service.time} · {service.location}</p>
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
 
       <SectionNav
         items={[

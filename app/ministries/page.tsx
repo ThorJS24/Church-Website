@@ -5,8 +5,6 @@ import Link from 'next/link';
 import { motion } from 'motion/react';
 import { Users, Baby, Music, BookOpen, Heart, Clock, MapPin, Search } from 'lucide-react';
 import { getPageContent, getMinistries, getSiteSettings, Ministry, SiteSettings } from '@/lib/content';
-import StatBar from '@/components/StatBar';
-import { PageHero } from '@/components/ui/page-hero';
 import { Section } from '@/components/ui/section';
 import { Card } from '@/components/ui/card';
 import { Grid } from '@/components/ui/grid';
@@ -97,11 +95,37 @@ export default function MinistriesPage() {
 
   if (loading) return <LoadingState label="Loading ministries..." />;
 
+  const stats = [
+    { value: siteSettings?.statistics?.ministries || String(ministries.length || '15+'), label: 'Ministries' },
+    { value: siteSettings?.statistics?.members || '500+', label: 'Members' },
+    { value: siteSettings?.statistics?.yearsServing || '25+', label: 'Years serving' },
+  ];
+
   return (
     <div>
-      <PageHero icon={<Heart />} eyebrow="Get Involved" title={ministriesPage?.title || 'Our Ministries'} description={ministriesPage?.subtitle || 'Find your place to serve, grow, and make a difference in our community'} />
-
-      <StatBar statistics={siteSettings?.statistics} />
+      {/* One warm community band — title, live stats, search, and category
+          chips all belong to the same "find your place" gesture, instead of
+          a generic icon-hero followed by a separate stat banner followed by
+          a separate filter bar. */}
+      <div className="bg-warm text-warm-foreground">
+        <div className="mx-auto max-w-[1680px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+          <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="flex items-center gap-2 text-caption font-semibold uppercase tracking-widest opacity-80"><Heart className="h-3.5 w-3.5" /> Get Involved</p>
+              <h1 className="mt-2 font-serif text-display-sm">{ministriesPage?.title || 'Our Ministries'}</h1>
+              <p className="mt-2 max-w-xl text-body-md opacity-90">{ministriesPage?.subtitle || 'Find your place to serve, grow, and make a difference in our community'}</p>
+            </div>
+            <div className="flex gap-8">
+              {stats.map((stat) => (
+                <div key={stat.label}>
+                  <div className="text-display-sm">{stat.value}</div>
+                  <div className="mt-1 text-caption opacity-80">{stat.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div ref={ministriesGridRef} className="border-b border-border bg-background py-6">
         <div className="mx-auto mb-4 flex max-w-md justify-center px-4">

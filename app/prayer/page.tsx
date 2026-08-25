@@ -190,6 +190,20 @@ export default function PrayerPage() {
         </div>
       </div>
 
+      {/* Participation-first compose bar — always visible above the wall,
+          not just a button hidden in the hero, since submitting a request
+          is the page's core action. */}
+      <div className="border-b border-border bg-background">
+        <Container size="sm" className="py-4">
+          <button
+            onClick={() => setShowModal(true)}
+            className={cn('flex w-full items-center gap-3 rounded-full border border-border bg-surface px-5 py-3 text-left text-body-sm text-foreground-muted transition-colors hover:border-border-strong hover:bg-surface-hover', tamilFont)}
+          >
+            <HandHeart className="h-4 w-4 shrink-0 text-warm" /> {t('prayer.submitToStart')}
+          </button>
+        </Container>
+      </div>
+
       <Section spacing="lg">
         {loading ? (
           <LoadingState label={t('prayer.loading')} />
@@ -206,11 +220,14 @@ export default function PrayerPage() {
             </p>
           </Card>
         ) : (
-          <Grid cols={2} gap={6}>
+          // A masonry wall (varying card heights in flowing columns)
+          // instead of a uniform 2-col grid — reads as a wall of requests,
+          // not a matched-height product grid.
+          <div className="columns-1 gap-6 sm:columns-2 [&>*]:mb-6 [&>*]:break-inside-avoid">
             <AnimatePresence>
               {visiblePrayers.map((prayer) => (
                 <motion.div key={prayer.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} layout>
-                  <Card variant="raised" padding="lg" className="h-full">
+                  <Card variant="raised" padding="lg">
                     <div className="flex flex-wrap items-center gap-2">
                       <Badge variant="accent" className="capitalize">{prayer.category}</Badge>
                       {prayer.status === 'ongoing' && <Badge variant="info" className={tamilFont}>{t('prayer.ongoing')}</Badge>}
@@ -265,7 +282,7 @@ export default function PrayerPage() {
                 </motion.div>
               ))}
             </AnimatePresence>
-          </Grid>
+          </div>
         )}
       </Section>
 

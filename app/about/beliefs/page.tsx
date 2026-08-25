@@ -5,7 +5,6 @@ import StatBar from '@/components/StatBar';
 import { PageHero } from '@/components/ui/page-hero';
 import { Section } from '@/components/ui/section';
 import { Card } from '@/components/ui/card';
-import { Grid } from '@/components/ui/grid';
 import { Accordion, AccordionItem } from '@/components/ui/accordion';
 import { Trans } from '@/components/i18n/Trans';
 import { BeliefsSectionNav } from '@/components/about/BeliefsSectionNav';
@@ -59,54 +58,52 @@ export default async function BeliefsPage() {
 
       <BeliefsSectionNav hasCoreValues={!!(aboutPage?.values && aboutPage.values.length > 0)} />
 
-      {/* Mission & Vision */}
+      {/* Mission & Vision — a plain two-column statement, not two matched
+          cards each repeating the same icon/heading/paragraph shape. */}
       <Section id="mission-vision" spacing="lg">
-        <Grid cols={2} gap={8}>
+        <div className="grid gap-10 sm:grid-cols-2">
           <div>
-            <Card variant="raised" padding="lg" className="h-full text-center">
-              <Target className="mx-auto mb-5 h-10 w-10 text-accent" aria-hidden="true" />
-              <Trans k="about.ourMission" as="h2" className="text-headline-sm text-foreground" />
-              <p className="mt-4 text-body-md leading-relaxed text-foreground-muted">
-                {aboutPage?.mission || <Trans k="about.defaultMission" />}
-              </p>
-            </Card>
+            <Target className="mb-4 h-8 w-8 text-accent" aria-hidden="true" />
+            <Trans k="about.ourMission" as="h2" className="font-serif text-headline-sm text-foreground" />
+            <p className="mt-3 text-body-md leading-relaxed text-foreground-muted">
+              {aboutPage?.mission || <Trans k="about.defaultMission" />}
+            </p>
           </div>
           <div>
-            <Card variant="raised" padding="lg" className="h-full text-center">
-              <Eye className="mx-auto mb-5 h-10 w-10 text-accent" aria-hidden="true" />
-              <Trans k="about.ourVision" as="h2" className="text-headline-sm text-foreground" />
-              <p className="mt-4 text-body-md leading-relaxed text-foreground-muted">
-                {aboutPage?.vision || <Trans k="about.defaultVision" />}
-              </p>
-            </Card>
+            <Eye className="mb-4 h-8 w-8 text-accent" aria-hidden="true" />
+            <Trans k="about.ourVision" as="h2" className="font-serif text-headline-sm text-foreground" />
+            <p className="mt-3 text-body-md leading-relaxed text-foreground-muted">
+              {aboutPage?.vision || <Trans k="about.defaultVision" />}
+            </p>
           </div>
-        </Grid>
+        </div>
       </Section>
 
-      {/* Core Values */}
+      {/* Core Values — a divided list, not a card grid identical in shape
+          to Mission/Vision above it. */}
       {aboutPage?.values && aboutPage.values.length > 0 && (
         <Section id="core-values" spacing="lg" className="bg-surface">
-          <h2 className="mb-10 text-center text-headline-md text-foreground">
+          <h2 className="mb-8 font-serif text-headline-md text-foreground">
             {aboutPage.valuesSectionTitle || <Trans k="about.defaultCoreValues" />}
           </h2>
-          <Grid cols={3} gap={6}>
-            {aboutPage.values.map((value, index) => (
-              <div key={value.title}>
-                <Card padding="lg" className="h-full text-center">
-                  <Heart className="mx-auto mb-4 h-8 w-8 text-accent" aria-hidden="true" />
-                  <h3 className="text-title-md text-foreground">{value.title}</h3>
-                  <p className="mt-2 text-body-sm text-foreground-muted">{value.description}</p>
+          <div className="grid gap-x-8 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
+            {aboutPage.values.map((value) => (
+              <div key={value.title} className="flex gap-3">
+                <Heart className="mt-0.5 h-5 w-5 shrink-0 text-accent" aria-hidden="true" />
+                <div>
+                  <h3 className="text-title-sm text-foreground">{value.title}</h3>
+                  <p className="mt-1 text-body-sm text-foreground-muted">{value.description}</p>
                   {value.scriptureReferences && value.scriptureReferences.length > 0 && (
-                    <div className="mt-3 flex flex-wrap justify-center gap-2">
+                    <div className="mt-2 flex flex-wrap gap-2">
                       {value.scriptureReferences.map((s, i) => (
                         <ScriptureReference key={i} reference={s.reference} verse={s.verse} version={s.version} />
                       ))}
                     </div>
                   )}
-                </Card>
+                </div>
               </div>
             ))}
-          </Grid>
+          </div>
         </Section>
       )}
 
@@ -158,23 +155,21 @@ export default async function BeliefsPage() {
           <Trans k="about.faqHeading" as="h2" className="text-headline-md text-foreground" />
         </div>
         <div className="mx-auto max-w-3xl">
-          <Card padding="lg">
-            <Accordion>
-              {aboutPage?.faqs && aboutPage.faqs.length > 0 ? (
-                aboutPage.faqs.map((faq, i) => (
-                  <AccordionItem key={i} id={`faq-${i}`} title={faq.question}>
-                    {faq.answer}
-                  </AccordionItem>
-                ))
-              ) : (
-                DEFAULT_FAQ_KEYS.map((faq, i) => (
-                  <AccordionItem key={i} id={`faq-${i}`} title={<Trans k={faq.questionKey} />}>
-                    <Trans k={faq.answerKey} />
-                  </AccordionItem>
-                ))
-              )}
-            </Accordion>
-          </Card>
+          <Accordion>
+            {aboutPage?.faqs && aboutPage.faqs.length > 0 ? (
+              aboutPage.faqs.map((faq, i) => (
+                <AccordionItem key={i} id={`faq-${i}`} title={faq.question}>
+                  {faq.answer}
+                </AccordionItem>
+              ))
+            ) : (
+              DEFAULT_FAQ_KEYS.map((faq, i) => (
+                <AccordionItem key={i} id={`faq-${i}`} title={<Trans k={faq.questionKey} />}>
+                  <Trans k={faq.answerKey} />
+                </AccordionItem>
+              ))
+            )}
+          </Accordion>
         </div>
       </Section>
     </div>

@@ -185,16 +185,21 @@ function FullAdminDashboard() {
         </Card>
       )}
 
-      <Grid cols={5} gap={4} className="mb-8">
+      {/* A dense stat strip (divided row, not five separate cards) — reads
+          as one scannable line of vital signs, the way an ops dashboard
+          leads, not five equal-weight product tiles. */}
+      <div className="mb-8 grid grid-cols-2 divide-x divide-border overflow-hidden rounded-xl border border-border sm:grid-cols-5">
         {cards.map((card) => {
           const content = (
-            <Card variant="interactive" padding="md">
-              <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-lg ${card.tone}`}>
-                <card.icon className="h-5 w-5" />
+            <div className="flex items-center gap-3 px-4 py-4 transition-colors hover:bg-surface-hover">
+              <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${card.tone}`}>
+                <card.icon className="h-4 w-4" />
               </div>
-              <div className="text-headline-sm text-foreground">{card.value}</div>
-              <div className="text-body-sm text-foreground-muted">{card.label}</div>
-            </Card>
+              <div className="min-w-0">
+                <div className="text-title-lg text-foreground">{card.value}</div>
+                <div className="truncate text-caption text-foreground-muted">{card.label}</div>
+              </div>
+            </div>
           );
           return card.href ? (
             <Link key={card.label} href={card.href}>{content}</Link>
@@ -202,7 +207,7 @@ function FullAdminDashboard() {
             <div key={card.label}>{content}</div>
           );
         })}
-      </Grid>
+      </div>
 
       <Grid cols={2} gap={6} className="mb-6">
         <Card>
@@ -410,19 +415,19 @@ function ModeratorDashboard() {
         <LinkButton href="/admin/moderation">Open Queue</LinkButton>
       </Card>
 
-      <Grid cols={4} gap={4} className="mb-8">
+      <div className="mb-8 grid grid-cols-2 divide-x divide-border overflow-hidden rounded-xl border border-border sm:grid-cols-4">
         {byCollection.map((c) => (
-          <Link key={c.key} href="/admin/moderation">
-            <Card variant="interactive" padding="md">
-              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-warning-subtle">
-                <c.icon className="h-5 w-5 text-warning" />
-              </div>
-              <div className="text-headline-sm text-foreground">{c.count}</div>
-              <div className="text-body-sm text-foreground-muted">{c.label}</div>
-            </Card>
+          <Link key={c.key} href="/admin/moderation" className="flex items-center gap-3 px-4 py-4 transition-colors hover:bg-surface-hover">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-warning-subtle">
+              <c.icon className="h-4 w-4 text-warning" />
+            </div>
+            <div className="min-w-0">
+              <div className="text-title-lg text-foreground">{c.count}</div>
+              <div className="truncate text-caption text-foreground-muted">{c.label}</div>
+            </div>
           </Link>
         ))}
-      </Grid>
+      </div>
 
       {oldest.length > 0 && (
         <Card>

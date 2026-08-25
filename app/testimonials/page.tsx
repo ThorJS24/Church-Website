@@ -8,7 +8,6 @@ import { PageHero } from '@/components/ui/page-hero';
 import { Section } from '@/components/ui/section';
 import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';
-import { Grid } from '@/components/ui/grid';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
@@ -213,7 +212,10 @@ export default function TestimonialsPage() {
           ) : filteredTestimonials.length === 0 ? (
             <p className="text-center text-body-md text-foreground-muted">No testimonials match your search.</p>
           ) : (
-            <Grid cols={2} gap={6}>
+            /* A quote wall — varying card heights in flowing columns —
+               reads as social proof accumulating over time, not a matched
+               product grid. */
+            <div className="columns-1 gap-6 sm:columns-2 [&>*]:mb-6 [&>*]:break-inside-avoid">
               {filteredTestimonials.map((t) => (
                 <Card key={t.id}>
                   {t.category && <p className="mb-2 text-label uppercase tracking-wide text-accent">{t.category}</p>}
@@ -225,7 +227,7 @@ export default function TestimonialsPage() {
                   </div>
                 </Card>
               ))}
-            </Grid>
+            </div>
           )}
         </Container>
       </Section>

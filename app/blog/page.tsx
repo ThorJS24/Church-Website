@@ -6,7 +6,6 @@ import Image from 'next/image';
 import { motion } from 'motion/react';
 import { Search, BookOpen, Rss } from 'lucide-react';
 import { getBlogPosts, BlogPost } from '@/lib/content';
-import { PageHero } from '@/components/ui/page-hero';
 import { Section } from '@/components/ui/section';
 import { Card } from '@/components/ui/card';
 import { Grid } from '@/components/ui/grid';
@@ -40,34 +39,39 @@ export default function BlogPage() {
 
   return (
     <div>
-      <PageHero
-        icon={<BookOpen />}
-        eyebrow="Stories & Reflections"
-        title="Blog"
-        description="Reflections, updates, and stories from our church family"
-        actions={
-          <a href="/blog/feed.xml" className="inline-flex items-center gap-1.5 text-body-sm font-medium text-accent hover:underline dark:text-accent-hover">
-            <Rss className="h-4 w-4" /> RSS Feed
-          </a>
-        }
-      />
-
-      {posts.length > 0 && (
-        <Section spacing="sm" className="bg-surface">
-          <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <Input placeholder="Search posts..." aria-label="Search posts" leftIcon={<Search />} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="max-w-md" />
-            {categories.length > 2 && (
-              <Select
-                aria-label="Filter by category"
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                options={categories.map((c) => ({ value: c, label: c === 'all' ? 'All Categories' : c }))}
-                className="w-auto capitalize"
-              />
-            )}
+      {/* Editorial masthead — a newspaper/magazine flag (rule, serif
+          wordmark, rule) with category tabs and search/RSS tucked into the
+          same band, instead of the generic icon+eyebrow+title hero every
+          other list page opens with. */}
+      <div className="border-b-4 border-double border-foreground bg-background">
+        <div className="mx-auto max-w-[1680px] px-4 pt-8 sm:px-6 lg:px-8">
+          <div className="flex items-baseline justify-between border-b border-foreground pb-4">
+            <h1 className="font-serif text-display-md tracking-tight text-foreground">The Salem PBC Journal</h1>
+            <a href="/blog/feed.xml" className="hidden items-center gap-1.5 text-body-sm font-medium text-foreground-muted hover:text-accent sm:flex">
+              <Rss className="h-4 w-4" /> RSS
+            </a>
           </div>
-        </Section>
-      )}
+          <p className="mt-3 max-w-lg font-serif text-body-md italic text-foreground-muted">Reflections, updates, and stories from our church family.</p>
+
+          {posts.length > 0 && (
+            <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3 pb-5">
+              {categories.length > 2 && categories.map((c) => (
+                <button
+                  key={c}
+                  onClick={() => setSelectedCategory(c)}
+                  style={{ borderBottomColor: selectedCategory === c ? undefined : 'transparent' }}
+                  className={`border-b-2 pb-1 text-body-sm font-semibold uppercase tracking-wide transition-colors ${selectedCategory === c ? 'border-accent text-accent' : 'text-foreground-muted hover:text-foreground'}`}
+                >
+                  {c === 'all' ? 'All Stories' : c}
+                </button>
+              ))}
+              <div className="ml-auto">
+                <Input placeholder="Search posts..." aria-label="Search posts" leftIcon={<Search />} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-56" />
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
 
       <Section spacing="lg">
         {filteredPosts.length === 0 ? (

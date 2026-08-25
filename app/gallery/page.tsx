@@ -11,7 +11,6 @@ import Image from 'next/image';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { useMounted } from '@/hooks/useMounted';
 import { createPortal } from 'react-dom';
-import { PageHero } from '@/components/ui/page-hero';
 import { Section } from '@/components/ui/section';
 import { Card } from '@/components/ui/card';
 import { Grid } from '@/components/ui/grid';
@@ -521,15 +520,37 @@ function GalleryPageInner() {
     );
   }
 
+  // Media-first header: a mosaic of real recent cover photos instead of a
+  // generic icon+eyebrow+title text banner — this page is about photos, so
+  // it opens with photos.
+  const mosaicPhotos = events
+    .map((e) => e.imageUrl ? { imageUrl: e.imageUrl, title: e.title } : albumCoverPhoto(e.photos))
+    .filter((p): p is { imageUrl: string; title: string } => !!p)
+    .slice(0, 6);
+
   return (
     <div>
-      <PageHero
-        icon={<Camera />}
-        eyebrow="Photo Gallery"
-        title="Event Gallery"
-        description="Browse photos from our church events and activities"
-        actions={<Button leftIcon={<Upload className="h-4 w-4" />} onClick={() => setShowSubmitModal(true)}>Submit a Photo</Button>}
-      />
+      <div className="relative overflow-hidden bg-[#14110d]">
+        {mosaicPhotos.length > 0 ? (
+          <div className="grid h-56 grid-cols-3 gap-0.5 sm:h-72 sm:grid-cols-6">
+            {mosaicPhotos.map((p, i) => (
+              <div key={i} className={`relative ${i >= 3 ? 'hidden sm:block' : ''}`}>
+                <Image src={p.imageUrl} alt="" fill sizes="17vw" className="object-cover opacity-70" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="h-40" />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#14110d] via-[#14110d]/40 to-[#14110d]/10" />
+        <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-end justify-between gap-4 px-4 pb-6 sm:px-6 sm:pb-8 lg:px-8">
+          <div>
+            <p className="flex items-center gap-2 text-caption font-medium uppercase tracking-widest text-white/60"><Camera className="h-3.5 w-3.5" /> Photo Gallery</p>
+            <h1 className="mt-1 font-serif text-headline-lg text-white sm:text-display-sm">Event Gallery</h1>
+          </div>
+          <Button leftIcon={<Upload className="h-4 w-4" />} onClick={() => setShowSubmitModal(true)}>Submit a Photo</Button>
+        </div>
+      </div>
 
       {events.length > 0 && (
         <Section spacing="sm" className="bg-surface">

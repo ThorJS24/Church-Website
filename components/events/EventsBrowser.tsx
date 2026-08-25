@@ -130,21 +130,29 @@ export function EventsBrowser({ initialEvents }: EventsBrowserProps) {
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         className="object-cover"
                       />
+                      {/* A stacked day/month date block — the same visual
+                          language as the event detail page's ticket rail —
+                          instead of a small inline pill, so the date reads
+                          first when scanning the grid. */}
+                      {event.category !== 'regular-service' && (
+                        <div className={cn('absolute left-3 top-3 flex w-14 flex-col items-center rounded-lg py-1.5 text-white shadow', category.dotClass)}>
+                          <span className="text-caption font-semibold uppercase leading-none">{new Date(event.startDate).toLocaleDateString('en-US', { month: 'short' })}</span>
+                          <span className="text-title-lg font-bold leading-none">{new Date(event.startDate).getDate()}</span>
+                        </div>
+                      )}
+                      {event.category === 'regular-service' && (
+                        <span className={cn('absolute left-3 top-3 rounded-full px-2.5 py-1 text-caption font-medium text-white', category.dotClass)}>Weekly</span>
+                      )}
+                      {event.featured && <Star className="absolute right-3 top-3 h-5 w-5 fill-warning text-warning drop-shadow" />}
                     </div>
 
                     <div className="p-5">
-                      <div className="mb-3 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className={cn('rounded-full px-2.5 py-1 text-caption font-medium text-white', category.dotClass)}>
-                            {event.category === 'regular-service' ? 'Weekly' : new Date(event.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                          </span>
-                          {moreCount > 0 && (
-                            <span className="text-caption text-foreground-subtle">+{moreCount} more this month</span>
-                          )}
-                          {event.featured && <Star className="h-4 w-4 fill-current text-warning" />}
-                        </div>
+                      <div className="mb-2 flex items-center justify-between">
+                        {moreCount > 0 && (
+                          <span className="text-caption text-foreground-subtle">+{moreCount} more this month</span>
+                        )}
                         {event.cost !== undefined && (
-                          <span className="text-body-sm font-medium text-success">{event.cost === 0 ? 'Free' : `$${event.cost}`}</span>
+                          <span className="ml-auto text-body-sm font-medium text-success">{event.cost === 0 ? 'Free' : `$${event.cost}`}</span>
                         )}
                       </div>
 

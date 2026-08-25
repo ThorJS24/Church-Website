@@ -93,6 +93,7 @@ export default function Navbar() {
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isLive, setIsLive] = useState(false);
+  const [exploreOpen, setExploreOpen] = useState(false);
 
   const { user, logout, canAccessAdminPanel } = useAuth();
   const { theme, toggleTheme } = useTheme() || { theme: 'light', toggleTheme: () => {} };
@@ -133,7 +134,15 @@ export default function Navbar() {
   useEffect(() => {
     setIsMobileOpen(false);
     setMobileSection(null);
+    setExploreOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!exploreOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => e.key === 'Escape' && setExploreOpen(false);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [exploreOpen]);
 
   const isActive = useCallback(
     (href: string) => (href === '/' ? pathname === '/' : pathname.startsWith(href)),
@@ -153,195 +162,165 @@ export default function Navbar() {
       <nav
         ref={navRef}
         className={cn(
-          'fixed left-0 right-0 top-0 z-40 h-20 transition-colors duration-base ease-standard',
-          scrolled ? 'border-b border-border bg-background/90 shadow-sm backdrop-blur-md' : 'border-b-0 bg-background'
+          'fixed left-0 right-0 top-0 z-40 flex flex-col transition-colors duration-base ease-standard',
+          scrolled ? 'shadow-sm' : ''
         )}
       >
-        <div className="mx-auto flex h-full w-full max-w-[1680px] items-center gap-3 px-4 sm:px-6 lg:px-8">
-          {/* Brand — the strongest element on the left; a real organization
-              identity (name + tagline), not an app logo mark. */}
-          <div className="flex shrink-0 items-center gap-3">
-            <Link href="/" className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-accent">
-                <Church className="h-6 w-6 text-accent-foreground" aria-hidden="true" />
-              </div>
-              <div className="hidden leading-tight sm:block">
-                <p className="font-serif text-title-md text-foreground">Salem PBC</p>
-                <p className="text-caption text-foreground-subtle">{t('nav.tagline')}</p>
-              </div>
-            </Link>
-            {isLive && (
-              <Link
-                href="/"
-                className="flex items-center gap-1.5 rounded-full border border-danger/40 bg-danger/15 px-2.5 py-1 text-caption font-medium text-danger transition-colors hover:bg-danger/25"
-              >
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-danger" />
-                Live
-              </Link>
-            )}
-          </div>
-
-          {/* Primary navigation — centered in the remaining space between
-              brand and utilities, rather than packed left, so it reads as
-              the header's main content instead of one more control cluster.
-              Reveals at xl (1280px), not lg (1024px): About/Get Involved/
-              Connect used to be nested inside one "More" revealer; now each
-              is its own top-level dropdown, which needs more room than the
-              1024px floor has to spare. The mobile Sheet menu's trigger
-              below is gated the same way (xl:hidden) so it covers the
-              1024-1279px gap this leaves. */}
-          <div className="hidden flex-1 items-center justify-center gap-1 xl:flex">
-            {primaryItems.map((item) => {
-              const active = isActive(item.href);
-              return (
-                <Link
-                  key={item.key}
-                  href={item.href}
-                  className={cn(
-                    'relative rounded-md px-3 py-2 text-body-sm font-medium whitespace-nowrap transition-colors duration-fast',
-                    active ? 'text-accent' : 'text-foreground-muted hover:text-foreground'
-                  )}
-                >
-                  {t(item.labelKey)}
-                  {active && (
-                    <motion.span
-                      layoutId="navActiveIndicator"
-                      className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-accent"
-                      transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-                    />
-                  )}
+        {/* Tier 1 — slim utility band: live status left, everything else
+            (search, theme, language, notifications, account) right. Keeps
+            the primary band below free of anything but navigation. */}
+        <div className="hidden h-9 w-full border-b border-border/70 bg-surface sm:flex">
+          <div className="mx-auto flex h-full w-full max-w-[1680px] items-center justify-between px-4 lg:px-8">
+            <div className="flex items-center gap-3">
+              {isLive ? (
+                <Link href="/" className="flex items-center gap-1.5 text-caption font-medium text-danger">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-danger" />
+                  Live now — tap to watch
                 </Link>
-              );
-            })}
-
-            {MENU_GROUPS.map((group) => {
-              const groupItems = secondaryItems.filter((item) => item.menuGroup === group.key);
-              const groupActive = groupItems.some(
-                (item) => isActive(item.href) || item.section?.some((sub) => isActive(sub.href))
-              );
-              return (
-                <DropdownMenu key={group.key}>
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      type="button"
-                      className={cn(
-                        'flex items-center gap-1 whitespace-nowrap rounded-md border-0 bg-transparent px-3 py-2 text-body-sm font-medium transition-colors duration-fast',
-                        groupActive ? 'text-accent' : 'text-foreground-muted hover:text-foreground'
-                      )}
-                    >
-                      <span>{t(group.labelKey)}</span>
-                      <ChevronDown className="h-3.5 w-3.5 opacity-60" aria-hidden="true" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="min-w-56 p-2">
-                    {groupItems.map((item) =>
-                      item.section ? (
-                        item.section.map((sub) => (
-                          <DropdownMenuItem key={sub.key} onClick={() => router.push(sub.href)}>
-                            {t(sub.labelKey)}
-                          </DropdownMenuItem>
-                        ))
-                      ) : (
-                        <DropdownMenuItem key={item.key} onClick={() => router.push(item.href)}>
-                          <item.icon className="h-4 w-4 text-foreground-subtle" aria-hidden="true" />
-                          {t(item.labelKey)}
-                        </DropdownMenuItem>
-                      )
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              );
-            })}
-          </div>
-
-          {/* Utilities — visually quieter than primary nav: smaller icon
-              scale, no borders/fills of their own, and Search reads as a
-              nav-style text link rather than a command-palette input. */}
-          <div className="flex shrink-0 items-center gap-0.5">
-            <button
-              type="button"
-              onClick={() => setShowCommandPalette(true)}
-              className="hidden items-center gap-1.5 whitespace-nowrap rounded-md border-0 bg-transparent px-2.5 py-2 text-body-sm font-medium text-foreground-muted transition-colors duration-fast hover:text-foreground 2xl:flex"
-            >
-              <Search className="h-4 w-4" aria-hidden="true" />
-              <span>{t('common.search') || 'Search'}</span>
-              <kbd aria-hidden="true" className="ml-1 hidden text-caption text-foreground-subtle 2xl:inline">⌘K</kbd>
-            </button>
-            <IconButton label={t('common.search') || 'Search'} size="sm" className="2xl:hidden" onClick={() => setShowCommandPalette(true)}>
-              <Search />
-            </IconButton>
-
-            <IconButton label={t('nav.toggleTheme')} size="sm" onClick={toggleTheme}>
-              {theme === 'light' ? <Moon /> : <Sun />}
-            </IconButton>
-
-            <AccessibilityMenu size="sm" />
-
-            <NotificationBell size="sm" />
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  type="button"
-                  aria-label="Language"
-                  className="flex h-8 w-8 items-center justify-center rounded-md border-0 bg-transparent text-foreground-muted transition-colors duration-fast hover:bg-surface-hover hover:text-foreground"
-                >
-                  <Globe className="h-4 w-4" aria-hidden="true" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {LANGUAGES.map((lang) => (
-                  <DropdownMenuItem key={lang.code} onClick={() => handleLanguageChange(lang.code)}>
-                    <span className="text-base">{lang.flag}</span>
-                    <span className="flex-1">{lang.nameNative}</span>
-                    {language === lang.code && <span className="h-1.5 w-1.5 rounded-full bg-accent" />}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
-          {/* Account — separated from utilities by a hairline so the
-              hierarchy (nav > utilities > account) reads at a glance
-              instead of one undifferentiated row of controls. */}
-          <div className="ml-0.5 flex shrink-0 items-center gap-2 border-l border-border pl-2.5">
-            {user ? (
+              ) : (
+                <span className="text-caption text-foreground-subtle">{t('nav.tagline')}</span>
+              )}
+            </div>
+            <div className="flex items-center gap-0.5">
+              <button
+                type="button"
+                onClick={() => setShowCommandPalette(true)}
+                className="hidden items-center gap-1.5 whitespace-nowrap rounded-md border-0 bg-transparent px-2 py-1 text-caption font-medium text-foreground-muted transition-colors duration-fast hover:text-foreground lg:flex"
+              >
+                <Search className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>{t('common.search') || 'Search'}</span>
+                <kbd aria-hidden="true" className="ml-1 text-foreground-subtle">⌘K</kbd>
+              </button>
+              <IconButton label={t('common.search') || 'Search'} size="sm" className="lg:hidden" onClick={() => setShowCommandPalette(true)}>
+                <Search />
+              </IconButton>
+              <IconButton label={t('nav.toggleTheme')} size="sm" onClick={toggleTheme}>
+                {theme === 'light' ? <Moon /> : <Sun />}
+              </IconButton>
+              <AccessibilityMenu size="sm" />
+              <NotificationBell size="sm" />
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button type="button" className="flex items-center gap-2 rounded-md border border-border bg-surface px-2 py-1.5">
-                    <Avatar name={user.displayName || user.firstName || user.email} size="xs" />
-                    <span className="hidden max-w-24 truncate text-body-sm font-medium text-foreground sm:block">
-                      {user.displayName || user.firstName || user.email}
-                    </span>
-                    <ChevronDown className="h-3.5 w-3.5 text-foreground-subtle" aria-hidden="true" />
+                  <button
+                    type="button"
+                    aria-label="Language"
+                    className="flex h-7 w-7 items-center justify-center rounded-md border-0 bg-transparent text-foreground-muted transition-colors duration-fast hover:bg-surface-hover hover:text-foreground"
+                  >
+                    <Globe className="h-3.5 w-3.5" aria-hidden="true" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => router.push('/profile')}>
-                    <User className="h-4 w-4 text-foreground-subtle" /> {t('nav.profile')}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => router.push('/dashboard')}>
-                    <LayoutGrid className="h-4 w-4 text-foreground-subtle" /> {t('nav.dashboard')}
-                  </DropdownMenuItem>
-                  {canAccessAdminPanel() && (
-                    <DropdownMenuItem onClick={() => router.push('/admin')}>
-                      <ShieldCheck className="h-4 w-4 text-foreground-subtle" /> Admin Dashboard
+                  {LANGUAGES.map((lang) => (
+                    <DropdownMenuItem key={lang.code} onClick={() => handleLanguageChange(lang.code)}>
+                      <span className="text-base">{lang.flag}</span>
+                      <span className="flex-1">{lang.nameNative}</span>
+                      {language === lang.code && <span className="h-1.5 w-1.5 rounded-full bg-accent" />}
                     </DropdownMenuItem>
-                  )}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem variant="destructive" onClick={logout}>
-                    <LogOut className="h-4 w-4" /> {t('nav.logout')}
-                  </DropdownMenuItem>
+                  ))}
                 </DropdownMenuContent>
               </DropdownMenu>
-            ) : (
-              <div className="hidden items-center gap-2 sm:flex">
-                <Button variant="ghost" size="sm" onClick={() => setShowLoginModal(true)}>
-                  {t('nav.login')}
-                </Button>
-                <LinkButton href="/register" size="sm">{t('nav.register')}</LinkButton>
+              <div className="mx-1 h-4 w-px bg-border" />
+              {user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button type="button" className="flex items-center gap-2 rounded-md border-0 bg-transparent px-1 py-1">
+                      <Avatar name={user.displayName || user.firstName || user.email} size="xs" />
+                      <span className="hidden max-w-24 truncate text-caption font-medium text-foreground sm:block">
+                        {user.displayName || user.firstName || user.email}
+                      </span>
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => router.push('/profile')}>
+                      <User className="h-4 w-4 text-foreground-subtle" /> {t('nav.profile')}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push('/dashboard')}>
+                      <LayoutGrid className="h-4 w-4 text-foreground-subtle" /> {t('nav.dashboard')}
+                    </DropdownMenuItem>
+                    {canAccessAdminPanel() && (
+                      <DropdownMenuItem onClick={() => router.push('/admin')}>
+                        <ShieldCheck className="h-4 w-4 text-foreground-subtle" /> Admin Dashboard
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem variant="destructive" onClick={logout}>
+                      <LogOut className="h-4 w-4" /> {t('nav.logout')}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <div className="flex items-center gap-1">
+                  <button type="button" onClick={() => setShowLoginModal(true)} className="rounded-md border-0 bg-transparent px-2 py-1 text-caption font-medium text-foreground-muted hover:text-foreground">
+                    {t('nav.login')}
+                  </button>
+                  <Link href="/register" className="rounded-md border-0 bg-transparent px-2 py-1 text-caption font-medium text-accent hover:text-accent-hover">
+                    {t('nav.register')}
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Tier 2 — primary band: brand mark, bold nav labels, one "Explore"
+            trigger that opens a full-width mega-panel (below) instead of
+            three separate small popovers. */}
+        <div className={cn('h-16 w-full transition-colors duration-base ease-standard sm:h-[4.5rem]', scrolled ? 'border-b border-border bg-background/95 backdrop-blur-md' : 'border-b-0 bg-background')}>
+          <div className="mx-auto flex h-full w-full max-w-[1680px] items-center gap-4 px-4 sm:px-6 lg:px-8">
+            <Link href="/" className="flex shrink-0 items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
+                <Church className="h-5 w-5 text-accent-foreground" aria-hidden="true" />
               </div>
-            )}
+              <p className="font-serif text-title-lg text-foreground">Salem PBC</p>
+            </Link>
+
+            <div className="hidden flex-1 items-center gap-1 xl:flex">
+              {primaryItems.map((item) => {
+                const active = isActive(item.href);
+                return (
+                  <Link
+                    key={item.key}
+                    href={item.href}
+                    className={cn(
+                      'relative rounded-md px-3 py-2 text-body-md font-medium whitespace-nowrap transition-colors duration-fast',
+                      active ? 'text-accent' : 'text-foreground-muted hover:text-foreground'
+                    )}
+                  >
+                    {t(item.labelKey)}
+                    {active && (
+                      <motion.span
+                        layoutId="navActiveIndicator"
+                        className="absolute inset-x-3 -bottom-1 h-0.5 rounded-full bg-accent"
+                        transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+                      />
+                    )}
+                  </Link>
+                );
+              })}
+              <button
+                type="button"
+                onClick={() => setExploreOpen((v) => !v)}
+                aria-expanded={exploreOpen}
+                className={cn(
+                  'flex items-center gap-1 whitespace-nowrap rounded-md border-0 bg-transparent px-3 py-2 text-body-md font-medium transition-colors duration-fast',
+                  exploreOpen || secondaryItems.some((i) => isActive(i.href) || i.section?.some((s) => isActive(s.href)))
+                    ? 'text-accent'
+                    : 'text-foreground-muted hover:text-foreground'
+                )}
+              >
+                Explore
+                <ChevronDown className={cn('h-3.5 w-3.5 opacity-60 transition-transform', exploreOpen && 'rotate-180')} aria-hidden="true" />
+              </button>
+            </div>
+
+            <div className="ml-auto flex shrink-0 items-center gap-3">
+              <LinkButton href="/give" size="sm" className="hidden xl:inline-flex">{t('nav.give')}</LinkButton>
+              {!user && (
+                <LinkButton href="/register" size="sm" variant="outline" className="hidden sm:inline-flex xl:hidden">
+                  {t('nav.register')}
+                </LinkButton>
+              )}
+            </div>
 
             <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
               <SheetTrigger asChild>
@@ -441,6 +420,59 @@ export default function Navbar() {
             </Sheet>
           </div>
         </div>
+
+        {/* Explore mega-panel — one full-width surface listing every
+            secondary group in columns, replacing three separate small
+            dropdown popovers. */}
+        <AnimatePresence>
+          {exploreOpen && (
+            <>
+              <motion.button
+                type="button"
+                aria-label="Close explore menu"
+                onClick={() => setExploreOpen(false)}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 top-[calc(2.25rem+4.5rem)] z-30 hidden bg-black/20 xl:block"
+              />
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.16 }}
+                className="absolute inset-x-0 top-full z-40 hidden border-b border-border bg-background shadow-lg xl:block"
+              >
+                <div className="mx-auto grid w-full max-w-[1680px] grid-cols-3 gap-8 px-8 py-8">
+                  {MENU_GROUPS.map((group) => {
+                    const groupItems = secondaryItems.filter((item) => item.menuGroup === group.key);
+                    return (
+                      <div key={group.key}>
+                        <p className="mb-3 text-caption font-semibold uppercase tracking-wide text-foreground-subtle">{t(group.labelKey)}</p>
+                        <div className="space-y-1">
+                          {groupItems.map((item) =>
+                            item.section ? (
+                              item.section.map((sub) => (
+                                <Link key={sub.key} href={sub.href} className="block rounded-md px-2 py-1.5 text-body-md text-foreground-muted hover:bg-surface-hover hover:text-foreground">
+                                  {t(sub.labelKey)}
+                                </Link>
+                              ))
+                            ) : (
+                              <Link key={item.key} href={item.href} className="flex items-center gap-2 rounded-md px-2 py-1.5 text-body-md text-foreground-muted hover:bg-surface-hover hover:text-foreground">
+                                <item.icon className="h-4 w-4 text-foreground-subtle" aria-hidden="true" />
+                                {t(item.labelKey)}
+                              </Link>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
       </nav>
 
       <EnhancedLoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} onLogin={() => setShowLoginModal(false)} />

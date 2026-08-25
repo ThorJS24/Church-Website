@@ -26,7 +26,7 @@ export function PublicChrome({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main id="main-content" className="grow pt-16 pb-16 md:pb-0" role="main">
+      <main id="main-content" className="grow pt-16 pb-16 sm:pt-[6.75rem] md:pb-0" role="main">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={pathname}

@@ -50,15 +50,19 @@ export default function LegacyGivingPage() {
             </p>
           </div>
 
-          <Grid cols={3} gap={6}>
+          {/* A divided list, matching /give's "ways to give" treatment,
+              rather than a third page opening its options as a card grid. */}
+          <div className="mx-auto max-w-2xl divide-y divide-border border-y border-border">
             {LEGACY_OPTIONS.map((option) => (
-              <Card key={option.title} variant="raised" padding="lg" className="h-full">
-                <option.icon className="mb-4 h-9 w-9 text-accent" aria-hidden="true" />
-                <h3 className="text-title-md text-foreground">{option.title}</h3>
-                <p className="mt-2 text-body-sm text-foreground-muted">{option.description}</p>
-              </Card>
+              <div key={option.title} className="flex gap-4 py-6">
+                <option.icon className="mt-0.5 h-6 w-6 shrink-0 text-accent" aria-hidden="true" />
+                <div>
+                  <h3 className="text-title-md text-foreground">{option.title}</h3>
+                  <p className="mt-1.5 text-body-sm text-foreground-muted">{option.description}</p>
+                </div>
+              </div>
             ))}
-          </Grid>
+          </div>
         </Container>
       </Section>
 

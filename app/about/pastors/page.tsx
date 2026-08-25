@@ -121,32 +121,28 @@ export default function PastorsPage() {
 
       {staff.length > 0 && (
         <Section spacing="lg" className="bg-surface">
-          <div className="mb-10 text-center">
-            <Users2 className="mx-auto mb-4 h-10 w-10 text-accent" aria-hidden="true" />
-            <h2 className="text-headline-md text-foreground">Staff & Leadership Team</h2>
+          <div className="mb-8 flex items-center gap-3">
+            <Users2 className="h-6 w-6 shrink-0 text-accent" aria-hidden="true" />
+            <h2 className="font-serif text-headline-sm text-foreground">Staff &amp; Leadership Team</h2>
           </div>
-          <Grid cols={4} gap={4}>
-            {staff.map((member, index) => (
-              <motion.div
-                key={member.id}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-80px' }}
-                transition={{ delay: index * 0.04, duration: 0.4 }}
-              >
-                <Card padding="md" className="h-full text-center">
-                  <Avatar name={member.name} size="md" className="mx-auto mb-3" />
-                  <h3 className="text-title-sm text-foreground">{member.name}</h3>
-                  <p className="text-body-sm text-foreground-muted">{member.position}</p>
-                  {member.email && (
-                    <a href={`mailto:${member.email}`} className="mt-2 inline-flex items-center gap-1 text-caption text-accent hover:underline dark:text-accent-hover">
-                      <Mail className="h-3 w-3" /> Contact
-                    </a>
-                  )}
-                </Card>
-              </motion.div>
+          {/* A roster list — not a second row of photo cards echoing the
+              pastor grid above. */}
+          <div className="mx-auto grid max-w-3xl divide-y divide-border border-y border-border sm:grid-cols-2 sm:divide-y-0 sm:gap-x-8">
+            {staff.map((member) => (
+              <div key={member.id} className="flex items-center gap-3 py-3">
+                <Avatar name={member.name} size="sm" />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-body-sm font-medium text-foreground">{member.name}</p>
+                  <p className="truncate text-caption text-foreground-subtle">{member.position}</p>
+                </div>
+                {member.email && (
+                  <a href={`mailto:${member.email}`} aria-label={`Email ${member.name}`} className="shrink-0 text-accent hover:text-accent-hover">
+                    <Mail className="h-4 w-4" />
+                  </a>
+                )}
+              </div>
             ))}
-          </Grid>
+          </div>
         </Section>
       )}
 

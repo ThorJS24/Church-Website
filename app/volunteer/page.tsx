@@ -10,7 +10,6 @@ import { PageHero } from '@/components/ui/page-hero';
 import { Section } from '@/components/ui/section';
 import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';
-import { Grid } from '@/components/ui/grid';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -244,9 +243,11 @@ export default function VolunteerPage() {
               <h2 className="text-headline-md text-foreground">Open Volunteer Opportunities</h2>
               <p className="mt-2 text-body-md text-foreground-muted">Sign up for a specific shift below, or fill out a general application</p>
             </div>
-            <Grid cols={2} gap={4}>
+            {/* Shift board: a horizontal-scroll row of open slots reads as
+                "pick one now" rather than a browsing grid of matched cards. */}
+            <div className="-mx-4 flex snap-x gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
               {opportunities.map((opp) => (
-                <Card key={opp.id} variant="raised" padding="lg">
+                <Card key={opp.id} variant="raised" padding="lg" className="w-72 shrink-0 snap-start">
                   {opp.area && <span className="text-label uppercase tracking-wide text-accent">{opp.area}</span>}
                   <h3 className="mt-1 text-title-md text-foreground">{opp.title}</h3>
                   <p className="mt-2 text-body-sm text-foreground-muted">{opp.description}</p>
@@ -258,7 +259,7 @@ export default function VolunteerPage() {
                   <Button size="sm" fullWidth className="mt-4" onClick={() => signUpForShift(opp)}>Sign Up for This</Button>
                 </Card>
               ))}
-            </Grid>
+            </div>
           </Container>
         </Section>
       )}

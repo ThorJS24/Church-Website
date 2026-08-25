@@ -236,13 +236,16 @@ export function SermonsBrowser({ initialSermons, initialSeries, initialSpeakers 
       )}
 
       {featuredSermon && (
-        <Section spacing="lg">
-          <h2 className="mb-8 text-center text-headline-md text-foreground">Latest Sermon</h2>
-          <Card variant="raised" padding="none" className="mx-auto max-w-4xl overflow-hidden">
+        // Same dark theater treatment as the sermon detail page's video
+        // opener, so "latest sermon" reads as a preview of that watching
+        // experience rather than a generic marketing feature card.
+        <Section spacing="lg" className="bg-[#14110d]">
+          <h2 className="mb-8 text-center font-serif text-headline-md text-white">Latest Sermon</h2>
+          <div className="mx-auto max-w-4xl overflow-hidden rounded-xl">
             <div className="md:flex">
-              <div className="relative h-64 shrink-0 bg-surface-active md:h-auto md:w-1/2">
+              <div className="relative h-64 shrink-0 bg-black/40 md:h-auto md:w-1/2">
                 {featuredSermon.imageUrl ? (
-                  <Image src={featuredSermon.imageUrl} alt={featuredSermon.title} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
+                  <Image src={featuredSermon.imageUrl} alt={featuredSermon.title} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover opacity-90" />
                 ) : (
                   <div className="flex h-full items-center justify-center">
                     <BookOpen className="h-12 w-12 text-white/30" />
@@ -262,7 +265,7 @@ export function SermonsBrowser({ initialSermons, initialSeries, initialSpeakers 
                   <Badge variant="neutral" className="absolute bottom-3 right-3 bg-background/90">{featuredSermon.duration} minutes</Badge>
                 )}
               </div>
-              <div className="flex-1 p-8">
+              <div className="flex-1 bg-[#1c1712] p-8 text-white">
                 <div className="mb-2 flex items-center justify-between">
                   {featuredSermon.seriesTitle && seriesIdByTitle.has(featuredSermon.seriesTitle) ? (
                     <Link href={`/sermons/series/${seriesIdByTitle.get(featuredSermon.seriesTitle)}`} className="text-body-sm font-semibold text-accent hover:underline">
@@ -273,11 +276,11 @@ export function SermonsBrowser({ initialSermons, initialSeries, initialSpeakers 
                   )}
                   <Badge variant="warning">Latest</Badge>
                 </div>
-                <h3 className="text-headline-sm text-foreground">{featuredSermon.title}</h3>
-                {featuredSermon.subtitle && <p className="mt-1 text-body-sm text-foreground-muted">{featuredSermon.subtitle}</p>}
-                {featuredSermon.scripture && <p className="mt-3 text-body-sm font-medium text-warm">📖 {featuredSermon.scripture}</p>}
-                {featuredSermon.description && <p className="mt-3 line-clamp-3 text-body-sm text-foreground-muted">{featuredSermon.description}</p>}
-                <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-body-sm text-foreground-muted">
+                <h3 className="font-serif text-headline-sm">{featuredSermon.title}</h3>
+                {featuredSermon.subtitle && <p className="mt-1 text-body-sm text-white/60">{featuredSermon.subtitle}</p>}
+                {featuredSermon.scripture && <p className="mt-3 font-serif text-body-sm italic text-warm">{featuredSermon.scripture}</p>}
+                {featuredSermon.description && <p className="mt-3 line-clamp-3 text-body-sm text-white/70">{featuredSermon.description}</p>}
+                <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-body-sm text-white/60">
                   <span className="flex items-center gap-1.5"><User className="h-3.5 w-3.5" /> {featuredSermon.speakerName}</span>
                   <span className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" /> {new Date(featuredSermon.date).toLocaleDateString()}</span>
                   {featuredSermon.duration && <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> {featuredSermon.duration} min</span>}
@@ -289,7 +292,7 @@ export function SermonsBrowser({ initialSermons, initialSeries, initialSpeakers 
                 )}
               </div>
             </div>
-          </Card>
+          </div>
         </Section>
       )}
 

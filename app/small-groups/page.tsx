@@ -84,13 +84,17 @@ export default function SmallGroupsPage() {
             />
           )
         ) : (
+          /* Discovery grid stays a grid (groups are meant to be compared
+             side by side by day/capacity), but availability is now the
+             loudest signal — a colored left-edge instead of a badge among
+             badges. */
           <Grid cols={3} gap={6}>
             {filteredGroups.map((group, index) => {
               const isFull = typeof group.capacity === 'number' && typeof group.currentMembers === 'number' && group.currentMembers >= group.capacity;
               const spotsLeft = typeof group.capacity === 'number' && typeof group.currentMembers === 'number' ? Math.max(group.capacity - group.currentMembers, 0) : null;
               return (
                 <motion.div key={group.id} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-80px' }} transition={{ delay: Math.min(index * 0.05, 0.3), duration: 0.4 }}>
-                  <Card className="flex h-full flex-col">
+                  <Card className={`flex h-full flex-col border-l-4 ${isFull ? 'border-l-danger' : spotsLeft !== null ? 'border-l-success' : 'border-l-accent'}`}>
                     <div className="flex flex-wrap items-center gap-2">
                       {group.category && <Badge variant="accent">{group.category}</Badge>}
                       {group.lifeStage && <Badge variant="neutral">{group.lifeStage}</Badge>}

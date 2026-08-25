@@ -9,7 +9,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getIdToken } from '@/lib/firebase';
 import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';
-import { Grid } from '@/components/ui/grid';
 import { Avatar } from '@/components/ui/avatar';
 import { EmptyState } from '@/components/ui/states';
 import { WelcomeTourModal } from '@/components/WelcomeTourModal';
@@ -146,49 +145,41 @@ export default function MemberDashboard() {
 
   return (
     <Container size="lg" className="py-10">
-      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-        <h1 className="font-serif text-headline-lg text-foreground">Welcome back, {user.firstName || user.displayName}!</h1>
-        <p className="mt-2 text-body-md text-foreground-muted">Here&apos;s what&apos;s happening in your church community</p>
+      {/* Greeting strip with stats woven inline (small, secondary) instead
+          of four large equal-weight cards competing with the actual
+          content for top-of-page attention. */}
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mb-8 flex flex-wrap items-end justify-between gap-6 border-b border-border pb-6">
+        <div>
+          <h1 className="font-serif text-headline-lg text-foreground">Welcome back, {user.firstName || user.displayName}!</h1>
+          <p className="mt-2 text-body-md text-foreground-muted">Here&apos;s what&apos;s happening in your church community</p>
+        </div>
+        <div className="flex gap-6">
+          {STAT_CARDS.map((stat) => (
+            <div key={stat.key} className="text-right">
+              <p className="text-title-lg text-foreground">{stat.prefix}{stats[stat.key]}</p>
+              <p className="text-caption text-foreground-subtle">{stat.label}</p>
+            </div>
+          ))}
+        </div>
       </motion.div>
 
-      <Grid cols={4} gap={6} className="mb-8">
-        {STAT_CARDS.map((stat, index) => (
-          <motion.div key={stat.key} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: index * 0.05 }}>
-            <Card variant="raised" className="flex items-center gap-4">
-              <stat.icon className={`h-8 w-8 shrink-0 ${stat.color}`} />
-              <div>
-                <p className="text-body-sm text-foreground-muted">{stat.label}</p>
-                <p className="text-title-lg text-foreground">{stat.prefix}{stats[stat.key]}</p>
-              </div>
-            </Card>
-          </motion.div>
+      {/* Quick actions as a compact icon rail — not a grid of cards
+          competing for the same visual weight as real content below. */}
+      <div className="mb-8 flex flex-wrap gap-2">
+        {QUICK_ACTIONS.map((action) => (
+          <a
+            key={action.label}
+            href={action.href}
+            className="flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-body-sm font-medium text-foreground-muted transition-colors hover:border-border-strong hover:text-foreground"
+          >
+            <action.icon className="h-4 w-4 text-accent" /> {action.label}
+          </a>
         ))}
-      </Grid>
+      </div>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <h2 className="mb-4 text-title-lg text-foreground">Quick Actions</h2>
-          <Grid cols={3} gap={4}>
-            {QUICK_ACTIONS.map((action, index) => (
-              <motion.a
-                key={action.label}
-                href={action.href}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-                className="block"
-              >
-                <Card variant="interactive" className="text-center">
-                  <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-lg bg-accent-subtle">
-                    <action.icon className="h-6 w-6 text-accent" />
-                  </div>
-                  <p className="text-body-sm font-medium text-foreground">{action.label}</p>
-                </Card>
-              </motion.a>
-            ))}
-          </Grid>
-
-          <div className="mt-8">
+          <div>
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-title-lg text-foreground">Activity Timeline</h2>
               {recentActivity.length > 0 && (

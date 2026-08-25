@@ -170,36 +170,35 @@ export default function CommunityPage() {
 
       {communityData?.communityResources && communityData.communityResources.length > 0 && (
         <Section spacing="lg">
-          <div className="mb-8 text-center">
-            <Users className="mx-auto mb-4 h-10 w-10 text-accent" aria-hidden="true" />
-            <h2 className="text-headline-md text-foreground">Community Resource Directory</h2>
-            <p className="mt-2 text-body-md text-foreground-muted">Local resources for our church family and neighbors</p>
-          </div>
-          <div className="mx-auto mb-8 flex max-w-md justify-center">
-            <Input placeholder="Search resources..." aria-label="Search community resources" leftIcon={<Search />} value={resourceSearch} onChange={(e) => setResourceSearch(e.target.value)} />
-          </div>
-          {filteredResources.length === 0 ? (
-            <p className="text-center text-body-md text-foreground-muted">No resources match your search.</p>
-          ) : (
-            <Grid cols={3} gap={6}>
-              {filteredResources.map((resource, index) => (
-                <motion.div key={resource.title} {...fadeUp(index * 0.05)}>
-                  <Card className="h-full">
-                    <h3 className="text-title-md text-foreground">{resource.title}</h3>
-                    <p className="mt-2 text-body-sm text-foreground-muted">{resource.description}</p>
-                    {resource.schedule && (
-                      <p className="mt-3 flex items-center gap-2 text-body-sm text-foreground-subtle">
-                        <Calendar className="h-4 w-4" /> {resource.schedule}
-                      </p>
-                    )}
-                    <p className="mt-1.5 flex items-center gap-2 text-body-sm text-accent">
-                      <Phone className="h-4 w-4" /> {resource.contactInfo}
+          <Container size="md">
+            <div className="mb-6 flex items-center gap-3">
+              <Users className="h-6 w-6 shrink-0 text-accent" aria-hidden="true" />
+              <h2 className="text-headline-sm text-foreground">Community Resource Directory</h2>
+            </div>
+            <Input placeholder="Search resources..." aria-label="Search community resources" leftIcon={<Search />} value={resourceSearch} onChange={(e) => setResourceSearch(e.target.value)} className="mb-6 max-w-md" />
+            {filteredResources.length === 0 ? (
+              <p className="text-body-sm text-foreground-muted">No resources match your search.</p>
+            ) : (
+              <div className="divide-y divide-border border-y border-border">
+                {filteredResources.map((resource) => (
+                  <div key={resource.title} className="flex flex-col gap-1 py-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+                    <div>
+                      <h3 className="text-title-sm text-foreground">{resource.title}</h3>
+                      <p className="mt-1 max-w-xl text-body-sm text-foreground-muted">{resource.description}</p>
+                      {resource.schedule && (
+                        <p className="mt-1.5 flex items-center gap-1.5 text-body-sm text-foreground-subtle">
+                          <Calendar className="h-3.5 w-3.5" /> {resource.schedule}
+                        </p>
+                      )}
+                    </div>
+                    <p className="flex shrink-0 items-center gap-1.5 text-body-sm font-medium text-accent">
+                      <Phone className="h-3.5 w-3.5" /> {resource.contactInfo}
                     </p>
-                  </Card>
-                </motion.div>
-              ))}
-            </Grid>
-          )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </Container>
         </Section>
       )}
 
