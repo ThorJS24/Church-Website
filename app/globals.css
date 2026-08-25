@@ -271,6 +271,22 @@ layer(utilities);
   *, ::after, ::before, ::backdrop, ::file-selector-button {
     padding: revert-layer;
     margin: revert-layer;
+    border: revert-layer;
+  }
+}
+
+/* Same regression, two more properties: Preflight's `button, input, select,
+   optgroup, textarea, ::file-selector-button { background-color: transparent }`
+   keeps winning against later utility classes like bg-accent/bg-primary — every
+   native <button> sitewide was rendering with no visible fill or border
+   (confirmed via computed-style inspection in real Chrome: Button components,
+   the Switch control, and the cookie-consent banner all measured
+   background-color: transparent and border-width: 0px despite carrying
+   bg- and border- utility classes). Same fix shape as above, scoped to
+   Preflight's own selector so it wins by source order. */
+@layer base {
+  button, input, select, optgroup, textarea, ::file-selector-button {
+    background-color: revert-layer;
   }
 }
 

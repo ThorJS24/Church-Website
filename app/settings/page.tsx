@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type ElementType, type ReactNode } from 'react';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
-import { Settings, Bell, Shield, User as UserIcon, Eye, EyeOff } from 'lucide-react';
+import { Bell, Shield, User as UserIcon, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getIdToken } from '@/lib/firebase';
 import ConfirmModal from '@/components/admin/ConfirmModal';
@@ -16,6 +16,67 @@ import { LoadingState } from '@/components/ui/states';
 
 type Notifications = { email: boolean; events: boolean; prayers: boolean; newsletter: boolean; sermons: boolean; volunteerOpportunities: boolean };
 type Privacy = { profileVisible: boolean; contactVisible: boolean };
+
+const NOTIFICATION_COPY: Record<keyof Notifications, { label: string; description: string }> = {
+  email: { label: 'Email', description: 'Account notifications and important updates.' },
+  events: { label: 'Events', description: 'Upcoming church events and activities.' },
+  prayers: { label: 'Prayer Requests', description: 'Updates on prayer requests you follow.' },
+  newsletter: { label: 'Newsletter', description: 'Our periodic church newsletter.' },
+  sermons: { label: 'Sermons', description: 'New sermon and message uploads.' },
+  volunteerOpportunities: { label: 'Volunteer Opportunities', description: 'Openings to serve and volunteer.' },
+};
+
+const PRIVACY_COPY: Record<keyof Privacy, { label: string; description: string }> = {
+  profileVisible: { label: 'Profile Visibility', description: 'Allow other members to find and view your profile.' },
+  contactVisible: { label: 'Contact Visibility', description: 'Show your contact information to other members.' },
+};
+
+function SettingsSection({
+  icon: Icon,
+  title,
+  description,
+  children,
+}: {
+  icon: ElementType;
+  title: string;
+  description?: string;
+  children: ReactNode;
+}) {
+  return (
+    <Card variant="flat" padding="none" className="overflow-hidden">
+      <div className="flex items-start gap-3 border-b border-border px-5 py-4">
+        <Icon className="mt-0.5 h-5 w-5 shrink-0 text-accent" />
+        <div>
+          <h2 className="text-title-sm text-foreground">{title}</h2>
+          {description && <p className="mt-0.5 text-body-sm text-foreground-muted">{description}</p>}
+        </div>
+      </div>
+      <div className="divide-y divide-border">{children}</div>
+    </Card>
+  );
+}
+
+function SettingRow({
+  label,
+  description,
+  checked,
+  onChange,
+}: {
+  label: string;
+  description: string;
+  checked: boolean;
+  onChange: () => void;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-6 px-5 py-4">
+      <div className="min-w-0 pr-4">
+        <p className="text-body-md font-medium text-foreground">{label}</p>
+        <p className="mt-0.5 text-body-sm text-foreground-muted">{description}</p>
+      </div>
+      <Switch checked={checked} onChange={onChange} label={`Toggle ${label}`} className="shrink-0" />
+    </div>
+  );
+}
 
 export default function SettingsPage() {
   const { user, isLoading, updateUser, changePassword } = useAuth();
@@ -115,105 +176,103 @@ export default function SettingsPage() {
   if (isLoading || !user) return <LoadingState />;
 
   return (
-    <Container size="md" className="py-10">
-      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-        <Card variant="raised" padding="none">
-          <div className="flex items-center gap-3 border-b border-border p-6">
-            <Settings className="h-6 w-6 text-accent" />
-            <h1 className="font-serif text-headline-sm text-foreground">Settings</h1>
+    <Container size="sm" className="py-12 md:py-16">
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+        <header>
+          <h1 className="font-serif text-headline-sm text-foreground">Settings</h1>
+          <p className="mt-1 text-body-sm text-foreground-muted">Manage your notifications, privacy, and account.</p>
+        </header>
+
+        <SettingsSection icon={Bell} title="Communication Preferences" description="Choose what you'd like to hear from us about.">
+          {(Object.entries(notifications) as [keyof Notifications, boolean][]).map(([key, value]) => (
+            <SettingRow
+              key={key}
+              label={NOTIFICATION_COPY[key].label}
+              description={NOTIFICATION_COPY[key].description}
+              checked={value}
+              onChange={() => setNotifications((prev) => ({ ...prev, [key]: !prev[key] }))}
+            />
+          ))}
+        </SettingsSection>
+
+        <SettingsSection icon={Shield} title="Privacy">
+          {(Object.entries(privacy) as [keyof Privacy, boolean][]).map(([key, value]) => (
+            <SettingRow
+              key={key}
+              label={PRIVACY_COPY[key].label}
+              description={PRIVACY_COPY[key].description}
+              checked={value}
+              onChange={() => setPrivacy((prev) => ({ ...prev, [key]: !prev[key] }))}
+            />
+          ))}
+        </SettingsSection>
+
+        <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center sm:justify-end">
+          {saveStatus === 'success' && <p className="text-body-sm text-success">Settings saved.</p>}
+          {saveStatus === 'error' && <p className="text-body-sm text-danger">Couldn&apos;t save your settings. Please try again.</p>}
+          <Button loading={saving} onClick={handleSave}>{saving ? 'Saving...' : 'Save Changes'}</Button>
+        </div>
+
+        <SettingsSection icon={UserIcon} title="Account">
+          <div className="px-5 py-4">
+            <div className="flex items-center justify-between gap-6">
+              <div className="min-w-0 pr-4">
+                <p className="text-body-md font-medium text-foreground">Password</p>
+                <p className="mt-0.5 text-body-sm text-foreground-muted">Update the password you use to sign in.</p>
+              </div>
+              <Button
+                variant="secondary"
+                size="sm"
+                className="shrink-0"
+                onClick={() => { setShowPasswordForm((v) => !v); setPasswordStatus('idle'); setPasswordError(''); }}
+              >
+                {showPasswordForm ? 'Cancel' : 'Change Password'}
+              </Button>
+            </div>
+
+            {showPasswordForm && (
+              <form onSubmit={handleChangePassword} className="mt-4 max-w-sm space-y-3 border-t border-border pt-4">
+                <Input label="Current Password" type={showPasswords ? 'text' : 'password'} required value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
+                <Input label="New Password" type={showPasswords ? 'text' : 'password'} required value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+                <Input label="Confirm New Password" type={showPasswords ? 'text' : 'password'} required value={confirmNewPassword} onChange={(e) => setConfirmNewPassword(e.target.value)} />
+
+                <button type="button" onClick={() => setShowPasswords((v) => !v)} className="flex items-center gap-1 border-0 bg-transparent p-0 text-caption text-foreground-subtle hover:text-foreground">
+                  {showPasswords ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                  {showPasswords ? 'Hide' : 'Show'} passwords
+                </button>
+
+                {passwordError && <p className="text-body-sm text-danger">{passwordError}</p>}
+                {passwordStatus === 'success' && <p className="text-body-sm text-success">Password changed successfully.</p>}
+
+                <Button type="submit" size="sm" loading={passwordChanging}>{passwordChanging ? 'Changing...' : 'Update Password'}</Button>
+              </form>
+            )}
           </div>
 
-          <div className="space-y-8 p-6">
-            <div>
-              <div className="mb-1 flex items-center gap-2">
-                <Bell className="h-5 w-5 text-foreground-muted" />
-                <h3 className="text-title-md text-foreground">Communication Preferences</h3>
+          <div className="bg-danger-subtle/40 px-5 py-4">
+            <div className="flex items-center justify-between gap-6">
+              <div className="min-w-0 pr-4">
+                <p className="text-body-md font-medium text-danger">Delete Account</p>
+                <p className="mt-0.5 text-body-sm text-foreground-muted">Permanently delete your account and all associated data. This cannot be undone.</p>
               </div>
-              <p className="ml-7 mb-4 text-body-sm text-foreground-muted">Choose what you&apos;d like to hear from us about.</p>
-              <div className="ml-7 space-y-3">
-                {(Object.entries(notifications) as [keyof Notifications, boolean][]).map(([key, value]) => (
-                  <div key={key} className="flex items-center justify-between">
-                    <span className="text-body-sm capitalize text-foreground-muted">{key.replace(/([A-Z])/g, ' $1')}</span>
-                    <Switch checked={value} onChange={() => setNotifications((prev) => ({ ...prev, [key]: !prev[key] }))} label={`Toggle ${key} notifications`} />
-                  </div>
-                ))}
-              </div>
+              <Button
+                variant="danger"
+                size="sm"
+                className="shrink-0"
+                onClick={() => setShowDeleteConfirm(true)}
+                disabled={deleteStatus === 'success'}
+              >
+                Delete Account
+              </Button>
             </div>
-
-            <div>
-              <div className="mb-4 flex items-center gap-2">
-                <Shield className="h-5 w-5 text-foreground-muted" />
-                <h3 className="text-title-md text-foreground">Privacy</h3>
-              </div>
-              <div className="ml-7 space-y-3">
-                {(Object.entries(privacy) as [keyof Privacy, boolean][]).map(([key, value]) => (
-                  <div key={key} className="flex items-center justify-between">
-                    <span className="text-body-sm capitalize text-foreground-muted">{key.replace(/([A-Z])/g, ' $1')}</span>
-                    <Switch checked={value} onChange={() => setPrivacy((prev) => ({ ...prev, [key]: !prev[key] }))} label={`Toggle ${key}`} />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {saveStatus === 'success' && <p className="ml-7 rounded-lg border border-success/30 bg-success-subtle p-3 text-body-sm text-success">Settings saved.</p>}
-            {saveStatus === 'error' && <p className="ml-7 rounded-lg border border-danger/30 bg-danger-subtle p-3 text-body-sm text-danger">Couldn&apos;t save your settings. Please try again.</p>}
-
-            <div className="border-t border-border pt-6">
-              <div className="mb-4 flex items-center gap-2">
-                <UserIcon className="h-5 w-5 text-foreground-muted" />
-                <h3 className="text-title-md text-foreground">Account</h3>
-              </div>
-              <div className="ml-7 space-y-4">
-                <div>
-                  <button
-                    onClick={() => { setShowPasswordForm((v) => !v); setPasswordStatus('idle'); setPasswordError(''); }}
-                    className="text-body-sm font-medium text-accent hover:text-accent-hover"
-                  >
-                    {showPasswordForm ? 'Cancel' : 'Change Password'}
-                  </button>
-
-                  {showPasswordForm && (
-                    <form onSubmit={handleChangePassword} className="mt-4 max-w-sm space-y-3">
-                      <Input label="Current Password" type={showPasswords ? 'text' : 'password'} required value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
-                      <Input label="New Password" type={showPasswords ? 'text' : 'password'} required value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
-                      <Input label="Confirm New Password" type={showPasswords ? 'text' : 'password'} required value={confirmNewPassword} onChange={(e) => setConfirmNewPassword(e.target.value)} />
-
-                      <button type="button" onClick={() => setShowPasswords((v) => !v)} className="flex items-center gap-1 text-caption text-foreground-subtle hover:text-foreground">
-                        {showPasswords ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                        {showPasswords ? 'Hide' : 'Show'} passwords
-                      </button>
-
-                      {passwordError && <p className="text-body-sm text-danger">{passwordError}</p>}
-                      {passwordStatus === 'success' && <p className="text-body-sm text-success">Password changed successfully.</p>}
-
-                      <Button type="submit" size="sm" loading={passwordChanging}>{passwordChanging ? 'Changing...' : 'Update Password'}</Button>
-                    </form>
-                  )}
-                </div>
-
-                <div>
-                  <button
-                    onClick={() => setShowDeleteConfirm(true)}
-                    disabled={deleteStatus === 'success'}
-                    className="text-body-sm font-medium text-danger hover:text-danger/80 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    Delete Account
-                  </button>
-                  {deleteStatus === 'success' && (
-                    <p className="mt-2 text-body-sm text-success">Deletion request submitted. Our staff will review it and follow up with you by email.</p>
-                  )}
-                  {deleteStatus === 'error' && (
-                    <p className="mt-2 text-body-sm text-danger">Couldn&apos;t submit your deletion request. Please try again or contact us directly.</p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="border-t border-border pt-6">
-              <Button loading={saving} onClick={handleSave}>{saving ? 'Saving...' : 'Save Settings'}</Button>
-            </div>
+            {deleteStatus === 'success' && (
+              <p className="mt-3 text-body-sm text-success">Deletion request submitted. Our staff will review it and follow up with you by email.</p>
+            )}
+            {deleteStatus === 'error' && (
+              <p className="mt-3 text-body-sm text-danger">Couldn&apos;t submit your deletion request. Please try again or contact us directly.</p>
+            )}
           </div>
-        </Card>
+        </SettingsSection>
       </motion.div>
 
       <ConfirmModal
