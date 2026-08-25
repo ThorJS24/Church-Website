@@ -39,24 +39,38 @@ chrome) were found and fixed at the component level — see `PROJECT_STATE.md` �
     is a content/data issue, not a redesign bug — the grouping UI is there and
     will activate once ministry docs carry real category values. Left as-is per
     "preserve functionality, don't invent new backend behavior."
+- `/give` — "Your Impact" section converted from a 4-card icon grid to a
+  bordered stat-strip (amount-first, icon inline). The page had three
+  consecutive sections using the same icon-card pattern (Ways to Give, Your
+  Impact, Why We Give); this breaks the repetition for one of them. "Ways to
+  Give" and "Why We Give" still use card/icon layouts and are candidates for
+  a follow-up pass. No functional change; verified in real Chrome.
 
 ---
 
 ## Currently being rebuilt
 
-Nothing in-flight at the end of this session.
+Nothing in-flight at the end of this session. Checked via grep for the same
+generic icon-card pattern and still open: `/about/pastors`, `/community`,
+`/services`, and the rest of `/give` (Ways to Give / Why We Give sections).
+`/about/beliefs` was checked and is already reasonably differentiated
+per-section (mission/vision cards, values grid, belief checklist, accordion
+FAQ) — not a priority.
 
 ---
 
 ## Remaining areas (by blueprint phase)
 
 **Phase 4/5 — Public pages**, still on the pre-rebuild/second-rebuild reskin,
-not yet given first-principles treatment: `/about/*` (beliefs, branches,
-history, pastors), `/events` + `/events/[id]`, `/sermons` + detail + series,
+not yet given first-principles treatment: `/about/branches`, `/about/history`,
+`/about/pastors`, `/events/[id]`, `/sermons` + detail + series,
 `/services` + request/status, `/blog` + detail/author/category, `/gallery`,
-`/give` + `/give/legacy`, `/prayer`, `/testimonials`, `/resources`,
+`/give/legacy`, `/prayer`, `/testimonials`, `/resources`,
 `/small-groups` + detail, `/community`, `/contact`, `/newsletter/*`,
 `/volunteer`, `/login`, `/register`, `/privacy`, `/terms`.
+`/events` list was checked this session and left alone — it already uses a
+distinct photo-driven card layout appropriate to event browsing, not the
+generic icon-card pattern.
 
 **Phase 6 — Member experience**: `/dashboard`, `/profile`. Not yet redesigned;
 `/settings` is the only member-area page done so far, and it should not be
