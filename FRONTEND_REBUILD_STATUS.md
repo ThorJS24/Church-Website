@@ -39,12 +39,13 @@ chrome) were found and fixed at the component level — see `PROJECT_STATE.md` �
     is a content/data issue, not a redesign bug — the grouping UI is there and
     will activate once ministry docs carry real category values. Left as-is per
     "preserve functionality, don't invent new backend behavior."
-- `/give` — "Your Impact" section converted from a 4-card icon grid to a
-  bordered stat-strip (amount-first, icon inline). The page had three
-  consecutive sections using the same icon-card pattern (Ways to Give, Your
-  Impact, Why We Give); this breaks the repetition for one of them. "Ways to
-  Give" and "Why We Give" still use card/icon layouts and are candidates for
-  a follow-up pass. No functional change; verified in real Chrome.
+- `/give` — done. "Your Impact" is now a bordered stat-strip (amount-first,
+  icon inline), "Ways to Give" is a connected vertical stepper (icon
+  medallion + line). "Why We Give" was left as plain centered icon+text
+  (no card wrapper, already reads distinctly from the other two). Fund
+  selector cards, transparency bars, and legacy-giving card untouched — each
+  already a distinct treatment. No functional change; verified in real
+  Chrome at both steps.
 - `/community` — the page repeated the same "centered icon + heading + card
   grid" block five times in a row. Rewrote two: Missions & Local Outreach is
   now a divided list (location pinned right) instead of a 3-card grid;
@@ -71,7 +72,8 @@ centered auth card — the right composition for a single form, not the
 collage anti-pattern), `/testimonials`, `/small-groups`, `/volunteer`,
 `/resources`, `/prayer` (each a single-purpose listing page with one grid
 suited to its content, same idiom as `/events` — not the repeated-pattern
-issue).
+issue). `/sermons` (grid/timeline view toggle, featured-sermon card, video
+thumbnails). `/gallery` (masonry layout, not a card grid).
 
 ---
 
@@ -85,11 +87,15 @@ Nothing in-flight at the end of this session.
 
 **Phase 4/5 — Public pages**, still on the pre-rebuild/second-rebuild reskin,
 not yet given first-principles treatment or a redesign-candidacy check:
-`/events/[id]`, `/sermons` + detail + series, `/services/request` +
-`/services/request/status`, `/blog` + detail/author/category, `/gallery`,
-`/give/legacy`, `/newsletter/*`, `/register`, `/privacy`, `/terms`.
-Also worth a second pass: `/give`'s remaining "Ways to Give" and
-"Why We Give" sections (still icon-card grids).
+`/events/[id]`, `/sermons/[id]`, `/sermons/series/[id]`,
+`/services/request` + `/services/request/status`, `/blog` + detail/author/
+category, `/give/legacy`, `/newsletter/*`, `/register`, `/privacy`, `/terms`.
+
+**Public page audit is essentially complete for the list pages.** Every
+top-level public listing page has now been either redesigned or checked and
+confirmed already-differentiated (see above). What's left in Phase 4/5 is
+mostly detail/sub-pages (`[id]` routes) and legal/utility pages, which are
+lower-traffic and lower design-risk than the list pages just covered.
 
 **Phase 6 — Member experience**: `/dashboard`, `/profile`. Not yet redesigned;
 `/settings` is the only member-area page done so far, and it should not be
