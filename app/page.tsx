@@ -69,6 +69,7 @@ export default async function Home() {
       <HeroSection
         churchName={siteSettings?.churchName || 'Salem Primitive Baptist Church'}
         tagline={siteSettings?.tagline || 'A place where faith meets community, and hope comes alive.'}
+        nextService={nextService ?? null}
       />
 
       {/* Today's verse + next service */}
