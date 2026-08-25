@@ -107,9 +107,43 @@ edit-in-place profile card with a completeness meter, distinct from both
 concern about the member area looking like the public site does not hold
 up against the actual code.
 
-**Phase 8 — Admin**: not yet audited this session. All 10 `/admin/*`
-screens are still on the second-rebuild's shared-component reskin — next
-priority.
+**Phase 8 — Admin**: audited this session, logged in as a real
+`super_admin` account (credentials supplied by the user) — the first time
+in this session any admin-only screen could be visually verified.
+`AdminLayout` (collapsible sidebar, breadcrumbs, command palette, role
+badge) and every screen checked (`/admin` dashboard, `/admin/users`,
+`/admin/content`, `/admin/moderation`, `/admin/settings`, `/admin/media`,
+`/admin/forms`, `/admin/newsletter`, `/admin/messages`, `/admin/audit-log`)
+already have a dense, purpose-built admin IA — stat rows, real data
+tables with filters/CSV/columns, a moderation queue, a filterable audit
+log. None needed a first-principles redesign; the second rebuild's
+`GenericContentTab`/`DataTable` reskin already covers this well. **No
+further Phase 8 redesign work identified.**
+
+Two real, sitewide bugs were caught during this admin pass (only visible
+with a live admin session) and fixed at the shared-component level, not
+patched per-page:
+- **`components/ui/tabs.tsx`**: `TabsTrigger` used `h-[calc(100%-1px)]`
+  to fill `TabsList`'s fixed `h-8`. `/admin/content`'s 18+ content-type
+  tabs need `TabsList` to wrap (`h-auto flex-wrap`), which turned the
+  trigger's percentage height into a circular reference the browser
+  resolved to ~360px — every tab rendered as a giant blank rectangle.
+  Fixed by giving the trigger a fixed `h-8` instead. Affects every `Tabs`
+  usage, not just this page.
+- **`app/globals.css`**: `@tailwindcss/forms`' own
+  `[type=checkbox]:checked` / `[type=radio]:checked` base styles
+  (blue-600 color, `background-color: currentColor`) beat this app's
+  `checked:bg-accent`/`checked:border-accent` utilities — every checked
+  checkbox sitewide (not just admin) rendered browser-default blue
+  instead of the accent color. This is the same class of cascade-layer
+  regression as the three pre-existing fixes in this file (padding/
+  margin/border, button background/radius, button-link color); fixed the
+  same way. `components/ui/checkbox.tsx` is used sitewide (Settings,
+  AccessibilityMenu, contact/community forms), so this fix isn't
+  admin-only either.
+
+Both confirmed via computed-style inspection and real-Chrome screenshots
+while logged in as super_admin.
 
 **Phase 9 — Responsive**: verify each page above at the 6 standard breakpoints
 as it's redesigned, not as a separate pass at the end.
