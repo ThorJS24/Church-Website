@@ -124,41 +124,43 @@ export default function CommunityPage() {
 
       {communityData?.missions && communityData.missions.length > 0 && (
         <Section spacing="lg">
-          <div className="mb-10 text-center">
-            <Globe className="mx-auto mb-4 h-10 w-10 text-accent" aria-hidden="true" />
-            <h2 className="text-headline-md text-foreground">Missions &amp; Local Outreach</h2>
-          </div>
-          <Grid cols={3} gap={6}>
-            {communityData.missions.map((mission, index) => (
-              <motion.div key={mission.title} {...fadeUp(index * 0.05)}>
-                <Card className="h-full">
-                  <h3 className="text-title-md text-foreground">{mission.title}</h3>
-                  <p className="mt-2 text-body-sm text-foreground-muted">{mission.description}</p>
-                  <p className="mt-3 flex items-center gap-2 text-body-sm text-accent">
+          <Container size="md">
+            <div className="mb-10 flex items-center gap-3">
+              <Globe className="h-7 w-7 shrink-0 text-accent" aria-hidden="true" />
+              <h2 className="text-headline-md text-foreground">Missions &amp; Local Outreach</h2>
+            </div>
+            <div className="divide-y divide-border border-y border-border">
+              {communityData.missions.map((mission, index) => (
+                <motion.div key={mission.title} {...fadeUp(index * 0.05)} className="flex flex-col gap-2 py-6 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+                  <div>
+                    <h3 className="text-title-md text-foreground">{mission.title}</h3>
+                    <p className="mt-2 max-w-2xl text-body-sm text-foreground-muted">{mission.description}</p>
+                  </div>
+                  <p className="flex shrink-0 items-center gap-2 text-body-sm font-medium text-accent">
                     <MapPin className="h-4 w-4" /> {mission.location}
                   </p>
-                </Card>
-              </motion.div>
-            ))}
-          </Grid>
+                </motion.div>
+              ))}
+            </div>
+          </Container>
         </Section>
       )}
 
       {communityData?.outreachStories && communityData.outreachStories.length > 0 && (
         <Section spacing="lg" className="bg-surface">
           <div className="mb-10 text-center">
-            <Heart className="mx-auto mb-4 h-10 w-10 text-accent" aria-hidden="true" />
             <h2 className="text-headline-md text-foreground">Outreach Stories</h2>
+            <p className="mt-2 text-body-md text-foreground-muted">Recent stories of how our congregation has shown up for our neighbors</p>
           </div>
           <Grid cols={2} gap={6}>
             {communityData.outreachStories.map((story, index) => (
               <motion.div key={story.title} {...fadeUp(index * 0.05)}>
-                <Card className="h-full">
-                  <h3 className="text-title-md text-foreground">{story.title}</h3>
-                  <p className="mt-2 text-body-sm text-foreground-muted">{story.story}</p>
-                  <p className="mt-3 flex items-center gap-2 text-body-sm text-foreground-subtle">
-                    <Calendar className="h-4 w-4" /> {new Date(story.date).toLocaleDateString()}
+                <Card className="h-full border-l-4 border-l-accent">
+                  <p className="text-caption font-medium uppercase tracking-wide text-foreground-subtle">
+                    {new Date(story.date).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
                   </p>
+                  <h3 className="mt-1.5 text-title-md text-foreground">{story.title}</h3>
+                  <p className="mt-2 text-body-sm text-foreground-muted">{story.story}</p>
                 </Card>
               </motion.div>
             ))}
