@@ -3,6 +3,7 @@
 import { Type, Contrast } from 'lucide-react';
 import { useAccessibility } from '@/contexts/AccessibilityContext';
 import { IconButton } from '@/components/ui/icon-button';
+import type { ButtonSize } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import {
@@ -15,7 +16,7 @@ const TEXT_SIZES = [
   { value: 'larger' as const, label: 'A', className: 'text-lg' },
 ];
 
-export function AccessibilityMenu() {
+export function AccessibilityMenu({ size }: { size?: ButtonSize }) {
   const a11y = useAccessibility();
   if (!a11y) return null;
   const { textSize, setTextSize, highContrast, toggleHighContrast } = a11y;
@@ -23,7 +24,7 @@ export function AccessibilityMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <IconButton label="Accessibility settings">
+        <IconButton label="Accessibility settings" size={size}>
           <Type />
         </IconButton>
       </DropdownMenuTrigger>

@@ -153,19 +153,20 @@ export default function Navbar() {
       <nav
         ref={navRef}
         className={cn(
-          'fixed left-0 right-0 top-0 z-40 h-16 border-b transition-colors duration-base ease-standard',
-          scrolled ? 'border-border bg-background/90 shadow-sm backdrop-blur-md' : 'border-transparent bg-background'
+          'fixed left-0 right-0 top-0 z-40 h-20 transition-colors duration-base ease-standard',
+          scrolled ? 'border-b border-border bg-background/90 shadow-sm backdrop-blur-md' : 'border-b-0 bg-background'
         )}
       >
-        <div className="mx-auto flex h-full w-full max-w-[1680px] items-center justify-between px-4 sm:px-6 lg:px-8">
-          {/* Logo */}
-          <div className="flex items-center gap-3">
+        <div className="mx-auto flex h-full w-full max-w-[1680px] items-center gap-3 px-4 sm:px-6 lg:px-8">
+          {/* Brand — the strongest element on the left; a real organization
+              identity (name + tagline), not an app logo mark. */}
+          <div className="flex shrink-0 items-center gap-3">
             <Link href="/" className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent">
-                <Church className="h-5 w-5 text-accent-foreground" aria-hidden="true" />
+              <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-accent">
+                <Church className="h-6 w-6 text-accent-foreground" aria-hidden="true" />
               </div>
               <div className="hidden leading-tight sm:block">
-                <p className="font-serif text-title-sm text-foreground">Salem PBC</p>
+                <p className="font-serif text-title-md text-foreground">Salem PBC</p>
                 <p className="text-caption text-foreground-subtle">{t('nav.tagline')}</p>
               </div>
             </Link>
@@ -180,13 +181,16 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Desktop navigation — reveals at xl (1280px), not lg (1024px):
-              About/Get Involved/Connect used to be nested inside one "More"
-              revealer; now each is its own top-level dropdown, which needs
-              more room than the 1024px floor has to spare. The mobile Sheet
-              menu's trigger below is gated the same way (xl:hidden) so it
-              covers the 1024-1279px gap this leaves. */}
-          <div className="hidden items-center gap-1 xl:flex">
+          {/* Primary navigation — centered in the remaining space between
+              brand and utilities, rather than packed left, so it reads as
+              the header's main content instead of one more control cluster.
+              Reveals at xl (1280px), not lg (1024px): About/Get Involved/
+              Connect used to be nested inside one "More" revealer; now each
+              is its own top-level dropdown, which needs more room than the
+              1024px floor has to spare. The mobile Sheet menu's trigger
+              below is gated the same way (xl:hidden) so it covers the
+              1024-1279px gap this leaves. */}
+          <div className="hidden flex-1 items-center justify-center gap-1 xl:flex">
             {primaryItems.map((item) => {
               const active = isActive(item.href);
               return (
@@ -194,7 +198,7 @@ export default function Navbar() {
                   key={item.key}
                   href={item.href}
                   className={cn(
-                    'relative rounded-md px-2.5 py-2 text-body-sm font-medium whitespace-nowrap transition-colors duration-fast',
+                    'relative rounded-md px-3 py-2 text-body-sm font-medium whitespace-nowrap transition-colors duration-fast',
                     active ? 'text-accent' : 'text-foreground-muted hover:text-foreground'
                   )}
                 >
@@ -221,12 +225,12 @@ export default function Navbar() {
                     <button
                       type="button"
                       className={cn(
-                        'flex items-center gap-1 whitespace-nowrap rounded-md px-2.5 py-2 text-body-sm font-medium transition-colors duration-fast',
+                        'flex items-center gap-1 whitespace-nowrap rounded-md border-0 bg-transparent px-3 py-2 text-body-sm font-medium transition-colors duration-fast',
                         groupActive ? 'text-accent' : 'text-foreground-muted hover:text-foreground'
                       )}
                     >
                       <span>{t(group.labelKey)}</span>
-                      <ChevronDown className="h-4 w-4" aria-hidden="true" />
+                      <ChevronDown className="h-3.5 w-3.5 opacity-60" aria-hidden="true" />
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start" className="min-w-56 p-2">
@@ -250,37 +254,39 @@ export default function Navbar() {
             })}
           </div>
 
-          {/* Right actions */}
-          <div className="flex items-center gap-1.5">
+          {/* Utilities — visually quieter than primary nav: smaller icon
+              scale, no borders/fills of their own, and Search reads as a
+              nav-style text link rather than a command-palette input. */}
+          <div className="flex shrink-0 items-center gap-0.5">
             <button
               type="button"
               onClick={() => setShowCommandPalette(true)}
-              className="hidden items-center gap-2 rounded-md border border-border bg-surface px-3 py-1.5 text-body-sm text-foreground-subtle transition-colors duration-fast hover:border-border-strong hover:text-foreground md:flex"
+              className="hidden items-center gap-1.5 whitespace-nowrap rounded-md border-0 bg-transparent px-2.5 py-2 text-body-sm font-medium text-foreground-muted transition-colors duration-fast hover:text-foreground 2xl:flex"
             >
               <Search className="h-4 w-4" aria-hidden="true" />
               <span>{t('common.search') || 'Search'}</span>
-              <kbd aria-hidden="true" className="ml-2 hidden rounded border border-border bg-background px-1.5 py-0.5 text-caption 2xl:inline">⌘K</kbd>
+              <kbd aria-hidden="true" className="ml-1 hidden text-caption text-foreground-subtle 2xl:inline">⌘K</kbd>
             </button>
-            <IconButton label={t('common.search') || 'Search'} size="md" className="md:hidden" onClick={() => setShowCommandPalette(true)}>
+            <IconButton label={t('common.search') || 'Search'} size="sm" className="2xl:hidden" onClick={() => setShowCommandPalette(true)}>
               <Search />
             </IconButton>
 
-            <IconButton label={t('nav.toggleTheme')} onClick={toggleTheme}>
+            <IconButton label={t('nav.toggleTheme')} size="sm" onClick={toggleTheme}>
               {theme === 'light' ? <Moon /> : <Sun />}
             </IconButton>
 
-            <AccessibilityMenu />
+            <AccessibilityMenu size="sm" />
 
-            <NotificationBell />
+            <NotificationBell size="sm" />
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
                   aria-label="Language"
-                  className="flex h-10 w-10 items-center justify-center rounded-md text-foreground-muted transition-colors duration-fast hover:bg-surface-hover hover:text-foreground"
+                  className="flex h-8 w-8 items-center justify-center rounded-md border-0 bg-transparent text-foreground-muted transition-colors duration-fast hover:bg-surface-hover hover:text-foreground"
                 >
-                  <Globe className="h-5 w-5" aria-hidden="true" />
+                  <Globe className="h-4 w-4" aria-hidden="true" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -293,7 +299,12 @@ export default function Navbar() {
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
+          </div>
 
+          {/* Account — separated from utilities by a hairline so the
+              hierarchy (nav > utilities > account) reads at a glance
+              instead of one undifferentiated row of controls. */}
+          <div className="ml-0.5 flex shrink-0 items-center gap-2 border-l border-border pl-2.5">
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -365,7 +376,7 @@ export default function Navbar() {
                           <ShieldCheck className="h-5 w-5 text-foreground-subtle" aria-hidden="true" /> Admin Dashboard
                         </Link>
                       )}
-                      <button type="button" onClick={logout} className="flex w-full items-center gap-3 rounded-md px-3 py-3 text-body-md font-medium text-danger">
+                      <button type="button" onClick={logout} className="flex w-full items-center gap-3 rounded-md border-0 bg-transparent px-3 py-3 text-body-md font-medium text-danger">
                         <LogOut className="h-5 w-5" aria-hidden="true" /> {t('nav.logout')}
                       </button>
                     </div>
@@ -381,7 +392,7 @@ export default function Navbar() {
                             type="button"
                             onClick={() => setMobileSection(open ? null : item.key)}
                             className={cn(
-                              'flex w-full items-center justify-between rounded-md px-3 py-3 text-body-md font-medium transition-colors',
+                              'flex w-full items-center justify-between rounded-md border-0 bg-transparent px-3 py-3 text-body-md font-medium transition-colors',
                               active ? 'text-accent' : 'text-foreground'
                             )}
                           >

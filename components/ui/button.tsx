@@ -9,17 +9,21 @@ import { motion, type HTMLMotionProps } from 'motion/react';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-  'group/button inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*="size-"])]:size-4',
+  'group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*="size-"])]:size-4',
   {
     variants: {
       variant: {
-        primary: 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-xs',
+        // globals.css sets a global unlayered `* { border-color }` default
+        // (see its comment) — unlayered CSS always beats layered utility
+        // classes, so `border-transparent` can never win here. The only
+        // reliable way to render no border at all is zeroing the WIDTH.
+        primary: 'border-0 bg-primary text-primary-foreground hover:bg-primary/90 shadow-xs',
         secondary: 'bg-secondary text-secondary-foreground border-border hover:bg-muted',
         outline: 'border-border bg-background text-foreground hover:bg-muted hover:text-foreground',
-        ghost: 'text-foreground hover:bg-muted hover:text-foreground',
-        danger: 'bg-destructive text-white hover:bg-destructive/90 shadow-xs',
-        warm: 'bg-warm text-warm-foreground hover:brightness-110 shadow-xs',
-        link: 'text-primary underline-offset-4 hover:underline',
+        ghost: 'border-0 text-foreground hover:bg-muted hover:text-foreground',
+        danger: 'border-0 bg-destructive text-white hover:bg-destructive/90 shadow-xs',
+        warm: 'border-0 bg-warm text-warm-foreground hover:brightness-110 shadow-xs',
+        link: 'border-0 text-primary underline-offset-4 hover:underline',
       },
       size: {
         sm: 'h-8 gap-1.5 px-3 text-body-sm rounded-md',

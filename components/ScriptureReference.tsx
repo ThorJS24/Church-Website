@@ -62,7 +62,14 @@ export default function ScriptureReference({ reference, verse, version = 'NKJV' 
                   "{verse}"
                 </div>
               </div>
-              <div className="absolute top-full left-1/2 -translate-x-1/2 border-x-4 border-t-4 border-transparent border-t-border" />
+              {/* Inline style, not border-transparent/border-t-border: globals.css's
+                  unlayered `* { border-color }` default beats layered utility
+                  classes on every side equally, which would fill in the
+                  triangle's transparent left/right sides too. */}
+              <div
+                className="absolute top-full left-1/2 -translate-x-1/2 border-x-4 border-t-4"
+                style={{ borderLeftColor: 'transparent', borderRightColor: 'transparent', borderTopColor: 'rgb(var(--border))' }}
+              />
             </div>
           </motion.div>
         )}

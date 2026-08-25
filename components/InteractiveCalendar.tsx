@@ -162,7 +162,11 @@ export default function InteractiveCalendar() {
               // not be a <button> (an empty disabled button has no
               // accessible name and fails WCAG 4.1.2 / axe's button-name
               // check).
-              return <div key={index} className="min-h-20 rounded-lg border border-transparent" aria-hidden="true" />;
+              // Inline style, not the border-transparent utility: globals.css
+              // sets an unlayered `* { border-color }` default that always
+              // beats layered utility classes, so only an inline style can
+              // actually force this border invisible.
+              return <div key={index} className="min-h-20 rounded-lg border" style={{ borderColor: 'transparent' }} aria-hidden="true" />;
             }
 
             const dayEvents = getEventsForDay(day);

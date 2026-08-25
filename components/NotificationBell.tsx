@@ -6,6 +6,7 @@ import { Bell } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getIdToken } from '@/lib/firebase';
 import { IconButton } from '@/components/ui/icon-button';
+import type { ButtonSize } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/states';
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel,
@@ -20,7 +21,7 @@ interface NotificationItem {
   createdAt: string | null;
 }
 
-export function NotificationBell() {
+export function NotificationBell({ size }: { size?: ButtonSize }) {
   const { user } = useAuth();
   const [items, setItems] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -59,7 +60,7 @@ export function NotificationBell() {
     <DropdownMenu onOpenChange={(open) => open && load()}>
       <DropdownMenuTrigger asChild>
         <div className="relative">
-          <IconButton label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}>
+          <IconButton label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`} size={size}>
             <Bell />
           </IconButton>
           {unreadCount > 0 && (
