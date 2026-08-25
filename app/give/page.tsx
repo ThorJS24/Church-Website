@@ -152,17 +152,21 @@ export default function GivePage() {
           <h2 className={cn('text-headline-md text-foreground', tamilFont)}>{t('give.yourImpact')}</h2>
           <p className={cn('mt-2 text-body-md text-foreground-muted', tamilFont)}>{t('give.yourImpactSubtitle')}</p>
         </div>
-        <Grid cols={4} gap={6}>
-          {impactData.map((area) => (
-            <Card key={area.titleKey} className="text-center">
-              <area.icon className="mx-auto mb-4 h-10 w-10 text-accent" />
-              <h3 className={cn('text-title-md text-foreground', tamilFont)}>{t(area.titleKey)}</h3>
-              <p className={cn('mt-2 text-body-sm text-foreground-muted', tamilFont)}>{t(area.descKey)}</p>
-              <div className="mt-4 text-headline-sm text-accent">{area.amount}</div>
-              <div className={cn('text-caption text-foreground-subtle', tamilFont)}>{area.amount !== '∞' ? t('give.raisedThisYear') : t('give.godsProvision')}</div>
-            </Card>
-          ))}
-        </Grid>
+        <Container size="lg">
+          <div className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-background sm:grid sm:grid-cols-4 sm:divide-x sm:divide-y-0">
+            {impactData.map((area) => (
+              <div key={area.titleKey} className="flex items-start gap-4 p-6">
+                <area.icon className="mt-1 h-6 w-6 shrink-0 text-accent" />
+                <div>
+                  <div className="text-headline-sm text-accent">{area.amount}</div>
+                  <h3 className={cn('mt-1 text-title-sm text-foreground', tamilFont)}>{t(area.titleKey)}</h3>
+                  <p className={cn('mt-1 text-body-sm text-foreground-muted', tamilFont)}>{t(area.descKey)}</p>
+                  <div className={cn('mt-1.5 text-caption text-foreground-subtle', tamilFont)}>{area.amount !== '∞' ? t('give.raisedThisYear') : t('give.godsProvision')}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Container>
       </Section>
 
       {(() => {
