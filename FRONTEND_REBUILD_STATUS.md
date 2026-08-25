@@ -97,14 +97,19 @@ confirmed already-differentiated (see above). What's left in Phase 4/5 is
 mostly detail/sub-pages (`[id]` routes) and legal/utility pages, which are
 lower-traffic and lower design-risk than the list pages just covered.
 
-**Phase 6 — Member experience**: `/dashboard`, `/profile`. Not yet redesigned;
-`/settings` is the only member-area page done so far, and it should not be
-treated as proof the others are — `PROJECT_STATE.md` explicitly flags that the
-member experience needs its own information hierarchy, not "public site + a
-profile icon."
+**Phase 6 — Member experience**: checked this session. `/dashboard`
+(`components/MemberDashboard.tsx`) already has a genuine dashboard
+hierarchy — stat-card row, quick-actions grid, filterable activity
+timeline, saved-items library, sidebar profile card + ministry
+involvement — not "public site with a profile icon." `/profile` is an
+edit-in-place profile card with a completeness meter, distinct from both
+`/dashboard` and `/settings`. Neither needed changes; `PROJECT_STATE.md`'s
+concern about the member area looking like the public site does not hold
+up against the actual code.
 
-**Phase 8 — Admin**: all 10 `/admin/*` screens are on the second-rebuild's
-shared-component reskin, not a first-principles admin IA pass.
+**Phase 8 — Admin**: not yet audited this session. All 10 `/admin/*`
+screens are still on the second-rebuild's shared-component reskin — next
+priority.
 
 **Phase 9 — Responsive**: verify each page above at the 6 standard breakpoints
 as it's redesigned, not as a separate pass at the end.
