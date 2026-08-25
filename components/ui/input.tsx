@@ -82,8 +82,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               'disabled:opacity-50 disabled:cursor-not-allowed',
               error ? 'border-danger' : 'border-border',
               SIZE_CLASSES[size],
-              leftIcon ? 'pl-9' : SIZE_PL[size],
-              rightIcon ? 'pr-9' : SIZE_PR[size],
+              leftIcon ? 'pl-10' : SIZE_PL[size],
+              rightIcon ? 'pr-10' : SIZE_PR[size],
               className
             )}
             {...props}
