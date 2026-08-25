@@ -77,36 +77,51 @@ export default function GivePage() {
             <p className={cn('mt-2 text-body-md text-foreground-muted', tamilFont)}>{t('give.waysToGiveSubtitle')}</p>
           </div>
 
-          <Grid cols={3} gap={6} className="mb-12">
-            <Card variant="raised" padding="lg">
-              <Landmark className="mb-4 h-9 w-9 text-accent" />
-              <h3 className={cn('text-title-md text-foreground', tamilFont)}>{t('give.bankTransferTitle')}</h3>
-              <p className={cn('mt-2 text-body-sm text-foreground-muted', tamilFont)}>
-                {/* TODO (church staff): replace this with the church's real bank account
-                    details (account name, number, IFSC/routing, bank branch) once provided.
-                    Do not publish placeholder account numbers in the meantime. */}
-                {t('give.bankTransferBodyPrefix')}{' '}
-                {siteSettings?.phoneNumber ? (
-                  <>{t('give.call')} <a href={`tel:${siteSettings.phoneNumber}`} className="text-accent underline">{siteSettings.phoneNumber}</a> {t('give.or')} </>
-                ) : null}
-                <Link href="/contact" className="text-accent underline">{t('give.contactUs')}</Link> {t('give.bankTransferBodySuffix')}
-              </p>
-            </Card>
+          <div className="relative mb-12">
+            <div className="absolute left-6 top-6 bottom-6 hidden w-px bg-border sm:block" aria-hidden="true" />
+            <div className="space-y-8">
+              <div className="relative flex gap-5 sm:pl-0">
+                <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-accent-subtle">
+                  <Landmark className="h-5 w-5 text-accent" />
+                </div>
+                <div className="pt-1.5">
+                  <h3 className={cn('text-title-md text-foreground', tamilFont)}>{t('give.bankTransferTitle')}</h3>
+                  <p className={cn('mt-1.5 text-body-sm text-foreground-muted', tamilFont)}>
+                    {/* TODO (church staff): replace this with the church's real bank account
+                        details (account name, number, IFSC/routing, bank branch) once provided.
+                        Do not publish placeholder account numbers in the meantime. */}
+                    {t('give.bankTransferBodyPrefix')}{' '}
+                    {siteSettings?.phoneNumber ? (
+                      <>{t('give.call')} <a href={`tel:${siteSettings.phoneNumber}`} className="text-accent underline">{siteSettings.phoneNumber}</a> {t('give.or')} </>
+                    ) : null}
+                    <Link href="/contact" className="text-accent underline">{t('give.contactUs')}</Link> {t('give.bankTransferBodySuffix')}
+                  </p>
+                </div>
+              </div>
 
-            <Card variant="raised" padding="lg">
-              <Building className="mb-4 h-9 w-9 text-accent" />
-              <h3 className={cn('text-title-md text-foreground', tamilFont)}>{t('give.inPersonTitle')}</h3>
-              <p className={cn('mt-2 text-body-sm text-foreground-muted', tamilFont)}>{t('give.inPersonBody')}</p>
-              <Link href="/services" className={cn('mt-3 inline-block text-body-sm font-semibold text-accent hover:underline dark:text-accent-hover', tamilFont)}>{t('give.viewServiceTimes')} →</Link>
-            </Card>
+              <div className="relative flex gap-5">
+                <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-accent-subtle">
+                  <Building className="h-5 w-5 text-accent" />
+                </div>
+                <div className="pt-1.5">
+                  <h3 className={cn('text-title-md text-foreground', tamilFont)}>{t('give.inPersonTitle')}</h3>
+                  <p className={cn('mt-1.5 text-body-sm text-foreground-muted', tamilFont)}>{t('give.inPersonBody')}</p>
+                  <Link href="/services" className={cn('mt-1.5 inline-block text-body-sm font-semibold text-accent hover:underline dark:text-accent-hover', tamilFont)}>{t('give.viewServiceTimes')} →</Link>
+                </div>
+              </div>
 
-            <Card variant="raised" padding="lg">
-              <Mail className="mb-4 h-9 w-9 text-accent" />
-              <h3 className={cn('text-title-md text-foreground', tamilFont)}>{t('give.questionsTitle')}</h3>
-              <p className={cn('mt-2 text-body-sm text-foreground-muted', tamilFont)}>{t('give.questionsBody')}</p>
-              <Link href="/contact" className={cn('mt-3 inline-block text-body-sm font-semibold text-accent hover:underline dark:text-accent-hover', tamilFont)}>{t('give.contactUsArrow')} →</Link>
-            </Card>
-          </Grid>
+              <div className="relative flex gap-5">
+                <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-accent-subtle">
+                  <Mail className="h-5 w-5 text-accent" />
+                </div>
+                <div className="pt-1.5">
+                  <h3 className={cn('text-title-md text-foreground', tamilFont)}>{t('give.questionsTitle')}</h3>
+                  <p className={cn('mt-1.5 text-body-sm text-foreground-muted', tamilFont)}>{t('give.questionsBody')}</p>
+                  <Link href="/contact" className={cn('mt-1.5 inline-block text-body-sm font-semibold text-accent hover:underline dark:text-accent-hover', tamilFont)}>{t('give.contactUsArrow')} →</Link>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <div>
             <h3 className={cn('mb-2 text-center text-title-lg text-foreground', tamilFont)}>{t('give.designateHeading')}</h3>
