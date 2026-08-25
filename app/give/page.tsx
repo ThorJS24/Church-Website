@@ -168,9 +168,9 @@ export default function GivePage() {
           <p className={cn('mt-2 text-body-md text-foreground-muted', tamilFont)}>{t('give.yourImpactSubtitle')}</p>
         </div>
         <Container size="lg">
-          <div className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-background sm:grid sm:grid-cols-4 sm:divide-x sm:divide-y-0">
+          <div className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
             {impactData.map((area) => (
-              <div key={area.titleKey} className="flex items-start gap-4 p-6">
+              <div key={area.titleKey} className="flex items-start gap-4 bg-background p-6">
                 <area.icon className="mt-1 h-6 w-6 shrink-0 text-accent" />
                 <div>
                   <div className="text-headline-sm text-accent">{area.amount}</div>
