@@ -60,12 +60,18 @@ chrome) were found and fixed at the component level — see `PROJECT_STATE.md` �
 not the generic pattern)**: `/about/pastors` (photo cards + staff grid + bio
 modal cross-referenced with sermons), `/about/beliefs` (varies composition
 per section: mission/vision cards, values grid, belief checklist, accordion
-FAQ), `/services` (service-time cards, plain icon list, badge-dated events,
-2-col video panel, accent CTA — five different treatments already),
-`/events` (photo-driven card grid, appropriate for event browsing),
-`/testimonials`, `/small-groups`, `/volunteer`, `/resources`, `/prayer`
-(each a single-purpose listing page with one grid suited to its content,
-same idiom as `/events` — not the repeated-pattern issue).
+FAQ), `/about/branches` (photo cards + rich detail modal with carousel/map),
+`/about/history` (purpose-built vertical timeline with search/filter/
+autoplay — not a card grid at all), `/services` (service-time cards, plain
+icon list, badge-dated events, 2-col video panel, accent CTA — five
+different treatments already), `/events` (photo-driven card grid,
+appropriate for event browsing), `/contact` (multi-step form + info
+sidebar, staff grid, map — already rich and varied), `/login` (a focused
+centered auth card — the right composition for a single form, not the
+collage anti-pattern), `/testimonials`, `/small-groups`, `/volunteer`,
+`/resources`, `/prayer` (each a single-purpose listing page with one grid
+suited to its content, same idiom as `/events` — not the repeated-pattern
+issue).
 
 ---
 
@@ -79,12 +85,11 @@ Nothing in-flight at the end of this session.
 
 **Phase 4/5 — Public pages**, still on the pre-rebuild/second-rebuild reskin,
 not yet given first-principles treatment or a redesign-candidacy check:
-`/about/branches`, `/about/history`, `/events/[id]`, `/sermons` + detail +
-series, `/services/request` + `/services/request/status`, `/blog` + detail/
-author/category, `/gallery`, `/give/legacy`, `/contact`, `/newsletter/*`,
-`/login`, `/register`, `/privacy`, `/terms`. Also worth a second pass:
-`/give`'s remaining "Ways to Give" and "Why We Give" sections (still
-icon-card grids).
+`/events/[id]`, `/sermons` + detail + series, `/services/request` +
+`/services/request/status`, `/blog` + detail/author/category, `/gallery`,
+`/give/legacy`, `/newsletter/*`, `/register`, `/privacy`, `/terms`.
+Also worth a second pass: `/give`'s remaining "Ways to Give" and
+"Why We Give" sections (still icon-card grids).
 
 **Phase 6 — Member experience**: `/dashboard`, `/profile`. Not yet redesigned;
 `/settings` is the only member-area page done so far, and it should not be
