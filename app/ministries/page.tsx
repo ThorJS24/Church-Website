@@ -95,7 +95,7 @@ export default function MinistriesPage() {
         <div className="mx-auto mb-4 flex max-w-md justify-center px-4">
           <Input placeholder="Search ministries..." aria-label="Search ministries" leftIcon={<Search />} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
         </div>
-        <div className="mx-auto flex max-w-7xl flex-wrap justify-center gap-3 px-4">
+        <div className="mx-auto flex max-w-[1680px] flex-wrap justify-center gap-3 px-4">
           {CATEGORIES.map((category) => (
             <button
               key={category.id}

@@ -159,7 +159,7 @@ export default function PrayerPage() {
       />
 
       <div className="border-b border-border bg-background py-6">
-        <div className="mx-auto mb-4 flex max-w-7xl justify-center gap-2 px-4">
+        <div className="mx-auto mb-4 flex max-w-[1680px] justify-center gap-2 px-4">
           <button
             onClick={() => setView('wall')}
             className={cn('flex items-center gap-1.5 rounded-full px-5 py-2 text-body-sm font-medium transition-colors', view === 'wall' ? 'bg-warm text-warm-foreground' : 'bg-surface-active text-foreground-muted hover:bg-surface-hover', tamilFont)}
@@ -173,7 +173,7 @@ export default function PrayerPage() {
             <Archive className="h-4 w-4" /> {t('prayer.answeredTab')} {answeredPrayers.length > 0 && `(${answeredPrayers.length})`}
           </button>
         </div>
-        <div className="mx-auto flex max-w-7xl flex-wrap justify-center gap-3 px-4">
+        <div className="mx-auto flex max-w-[1680px] flex-wrap justify-center gap-3 px-4">
           {CATEGORIES.map((category) => (
             <button
               key={category}

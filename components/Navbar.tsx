@@ -17,7 +17,7 @@ import { IconButton } from '@/components/ui/icon-button';
 import { Button, LinkButton } from '@/components/ui/button';
 import { Avatar } from '@/components/ui/avatar';
 import {
-  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel,
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import CommandPalette from '@/components/CommandPalette';
@@ -157,7 +157,7 @@ export default function Navbar() {
           scrolled ? 'border-border bg-background/90 shadow-sm backdrop-blur-md' : 'border-transparent bg-background'
         )}
       >
-        <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex h-full w-full max-w-[1680px] items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Logo */}
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-3">
@@ -180,8 +180,13 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Desktop navigation */}
-          <div className="hidden items-center gap-1 lg:flex">
+          {/* Desktop navigation — reveals at xl (1280px), not lg (1024px):
+              About/Get Involved/Connect used to be nested inside one "More"
+              revealer; now each is its own top-level dropdown, which needs
+              more room than the 1024px floor has to spare. The mobile Sheet
+              menu's trigger below is gated the same way (xl:hidden) so it
+              covers the 1024-1279px gap this leaves. */}
+          <div className="hidden items-center gap-1 xl:flex">
             {primaryItems.map((item) => {
               const active = isActive(item.href);
               return (
@@ -189,7 +194,7 @@ export default function Navbar() {
                   key={item.key}
                   href={item.href}
                   className={cn(
-                    'relative rounded-md px-3.5 py-2 text-body-sm font-medium transition-colors duration-fast',
+                    'relative rounded-md px-2.5 py-2 text-body-sm font-medium whitespace-nowrap transition-colors duration-fast',
                     active ? 'text-accent' : 'text-foreground-muted hover:text-foreground'
                   )}
                 >
@@ -205,44 +210,44 @@ export default function Navbar() {
               );
             })}
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  type="button"
-                  className="flex items-center gap-1 rounded-md px-3.5 py-2 text-body-sm font-medium text-foreground-muted transition-colors duration-fast hover:text-foreground"
-                >
-                  <span>{t('nav.more')}</span>
-                  <ChevronDown className="h-4 w-4" aria-hidden="true" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="!w-[600px] !max-w-[calc(100vw-2rem)] p-2">
-                <div className="grid grid-cols-3 gap-1">
-                  {MENU_GROUPS.map((group) => (
-                    <div key={group.key} className="px-1">
-                      <DropdownMenuLabel className="text-caption font-semibold tracking-wide text-foreground-subtle uppercase">
-                        {t(group.labelKey)}
-                      </DropdownMenuLabel>
-                      {secondaryItems
-                        .filter((item) => item.menuGroup === group.key)
-                        .map((item) =>
-                          item.section ? (
-                            item.section.map((sub) => (
-                              <DropdownMenuItem key={sub.key} onClick={() => router.push(sub.href)}>
-                                {t(sub.labelKey)}
-                              </DropdownMenuItem>
-                            ))
-                          ) : (
-                            <DropdownMenuItem key={item.key} onClick={() => router.push(item.href)}>
-                              <item.icon className="h-4 w-4 text-foreground-subtle" aria-hidden="true" />
-                              {t(item.labelKey)}
-                            </DropdownMenuItem>
-                          )
-                        )}
-                    </div>
-                  ))}
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {MENU_GROUPS.map((group) => {
+              const groupItems = secondaryItems.filter((item) => item.menuGroup === group.key);
+              const groupActive = groupItems.some(
+                (item) => isActive(item.href) || item.section?.some((sub) => isActive(sub.href))
+              );
+              return (
+                <DropdownMenu key={group.key}>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      className={cn(
+                        'flex items-center gap-1 whitespace-nowrap rounded-md px-2.5 py-2 text-body-sm font-medium transition-colors duration-fast',
+                        groupActive ? 'text-accent' : 'text-foreground-muted hover:text-foreground'
+                      )}
+                    >
+                      <span>{t(group.labelKey)}</span>
+                      <ChevronDown className="h-4 w-4" aria-hidden="true" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="min-w-56 p-2">
+                    {groupItems.map((item) =>
+                      item.section ? (
+                        item.section.map((sub) => (
+                          <DropdownMenuItem key={sub.key} onClick={() => router.push(sub.href)}>
+                            {t(sub.labelKey)}
+                          </DropdownMenuItem>
+                        ))
+                      ) : (
+                        <DropdownMenuItem key={item.key} onClick={() => router.push(item.href)}>
+                          <item.icon className="h-4 w-4 text-foreground-subtle" aria-hidden="true" />
+                          {t(item.labelKey)}
+                        </DropdownMenuItem>
+                      )
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              );
+            })}
           </div>
 
           {/* Right actions */}
@@ -254,7 +259,7 @@ export default function Navbar() {
             >
               <Search className="h-4 w-4" aria-hidden="true" />
               <span>{t('common.search') || 'Search'}</span>
-              <kbd aria-hidden="true" className="ml-2 rounded border border-border bg-background px-1.5 py-0.5 text-caption">⌘K</kbd>
+              <kbd aria-hidden="true" className="ml-2 hidden rounded border border-border bg-background px-1.5 py-0.5 text-caption 2xl:inline">⌘K</kbd>
             </button>
             <IconButton label={t('common.search') || 'Search'} size="md" className="md:hidden" onClick={() => setShowCommandPalette(true)}>
               <Search />
@@ -329,7 +334,7 @@ export default function Navbar() {
 
             <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
               <SheetTrigger asChild>
-                <IconButton label={isMobileOpen ? 'Close menu' : 'Open menu'} className="lg:hidden">
+                <IconButton label={isMobileOpen ? 'Close menu' : 'Open menu'} className="xl:hidden">
                   {isMobileOpen ? <X /> : <Menu />}
                 </IconButton>
               </SheetTrigger>

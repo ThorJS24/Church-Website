@@ -18,7 +18,10 @@ const SIZE_CLASSES = {
 };
 
 export function Container({ size = 'lg', className, ...props }: ContainerProps) {
+  // Capped at lg:px-8 (2rem) rather than growing further at xl — a bigger
+  // side gutter on wide screens fights the point of widening max-w above,
+  // and reads as a large margin rather than the small one this site wants.
   return (
-    <div className={cn('mx-auto w-full px-4 sm:px-6 lg:px-8 xl:px-12', SIZE_CLASSES[size], className)} {...props} />
+    <div className={cn('mx-auto w-full px-4 sm:px-6 lg:px-8', SIZE_CLASSES[size], className)} {...props} />
   );
 }
