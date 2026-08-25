@@ -178,7 +178,7 @@ function BackupSection() {
   );
 }
 
-const DEFAULT_ACCENT = '#1D3557';
+const DEFAULT_ACCENT = '#A64A1B';
 
 function ThemeCustomizer() {
   const [color, setColor] = useState(DEFAULT_ACCENT);

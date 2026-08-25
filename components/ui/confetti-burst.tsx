@@ -2,7 +2,7 @@
 
 import { motion } from 'motion/react';
 
-const COLORS = ['#1D3557', '#8A5E18', '#2F6B3A', '#9B2226', '#C9A227'];
+const COLORS = ['#A64A1B', '#5A673A', '#2F6B3A', '#9B2226', '#C9A227'];
 const PARTICLE_COUNT = 24;
 
 /**
