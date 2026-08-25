@@ -48,6 +48,18 @@ const GET_INVOLVED = [
   { icon: Heart, title: 'Build Community', description: 'Connect with others through fellowship events, ministry teams, and community service projects.', href: '/contact', cta: 'Get Connected' },
 ];
 
+function groupByCategory(ministries: Ministry[]): [string, Ministry[]][] {
+  const groups = new Map<string, Ministry[]>();
+  for (const ministry of ministries) {
+    const key = Array.isArray(ministry.category) ? ministry.category[0] : ministry.category;
+    const list = groups.get(key) ?? [];
+    list.push(ministry);
+    groups.set(key, list);
+  }
+  const order = CATEGORIES.map((c) => c.id);
+  return Array.from(groups.entries()).sort((a, b) => order.indexOf(a[0]) - order.indexOf(b[0]));
+}
+
 export default function MinistriesPage() {
   const [ministriesPage, setMinistriesPage] = useState<MinistriesPage | null>(null);
   const [ministries, setMinistries] = useState<Ministry[]>([]);
@@ -116,30 +128,73 @@ export default function MinistriesPage() {
         {filteredMinistries.length === 0 ? (
           <EmptyState icon={BookOpen} title="No ministries found" description="Check back soon for new ministry opportunities!" />
         ) : (
-          <Grid cols={3} gap={6}>
-            {filteredMinistries.map((ministry, index) => {
-              const categoryKey = Array.isArray(ministry.category) ? ministry.category[0] : ministry.category;
+          <div className="space-y-16">
+            {groupByCategory(filteredMinistries).map(([categoryKey, group]) => {
+              const meta = CATEGORIES.find((c) => c.id === categoryKey);
               const Icon = iconMap[categoryKey as keyof typeof iconMap] || iconMap.default;
               return (
-                <motion.div key={ministry.id} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-80px' }} transition={{ delay: Math.min(index * 0.05, 0.3), duration: 0.4 }}>
-                  <Card variant="raised" padding="lg" className="h-full text-center">
-                    <Icon className="mx-auto mb-4 h-10 w-10 text-accent" aria-hidden="true" />
-                    <h3 className="text-title-lg text-foreground">{ministry.title}</h3>
-                    {ministry.ageGroup && <p className="mt-1 text-body-sm font-medium text-accent">{ministry.ageGroup}</p>}
-                    <p className="mt-3 text-body-sm text-foreground-muted">{ministry.description}</p>
-                    <div className="mt-4 space-y-1.5 text-body-sm text-foreground-subtle">
-                      {ministry.meetingTime && <p className="flex items-center justify-center gap-2"><Clock className="h-4 w-4" /> {ministry.meetingTime}</p>}
-                      {ministry.location && <p className="flex items-center justify-center gap-2"><MapPin className="h-4 w-4" /> {ministry.location}</p>}
+                <div key={categoryKey || 'uncategorized'}>
+                  {meta && (
+                    <div className="mb-6 flex items-center gap-3">
+                      <span className={cn('h-2.5 w-2.5 rounded-full', meta.dotClass)} />
+                      <h2 className="text-title-lg text-foreground">{meta.label}</h2>
+                      <div className="h-px flex-1 bg-border" />
                     </div>
-                    <div className="mt-5 flex gap-3">
-                      <LinkButton href={`/ministries/volunteer?ministry=${ministry.id}`} size="sm" fullWidth>Join Ministry</LinkButton>
-                      <LinkButton href={`/ministries/${ministry.id}`} variant="outline" size="sm" fullWidth>Learn More</LinkButton>
-                    </div>
-                  </Card>
-                </motion.div>
+                  )}
+                  <div className="space-y-10">
+                    {group.map((ministry, index) => (
+                      <motion.div
+                        key={ministry.id}
+                        initial={{ opacity: 0, y: 16 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, margin: '-80px' }}
+                        transition={{ delay: Math.min(index * 0.05, 0.3), duration: 0.4 }}
+                        className={cn(
+                          'grid items-center gap-6 md:grid-cols-5',
+                          index % 2 === 1 && 'md:[&>*:first-child]:order-2'
+                        )}
+                      >
+                        <div className="md:col-span-2">
+                          {ministry.imageUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={ministry.imageUrl}
+                              alt=""
+                              className="aspect-[4/3] w-full rounded-2xl border border-border object-cover"
+                            />
+                          ) : (
+                            <div className="flex aspect-[4/3] w-full items-center justify-center rounded-2xl border border-border bg-surface">
+                              <Icon className="h-12 w-12 text-accent/60" aria-hidden="true" />
+                            </div>
+                          )}
+                        </div>
+                        <Card variant="raised" padding="lg" className="md:col-span-3">
+                          <div className="flex items-start justify-between gap-4">
+                            <h3 className="text-title-lg text-foreground">{ministry.title}</h3>
+                            {ministry.ageGroup && (
+                              <span className="shrink-0 rounded-full bg-accent-subtle px-3 py-1 text-caption font-medium text-accent">
+                                {ministry.ageGroup}
+                              </span>
+                            )}
+                          </div>
+                          <p className="mt-3 text-body-sm text-foreground-muted">{ministry.description}</p>
+                          <div className="mt-4 flex flex-wrap gap-x-5 gap-y-1.5 text-body-sm text-foreground-subtle">
+                            {ministry.meetingTime && <p className="flex items-center gap-2"><Clock className="h-4 w-4" /> {ministry.meetingTime}</p>}
+                            {ministry.location && <p className="flex items-center gap-2"><MapPin className="h-4 w-4" /> {ministry.location}</p>}
+                            {ministry.leaderName && <p className="flex items-center gap-2"><Users className="h-4 w-4" /> Led by {ministry.leaderName}</p>}
+                          </div>
+                          <div className="mt-5 flex gap-3">
+                            <LinkButton href={`/ministries/volunteer?ministry=${ministry.id}`} size="sm">Join Ministry</LinkButton>
+                            <LinkButton href={`/ministries/${ministry.id}`} variant="outline" size="sm">Learn More</LinkButton>
+                          </div>
+                        </Card>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
               );
             })}
-          </Grid>
+          </div>
         )}
       </Section>
 
