@@ -52,7 +52,7 @@ export function AccordionItem({ id, title, children }: { id: string; title: Reac
         aria-expanded={isOpen}
         aria-controls={panelId}
         onClick={() => toggle(id)}
-        className="flex w-full items-center justify-between gap-4 py-4 text-left"
+        className="flex w-full items-center justify-between gap-4 border-0 bg-transparent py-4 text-left"
       >
         <span className="text-title-sm text-foreground">{title}</span>
         <ChevronDown

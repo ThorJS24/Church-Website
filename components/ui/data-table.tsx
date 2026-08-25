@@ -258,7 +258,7 @@ export function DataTable<T>({
                     style={{ width: widths[col.key] ?? col.width, minWidth: col.minWidth ?? 100 }}
                   >
                     {col.sortValue ? (
-                      <button type="button" onClick={() => toggleSort(col.key)} className="flex items-center gap-1 hover:text-foreground">
+                      <button type="button" onClick={() => toggleSort(col.key)} className="flex items-center gap-1 border-0 bg-transparent p-0 hover:text-foreground">
                         {col.header}
                         {sort?.key === col.key ? (
                           sort.direction === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />

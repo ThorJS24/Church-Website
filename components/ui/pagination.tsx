@@ -40,8 +40,8 @@ export function Pagination({ page, totalPages, onChange, className }: Pagination
             aria-current={p === page ? 'page' : undefined}
             onClick={() => onChange(p)}
             className={cn(
-              'flex h-8 min-w-8 items-center justify-center rounded-md px-2 text-body-sm font-medium transition-colors duration-fast',
-              p === page ? 'bg-accent text-accent-foreground' : 'text-foreground-muted hover:bg-surface-hover hover:text-foreground'
+              'flex h-8 min-w-8 items-center justify-center rounded-md border-0 px-2 text-body-sm font-medium transition-colors duration-fast',
+              p === page ? 'bg-accent text-accent-foreground' : 'bg-transparent text-foreground-muted hover:bg-surface-hover hover:text-foreground'
             )}
           >
             {p}
