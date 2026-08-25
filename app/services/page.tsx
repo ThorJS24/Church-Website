@@ -297,7 +297,7 @@ export default function ServicesPage() {
             <Button
               variant="outline"
               size="lg"
-              className={cn('border-white/40 text-accent-foreground hover:bg-white/10', tamilFont)}
+              className={cn('border-white/40 bg-transparent text-accent-foreground hover:bg-white/10', tamilFont)}
               leftIcon={<MapPin className="h-4 w-4" />}
               onClick={() => {
                 if (siteSettings?.googleMapsUrl) {

@@ -171,7 +171,7 @@ export default function MinistriesPage() {
         <p className="mx-auto mt-3 max-w-xl text-body-lg opacity-90">Take the next step and join a ministry that matches your passion and calling.</p>
         <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
           <LinkButton href="/ministries/contact" variant="secondary" size="lg">Contact Ministry Leader</LinkButton>
-          <LinkButton href="/ministries/volunteer" variant="outline" size="lg" className="border-white/40 text-accent-foreground hover:bg-white/10">Volunteer Application</LinkButton>
+          <LinkButton href="/ministries/volunteer" variant="outline" size="lg" className="border-white/40 bg-transparent text-accent-foreground hover:bg-white/10">Volunteer Application</LinkButton>
         </div>
       </Section>
     </div>
