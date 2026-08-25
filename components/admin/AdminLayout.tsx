@@ -127,14 +127,14 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           slim contextual bar. */}
       <aside
         className={cn(
-          'sticky top-0 flex h-screen shrink-0 flex-col bg-[#1c1712] text-white/90 transition-all duration-base ease-standard',
+          'sticky top-0 flex h-screen shrink-0 flex-col bg-[#14161A] text-white/90 transition-all duration-base ease-standard',
           collapsed ? 'w-16' : 'w-64'
         )}
       >
         <div className="h-1 w-full bg-accent" aria-hidden="true" />
         <div className={cn('flex h-14 items-center', collapsed ? 'justify-center px-2' : 'justify-between px-5')}>
           {!collapsed && (
-            <Link href="/admin" className="flex items-center gap-2 text-title-sm text-white">
+            <Link href="/admin" className="flex items-center gap-2 font-display text-title-sm text-white">
               <Shield className="h-5 w-5 text-accent" /> Admin
             </Link>
           )}
@@ -152,7 +152,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             onClick={() => setShowCommandPalette(true)}
             title="Search"
             className={cn(
-              'flex w-full items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 py-2 text-body-sm text-white/50 hover:border-white/20 hover:text-white',
+              'flex w-full items-center gap-2 border border-white/10 bg-white/5 px-3 py-2 text-body-sm text-white/50 hover:border-white/20 hover:text-white',
               collapsed && 'justify-center px-0'
             )}
           >
@@ -160,7 +160,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             {!collapsed && (
               <>
                 <span className="flex-1 text-left">Search</span>
-                <kbd className="rounded border border-white/10 px-1.5 py-0.5 text-caption">⌘K</kbd>
+                <kbd className="border border-white/10 px-1.5 py-0.5 font-mono text-caption">⌘K</kbd>
               </>
             )}
           </button>
@@ -169,7 +169,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-2">
           {visibleSections.map((section) => (
             <div key={section.label}>
-              {!collapsed && <p className="mb-1.5 px-3 text-caption font-semibold uppercase tracking-wide text-white/35">{section.label}</p>}
+              {!collapsed && <p className="mb-1.5 px-3 font-mono text-caption font-semibold uppercase tracking-wide text-white/35">{section.label}</p>}
               <div className="space-y-0.5">
                 {section.items.map((item) => {
                   const active = item.href === '/admin' ? pathname === '/admin' : pathname.startsWith(item.href);
@@ -179,9 +179,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                       href={item.href}
                       title={collapsed ? item.label : undefined}
                       className={cn(
-                        'flex items-center gap-3 rounded-md px-3 py-2 text-body-sm font-medium transition-colors',
+                        'flex items-center gap-3 border-l-2 px-3 py-2 text-body-sm font-medium transition-colors',
                         collapsed && 'justify-center px-0',
-                        active ? 'bg-accent text-accent-foreground' : 'text-white/65 hover:bg-white/10 hover:text-white'
+                        active ? 'border-accent bg-white/10 text-white' : 'border-transparent text-white/65 hover:bg-white/5 hover:text-white'
                       )}
                     >
                       <item.icon className="h-4 w-4 shrink-0" />
@@ -208,7 +208,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             onClick={() => logout()}
             title="Log out"
             className={cn(
-              'flex items-center gap-3 rounded-md px-3 py-2 text-body-sm font-medium text-white/60 transition-colors hover:bg-danger-subtle hover:text-danger',
+              'flex items-center gap-3 border-l-2 border-transparent px-3 py-2 text-body-sm font-medium text-white/60 transition-colors hover:border-danger hover:bg-danger-subtle hover:text-danger',
               collapsed && 'justify-center px-0'
             )}
           >

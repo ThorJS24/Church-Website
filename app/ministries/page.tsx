@@ -111,15 +111,15 @@ export default function MinistriesPage() {
         <div className="mx-auto max-w-[1680px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
           <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="flex items-center gap-2 text-caption font-semibold uppercase tracking-widest opacity-80"><Heart className="h-3.5 w-3.5" /> Get Involved</p>
-              <h1 className="mt-2 font-serif text-display-sm">{ministriesPage?.title || 'Our Ministries'}</h1>
+              <p className="flex items-center gap-2 font-mono text-caption font-semibold uppercase tracking-widest opacity-80"><Heart className="h-3.5 w-3.5" /> Get Involved</p>
+              <h1 className="mt-2 font-display text-display-sm">{ministriesPage?.title || 'Our Ministries'}</h1>
               <p className="mt-2 max-w-xl text-body-md opacity-90">{ministriesPage?.subtitle || 'Find your place to serve, grow, and make a difference in our community'}</p>
             </div>
             <div className="flex gap-8">
               {stats.map((stat) => (
                 <div key={stat.label}>
-                  <div className="text-display-sm">{stat.value}</div>
-                  <div className="mt-1 text-caption opacity-80">{stat.label}</div>
+                  <div className="font-display text-display-sm">{stat.value}</div>
+                  <div className="mt-1 font-mono text-caption uppercase tracking-wide opacity-80">{stat.label}</div>
                 </div>
               ))}
             </div>
@@ -137,8 +137,8 @@ export default function MinistriesPage() {
               key={category.id}
               onClick={() => setActiveCategory(category.id)}
               className={cn(
-                'flex items-center gap-2 rounded-full px-5 py-2 text-body-sm font-medium transition-colors',
-                activeCategory === category.id ? category.chipActiveClass : 'bg-surface-active text-foreground-muted hover:bg-surface-hover'
+                'flex items-center gap-2 border px-5 py-2 text-body-sm font-medium transition-colors',
+                activeCategory === category.id ? cn(category.chipActiveClass, 'border-transparent') : 'border-border text-foreground-muted hover:bg-surface-hover'
               )}
             >
               <span className={cn('h-2 w-2 rounded-full', category.dotClass)} />
@@ -161,7 +161,7 @@ export default function MinistriesPage() {
                   {meta && (
                     <div className="mb-6 flex items-center gap-3">
                       <span className={cn('h-2.5 w-2.5 rounded-full', meta.dotClass)} />
-                      <h2 className="text-title-lg text-foreground">{meta.label}</h2>
+                      <h2 className="font-display text-title-lg text-foreground">{meta.label}</h2>
                       <div className="h-px flex-1 bg-border" />
                     </div>
                   )}
@@ -184,19 +184,19 @@ export default function MinistriesPage() {
                             <img
                               src={ministry.imageUrl}
                               alt=""
-                              className="aspect-[4/3] w-full rounded-2xl border border-border object-cover"
+                              className="aspect-[4/3] w-full border border-border object-cover"
                             />
                           ) : (
-                            <div className="flex aspect-[4/3] w-full items-center justify-center rounded-2xl border border-border bg-surface">
+                            <div className="flex aspect-[4/3] w-full items-center justify-center border border-border bg-surface">
                               <Icon className="h-12 w-12 text-accent/60" aria-hidden="true" />
                             </div>
                           )}
                         </div>
                         <Card variant="raised" padding="lg" className="md:col-span-3">
                           <div className="flex items-start justify-between gap-4">
-                            <h3 className="text-title-lg text-foreground">{ministry.title}</h3>
+                            <h3 className="font-display text-title-lg text-foreground">{ministry.title}</h3>
                             {ministry.ageGroup && (
-                              <span className="shrink-0 rounded-full bg-accent-subtle px-3 py-1 text-caption font-medium text-accent">
+                              <span className="shrink-0 border border-accent/30 bg-accent-subtle px-3 py-1 font-mono text-caption font-medium text-accent">
                                 {ministry.ageGroup}
                               </span>
                             )}
@@ -224,7 +224,7 @@ export default function MinistriesPage() {
 
       <Section spacing="lg" className="bg-surface">
         <div className="mb-10 text-center">
-          <h2 className="text-headline-md text-foreground">Get Involved</h2>
+          <h2 className="font-display text-headline-md text-foreground">Get Involved</h2>
           <p className="mt-2 text-body-md text-foreground-muted">There are many ways to serve and grow in our church community</p>
         </div>
         <Grid cols={3} gap={6}>
@@ -232,7 +232,7 @@ export default function MinistriesPage() {
             <motion.div key={item.title} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-80px' }} transition={{ delay: index * 0.1, duration: 0.4 }}>
               <Card padding="lg" className="h-full text-center">
                 <item.icon className="mx-auto mb-4 h-10 w-10 text-accent" aria-hidden="true" />
-                <h3 className="text-title-lg text-foreground">{item.title}</h3>
+                <h3 className="font-display text-title-lg text-foreground">{item.title}</h3>
                 <p className="mt-3 text-body-sm text-foreground-muted">{item.description}</p>
                 {item.href ? (
                   <LinkButton href={item.href} className="mt-5">{item.cta}</LinkButton>
@@ -246,7 +246,7 @@ export default function MinistriesPage() {
       </Section>
 
       <Section spacing="lg" className="bg-accent text-center text-accent-foreground">
-        <h2 className="text-headline-md">Ready to Get Involved?</h2>
+        <h2 className="font-display text-headline-md">Ready to Get Involved?</h2>
         <p className="mx-auto mt-3 max-w-xl text-body-lg opacity-90">Take the next step and join a ministry that matches your passion and calling.</p>
         <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
           <LinkButton href="/ministries/contact" variant="secondary" size="lg">Contact Ministry Leader</LinkButton>

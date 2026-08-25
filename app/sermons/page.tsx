@@ -18,7 +18,7 @@ export default async function SermonsPage() {
         icon={<BookOpen />}
         eyebrow="Sermon Library"
         title="Sermons"
-        description="Be encouraged and challenged by God's Word through our sermon library"
+        description="A searchable archive of every message — filter by series, speaker, or scripture."
       />
       <SermonsBrowser initialSermons={sermons} initialSeries={series} initialSpeakers={speakers} />
     </div>

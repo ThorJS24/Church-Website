@@ -3,12 +3,18 @@ import { cn } from '@/lib/utils';
 
 export type CardVariant = 'flat' | 'raised' | 'outline' | 'interactive';
 
+// Shape language rewrite: a "card" here means a hairline-bordered block,
+// not a floating rounded rectangle. Depth comes from border-strength and a
+// near-invisible shadow whisper (see globals.css's flattened --shadow-*
+// tokens), never from radius. `raised` still exists for the rare case that
+// genuinely needs to separate from a busy background, but it's a border
+// treatment first and a shadow second now, not the reverse.
 const VARIANT_CLASSES: Record<CardVariant, string> = {
   flat: 'bg-surface border border-border',
-  raised: 'bg-background border border-border shadow-md',
+  raised: 'bg-surface border border-border-strong shadow-sm',
   outline: 'bg-transparent border border-border',
   interactive:
-    'bg-surface border border-border shadow-xs hover:shadow-md hover:border-border-strong transition-all duration-base ease-standard cursor-pointer',
+    'bg-surface border border-border hover:border-border-strong hover:shadow-sm transition-all duration-base ease-standard cursor-pointer',
 };
 
 const PADDING_CLASSES = {
@@ -28,7 +34,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
     <div
       ref={ref}
       data-slot="card"
-      className={cn('rounded-xl', VARIANT_CLASSES[variant], PADDING_CLASSES[padding], className)}
+      className={cn('rounded-sm', VARIANT_CLASSES[variant], PADDING_CLASSES[padding], className)}
       {...props}
     >
       {children}
@@ -42,7 +48,7 @@ function CardHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement
 }
 
 function CardTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
-  return <h3 data-slot="card-title" className={cn('text-title-lg text-foreground', className)} {...props} />;
+  return <h3 data-slot="card-title" className={cn('font-display text-title-lg text-foreground', className)} {...props} />;
 }
 
 function CardDescription({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {

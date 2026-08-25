@@ -168,15 +168,15 @@ export function SermonsBrowser({ initialSermons, initialSeries, initialSpeakers 
         options={[{ value: 'All Speakers', label: 'All Speakers' }, ...speakers.map((s) => ({ value: s.name, label: s.name }))]}
         className={mobile ? 'w-full' : 'w-auto'}
       />
-      <div className={cn('flex rounded-lg bg-surface-active p-1', mobile && 'w-full')}>
+      <div className={cn('flex border border-border', mobile && 'w-full')}>
         {(['grid', 'timeline'] as const).map((mode) => (
           <button
             key={mode}
             onClick={() => setViewMode(mode)}
             className={cn(
-              'rounded-md px-3 py-1.5 text-body-sm capitalize transition-colors',
+              'px-3 py-1.5 text-body-sm capitalize transition-colors',
               mobile && 'flex-1',
-              viewMode === mode ? 'bg-background text-foreground shadow-xs' : 'text-foreground-muted'
+              viewMode === mode ? 'bg-accent text-accent-foreground' : 'text-foreground-muted hover:bg-surface-hover'
             )}
           >
             {mode}
@@ -186,9 +186,9 @@ export function SermonsBrowser({ initialSermons, initialSeries, initialSpeakers 
       <button
         onClick={() => setQueueOnly((v) => !v)}
         className={cn(
-          'flex items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-body-sm transition-colors',
+          'flex items-center justify-center gap-1.5 border border-border px-3 py-1.5 text-body-sm transition-colors',
           mobile && 'w-full',
-          queueOnly ? 'bg-accent text-accent-foreground' : 'bg-surface-active text-foreground-muted hover:text-foreground'
+          queueOnly ? 'bg-accent text-accent-foreground border-accent' : 'text-foreground-muted hover:bg-surface-hover'
         )}
       >
         {queueOnly ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
@@ -225,7 +225,7 @@ export function SermonsBrowser({ initialSermons, initialSeries, initialSpeakers 
                 <button
                   key={r.id}
                   onClick={() => watchSermon(sermon)}
-                  className="shrink-0 rounded-lg border border-border bg-background px-4 py-2.5 text-left text-body-sm text-foreground transition-colors hover:border-accent"
+                  className="shrink-0 border border-border bg-background px-4 py-2.5 text-left text-body-sm text-foreground transition-colors hover:border-accent"
                 >
                   {sermon.title}
                 </button>
@@ -239,9 +239,9 @@ export function SermonsBrowser({ initialSermons, initialSeries, initialSpeakers 
         // Same dark theater treatment as the sermon detail page's video
         // opener, so "latest sermon" reads as a preview of that watching
         // experience rather than a generic marketing feature card.
-        <Section spacing="lg" className="bg-[#14110d]">
-          <h2 className="mb-8 text-center font-serif text-headline-md text-white">Latest Sermon</h2>
-          <div className="mx-auto max-w-4xl overflow-hidden rounded-xl">
+        <Section spacing="lg" className="bg-[#14161A]">
+          <p className="mb-8 text-center font-mono text-caption font-semibold uppercase tracking-[0.14em] text-white/50">Latest Sermon</p>
+          <div className="mx-auto max-w-4xl overflow-hidden border border-white/10">
             <div className="md:flex">
               <div className="relative h-64 shrink-0 bg-black/40 md:h-auto md:w-1/2">
                 {featuredSermon.imageUrl ? (
@@ -276,7 +276,7 @@ export function SermonsBrowser({ initialSermons, initialSeries, initialSpeakers 
                   )}
                   <Badge variant="warning">Latest</Badge>
                 </div>
-                <h3 className="font-serif text-headline-sm">{featuredSermon.title}</h3>
+                <h3 className="font-display text-headline-sm">{featuredSermon.title}</h3>
                 {featuredSermon.subtitle && <p className="mt-1 text-body-sm text-white/60">{featuredSermon.subtitle}</p>}
                 {featuredSermon.scripture && <p className="mt-3 font-serif text-body-sm italic text-warm">{featuredSermon.scripture}</p>}
                 {featuredSermon.description && <p className="mt-3 line-clamp-3 text-body-sm text-white/70">{featuredSermon.description}</p>}
@@ -333,7 +333,7 @@ export function SermonsBrowser({ initialSermons, initialSeries, initialSpeakers 
               <Link
                 key={s.id}
                 href={`/sermons/series/${s.id}`}
-                className="rounded-full bg-surface-active px-3 py-1 text-caption font-medium text-foreground-muted transition-colors hover:text-foreground"
+                className="border border-border px-3 py-1 text-caption font-medium text-foreground-muted transition-colors hover:border-accent hover:text-accent"
               >
                 {s.title}
               </Link>
@@ -349,8 +349,8 @@ export function SermonsBrowser({ initialSermons, initialSeries, initialSpeakers 
                 key={book}
                 onClick={() => setSelectedBook(selectedBook === book ? null : book)}
                 className={cn(
-                  'rounded-full px-3 py-1 text-caption font-medium transition-colors',
-                  selectedBook === book ? 'bg-accent text-accent-foreground' : 'bg-surface-active text-foreground-muted hover:text-foreground'
+                  'border px-3 py-1 text-caption font-medium transition-colors',
+                  selectedBook === book ? 'border-accent bg-accent text-accent-foreground' : 'border-border text-foreground-muted hover:border-accent hover:text-accent'
                 )}
               >
                 {book}
@@ -363,7 +363,7 @@ export function SermonsBrowser({ initialSermons, initialSeries, initialSpeakers 
           <Card className="mx-auto mt-6 flex max-w-2xl items-start gap-4">
             <Avatar src={selectedSpeakerBio.imageUrl} name={selectedSpeakerBio.name} size="lg" />
             <div>
-              <h3 className="text-title-md text-foreground">{selectedSpeakerBio.name}</h3>
+              <h3 className="font-display text-title-md text-foreground">{selectedSpeakerBio.name}</h3>
               {selectedSpeakerBio.bio && <p className="mt-1 text-body-sm text-foreground-muted">{selectedSpeakerBio.bio}</p>}
             </div>
           </Card>
@@ -378,12 +378,12 @@ export function SermonsBrowser({ initialSermons, initialSeries, initialSpeakers 
             {Object.entries(groupedSermons)
               .sort(([a], [b]) => b.localeCompare(a))
               .map(([yearMonth, group]) => (
-                <div key={yearMonth} className="border-l-2 border-accent/30 pl-6">
-                  <h3 className="mb-4 text-title-lg text-accent">{group.monthName}</h3>
+                <div key={yearMonth} className="border-l-2 border-accent pl-6">
+                  <h3 className="mb-4 font-mono text-label font-semibold uppercase tracking-wide text-accent">{group.monthName}</h3>
                   <div className="space-y-3">
                     {group.sermons.map((sermon) => (
                       <Card key={sermon.id} className="flex items-start gap-4">
-                        <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-surface-active">
+                        <div className="relative h-16 w-16 shrink-0 overflow-hidden bg-surface-active">
                           {sermon.imageUrl ? (
                             <Image src={sermon.imageUrl} alt={sermon.title} fill sizes="64px" className="object-cover" />
                           ) : (
@@ -393,7 +393,7 @@ export function SermonsBrowser({ initialSermons, initialSeries, initialSpeakers 
                           )}
                         </div>
                         <div className="flex-1">
-                          <h4 className="text-title-sm text-foreground">{sermon.title}</h4>
+                          <h4 className="font-display text-title-sm text-foreground">{sermon.title}</h4>
                           <p className="text-body-sm text-foreground-muted">{sermon.speakerName} · {new Date(sermon.date).toLocaleDateString()}</p>
                           {sermon.scripture && <p className="text-caption text-warm">📖 {sermon.scripture}</p>}
                         </div>
@@ -476,7 +476,7 @@ export function SermonsBrowser({ initialSermons, initialSeries, initialSpeakers 
                         </span>
                       )}
                     </div>
-                    <h3 className="line-clamp-2 text-title-md text-foreground">{sermon.title}</h3>
+                    <h3 className="line-clamp-2 font-display text-title-md text-foreground">{sermon.title}</h3>
                     {sermon.scripture && <p className="mt-1.5 text-caption font-medium text-warm">📖 {sermon.scripture}</p>}
                     {sermon.description && <p className="mt-2 line-clamp-2 text-body-sm text-foreground-muted">{sermon.description}</p>}
                     <div className="mt-3 flex items-center gap-3 text-caption text-foreground-subtle">

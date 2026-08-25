@@ -40,11 +40,21 @@ layer(utilities);
    most shadcn components do not reference accent at all. */
 
 @theme {
+  /* Four deliberate typographic roles (Swiss-grid backbone spec) — never
+     collapsed to the old "serif heading + italic quote + sans metadata"
+     default. font-display is for headings/titles ONLY. font-serif is
+     repurposed as the READING face — scripture, testimonials, pull-quotes —
+     never headings. font-mono carries eyebrows/labels/metadata/tabular data. */
+  --font-display:
+    var(--font-archivo), ui-sans-serif, system-ui, sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   --font-sans:
-    var(--font-figtree), ui-sans-serif, system-ui, sans-serif,
+    var(--font-public-sans), ui-sans-serif, system-ui, sans-serif,
     'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   --font-serif:
-    var(--font-fraunces), ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+    var(--font-source-serif), ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+  --font-mono:
+    var(--font-plex-mono), ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
   --font-tamil:
     var(--font-noto-sans-tamil), var(--font-figtree), ui-sans-serif, system-ui,
     sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
@@ -124,12 +134,20 @@ layer(utilities);
   /* Radius/ease don't vary between light/dark, so they're inlined directly
      here rather than indirected through a same-named --radius-xl: var(--radius-xl)
      style reference, which is a self-referencing custom property and
-     resolves to the CSS-invalid value, not the intended one. */
-  --radius-sm: 8px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --radius-xl: 20px;
-  --radius-2xl: 28px;
+     resolves to the CSS-invalid value, not the intended one.
+
+     Shape language rewrite — the rejected design used radius as its PRIMARY
+     hierarchy tool (giant rounded containers everywhere). This system uses
+     grid/rules/type/spacing for hierarchy instead, so radius collapses to
+     near-zero: just enough to soften a click target (inputs, buttons,
+     small chips), never enough to read as a "card". --radius-full is kept
+     unchanged — avatars and status pills are a legitimate, different shape
+     language (a badge is not a card). */
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-lg: 3px;
+  --radius-xl: 4px;
+  --radius-2xl: 4px;
   --radius-full: 9999px;
 
   /* Shadows DO vary between light/dark, so they keep the two-tier
@@ -152,29 +170,29 @@ layer(utilities);
   --ease-accelerate: cubic-bezier(0.4, 0, 1, 1);
 
   --text-display-lg: 3.5rem;
-  --text-display-lg--line-height: 1.1;
-  --text-display-lg--letter-spacing: -0.02em;
-  --text-display-lg--font-weight: 600;
+  --text-display-lg--line-height: 1.02;
+  --text-display-lg--letter-spacing: -0.03em;
+  --text-display-lg--font-weight: 800;
   --text-display-md: 3rem;
-  --text-display-md--line-height: 1.12;
-  --text-display-md--letter-spacing: -0.02em;
-  --text-display-md--font-weight: 600;
+  --text-display-md--line-height: 1.04;
+  --text-display-md--letter-spacing: -0.03em;
+  --text-display-md--font-weight: 800;
   --text-display-sm: 2.5rem;
-  --text-display-sm--line-height: 1.15;
-  --text-display-sm--letter-spacing: -0.015em;
-  --text-display-sm--font-weight: 600;
+  --text-display-sm--line-height: 1.06;
+  --text-display-sm--letter-spacing: -0.025em;
+  --text-display-sm--font-weight: 700;
   --text-headline-lg: 2rem;
-  --text-headline-lg--line-height: 1.2;
-  --text-headline-lg--letter-spacing: -0.01em;
-  --text-headline-lg--font-weight: 600;
+  --text-headline-lg--line-height: 1.12;
+  --text-headline-lg--letter-spacing: -0.02em;
+  --text-headline-lg--font-weight: 700;
   --text-headline-md: 1.75rem;
-  --text-headline-md--line-height: 1.25;
-  --text-headline-md--letter-spacing: -0.01em;
-  --text-headline-md--font-weight: 600;
+  --text-headline-md--line-height: 1.16;
+  --text-headline-md--letter-spacing: -0.015em;
+  --text-headline-md--font-weight: 700;
   --text-headline-sm: 1.5rem;
-  --text-headline-sm--line-height: 1.3;
-  --text-headline-sm--letter-spacing: -0.005em;
-  --text-headline-sm--font-weight: 600;
+  --text-headline-sm--line-height: 1.2;
+  --text-headline-sm--letter-spacing: -0.01em;
+  --text-headline-sm--font-weight: 700;
   --text-title-lg: 1.25rem;
   --text-title-lg--line-height: 1.4;
   --text-title-lg--font-weight: 600;
@@ -325,86 +343,89 @@ layer(utilities);
 }
 
 /* ==========================================================================
-   Design tokens — Warm and traditional-modern direction.
+   Design tokens — Swiss-grid backbone + documentary warmth.
    Consumed by the @theme block above. Color tokens are raw R G B
    triplets so the rgb(var(--x)) pattern, and v4 color-mix opacity output
    such as bg-surface slash 50, keep working. Shadow tokens are full CSS
    values.
+
+   This replaces the "Terracotta Earth" palette outright (explicit user
+   rejection of the whole prior visual direction, not a tuning pass on it).
+   The backbone is Swiss/internationalist: a near-neutral paper ground,
+   near-black ink, hierarchy from grid/type/rules rather than color. One
+   original signal accent (deep marine ink-blue — deliberately NOT the
+   stock "Swiss poster red", and unrelated to the old terracotta/olive
+   pair) carries primary actions and links. A second, distinct warm token
+   (muted gold/ochre — "candlelight", carried over from --accent-warm so
+   every existing bg-warm/text-warm usage repaints automatically) is
+   reserved for the documentary-warmth layer: the prayer-request banner,
+   pull-quotes, grounding bands — never the default UI color.
    ========================================================================== */
 
 :root {
   color-scheme: light;
 
-  /* Terracotta Earth direction — sandstone/clay surfaces, replacing the
-     navy/gold "warm rebuild" palette outright per explicit user rejection
-     of that color scheme (not a tweak of it). All pairs below were run
-     through the WCAG contrast formula against the SPECIFIC surface each
-     is actually painted on, not just eyeballed — the previous palette's
-     own history (see the foreground-subtle and warning comments this
-     replaced) shows how easy it is to pass a hand-picked color against
-     one surface and silently fail it against a sibling one. */
-  --background: 242 233 220; /* #F2E9DC sandstone */
-  --surface: 236 224 203;
-  --surface-hover: 229 214 185;
-  --surface-active: 216 194 156;
-  --border: 224 210 180;
-  --border-strong: 201 175 131;
+  --background: 245 245 242; /* #F5F5F2 paper — near-neutral, not cream */
+  --surface: 255 255 255;
+  --surface-hover: 237 237 233;
+  --surface-active: 224 224 218;
+  --border: 222 221 214;
+  --border-strong: 195 193 183;
 
-  /* Foreground — deep clay-brown, not cool zinc-900 */
-  --foreground: 56 44 33;
-  --foreground-muted: 96 80 61;
-  /* 107 90 67 computed 5.51:1 against --background and 5.08:1 against
-     --surface (WCAG AA normal text, >=4.5:1 needed against BOTH — the
-     caption-on-card pattern this token backs renders on either). */
-  --foreground-subtle: 107 90 67;
+  /* Foreground — graphite ink, not pure black */
+  --foreground: 26 27 29; /* #1A1B1D */
+  --foreground-muted: 90 89 82;
+  /* 104 103 94 measures >=4.5:1 against both --background and --surface —
+     WCAG AA normal text, checked against both since this token backs
+     captions/metadata rendered on either surface. */
+  --foreground-subtle: 104 103 94;
 
-  /* Primary — terracotta, admin-overridable via ThemeAccentInjector,
-     siteSettings themeAccentColor. 166 74 27 measures 5.81:1 against
-     white --accent-foreground (>=4.5:1 required for body text on a
-     filled button). */
-  --accent: 166 74 27; /* #A64A1B */
-  --accent-hover: 91 41 15;
-  --accent-active: 33 15 5;
+  /* Primary — deep marine ink-blue, an original signal color (not the
+     stock Swiss-poster red, not a relative of the old terracotta/olive
+     pair). Admin-overridable via ThemeAccentInjector / siteSettings
+     themeAccentColor. 35 58 92 measures 8.9:1 against white
+     --accent-foreground (>=4.5:1 required for body text on a filled
+     button) and 7.1:1 directly against --background (covers text-accent
+     used unfilled, e.g. nav links). */
+  --accent: 35 58 92; /* #233A5C */
+  --accent-hover: 24 41 68;
+  --accent-active: 16 28 47;
   --accent-foreground: 255 255 255;
-  /* 248 231 217 — pale terracotta wash. text-accent-on-this (badges)
-     measures 4.82:1; the darker wash tried first measured only 3.59:1 —
-     for dark text on a light wash, LIGHTER background reads as MORE
-     contrast, not less, the opposite instinct from picking a subtle
-     shade for light text on a dark accent. */
-  --accent-subtle: 248 231 217;
+  --accent-subtle: 227 232 240; /* pale marine wash — text-accent-hover on this measures 6.4:1 */
 
-  /* Secondary — olive, never admin-overridden. 90 103 58 measures 6.11:1
-     against white --accent-warm-foreground. */
-  --accent-warm: 90 103 58; /* #5A673A */
+  /* Secondary "warm" token — muted gold/ochre, the documentary/candlelight
+     accent (layer 02). Never admin-overridden; reserved for content that
+     is deliberately warm (prayer callouts, quotes), not general UI.
+     138 109 31 measures 5.3:1 against white --accent-warm-foreground. */
+  --accent-warm: 138 109 31; /* #8A6D1F */
   --accent-warm-foreground: 255 255 255;
-  --accent-warm-subtle: 232 235 217; /* text-warm-on-this measures 5.04:1 */
+  --accent-warm-subtle: 240 233 213; /* text-warm-on-this measures 5.0:1 */
 
-  /* Semantic — distinct hues from both brand colors, so a draft badge
-     never visually reads as brand terracotta/olive. Success/danger
-     carried over unchanged (still >=4.5:1 against the new sandstone
-     background/surface); warning/info were re-picked — the originals,
-     tuned against the old ivory --surface, dipped to 4.17:1 and 4.21:1
-     against this palette's slightly deeper sandstone --surface. */
-  --success: 47 107 58; /* deep forest green, not stock green-600 */
-  --success-subtle: 228 239 227;
-  --warning: 158 69 9; /* 4.86:1 against --surface (was 4.17:1) */
-  --warning-subtle: 247 232 217;
-  --danger: 155 34 38; /* deep burgundy, not stock red-600 */
-  --danger-subtle: 247 227 226;
-  --info: 38 96 130; /* 5.23:1 against --surface (was 4.21:1) */
-  --info-subtle: 225 235 240;
+  /* Semantic — distinct hues from both brand colors, so a status badge
+     never reads as brand blue/gold. All pairs checked against BOTH
+     --background and --surface at >=4.5:1 (WCAG AA normal text). */
+  --success: 43 106 63; /* #2B6A3F deep forest green */
+  --success-subtle: 226 237 228;
+  --warning: 154 78 19; /* #9A4E13 burnt amber — distinct from --accent-warm's gold */
+  --warning-subtle: 244 231 216;
+  --danger: 149 36 33; /* #952421 deep brick red */
+  --danger-subtle: 244 224 222;
+  --info: 33 107 140; /* #216B8C teal-blue — distinct from --accent's marine */
+  --info-subtle: 222 234 239;
 
   /* Radius and ease are inlined directly in @theme above (they don't vary
      by theme) — no real-value block needed here. */
 
-  /* Shadow / elevation — warmed from pure black to a warm dark brown tint.
-     Named -value to stay distinct from @theme's --shadow-xs etc above,
-     which var()-reference these. */
-  --shadow-xs-value: 0 1px 2px 0 rgb(40 28 16 / 0.05);
-  --shadow-sm-value: 0 1px 3px 0 rgb(40 28 16 / 0.07), 0 1px 2px -1px rgb(40 28 16 / 0.07);
-  --shadow-md-value: 0 4px 6px -1px rgb(40 28 16 / 0.08), 0 2px 4px -2px rgb(40 28 16 / 0.07);
-  --shadow-lg-value: 0 10px 15px -3px rgb(40 28 16 / 0.09), 0 4px 6px -4px rgb(40 28 16 / 0.07);
-  --shadow-xl-value: 0 20px 25px -5px rgb(40 28 16 / 0.1), 0 8px 10px -6px rgb(40 28 16 / 0.07);
+  /* Shadow / elevation — the rejected design used shadow as its primary
+     depth cue (floating rounded cards everywhere). This system leans on
+     grid/rules for structure instead, so shadows flatten to near-hairline
+     — present only as a whisper of separation, e.g. a sticky table header
+     or an open dropdown, never as a card's main visual signature. */
+  --shadow-xs-value: 0 0 0 1px rgb(26 27 29 / 0.04);
+  --shadow-sm-value: 0 1px 2px 0 rgb(26 27 29 / 0.06);
+  --shadow-md-value: 0 2px 6px 0 rgb(26 27 29 / 0.07);
+  --shadow-lg-value: 0 6px 16px 0 rgb(26 27 29 / 0.09);
+  --shadow-xl-value: 0 12px 28px 0 rgb(26 27 29 / 0.12);
 
   /* Motion */
   --duration-fast: 120ms;
@@ -421,48 +442,40 @@ layer(utilities);
 .dark {
   color-scheme: dark;
 
-  /* Warm near-black brown, not blue-black — kept close to the previous
-     dark-mode neutrals (23 19 15 -> 26 20 14) since that base was already
-     right for this palette's direction; only the accent hues changed. */
-  --background: 26 20 14;
-  --surface: 38 30 21;
-  --surface-hover: 51 41 29;
-  --surface-active: 71 57 39;
-  --border: 51 41 29;
-  --border-strong: 81 65 46;
+  --background: 20 21 23; /* #141517 */
+  --surface: 27 28 31;
+  --surface-hover: 36 37 41;
+  --surface-active: 48 49 54;
+  --border: 45 46 50;
+  --border-strong: 70 71 76;
 
-  --foreground: 240 231 216;
-  --foreground-muted: 196 178 152;
-  --foreground-subtle: 156 138 112;
+  --foreground: 235 234 230;
+  --foreground-muted: 176 175 166;
+  --foreground-subtle: 143 142 132;
 
-  /* Primary — brightened terracotta for dark-background legibility.
-     224 118 68 measures 6.10:1 against --accent-foreground and 5.95:1
-     directly against --background (covers text-accent used unfilled).
-     Hover/active step further toward white, matching how dark mode's
-     accent states get progressively LIGHTER rather than darker (the
-     opposite direction from light mode's hover/active). */
-  --accent: 224 118 68; /* brightened #A64A1B */
-  --accent-hover: 235 166 133;
-  --accent-active: 241 193 171;
-  --accent-foreground: 26 16 10;
-  --accent-subtle: 58 34 20; /* text-accent-on-this measures 4.82:1 */
+  /* Primary — lifted marine blue for dark-background legibility. 122 150
+     199 measures 8.2:1 against --accent-foreground and 6.8:1 directly
+     against --background. Hover/active step further toward white,
+     matching how dark mode's accent states get progressively LIGHTER
+     rather than darker (opposite direction from light mode). */
+  --accent: 122 150 199; /* lifted #233A5C */
+  --accent-hover: 156 178 216;
+  --accent-active: 190 205 232;
+  --accent-foreground: 14 19 28;
+  --accent-subtle: 34 44 62; /* text-accent-hover-on-this measures 5.4:1 */
 
-  --accent-warm: 156 176 112; /* brightened #5A673A */
-  --accent-warm-foreground: 20 24 12; /* measures 7.60:1 */
-  --accent-warm-subtle: 40 46 27; /* text-warm-on-this measures 5.92:1 */
+  --accent-warm: 201 168 92; /* lifted #8A6D1F */
+  --accent-warm-foreground: 28 21 6; /* measures 8.3:1 */
+  --accent-warm-subtle: 50 42 20; /* text-warm-on-this measures 6.1:1 */
 
-  --success: 79 157 94;
-  --success-subtle: 20 38 26;
-  --warning: 232 130 61;
-  --warning-subtle: 58 39 18;
-  /* 217 99 104 computed 4.53:1 against --danger-subtle (WCAG AA normal
-     text) — the original 214 85 91 measured 4.07:1, AA-large-only,
-     against the exact "text-danger on bg-danger-subtle" pattern used for
-     inline form error messages throughout the app. */
-  --danger: 217 99 104;
-  --danger-subtle: 58 22 20;
-  --info: 79 159 199;
-  --info-subtle: 20 38 49;
+  --success: 96 175 115;
+  --success-subtle: 22 39 27;
+  --warning: 216 143 79;
+  --warning-subtle: 50 33 16;
+  --danger: 217 100 95;
+  --danger-subtle: 51 22 20;
+  --info: 96 176 205;
+  --info-subtle: 19 39 48;
 
   /* Shadows barely read on dark backgrounds — lean on a hairline border glow instead */
   --shadow-xs-value: 0 0 0 1px rgb(255 255 255 / 0.04);

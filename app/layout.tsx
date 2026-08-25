@@ -1,4 +1,4 @@
-import { Fraunces, Figtree, Noto_Sans_Tamil, Noto_Serif_Tamil } from 'next/font/google';
+import { Archivo, Public_Sans, Source_Serif_4, IBM_Plex_Mono, Noto_Sans_Tamil, Noto_Serif_Tamil } from 'next/font/google';
 import { MotionConfig } from 'motion/react';
 import './globals.css';
 import { ThemeProvider } from '@/contexts/ThemeContext';
@@ -13,23 +13,43 @@ import { PublicChrome } from '@/components/PublicChrome';
 import { ThemeAccentInjector } from '@/components/ThemeAccentInjector';
 import { cn } from '@/lib/utils';
 
-// Warm & traditional-modern pairing: Fraunces (serif, display/headings —
-// used deliberately in italic for Scripture references / pull-quotes) +
-// Figtree (sans, body/UI — reads warmer than Inter, which the first
-// rebuild used and is part of why it read "corporate"). Static weights
-// only (not the full variable axis range) to control font payload.
-const fraunces = Fraunces({
+// Swiss-grid backbone + documentary warmth: four deliberate roles, not the
+// generic "serif heading + italic quote + sans metadata" default.
+// - Archivo: display/headings ONLY (grotesque, confident, technical).
+// - Public Sans: body copy and UI chrome (civic/humanist register — a
+//   deliberate nod to the modern-civic research lineage, distinct from the
+//   Inter/Figtree either prior rebuild used).
+// - Source Serif 4: the READING face — scripture references, testimonials,
+//   pull-quotes ONLY. Never a heading. This is what keeps serif+italic from
+//   collapsing back into the rejected default: it's scoped to specific
+//   editorial moments, not applied everywhere.
+// - IBM Plex Mono: eyebrows, metadata, labels, tabular/admin data.
+const archivo = Archivo({
   subsets: ['latin'],
-  weight: ['500', '600', '700'],
-  style: ['normal', 'italic'],
-  variable: '--font-fraunces',
+  weight: ['600', '700', '800'],
+  variable: '--font-archivo',
   display: 'swap',
 });
 
-const figtree = Figtree({
+const publicSans = Public_Sans({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
-  variable: '--font-figtree',
+  variable: '--font-public-sans',
+  display: 'swap',
+});
+
+const sourceSerif = Source_Serif_4({
+  subsets: ['latin'],
+  weight: ['400', '600'],
+  style: ['normal', 'italic'],
+  variable: '--font-source-serif',
+  display: 'swap',
+});
+
+const plexMono = IBM_Plex_Mono({
+  subsets: ['latin'],
+  weight: ['500', '600'],
+  variable: '--font-plex-mono',
   display: 'swap',
 });
 
@@ -100,7 +120,7 @@ export const viewport = {
   initialScale: 1,
   maximumScale: 5,
   userScalable: true,
-  themeColor: '#A64A1B',
+  themeColor: '#233A5C',
 };
 
 export default function RootLayout({
@@ -120,7 +140,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn(fraunces.variable, figtree.variable, notoSansTamil.variable, notoSerifTamil.variable)}
+      className={cn(archivo.variable, publicSans.variable, sourceSerif.variable, plexMono.variable, notoSansTamil.variable, notoSerifTamil.variable)}
       suppressHydrationWarning
     >
       <body className="font-sans antialiased">

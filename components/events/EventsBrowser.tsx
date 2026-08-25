@@ -92,8 +92,8 @@ export function EventsBrowser({ initialEvents }: EventsBrowserProps) {
                   key={category.id}
                   onClick={() => handleFilterChange(category.id)}
                   className={cn(
-                    'flex items-center gap-2 rounded-full px-3 py-1.5 text-body-sm font-medium transition-colors',
-                    active ? category.chipActiveClass : 'bg-surface-active text-foreground-muted hover:bg-surface-hover'
+                    'flex items-center gap-2 border px-3 py-1.5 text-body-sm font-medium transition-colors',
+                    active ? cn(category.chipActiveClass, 'border-transparent') : 'border-border text-foreground-muted hover:bg-surface-hover'
                   )}
                 >
                   <span className={cn('h-2 w-2 rounded-full', category.dotClass)} />
@@ -135,7 +135,7 @@ export function EventsBrowser({ initialEvents }: EventsBrowserProps) {
                           instead of a small inline pill, so the date reads
                           first when scanning the grid. */}
                       {event.category !== 'regular-service' && (
-                        <div className={cn('absolute left-3 top-3 flex w-14 flex-col items-center rounded-lg py-1.5 text-white shadow', category.dotClass)}>
+                        <div className={cn('absolute left-3 top-3 flex w-14 flex-col items-center py-1.5 text-white', category.dotClass)}>
                           <span className="text-caption font-semibold uppercase leading-none">{new Date(event.startDate).toLocaleDateString('en-US', { month: 'short' })}</span>
                           <span className="text-title-lg font-bold leading-none">{new Date(event.startDate).getDate()}</span>
                         </div>
@@ -156,7 +156,7 @@ export function EventsBrowser({ initialEvents }: EventsBrowserProps) {
                         )}
                       </div>
 
-                      <h3 className="text-title-md text-foreground">{event.title}</h3>
+                      <h3 className="font-display text-title-md text-foreground">{event.title}</h3>
                       {event.subtitle && <p className="mt-1 text-body-sm text-foreground-subtle">{event.subtitle}</p>}
 
                       <div className="mt-3 space-y-1.5 text-body-sm text-foreground-muted">

@@ -161,10 +161,7 @@ export default function Navbar() {
     <>
       <nav
         ref={navRef}
-        className={cn(
-          'fixed left-0 right-0 top-0 z-40 flex flex-col transition-colors duration-base ease-standard',
-          scrolled ? 'shadow-sm' : ''
-        )}
+        className="fixed left-0 right-0 top-0 z-40 flex flex-col transition-colors duration-base ease-standard"
       >
         {/* Tier 1 — slim utility band: live status left, everything else
             (search, theme, language, notifications, account) right. Keeps
@@ -268,10 +265,10 @@ export default function Navbar() {
         <div className={cn('h-16 w-full transition-colors duration-base ease-standard sm:h-[4.5rem]', scrolled ? 'border-b border-border bg-background/95 backdrop-blur-md' : 'border-b-0 bg-background')}>
           <div className="mx-auto flex h-full w-full max-w-[1680px] items-center gap-4 px-4 sm:px-6 lg:px-8">
             <Link href="/" className="flex shrink-0 items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
+              <div className="flex h-10 w-10 items-center justify-center bg-accent">
                 <Church className="h-5 w-5 text-accent-foreground" aria-hidden="true" />
               </div>
-              <p className="font-serif text-title-lg text-foreground">Salem PBC</p>
+              <p className="font-display text-title-lg text-foreground">Salem PBC</p>
             </Link>
 
             <div className="hidden flex-1 items-center gap-1 xl:flex">
@@ -330,10 +327,10 @@ export default function Navbar() {
               </SheetTrigger>
               <SheetContent side="right" className="w-full max-w-sm p-0">
                 <div className="flex h-16 items-center gap-3 border-b border-border px-4">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent">
+                  <div className="flex h-9 w-9 items-center justify-center bg-accent">
                     <Church className="h-5 w-5 text-accent-foreground" aria-hidden="true" />
                   </div>
-                  <SheetTitle className="font-serif text-title-sm text-foreground">Salem PBC</SheetTitle>
+                  <SheetTitle className="font-display text-title-sm text-foreground">Salem PBC</SheetTitle>
                 </div>
                 <div className="max-h-[calc(100vh-4rem)] space-y-1 overflow-y-auto px-4 py-4">
                   {!user && (
@@ -441,7 +438,7 @@ export default function Navbar() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.16 }}
-                className="absolute inset-x-0 top-full z-40 hidden border-b border-border bg-background shadow-lg xl:block"
+                className="absolute inset-x-0 top-full z-40 hidden border-b border-border-strong bg-background xl:block"
               >
                 <div className="mx-auto grid w-full max-w-[1680px] grid-cols-3 gap-8 px-8 py-8">
                   {MENU_GROUPS.map((group) => {

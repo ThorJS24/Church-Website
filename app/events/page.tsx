@@ -15,10 +15,10 @@ export default async function EventsPage() {
 
   return (
     <div>
-      <PageHero icon={<Calendar />} eyebrow="What's Happening" title="Upcoming Events" description="Join us for worship, fellowship, and community events" />
+      <PageHero icon={<Calendar />} eyebrow="What's Happening" title="Events" description="What, when, where, and who — worship, fellowship, and community gatherings." />
 
-      <Section spacing="lg">
-        <h2 className="mb-6 text-center text-headline-md text-foreground">Event Calendar</h2>
+      <Section spacing="lg" className="border-b border-border">
+        <h2 className="mb-6 font-display text-headline-md text-foreground">Calendar</h2>
         <InteractiveCalendar />
       </Section>
 

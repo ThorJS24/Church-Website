@@ -150,27 +150,28 @@ export default function MemberDashboard() {
           content for top-of-page attention. */}
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mb-8 flex flex-wrap items-end justify-between gap-6 border-b border-border pb-6">
         <div>
-          <h1 className="font-serif text-headline-lg text-foreground">Welcome back, {user.firstName || user.displayName}!</h1>
-          <p className="mt-2 text-body-md text-foreground-muted">Here&apos;s what&apos;s happening in your church community</p>
+          <p className="font-mono text-caption font-semibold uppercase tracking-[0.1em] text-accent">Member Dashboard</p>
+          <h1 className="mt-1 font-display text-headline-lg text-foreground">Welcome back, {user.firstName || user.displayName}</h1>
         </div>
         <div className="flex gap-6">
           {STAT_CARDS.map((stat) => (
             <div key={stat.key} className="text-right">
-              <p className="text-title-lg text-foreground">{stat.prefix}{stats[stat.key]}</p>
-              <p className="text-caption text-foreground-subtle">{stat.label}</p>
+              <p className="font-mono text-title-lg text-foreground">{stat.prefix}{stats[stat.key]}</p>
+              <p className="font-mono text-caption uppercase tracking-wide text-foreground-subtle">{stat.label}</p>
             </div>
           ))}
         </div>
       </motion.div>
 
-      {/* Quick actions as a compact icon rail — not a grid of cards
-          competing for the same visual weight as real content below. */}
+      {/* Quick actions as a compact rail of bordered, flat-shape links —
+          not a grid of cards competing for the same visual weight as real
+          content below. */}
       <div className="mb-8 flex flex-wrap gap-2">
         {QUICK_ACTIONS.map((action) => (
           <a
             key={action.label}
             href={action.href}
-            className="flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-body-sm font-medium text-foreground-muted transition-colors hover:border-border-strong hover:text-foreground"
+            className="flex items-center gap-2 border border-border bg-surface px-4 py-2 text-body-sm font-medium text-foreground-muted transition-colors hover:border-border-strong hover:text-foreground"
           >
             <action.icon className="h-4 w-4 text-accent" /> {action.label}
           </a>
@@ -181,7 +182,7 @@ export default function MemberDashboard() {
         <div className="lg:col-span-2">
           <div>
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-title-lg text-foreground">Activity Timeline</h2>
+              <h2 className="font-display text-title-lg text-foreground">Activity Timeline</h2>
               {recentActivity.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
                   {['all', ...Array.from(new Set(recentActivity.map((a) => a.type)))].map((type) => (
@@ -190,7 +191,7 @@ export default function MemberDashboard() {
                       type="button"
                       onClick={() => setActivityFilter(type)}
                       className={cn(
-                        'rounded-full border px-3 py-1 text-caption font-medium capitalize transition-colors',
+                        'border px-3 py-1 text-caption font-medium capitalize transition-colors',
                         activityFilter === type
                           ? 'border-accent bg-accent-subtle text-accent'
                           : 'border-border text-foreground-muted hover:border-border-strong hover:text-foreground'
@@ -229,7 +230,7 @@ export default function MemberDashboard() {
           </div>
 
           <div id="saved" className="mt-8 scroll-mt-6">
-            <h2 className="mb-4 text-title-lg text-foreground">My Library</h2>
+            <h2 className="mb-4 font-display text-title-lg text-foreground">My Library</h2>
             <Card padding="none">
               {savedItems.length > 0 ? (
                 <div className="divide-y divide-border">
@@ -250,14 +251,14 @@ export default function MemberDashboard() {
         </div>
 
         <div>
-          <h2 className="mb-4 text-title-lg text-foreground">Profile &amp; Security</h2>
+          <h2 className="mb-4 font-display text-title-lg text-foreground">Profile &amp; Security</h2>
           <Card>
             <div className="mb-6 flex items-center gap-4">
               <Avatar name={`${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || user.email} size="lg" />
               <div>
-                <h3 className="text-title-sm text-foreground">{user.firstName} {user.lastName}</h3>
+                <h3 className="font-display text-title-sm text-foreground">{user.firstName} {user.lastName}</h3>
                 <p className="text-body-sm text-foreground-muted">{user.email}</p>
-                <p className="text-body-sm capitalize text-accent">{user.role}</p>
+                <p className="font-mono text-caption uppercase tracking-wide text-accent">{user.role}</p>
               </div>
             </div>
 
@@ -265,14 +266,14 @@ export default function MemberDashboard() {
               <button
                 onClick={handleDownloadData}
                 disabled={downloadingData}
-                className="flex w-full items-center justify-between rounded-lg bg-surface p-3 transition-colors hover:bg-surface-hover disabled:opacity-50"
+                className="flex w-full items-center justify-between border border-border p-3 transition-colors hover:bg-surface-hover disabled:opacity-50"
               >
                 <span className="flex items-center gap-3 text-body-sm font-medium text-foreground"><Download className="h-4 w-4 text-foreground-muted" /> Download Data</span>
                 <span className="text-caption text-foreground-subtle">{downloadingData ? 'Preparing...' : 'GDPR'}</span>
               </button>
               {downloadError && <p className="text-caption text-danger">{downloadError}</p>}
 
-              <button onClick={() => router.push('/settings')} className="flex w-full items-center justify-between rounded-lg bg-surface p-3 transition-colors hover:bg-surface-hover">
+              <button onClick={() => router.push('/settings')} className="flex w-full items-center justify-between border border-border p-3 transition-colors hover:bg-surface-hover">
                 <span className="flex items-center gap-3 text-body-sm font-medium text-foreground"><Bell className="h-4 w-4 text-foreground-muted" /> Notifications</span>
                 <span className="text-caption text-foreground-subtle">Manage</span>
               </button>
@@ -280,7 +281,7 @@ export default function MemberDashboard() {
           </Card>
 
           <div className="mt-6">
-            <h2 className="mb-4 text-title-lg text-foreground">Ministry Involvement</h2>
+            <h2 className="mb-4 font-display text-title-lg text-foreground">Ministry Involvement</h2>
             <Card>
               {ministryInvolvement.length > 0 ? (
                 <ul className="space-y-3">

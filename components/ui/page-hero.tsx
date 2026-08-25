@@ -18,60 +18,50 @@ export interface PageHeroProps {
 }
 
 // A single shared header shell used across ~25 list/info pages — reskinned
-// once here rather than per-page. Structurally different from a plain
-// centered icon-chip/title/description stack: a warm gradient band with the
-// icon rendered as a large low-opacity watermark behind the text (not a
-// small foreground badge), the eyebrow as a bordered pill, and the title
-// flanked by decorative rules when centered.
-export function PageHero({ eyebrow, title, description, icon, align = 'center', actions, className, breadcrumbs }: PageHeroProps) {
-  const watermark = isValidElement(icon)
-    ? cloneElement(icon as React.ReactElement<{ className?: string }>, { className: 'h-full w-full' })
+// once here rather than per-page. Grid-disciplined, not decorative: a
+// mono-set eyebrow above a hairline rule, a left-aligned display headline,
+// and an icon (when passed) rendered small and structural in its own
+// bordered cell rather than a large low-opacity watermark bleeding behind
+// the text. `align="center"` is kept for the few pages that want it, but
+// left is now the honest default — centering is a choice, not the shape
+// this shell forces on every page.
+export function PageHero({ eyebrow, title, description, icon, align = 'left', actions, className, breadcrumbs }: PageHeroProps) {
+  const iconEl = isValidElement(icon)
+    ? cloneElement(icon as React.ReactElement<{ className?: string }>, { className: 'h-5 w-5' })
     : icon;
 
   return (
-    <Section spacing="md" className={cn('relative overflow-hidden border-b border-border bg-gradient-to-br from-surface via-background to-accent-subtle/50', className)}>
-      {watermark && (
-        <div
-          aria-hidden="true"
-          className={cn(
-            'pointer-events-none absolute top-1/2 h-40 w-40 -translate-y-1/2 text-accent/10 sm:h-56 sm:w-56',
-            align === 'center' ? 'left-1/2 -translate-x-1/2' : 'right-4 sm:right-10'
-          )}
-        >
-          {watermark}
-        </div>
-      )}
-
+    <Section spacing="sm" className={cn('border-b border-border bg-background', className)}>
       {breadcrumbs && (
         <Breadcrumbs
           items={breadcrumbs}
-          className={cn('relative mb-6', align === 'center' && 'justify-center')}
+          className={cn('mb-6', align === 'center' && 'justify-center')}
         />
       )}
       <motion.div
-        initial={{ opacity: 0, y: 12 }}
+        initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-        className={cn('relative mx-auto max-w-3xl', align === 'center' ? 'text-center' : 'text-left')}
+        transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+        className={cn(align === 'center' && 'mx-auto max-w-3xl text-center')}
       >
         {eyebrow && (
-          <span className={cn('mb-4 inline-flex items-center rounded-full border border-accent/30 bg-background/60 px-3 py-1 text-label uppercase tracking-wide text-accent backdrop-blur-sm')}>
-            {eyebrow}
-          </span>
+          <div className={cn('mb-4 flex items-center gap-3', align === 'center' && 'justify-center')}>
+            {iconEl && (
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center border border-border-strong text-accent">
+                {iconEl}
+              </span>
+            )}
+            <span className="font-mono text-caption font-semibold uppercase tracking-[0.1em] text-accent">
+              {eyebrow}
+            </span>
+            <span className={cn('h-px flex-1 bg-border', align === 'center' && 'hidden')} aria-hidden="true" />
+          </div>
         )}
 
-        {align === 'center' ? (
-          <div className="flex items-center justify-center gap-4">
-            <span className="hidden h-px flex-1 max-w-16 bg-border sm:block" aria-hidden="true" />
-            <h1 className="font-serif text-display-sm text-foreground">{title}</h1>
-            <span className="hidden h-px flex-1 max-w-16 bg-border sm:block" aria-hidden="true" />
-          </div>
-        ) : (
-          <h1 className="font-serif text-display-sm text-foreground">{title}</h1>
-        )}
+        <h1 className={cn('font-display text-display-sm text-foreground', align !== 'center' && 'max-w-3xl')}>{title}</h1>
 
         {description && (
-          <p className="mt-4 text-body-lg text-foreground-muted">{description}</p>
+          <p className={cn('mt-4 max-w-2xl text-body-lg text-foreground-muted', align === 'center' && 'mx-auto')}>{description}</p>
         )}
         {actions && <div className={cn('mt-7 flex flex-wrap gap-3', align === 'center' ? 'justify-center' : 'justify-start')}>{actions}</div>}
       </motion.div>

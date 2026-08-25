@@ -61,10 +61,10 @@ const Footer = () => {
         <div className="grid grid-cols-1 gap-10 md:grid-cols-4">
           <div>
             <div className="mb-4 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
+              <div className="flex h-10 w-10 items-center justify-center bg-accent">
                 <Church className="h-5 w-5 text-accent-foreground" aria-hidden="true" />
               </div>
-              <h2 className="font-serif text-title-md">{settings?.churchName || 'Salem Primitive Baptist Church'}</h2>
+              <h2 className="font-display text-title-md">{settings?.churchName || 'Salem Primitive Baptist Church'}</h2>
             </div>
             <p className="mb-5 text-body-sm text-white/60">
               {settings?.tagline || 'A place where faith meets community, and hope comes alive. Join us every Sunday at 9:30 AM.'}

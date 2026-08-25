@@ -230,17 +230,17 @@ export default function UserManagementPage() {
   return (
     <div>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-headline-md text-foreground">Members ({filtered.length})</h1>
+        <h1 className="font-display text-headline-md text-foreground">Members <span className="font-mono text-title-md text-foreground-subtle">({filtered.length})</span></h1>
         <div className="flex items-center gap-2">
           <input ref={csvInputRef} type="file" accept=".csv" className="hidden" onChange={(e) => importCsv(e.target.files?.[0])} />
           <Button variant="secondary" size="sm" leftIcon={<Upload className="h-4 w-4" />} loading={importing} onClick={() => csvInputRef.current?.click()}>
             Import CSV
           </Button>
-          <div className="flex rounded-lg bg-surface-active p-1">
-            <IconButton label="Table view" size="sm" className={viewMode === 'table' ? 'bg-background shadow-xs' : ''} onClick={() => setViewMode('table')}>
+          <div className="flex border border-border">
+            <IconButton label="Table view" size="sm" className={viewMode === 'table' ? 'bg-accent-subtle text-accent' : ''} onClick={() => setViewMode('table')}>
               <List className="h-4 w-4" />
             </IconButton>
-            <IconButton label="Grid view" size="sm" className={viewMode === 'grid' ? 'bg-background shadow-xs' : ''} onClick={() => setViewMode('grid')}>
+            <IconButton label="Grid view" size="sm" className={viewMode === 'grid' ? 'bg-accent-subtle text-accent' : ''} onClick={() => setViewMode('grid')}>
               <LayoutGrid className="h-4 w-4" />
             </IconButton>
           </div>
@@ -276,9 +276,9 @@ export default function UserManagementPage() {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="rounded-lg border border-border bg-background p-12 text-center">
+        <div className="border border-border bg-background p-12 text-center">
           <UsersIcon className="mx-auto mb-3 h-12 w-12 text-foreground-subtle" />
-          <h3 className="text-title-sm text-foreground">No members match your filters</h3>
+          <h3 className="font-display text-title-sm text-foreground">No members match your filters</h3>
           <p className="mt-1 text-body-sm text-foreground-muted">Try clearing the search or filters.</p>
         </div>
       ) : viewMode === 'grid' ? (
