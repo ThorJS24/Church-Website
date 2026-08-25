@@ -45,32 +45,46 @@ chrome) were found and fixed at the component level — see `PROJECT_STATE.md` �
   Impact, Why We Give); this breaks the repetition for one of them. "Ways to
   Give" and "Why We Give" still use card/icon layouts and are candidates for
   a follow-up pass. No functional change; verified in real Chrome.
+- `/community` — the page repeated the same "centered icon + heading + card
+  grid" block five times in a row. Rewrote two: Missions & Local Outreach is
+  now a divided list (location pinned right) instead of a 3-card grid;
+  Outreach Stories got an accent-bordered editorial card instead of a plain
+  icon card. Resource directory (search + grid — appropriate for a directory)
+  and testimonies (quote cards — already distinct) left as-is. **Could not be
+  visually verified**: this environment has no seeded `community` page
+  content, so these sections render as the page's empty state; only
+  type-checked, not browser-verified. Re-verify in real Chrome once content
+  exists or a Firestore emulator/seed is available.
+
+**Pages checked and intentionally left alone (already well-differentiated,
+not the generic pattern)**: `/about/pastors` (photo cards + staff grid + bio
+modal cross-referenced with sermons), `/about/beliefs` (varies composition
+per section: mission/vision cards, values grid, belief checklist, accordion
+FAQ), `/services` (service-time cards, plain icon list, badge-dated events,
+2-col video panel, accent CTA — five different treatments already),
+`/events` (photo-driven card grid, appropriate for event browsing),
+`/testimonials`, `/small-groups`, `/volunteer`, `/resources`, `/prayer`
+(each a single-purpose listing page with one grid suited to its content,
+same idiom as `/events` — not the repeated-pattern issue).
 
 ---
 
 ## Currently being rebuilt
 
-Nothing in-flight at the end of this session. Checked via grep for the same
-generic icon-card pattern and still open: `/about/pastors`, `/community`,
-`/services`, and the rest of `/give` (Ways to Give / Why We Give sections).
-`/about/beliefs` was checked and is already reasonably differentiated
-per-section (mission/vision cards, values grid, belief checklist, accordion
-FAQ) — not a priority.
+Nothing in-flight at the end of this session.
 
 ---
 
 ## Remaining areas (by blueprint phase)
 
 **Phase 4/5 — Public pages**, still on the pre-rebuild/second-rebuild reskin,
-not yet given first-principles treatment: `/about/branches`, `/about/history`,
-`/about/pastors`, `/events/[id]`, `/sermons` + detail + series,
-`/services` + request/status, `/blog` + detail/author/category, `/gallery`,
-`/give/legacy`, `/prayer`, `/testimonials`, `/resources`,
-`/small-groups` + detail, `/community`, `/contact`, `/newsletter/*`,
-`/volunteer`, `/login`, `/register`, `/privacy`, `/terms`.
-`/events` list was checked this session and left alone — it already uses a
-distinct photo-driven card layout appropriate to event browsing, not the
-generic icon-card pattern.
+not yet given first-principles treatment or a redesign-candidacy check:
+`/about/branches`, `/about/history`, `/events/[id]`, `/sermons` + detail +
+series, `/services/request` + `/services/request/status`, `/blog` + detail/
+author/category, `/gallery`, `/give/legacy`, `/contact`, `/newsletter/*`,
+`/login`, `/register`, `/privacy`, `/terms`. Also worth a second pass:
+`/give`'s remaining "Ways to Give" and "Why We Give" sections (still
+icon-card grids).
 
 **Phase 6 — Member experience**: `/dashboard`, `/profile`. Not yet redesigned;
 `/settings` is the only member-area page done so far, and it should not be
