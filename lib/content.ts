@@ -14,11 +14,35 @@ import {
   orderBy,
   query,
   where,
+  Timestamp,
 } from 'firebase/firestore';
 import { db } from './firebase';
 
+/**
+ * Firestore `Timestamp` instances (from fields like `createdAt`/`updatedAt`
+ * set via `serverTimestamp()`) aren't plain serializable objects — passing
+ * one as a prop from a Server Component to a 'use client' component throws
+ * ("Objects with toJSON methods are not supported"). This surfaced once the
+ * homepage/sermons/events pages became Server Components passing fetched
+ * docs straight into client child components; recurses into nested
+ * objects/arrays (e.g. scriptureReferences) since a Timestamp can be
+ * buried arbitrarily deep in an admin-authored doc.
+ */
+function sanitizeTimestamps<T>(value: T): T {
+  if (value instanceof Timestamp) return value.toDate().toISOString() as unknown as T;
+  if (Array.isArray(value)) return value.map(sanitizeTimestamps) as unknown as T;
+  if (value && typeof value === 'object' && !(value instanceof Date)) {
+    const out: Record<string, unknown> = {};
+    for (const [key, v] of Object.entries(value as Record<string, unknown>)) {
+      out[key] = sanitizeTimestamps(v);
+    }
+    return out as T;
+  }
+  return value;
+}
+
 function withId<T>(snap: { id: string; data: () => any }): T {
-  return { id: snap.id, ...snap.data() } as T;
+  return sanitizeTimestamps({ id: snap.id, ...snap.data() }) as T;
 }
 
 /**
@@ -336,7 +360,7 @@ export interface Livestream {
 
 export async function getLivestream(): Promise<Livestream | null> {
   const snap = await getDoc(doc(db, 'livestream', 'current'));
-  return snap.exists() ? (snap.data() as Livestream) : null;
+  return snap.exists() ? sanitizeTimestamps(snap.data() as Livestream) : null;
 }
 
 export interface AmbientAudio {
@@ -348,7 +372,7 @@ export interface AmbientAudio {
 
 export async function getAmbientAudio(): Promise<AmbientAudio | null> {
   const snap = await getDoc(doc(db, 'ambientAudio', 'current'));
-  return snap.exists() ? (snap.data() as AmbientAudio) : null;
+  return snap.exists() ? sanitizeTimestamps(snap.data() as AmbientAudio) : null;
 }
 
 export interface SiteSettings {
@@ -395,7 +419,7 @@ export interface SiteSettings {
 
 export async function getSiteSettings(): Promise<SiteSettings | null> {
   const snap = await getDoc(doc(db, 'siteSettings', 'main'));
-  return snap.exists() ? (snap.data() as SiteSettings) : null;
+  return snap.exists() ? sanitizeTimestamps(snap.data() as SiteSettings) : null;
 }
 
 /**
@@ -409,7 +433,7 @@ export async function getSiteSettings(): Promise<SiteSettings | null> {
  */
 export async function getPageContent<T = any>(pageKey: string): Promise<T | null> {
   const snap = await getDoc(doc(db, 'pageContent', pageKey));
-  return snap.exists() ? (snap.data() as T) : null;
+  return snap.exists() ? sanitizeTimestamps(snap.data() as T) : null;
 }
 
 export interface SmallGroup extends Publishable {
