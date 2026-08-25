@@ -145,8 +145,34 @@ patched per-page:
 Both confirmed via computed-style inspection and real-Chrome screenshots
 while logged in as super_admin.
 
-**Phase 9 — Responsive**: verify each page above at the 6 standard breakpoints
-as it's redesigned, not as a separate pass at the end.
+**Phase 4/5 remainder — detail/sub-pages and legal/utility pages: audited
+this session, all found already well-composed, no changes needed.**
+`/events/[id]` (hero image, 2/3+sidebar layout, countdown, RSVP, map,
+photo grid, related events), `/sermons/[id]` (video-first single column
+with transcript), `/sermons/series/[id]` (numbered part list with
+progress dots), `/blog/[slug]` (editorial layout with sticky
+table-of-contents sidebar, author bio card, reading progress bar),
+`/give/legacy` (single non-repeated icon-card section — not the
+anti-pattern), `/services/request` (single well-composed form, Grids are
+just 2-col field layouts), `/services/request/status` (step-indicator
+tracker), `/register` (mirrors `/login`'s appropriate centered-card
+style), `/privacy` and `/terms` (structured legal-document layouts:
+summary card, category cards, checklist rows, do/don't lists, version
+diff, accordion FAQ — already varied, not repetitive),
+`/newsletter/archive` + `/newsletter/archive/[id]` + `/newsletter/preferences`
+(simple, purpose-appropriate list/form pages).
+
+**This closes out the full page-by-page audit.** Every route in the
+original Phase 4/5/6/8 scope has now been either redesigned or explicitly
+checked and confirmed correct.
+
+**Phase 9 — Responsive**: spot-checked `/ministries` and `/give` at 390px
+(mobile) this session — both this session's redesigns collapse cleanly to
+a single column, filter chips wrap, buttons stay inside their cards, no
+overflow. Not a full 6-breakpoint sweep across every page (tablet/1024/
+1280 untested), so still worth a dedicated pass before calling Phase 9
+fully done, but the two riskiest new layouts (alternating rows, vertical
+stepper) are confirmed responsive.
 
 ---
 
@@ -156,7 +182,10 @@ as it's redesigned, not as a separate pass at the end.
   but worth a look once real ministry photos exist in the CMS.
 - Everything not yet listed as "done" above should be assumed visually
   provisional (carried over from the second rebuild's systematic reskin), not a
-  finished reference, per `PROJECT_STATE.md` §6/§14.
+  finished reference, per `PROJECT_STATE.md` §6/§14. As of this session, that
+  now means: nothing — every route has been checked at least once.
+- Not yet re-verified at non-desktop breakpoints this session (see Phase 9
+  above).
 
 ## Known functional issues
 
