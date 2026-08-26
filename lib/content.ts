@@ -53,7 +53,7 @@ function withId<T>(snap: { id: string; data: () => any }): T {
  * scheduler infrastructure in this deployment and this is simpler and
  * can't silently miss a run.
  */
-function isEffectivelyPublished(data: Record<string, any>): boolean {
+export function isEffectivelyPublished(data: Record<string, any>): boolean {
   if (data.status !== 'draft') return true;
   return !!data.publishAt && new Date(data.publishAt).getTime() <= Date.now();
 }

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { ZodError } from 'zod';
 import { getAdminDb } from '@/lib/firebase-admin';
 import { requireAdmin, withAudit } from '@/lib/api-auth';
-import { resolveCollection } from '@/lib/adminContentCollections';
+import { resolveCollection, validateContentBody } from '@/lib/adminContentCollections';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ type: string }> }) {
   const authResult = await requireAdmin(request);
@@ -34,7 +35,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   }
 
   try {
-    const body = await request.json();
+    const rawBody = await request.json();
+    const body = validateContentBody(type, rawBody);
     const now = new Date().toISOString();
     // Testimonials submitted through this route came from an admin, not
     // the public form (app/api/testimonials/submit) — pre-approve them,
@@ -60,6 +62,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     return NextResponse.json({ success: true, id });
   } catch (error) {
+    if (error instanceof ZodError) {
+      return NextResponse.json({ success: false, message: error.issues[0]?.message ?? 'Invalid data' }, { status: 400 });
+    }
     console.error(`Error creating ${collectionName} doc:`, error);
     return NextResponse.json({ success: false, message: 'Failed to create content' }, { status: 500 });
   }

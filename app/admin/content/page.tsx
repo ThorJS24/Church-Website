@@ -18,7 +18,7 @@ import { IconButton } from '@/components/ui/icon-button';
 const SERMON_FIELDS: FieldSchema[] = [
   { key: 'title', label: 'Title', type: 'text', required: true },
   { key: 'subtitle', label: 'Subtitle', type: 'text' },
-  { key: 'speakerName', label: 'Speaker', type: 'text' },
+  { key: 'speakerId', label: 'Speaker', type: 'personRef' },
   { key: 'seriesTitle', label: 'Series', type: 'text' },
   { key: 'date', label: 'Date', type: 'date', required: true },
   { key: 'scripture', label: 'Scripture', type: 'text' },
@@ -40,7 +40,7 @@ const EVENT_FIELDS: FieldSchema[] = [
   { key: 'category', label: 'Category', type: 'text' },
   { key: 'shortDescription', label: 'Short Description', type: 'textarea' },
   { key: 'imageUrl', label: 'Image', type: 'url', accept: 'image' },
-  { key: 'organizerName', label: 'Organizer', type: 'text' },
+  { key: 'organizerId', label: 'Organizer', type: 'personRef' },
   { key: 'cost', label: 'Cost', type: 'number' },
   { key: 'registrationRequired', label: 'Registration Required', type: 'checkbox' },
   { key: 'registrationUrl', label: 'Registration URL', type: 'url' },
@@ -74,8 +74,7 @@ const BLOG_FIELDS: FieldSchema[] = [
 const SMALL_GROUP_FIELDS: FieldSchema[] = [
   { key: 'name', label: 'Group Name', type: 'text', required: true },
   { key: 'description', label: 'Description', type: 'textarea' },
-  { key: 'leaderName', label: 'Leader', type: 'text' },
-  { key: 'leaderEmail', label: 'Leader Email', type: 'email' },
+  { key: 'leaderIds', label: 'Leaders', type: 'personRefs' },
   { key: 'meetingSchedule', label: 'Meeting Schedule (e.g. "Wednesdays at 7pm")', type: 'text' },
   { key: 'dayOfWeek', label: 'Day of Week (Sunday–Saturday)', type: 'text' },
   { key: 'lifeStage', label: 'Life Stage (e.g. Young Adults, Families, Seniors)', type: 'text' },
@@ -159,15 +158,38 @@ const MINISTRY_FIELDS: FieldSchema[] = [
   { key: 'meetingTime', label: 'Meeting Time', type: 'text' },
   { key: 'location', label: 'Location', type: 'text' },
   { key: 'imageUrl', label: 'Ministry Photo', type: 'url', accept: 'image' },
-  { key: 'leaderName', label: 'Leader Name', type: 'text' },
-  { key: 'leaderTitle', label: 'Leader Title', type: 'text' },
-  { key: 'leaderEmail', label: 'Leader Email', type: 'email' },
-  { key: 'leaderPhone', label: 'Leader Phone', type: 'text' },
-  { key: 'leaderImageUrl', label: 'Leader Photo', type: 'url', accept: 'image' },
+  { key: 'leaderIds', label: 'Leaders', type: 'personRefs' },
   { key: 'testimonialQuote', label: 'Testimonial Quote', type: 'textarea' },
   { key: 'testimonialAuthor', label: 'Testimonial Author', type: 'text' },
   { key: 'volunteerNeeds', label: 'Volunteer Opportunities (one per line)', type: 'textarea' },
   { key: 'teamPhotos', label: 'Team Photos (one per line: Name|ImageURL)', type: 'textarea' },
+];
+
+const PEOPLE_FIELDS: FieldSchema[] = [
+  { key: 'displayName', label: 'Name', type: 'text', required: true },
+  { key: 'title', label: 'Title (e.g. "Senior Pastor", "Youth Leader")', type: 'text' },
+  { key: 'bio', label: 'Bio', type: 'textarea' },
+  { key: 'email', label: 'Email', type: 'email' },
+  { key: 'phone', label: 'Phone', type: 'text' },
+  { key: 'photoUrl', label: 'Photo', type: 'url', accept: 'image' },
+  { key: 'isStaff', label: 'Staff Member', type: 'checkbox' },
+];
+
+const LOCATION_FIELDS: FieldSchema[] = [
+  { key: 'name', label: 'Name', type: 'text', required: true },
+  { key: 'address', label: 'Address', type: 'text' },
+  { key: 'accessibilityInfo', label: 'Accessibility Info', type: 'textarea' },
+  { key: 'notes', label: 'Notes', type: 'textarea' },
+];
+
+const VOLUNTEER_OPPORTUNITY_FIELDS: FieldSchema[] = [
+  { key: 'title', label: 'Title', type: 'text', required: true },
+  { key: 'description', label: 'Description', type: 'textarea', required: true },
+  { key: 'area', label: 'Area', type: 'text' },
+  { key: 'spotsNeeded', label: 'Spots Needed', type: 'number' },
+  { key: 'shiftDate', label: 'Shift Date', type: 'date' },
+  { key: 'shiftTime', label: 'Shift Time', type: 'text' },
+  { key: 'location', label: 'Location', type: 'text' },
 ];
 
 const BUILT_IN_TABS = [
@@ -182,6 +204,9 @@ const BUILT_IN_TABS = [
   { key: 'announcements', label: 'Announcements' },
   { key: 'blog', label: 'Blog' },
   { key: 'small-groups', label: 'Small Groups' },
+  { key: 'people', label: 'People' },
+  { key: 'locations', label: 'Locations' },
+  { key: 'volunteer-opportunities', label: 'Volunteer Opportunities' },
   { key: 'testimonials', label: 'Testimonials' },
   { key: 'resources', label: 'Resources' },
   { key: 'prayer-requests', label: 'Prayer Requests' },
@@ -360,7 +385,19 @@ export default function ContentEditorPage() {
           <GenericContentTab type="blog" label="Blog Posts" fields={BLOG_FIELDS} columns={['title', 'authorName', 'category']} apiBase="/api/admin" autoOpenId={autoOpenId} onAutoOpened={() => setAutoOpenId(null)} />
         </TabsContent>
         <TabsContent value="small-groups">
-          <GenericContentTab type="smallGroups" label="Small Groups" fields={SMALL_GROUP_FIELDS} columns={['name', 'leaderName', 'meetingSchedule']} autoOpenId={autoOpenId} onAutoOpened={() => setAutoOpenId(null)} />
+          <GenericContentTab type="smallGroups" label="Small Groups" fields={SMALL_GROUP_FIELDS} columns={['name', 'meetingSchedule']} autoOpenId={autoOpenId} onAutoOpened={() => setAutoOpenId(null)} />
+        </TabsContent>
+        <TabsContent value="people">
+          <p className="mb-4 rounded-lg border border-accent/30 bg-accent-subtle p-3 text-body-sm text-accent">
+            The canonical record for anyone the site names — speakers, ministry/group leaders, event organizers. Sermons, ministries, groups and events reference people here instead of typing a name.
+          </p>
+          <GenericContentTab type="people" label="People" fields={PEOPLE_FIELDS} columns={['displayName', 'title', 'email']} autoOpenId={autoOpenId} onAutoOpened={() => setAutoOpenId(null)} />
+        </TabsContent>
+        <TabsContent value="locations">
+          <GenericContentTab type="locations" label="Locations" fields={LOCATION_FIELDS} columns={['name', 'address']} autoOpenId={autoOpenId} onAutoOpened={() => setAutoOpenId(null)} />
+        </TabsContent>
+        <TabsContent value="volunteer-opportunities">
+          <GenericContentTab type="volunteerOpportunities" label="Volunteer Opportunities" fields={VOLUNTEER_OPPORTUNITY_FIELDS} columns={['title', 'area', 'spotsNeeded']} autoOpenId={autoOpenId} onAutoOpened={() => setAutoOpenId(null)} />
         </TabsContent>
         <TabsContent value="testimonials">
           <GenericContentTab type="testimonials" label="Testimonials" fields={TESTIMONIAL_FIELDS} columns={['authorName', 'content']} autoOpenId={autoOpenId} onAutoOpened={() => setAutoOpenId(null)} />

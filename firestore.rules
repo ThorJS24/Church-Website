@@ -194,6 +194,63 @@ service cloud.firestore {
       allow update, delete: if isModerator();
     }
 
+    // ---- Domain model additions (Domain Architecture Redesign) ----
+
+    // Person: canonical identity for anyone named in the system (speakers,
+    // leaders, staff, members). Public-read like other content — a
+    // member's own account writes still go through users/{uid}, never
+    // this collection directly (see PATCH /api/member/profile).
+    match /people/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /locations/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /volunteerOpportunities/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    // Membership/assignment/attendance are join records, not content —
+    // never publicly readable, never directly client-writable (all
+    // mutations go through Admin-SDK API routes: app/api/admin/memberships,
+    // app/api/admin/volunteer-assignments, app/api/events/[id]/attendance).
+    // Explicit here rather than left to the deny-all fallback, matching
+    // eventRegistrations' existing (implicit) treatment.
+    match /ministryMemberships/{docId} {
+      allow read: if isModerator() || (isSignedIn() && resource.data.personId == request.auth.uid);
+      allow write: if false;
+    }
+    match /groupMemberships/{docId} {
+      allow read: if isModerator() || (isSignedIn() && resource.data.personId == request.auth.uid);
+      allow write: if false;
+    }
+    match /volunteerAssignments/{docId} {
+      allow read: if isModerator() || (isSignedIn() && resource.data.personId == request.auth.uid);
+      allow write: if false;
+    }
+    match /eventAttendance/{docId} {
+      allow read: if isModerator() || (isSignedIn() && resource.data.personId == request.auth.uid);
+      allow write: if false;
+    }
+    match /mediaAssets/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    // Giving: scaffolding only, no payment provider integrated (see
+    // architecture doc §9). Funds are public-read display content; records
+    // are never client-writable and readable only by the donor themself or
+    // moderator+ — defense in depth even though nothing writes here yet.
+    match /givingFunds/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /givingRecords/{docId} {
+      allow read: if isModerator() || (isSignedIn() && resource.data.donorPersonId == request.auth.uid);
+      allow write: if false;
+    }
+
     // ---- Audit log: append-only, written exclusively via the Admin SDK
     // (server already verified the actor's role before logging), never
     // directly from a client. ----

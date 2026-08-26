@@ -7,6 +7,7 @@ import { adminFetch } from '@/lib/adminApi';
 import { LoadingState, EmptyState, ErrorState } from '@/components/admin/States';
 import ConfirmModal from '@/components/admin/ConfirmModal';
 import MediaPickerModal from '@/components/admin/content/MediaPickerModal';
+import PersonPickerModal, { PersonOption } from '@/components/admin/content/PersonPickerModal';
 import { FieldSchema } from '@/types/contentType';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import { Modal } from '@/components/ui/modal';
@@ -52,7 +53,7 @@ interface Version {
 
 function emptyForm(fields: FieldSchema[]): Record<string, any> {
   const form: Record<string, any> = { status: 'published', publishAt: '', tags: '', metaDescription: '', shareImageUrl: '' };
-  fields.forEach(f => { form[f.key] = f.type === 'checkbox' ? false : ''; });
+  fields.forEach(f => { form[f.key] = f.type === 'checkbox' ? false : f.type === 'personRefs' ? [] : ''; });
   return form;
 }
 
@@ -90,13 +91,29 @@ export default function GenericContentTab({
   const [versionsLoading, setVersionsLoading] = useState(false);
 
   const [mediaPickerField, setMediaPickerField] = useState<{ key: string; accept: 'image' | 'file' } | null>(null);
+  const [personPickerField, setPersonPickerField] = useState<{ key: string; mode: 'single' | 'multi' } | null>(null);
+  const [peopleById, setPeopleById] = useState<Record<string, PersonOption>>({});
   const [importing, setImporting] = useState(false);
   const csvInputRef = useRef<HTMLInputElement>(null);
+
+  const hasPersonField = fields.some((f) => f.type === 'personRef' || f.type === 'personRefs');
 
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type, apiBase]);
+
+  useEffect(() => {
+    if (!hasPersonField) return;
+    adminFetch('/api/admin/content/people')
+      .then((data) => {
+        const map: Record<string, PersonOption> = {};
+        (data.items ?? []).forEach((p: any) => { map[p.id] = { id: p.id, displayName: p.displayName, title: p.title }; });
+        setPeopleById(map);
+      })
+      .catch(() => setPeopleById({}));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasPersonField]);
 
   useEffect(() => {
     if (!autoOpenId || loading) return;
@@ -408,6 +425,40 @@ export default function GenericContentTab({
                   checked={!!form[f.key]}
                   onChange={(e) => setForm({ ...form, [f.key]: e.target.checked })}
                 />
+              ) : f.type === 'personRef' ? (
+                <div>
+                  <label className="mb-1.5 block text-label text-foreground">{f.label}{f.required && <span className="ml-0.5 text-danger">*</span>}</label>
+                  <div className="flex items-center gap-2">
+                    <span className="flex-1 rounded-lg border border-border px-3 py-2 text-body-sm text-foreground">
+                      {form[f.key] ? (peopleById[form[f.key]]?.displayName ?? 'Selected person') : 'No one selected'}
+                    </span>
+                    <Button type="button" variant="outline" onClick={() => setPersonPickerField({ key: f.key, mode: 'single' })}>
+                      {form[f.key] ? 'Change' : 'Select'}
+                    </Button>
+                  </div>
+                </div>
+              ) : f.type === 'personRefs' ? (
+                <div>
+                  <label className="mb-1.5 block text-label text-foreground">{f.label}{f.required && <span className="ml-0.5 text-danger">*</span>}</label>
+                  <div className="mb-2 flex flex-wrap gap-1.5">
+                    {(form[f.key] ?? []).length === 0 && <span className="text-body-sm text-foreground-subtle">No one selected</span>}
+                    {(form[f.key] ?? []).map((personId: string) => (
+                      <Badge key={personId} variant="neutral">
+                        {peopleById[personId]?.displayName ?? personId}
+                        <button
+                          type="button"
+                          className="ml-1.5 text-foreground-subtle hover:text-danger"
+                          onClick={() => setForm({ ...form, [f.key]: (form[f.key] ?? []).filter((id: string) => id !== personId) })}
+                        >
+                          ×
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                  <Button type="button" variant="outline" size="sm" onClick={() => setPersonPickerField({ key: f.key, mode: 'multi' })}>
+                    Add / Edit People
+                  </Button>
+                </div>
               ) : f.type === 'url' && (f.accept === 'image' || f.accept === 'file') ? (
                 <div>
                   <label className="mb-1.5 block text-label text-foreground">{f.label}{f.required && <span className="ml-0.5 text-danger">*</span>}</label>
@@ -523,6 +574,24 @@ export default function GenericContentTab({
         accept={mediaPickerField?.accept}
         onClose={() => setMediaPickerField(null)}
         onSelect={(url) => { if (mediaPickerField) setForm(prev => ({ ...prev, [mediaPickerField.key]: url })); }}
+      />
+
+      <PersonPickerModal
+        isOpen={!!personPickerField}
+        mode={personPickerField?.mode ?? 'single'}
+        selectedIds={personPickerField ? (personPickerField.mode === 'multi' ? (form[personPickerField.key] ?? []) : (form[personPickerField.key] ? [form[personPickerField.key]] : [])) : []}
+        onChange={(ids) => {
+          if (!personPickerField) return;
+          setForm(prev => ({ ...prev, [personPickerField.key]: personPickerField.mode === 'multi' ? ids : (ids[0] ?? '') }));
+        }}
+        onPeopleLoaded={(people) => {
+          setPeopleById((prev) => {
+            const next = { ...prev };
+            people.forEach((p) => { next[p.id] = p; });
+            return next;
+          });
+        }}
+        onClose={() => setPersonPickerField(null)}
       />
 
       <Modal

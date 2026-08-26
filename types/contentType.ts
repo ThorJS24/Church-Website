@@ -2,7 +2,7 @@
 // client (admin panel forms) — no runtime dependencies, safe to import
 // from either.
 
-export type FieldType = 'text' | 'textarea' | 'date' | 'datetime' | 'number' | 'checkbox' | 'url' | 'email' | 'file';
+export type FieldType = 'text' | 'textarea' | 'date' | 'datetime' | 'number' | 'checkbox' | 'url' | 'email' | 'file' | 'personRef' | 'personRefs';
 
 export interface FieldSchema {
   key: string;
@@ -11,6 +11,7 @@ export interface FieldSchema {
   required?: boolean;
   /** For `type: 'url'` fields that hold a file — shows a "Browse Media" picker button, scoped to images or any file type. */
   accept?: 'image' | 'file';
+  /** `personRef`/`personRefs` store a Person doc id (or array of ids) instead of a free-text name — see components/admin/content/PersonPickerModal. */
   /** Forms only: hide this field unless another field (by key) currently
    * equals this value. Kept optional/generic rather than a full rules
    * engine — one dependency per field covers sign-up-form-shaped cases

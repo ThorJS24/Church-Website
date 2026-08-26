@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { ZodError } from 'zod';
 import { getAdminDb } from '@/lib/firebase-admin';
 import { requireAdmin, withAudit } from '@/lib/api-auth';
 import { saveContentVersion } from '@/lib/contentVersions';
-import { resolveCollection } from '@/lib/adminContentCollections';
+import { resolveCollection, validateContentBody } from '@/lib/adminContentCollections';
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ type: string; id: string }> }) {
   const authResult = await requireAdmin(request);
@@ -15,7 +16,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
   }
 
   try {
-    const body = await request.json();
+    const rawBody = await request.json();
+    const body = validateContentBody(type, rawBody, { partial: true });
     const ref = getAdminDb().collection(collectionName).doc(id);
     const before = (await ref.get()).data();
     if (!before) {
@@ -37,6 +39,9 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    if (error instanceof ZodError) {
+      return NextResponse.json({ success: false, message: error.issues[0]?.message ?? 'Invalid data' }, { status: 400 });
+    }
     console.error(`Error updating ${collectionName}/${id}:`, error);
     return NextResponse.json({ success: false, message: 'Failed to update content' }, { status: 500 });
   }
